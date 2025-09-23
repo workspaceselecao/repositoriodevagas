@@ -306,15 +306,15 @@ export default function ComparativoClientes() {
       {/* Comparativo */}
       {selectedClientes.length > 0 && (
         <div className="space-y-6">
-          {/* Filtros por Cliente */}
-          {selectedClientes.map(cliente => renderClientFilters(cliente))}
-
-          {/* Cards de Comparação */}
+          {/* Layout em Colunas com Filtros Acima */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {selectedClientes.map(cliente => {
               const vagasCliente = getVagasByCliente(cliente)
               return (
                 <div key={cliente} className="space-y-4">
+                  {/* Filtros para este Cliente */}
+                  {renderClientFilters(cliente)}
+
                   {/* Header da Coluna */}
                   <Card>
                     <CardHeader>
