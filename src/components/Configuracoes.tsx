@@ -62,8 +62,10 @@ export default function Configuracoes() {
       } else {
         setMessage('Erro ao criar usuário')
       }
-    } catch (error) {
-      setMessage('Erro ao criar usuário')
+    } catch (error: any) {
+      console.error('Erro detalhado ao criar usuário:', error)
+      const errorMessage = error?.message || 'Erro ao criar usuário'
+      setMessage(`Erro ao criar usuário: ${errorMessage}`)
     } finally {
       setLoading(false)
     }

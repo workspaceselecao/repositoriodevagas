@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, supabaseAdmin } from './supabase'
 import { User, AuthUser, LoginFormData, UserFormData } from '../types/database'
 
 // Função para fazer login usando Supabase Auth
@@ -28,6 +28,33 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
 
     if (userError) {
       console.error('Erro ao buscar usuário:', userError.message)
+      console.error('Detalhes do erro:', userError)
+      // Se não encontrar o usuário na tabela, criar um registro básico
+      if (userError.code === 'PGRST116') {
+        console.log('Usuário não encontrado na tabela users, criando registro...')
+        const { data: newUser, error: createError } = await supabase
+          .from('users')
+          .insert({
+            id: authData.user.id,
+            email: authData.user.email || '',
+            name: authData.user.user_metadata?.full_name || authData.user.email?.split('@')[0] || 'Usuário',
+            role: 'RH' // Role padrão
+          })
+          .select()
+          .single()
+        
+        if (createError) {
+          console.error('Erro ao criar usuário:', createError)
+          throw new Error('Erro ao criar perfil do usuário')
+        }
+        
+        return {
+          id: newUser.id,
+          email: newUser.email,
+          name: newUser.name,
+          role: newUser.role
+        }
+      }
       throw new Error('Dados do usuário não encontrados')
     }
 
@@ -51,14 +78,15 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
 // Função para criar usuário usando Supabase Auth
 export async function createUser(userData: UserFormData): Promise<User | null> {
   try {
-    // Criar usuário no Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    // Criar usuário no Supabase Auth usando cliente administrativo
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: userData.email,
       password: userData.password,
       email_confirm: true
     })
 
     if (authError) {
+      console.error('Erro ao criar usuário no Auth:', authError)
       throw new Error(authError.message)
     }
 
@@ -66,8 +94,8 @@ export async function createUser(userData: UserFormData): Promise<User | null> {
       throw new Error('Erro ao criar usuário no Auth')
     }
 
-    // Criar registro na tabela users
-    const { data: user, error: userError } = await supabase
+    // Criar registro na tabela users usando cliente administrativo
+    const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .insert({
         id: authData.user.id,
@@ -80,15 +108,16 @@ export async function createUser(userData: UserFormData): Promise<User | null> {
       .single()
 
     if (userError) {
+      console.error('Erro ao criar usuário na tabela:', userError)
       // Se falhou, remover o usuário do Auth
-      await supabase.auth.admin.deleteUser(authData.user.id)
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
       throw new Error(userError.message)
     }
 
     return user
   } catch (error) {
     console.error('Erro ao criar usuário:', error)
-    return null
+    throw error // Re-throw para que o componente possa capturar
   }
 }
 

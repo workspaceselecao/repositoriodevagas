@@ -1,15 +1,18 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import { VagaFormData } from '../types/database'
-import { createVaga } from '../lib/vagas'
-import { Plus, ArrowLeft } from 'lucide-react'
+import { VagaFormData, Vaga } from '../types/database'
+import { getVagaById, updateVaga } from '../lib/vagas'
+import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 
-export default function NovaVagaForm() {
+export default function EditarVagaForm() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [formData, setFormData] = useState<VagaFormData>({
     site: '',
     categoria: '',
@@ -27,31 +30,72 @@ export default function NovaVagaForm() {
     etapas_processo: ''
   })
   const [loading, setLoading] = useState(false)
+  const [loadingData, setLoadingData] = useState(true)
   const [message, setMessage] = useState('')
-  const { user } = useAuth()
-  const navigate = useNavigate()
+
+  useEffect(() => {
+    const loadVaga = async () => {
+      if (!id) {
+        setMessage('ID da vaga não fornecido')
+        setLoadingData(false)
+        return
+      }
+
+      try {
+        setLoadingData(true)
+        const vaga = await getVagaById(id)
+        if (vaga) {
+          setFormData({
+            site: vaga.site || '',
+            categoria: vaga.categoria || '',
+            cargo: vaga.cargo || '',
+            cliente: vaga.cliente || '',
+            produto: vaga.produto || '',
+            descricao_vaga: vaga.descricao_vaga || '',
+            responsabilidades_atribuicoes: vaga.responsabilidades_atribuicoes || '',
+            requisitos_qualificacoes: vaga.requisitos_qualificacoes || '',
+            salario: vaga.salario || '',
+            horario_trabalho: vaga.horario_trabalho || '',
+            jornada_trabalho: vaga.jornada_trabalho || '',
+            beneficios: vaga.beneficios || '',
+            local_trabalho: vaga.local_trabalho || '',
+            etapas_processo: vaga.etapas_processo || ''
+          })
+        } else {
+          setMessage('Vaga não encontrada')
+        }
+      } catch (error: any) {
+        console.error('Erro ao carregar vaga:', error)
+        setMessage(`Erro ao carregar vaga: ${error?.message || 'Erro desconhecido'}`)
+      } finally {
+        setLoadingData(false)
+      }
+    }
+
+    loadVaga()
+  }, [id])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user) return
+    if (!user || !id) return
 
     setLoading(true)
     setMessage('')
 
     try {
-      const novaVaga = await createVaga(formData, user.id)
-      if (novaVaga) {
-        setMessage('Vaga criada com sucesso!')
+      const vagaAtualizada = await updateVaga(id, formData, user.id)
+      if (vagaAtualizada) {
+        setMessage('Vaga atualizada com sucesso!')
         setTimeout(() => {
           navigate('/dashboard')
         }, 2000)
       } else {
-        setMessage('Erro ao criar vaga')
+        setMessage('Erro ao atualizar vaga')
       }
     } catch (error: any) {
-      console.error('Erro detalhado ao criar vaga:', error)
-      const errorMessage = error?.message || 'Erro ao criar vaga'
-      setMessage(`Erro ao criar vaga: ${errorMessage}`)
+      console.error('Erro detalhado ao atualizar vaga:', error)
+      const errorMessage = error?.message || 'Erro ao atualizar vaga'
+      setMessage(`Erro ao atualizar vaga: ${errorMessage}`)
     } finally {
       setLoading(false)
     }
@@ -65,6 +109,26 @@ export default function NovaVagaForm() {
     }))
   }
 
+  if (loadingData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+        <p className="ml-3 text-lg text-gray-700">Carregando vaga...</p>
+      </div>
+    )
+  }
+
+  if (message && message.includes('não encontrada')) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-red-600">
+        <p className="text-xl mb-4">{message}</p>
+        <Button onClick={() => navigate('/dashboard')} variant="outline">
+          <ArrowLeft className="h-4 w-4 mr-2" /> Voltar para a lista de vagas
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
@@ -76,9 +140,9 @@ export default function NovaVagaForm() {
           Voltar
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nova Vaga</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Editar Vaga</h1>
           <p className="text-gray-600 mt-2">
-            Adicione uma nova vaga ao sistema
+            Edite as informações da vaga
           </p>
         </div>
       </div>
@@ -96,11 +160,11 @@ export default function NovaVagaForm() {
       <Card className="max-w-4xl">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Plus className="h-5 w-5 mr-2" />
+            <Save className="h-5 w-5 mr-2" />
             Informações da Vaga
           </CardTitle>
           <CardDescription>
-            Preencha todas as informações necessárias sobre a vaga
+            Edite as informações necessárias sobre a vaga
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -292,7 +356,7 @@ export default function NovaVagaForm() {
                 Cancelar
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? 'Salvando...' : 'Criar Vaga'}
+                {loading ? 'Salvando...' : 'Salvar Alterações'}
               </Button>
             </div>
           </form>

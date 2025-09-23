@@ -7,6 +7,7 @@ import ComparativoClientes from './components/ComparativoClientes'
 import NovaVagaForm from './components/NovaVagaForm'
 import Configuracoes from './components/Configuracoes'
 import VagaView from './components/VagaView'
+import EditarVagaForm from './components/EditarVagaForm'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
@@ -72,11 +73,16 @@ function AppRoutes() {
           </DashboardLayout>
         </ProtectedRoute>
       } />
-      <Route path="/dashboard/vaga/:id" element={
-        <ProtectedRoute>
-          <VagaView />
-        </ProtectedRoute>
-      } />
+              <Route path="/dashboard/vaga/:id" element={
+                <ProtectedRoute>
+                  <VagaView />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/editar-vaga/:id" element={
+                <ProtectedRoute>
+                  <EditarVagaForm />
+                </ProtectedRoute>
+              } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
