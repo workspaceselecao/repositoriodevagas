@@ -37,15 +37,17 @@ function formatVagaForInsert(vaga: VagaData) {
     cargo: vaga.CARGO,
     cliente: vaga.CLIENTE,
     produto: vaga.PRODUTO,
-    descricao_vaga: truncateText(vaga['Descrição da vaga']),
-    responsabilidades_atribuicoes: truncateText(vaga['Responsabilidades e atribuições']),
-    requisitos_qualificacoes: truncateText(vaga['Requisitos e qualificações']),
+    // Campos TEXT não devem ser truncados para preservar informações completas
+    descricao_vaga: vaga['Descrição da vaga'] || null,
+    responsabilidades_atribuicoes: vaga['Responsabilidades e atribuições'] || null,
+    requisitos_qualificacoes: vaga['Requisitos e qualificações'] || null,
+    beneficios: vaga['Benefícios'] || null,
+    local_trabalho: vaga['Local de Trabalho'] || null,
+    etapas_processo: vaga['Etapas do processo'] || null,
+    // Campos VARCHAR podem ser truncados se necessário
     salario: truncateText(vaga['Salário']),
     horario_trabalho: truncateText(vaga['Horário de Trabalho']),
     jornada_trabalho: truncateText(vaga['Jornada de Trabalho']),
-    beneficios: truncateText(vaga['Benefícios']),
-    local_trabalho: truncateText(vaga['Local de Trabalho']),
-    etapas_processo: truncateText(vaga['Etapas do processo']),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   }

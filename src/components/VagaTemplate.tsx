@@ -87,7 +87,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = fal
             </h2>
             <div className="text-gray-700 leading-relaxed">
               {vaga.descricao_vaga ? (
-                <div dangerouslySetInnerHTML={{ __html: vaga.descricao_vaga }} />
+                <div className="whitespace-pre-wrap">{vaga.descricao_vaga}</div>
               ) : (
                 <p className="text-gray-500 italic">Informação não disponível</p>
               )}
@@ -101,7 +101,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = fal
             </h2>
             <div className="text-gray-700 leading-relaxed">
               {vaga.responsabilidades_atribuicoes ? (
-                <div dangerouslySetInnerHTML={{ __html: vaga.responsabilidades_atribuicoes }} />
+                <div className="whitespace-pre-wrap">{vaga.responsabilidades_atribuicoes}</div>
               ) : (
                 <p className="text-gray-500 italic">Informação não disponível</p>
               )}
@@ -115,7 +115,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = fal
             </h2>
             <div className="text-gray-700 leading-relaxed">
               {vaga.requisitos_qualificacoes ? (
-                <div dangerouslySetInnerHTML={{ __html: vaga.requisitos_qualificacoes }} />
+                <div className="whitespace-pre-wrap">{vaga.requisitos_qualificacoes}</div>
               ) : (
                 <p className="text-gray-500 italic">Informação não disponível</p>
               )}
