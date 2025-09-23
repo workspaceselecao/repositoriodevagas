@@ -6,7 +6,7 @@ import { Input } from './ui/input'
 import { Vaga } from '../types/database'
 import { getVagas, deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, Clock, DollarSign, Calendar } from 'lucide-react'
+import { Search, Download, Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, Clock, DollarSign, Calendar, Eye } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function ListaClientes() {
@@ -55,6 +55,10 @@ export default function ListaClientes() {
 
   const handleEdit = (vaga: Vaga) => {
     navigate(`/dashboard/editar-vaga/${vaga.id}`)
+  }
+
+  const handleViewVaga = (vaga: Vaga) => {
+    navigate(`/dashboard/vaga/${vaga.id}`)
   }
 
   const handleDelete = async (id: string) => {
@@ -205,6 +209,15 @@ export default function ListaClientes() {
                   </CardDescription>
                 </div>
                 <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleViewVaga(vaga)}
+                    className="flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Ver Vaga
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
