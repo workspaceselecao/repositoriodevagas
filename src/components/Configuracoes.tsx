@@ -98,7 +98,7 @@ export default function Configuracoes() {
     }))
   }
 
-  const handleBackupDataChange = (field: keyof typeof backupOptions.data, checked: boolean) => {
+  const handleBackupDataChange = (field: 'vagas' | 'users' | 'backup_logs', checked: boolean) => {
     setBackupOptions(prev => ({
       ...prev,
       data: {
