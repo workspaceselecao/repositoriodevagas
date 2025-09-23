@@ -198,21 +198,44 @@ export async function signOut(): Promise<void> {
 // Função para verificar sessão atual
 export async function getCurrentUser(): Promise<AuthUser | null> {
   try {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
+    // Verificar se há sessão ativa primeiro
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
-    if (!authUser) {
+    if (sessionError) {
+      console.error('Erro ao verificar sessão:', sessionError)
+      return null
+    }
+    
+    if (!session || !session.user) {
+      console.log('Nenhuma sessão ativa encontrada')
       return null
     }
 
-    // Buscar dados do usuário na tabela users
-    const { data: user, error } = await supabase
+    const authUser = session.user
+
+    // Buscar dados do usuário na tabela users com timeout
+    const userPromise = supabase
       .from('users')
       .select('*')
       .eq('id', authUser.id)
       .single()
 
+    // Adicionar timeout para evitar travamento
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Timeout ao buscar usuário')), 5000)
+    })
+
+    const { data: user, error } = await Promise.race([userPromise, timeoutPromise]) as any
+
     if (error || !user) {
-      return null
+      console.log('Usuário não encontrado na tabela, usando dados do Auth')
+      // Se não encontrou na tabela, usar dados do Auth
+      return {
+        id: authUser.id,
+        email: authUser.email || '',
+        name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
+        role: authUser.user_metadata?.role || 'RH'
+      }
     }
 
     return {

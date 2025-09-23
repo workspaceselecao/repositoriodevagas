@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { useCleanup } from './hooks/useCleanup'
 import LoginPage from './components/LoginPage'
 import DashboardLayout from './components/DashboardLayout'
 import ListaClientes from './components/ListaClientes'
@@ -16,8 +17,11 @@ function ProtectedRoute({ children, requireAdmin = false }: { children: React.Re
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent"></div>
+          <p className="text-muted-foreground text-sm">Carregando...</p>
+        </div>
       </div>
     )
   }
@@ -38,8 +42,11 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent"></div>
+          <p className="text-muted-foreground text-sm">Inicializando aplicação...</p>
+        </div>
       </div>
     )
   }
@@ -97,6 +104,9 @@ function AppRoutes() {
 }
 
 function App() {
+  // Hook para limpeza de cache
+  useCleanup()
+  
   return (
     <ThemeProvider>
       <AuthProvider>
