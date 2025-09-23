@@ -10,7 +10,8 @@ import {
   LogOut, 
   UserPlus,
   FileText,
-  BarChart3
+  BarChart3,
+  Activity
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -57,6 +58,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       icon: Settings,
       label: 'Configurações',
       href: '/dashboard/configuracoes',
+      show: user?.role === 'ADMIN'
+    },
+    {
+      icon: Activity,
+      label: 'Diagnóstico',
+      href: '/dashboard/diagnostico',
       show: user?.role === 'ADMIN'
     }
   ]

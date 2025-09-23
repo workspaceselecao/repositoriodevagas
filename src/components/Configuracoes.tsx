@@ -64,7 +64,20 @@ export default function Configuracoes() {
       }
     } catch (error: any) {
       console.error('Erro detalhado ao criar usuário:', error)
-      const errorMessage = error?.message || 'Erro ao criar usuário'
+      let errorMessage = 'Erro ao criar usuário'
+      
+      if (error?.message) {
+        if (error.message.includes('Invalid API key')) {
+          errorMessage = 'Chave de API inválida. Verifique a configuração do Supabase.'
+        } else if (error.message.includes('User already registered')) {
+          errorMessage = 'Este email já está cadastrado no sistema.'
+        } else if (error.message.includes('Password should be at least')) {
+          errorMessage = 'A senha deve ter pelo menos 6 caracteres.'
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
       setMessage(`Erro ao criar usuário: ${errorMessage}`)
     } finally {
       setLoading(false)

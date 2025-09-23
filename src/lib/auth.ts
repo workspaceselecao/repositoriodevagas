@@ -78,6 +78,26 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
 // Função para criar usuário usando Supabase Auth
 export async function createUser(userData: UserFormData): Promise<User | null> {
   try {
+    // Verificar se temos Service Key disponível
+    const hasServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_KEY && 
+                        import.meta.env.VITE_SUPABASE_SERVICE_KEY !== 'your_supabase_service_role_key_here'
+
+    if (hasServiceKey) {
+      // Usar método administrativo se Service Key estiver disponível
+      return await createUserWithAdmin(userData)
+    } else {
+      // Usar método alternativo sem Service Key
+      return await createUserWithoutAdmin(userData)
+    }
+  } catch (error) {
+    console.error('Erro ao criar usuário:', error)
+    throw error // Re-throw para que o componente possa capturar
+  }
+}
+
+// Método administrativo (requer Service Key)
+async function createUserWithAdmin(userData: UserFormData): Promise<User | null> {
+  try {
     // Criar usuário no Supabase Auth usando cliente administrativo
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: userData.email,
@@ -116,8 +136,57 @@ export async function createUser(userData: UserFormData): Promise<User | null> {
 
     return user
   } catch (error) {
-    console.error('Erro ao criar usuário:', error)
-    throw error // Re-throw para que o componente possa capturar
+    console.error('Erro no método administrativo:', error)
+    throw error
+  }
+}
+
+// Método alternativo sem Service Key (usando signUp)
+async function createUserWithoutAdmin(userData: UserFormData): Promise<User | null> {
+  try {
+    // Criar usuário usando signUp (método público)
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
+          full_name: userData.name,
+          role: userData.role
+        }
+      }
+    })
+
+    if (authError) {
+      console.error('Erro ao criar usuário no Auth:', authError)
+      throw new Error(authError.message)
+    }
+
+    if (!authData.user) {
+      throw new Error('Erro ao criar usuário no Auth')
+    }
+
+    // Criar registro na tabela users usando cliente padrão
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        email: userData.email,
+        name: userData.name,
+        role: userData.role,
+        password_hash: '' // Não precisamos mais do hash
+      })
+      .select()
+      .single()
+
+    if (userError) {
+      console.error('Erro ao criar usuário na tabela:', userError)
+      throw new Error(userError.message)
+    }
+
+    return user
+  } catch (error) {
+    console.error('Erro no método alternativo:', error)
+    throw error
   }
 }
 
