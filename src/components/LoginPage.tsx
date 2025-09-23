@@ -117,13 +117,6 @@ export default function LoginPage() {
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-xl">
-            <p className="text-sm text-primary text-center">
-              <strong>Credenciais de teste:</strong><br />
-              Email: roberio.gomes@atento.com<br />
-              Senha: admin123
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
