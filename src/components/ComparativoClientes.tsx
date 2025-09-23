@@ -5,57 +5,100 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion'
 import { Vaga, VagaFilter, ComparisonData } from '../types/database'
 import { getVagas, getClientes, getSites, getCategorias, getCargos, getProdutos } from '../lib/vagas'
-import { X, Filter, RotateCcw } from 'lucide-react'
+import { X, Filter, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
 
 export default function ComparativoClientes() {
   const [clientes, setClientes] = useState<string[]>([])
-  const [sites, setSites] = useState<string[]>([])
-  const [categorias, setCategorias] = useState<string[]>([])
-  const [cargos, setCargos] = useState<string[]>([])
-  const [produtos, setProdutos] = useState<string[]>([])
-  const [vagas, setVagas] = useState<Vaga[]>([])
-  
+  const [allVagas, setAllVagas] = useState<Vaga[]>([])
   const [selectedClientes, setSelectedClientes] = useState<string[]>([])
-  const [filters, setFilters] = useState<VagaFilter>({})
-  const [comparisonData, setComparisonData] = useState<ComparisonData>({ clientes: [], vagas: [] })
+  const [clientFilters, setClientFilters] = useState<{[cliente: string]: VagaFilter}>({})
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
+  const [expandedFilters, setExpandedFilters] = useState<{[cliente: string]: boolean}>({})
 
   useEffect(() => {
     loadData()
   }, [])
 
   useEffect(() => {
-    filterVagas()
-  }, [filters])
+    // Resetar filtros quando clientes selecionados mudarem
+    const newClientFilters: {[cliente: string]: VagaFilter} = {}
+    selectedClientes.forEach(cliente => {
+      newClientFilters[cliente] = clientFilters[cliente] || {}
+    })
+    setClientFilters(newClientFilters)
+  }, [selectedClientes])
 
   const loadData = async () => {
     try {
-      const [clientesData, sitesData, categoriasData, cargosData, produtosData, vagasData] = await Promise.all([
+      const [clientesData, vagasData] = await Promise.all([
         getClientes(),
-        getSites(),
-        getCategorias(),
-        getCargos(),
-        getProdutos(),
         getVagas()
       ])
 
       setClientes(clientesData)
-      setSites(sitesData)
-      setCategorias(categoriasData)
-      setCargos(cargosData)
-      setProdutos(produtosData)
-      setVagas(vagasData)
+      setAllVagas(vagasData)
     } catch (error) {
       console.error('Erro ao carregar dados:', error)
     }
   }
 
-  const filterVagas = () => {
-    let filtered = vagas
-
-    if (filters.cliente) {
-      filtered = filtered.filter(vaga => vaga.cliente === filters.cliente)
+  const handleClienteSelect = (cliente: string) => {
+    if (selectedClientes.includes(cliente)) {
+      setSelectedClientes(selectedClientes.filter(c => c !== cliente))
+      // Remover filtros do cliente desmarcado
+      const newClientFilters = { ...clientFilters }
+      delete newClientFilters[cliente]
+      setClientFilters(newClientFilters)
+    } else if (selectedClientes.length < 3) {
+      setSelectedClientes([...selectedClientes, cliente])
     }
+  }
+
+  const handleClientFilterChange = (cliente: string, key: keyof VagaFilter, value: string) => {
+    setClientFilters(prev => ({
+      ...prev,
+      [cliente]: {
+        ...prev[cliente],
+        [key]: value === 'all' ? undefined : value
+      }
+    }))
+  }
+
+  const clearAllFilters = () => {
+    setClientFilters({})
+    setSelectedClientes([])
+    setExpandedSections(new Set())
+    setExpandedFilters({})
+  }
+
+  const clearClientFilters = (cliente: string) => {
+    setClientFilters(prev => ({
+      ...prev,
+      [cliente]: {}
+    }))
+  }
+
+  const toggleSection = (section: string) => {
+    const newExpanded = new Set(expandedSections)
+    if (newExpanded.has(section)) {
+      newExpanded.delete(section)
+    } else {
+      newExpanded.add(section)
+    }
+    setExpandedSections(newExpanded)
+  }
+
+  const toggleFilterExpansion = (cliente: string) => {
+    setExpandedFilters(prev => ({
+      ...prev,
+      [cliente]: !prev[cliente]
+    }))
+  }
+
+  const getVagasByCliente = (cliente: string) => {
+    let filtered = allVagas.filter(vaga => vaga.cliente === cliente)
+    const filters = clientFilters[cliente] || {}
+
     if (filters.site) {
       filtered = filtered.filter(vaga => vaga.site === filters.site)
     }
@@ -69,43 +112,12 @@ export default function ComparativoClientes() {
       filtered = filtered.filter(vaga => vaga.produto === filters.produto)
     }
 
-    const clientesUnicos = [...new Set(filtered.map(v => v.cliente))]
-    setComparisonData({ clientes: clientesUnicos, vagas: filtered })
+    return filtered
   }
 
-  const handleClienteSelect = (cliente: string) => {
-    if (selectedClientes.includes(cliente)) {
-      setSelectedClientes(selectedClientes.filter(c => c !== cliente))
-    } else {
-      setSelectedClientes([...selectedClientes, cliente])
-    }
-  }
-
-  const handleFilterChange = (key: keyof VagaFilter, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value === 'all' ? undefined : value
-    }))
-  }
-
-  const clearFilters = () => {
-    setFilters({})
-    setSelectedClientes([])
-    setExpandedSections(new Set())
-  }
-
-  const toggleSection = (section: string) => {
-    const newExpanded = new Set(expandedSections)
-    if (newExpanded.has(section)) {
-      newExpanded.delete(section)
-    } else {
-      newExpanded.add(section)
-    }
-    setExpandedSections(newExpanded)
-  }
-
-  const getVagasByCliente = (cliente: string) => {
-    return comparisonData.vagas.filter(vaga => vaga.cliente === cliente)
+  const getUniqueValuesForCliente = (cliente: string, field: keyof Vaga) => {
+    const vagasCliente = allVagas.filter(vaga => vaga.cliente === cliente)
+    return [...new Set(vagasCliente.map(vaga => vaga[field]).filter(Boolean))].sort() as string[]
   }
 
   const renderVagaContent = (vaga: Vaga, section: string) => {
@@ -131,6 +143,118 @@ export default function ComparativoClientes() {
     )
   }
 
+  const renderClientFilters = (cliente: string) => {
+    const filters = clientFilters[cliente] || {}
+    const isExpanded = expandedFilters[cliente] || false
+
+    return (
+      <Card className="mb-4">
+        <CardHeader 
+          className="cursor-pointer hover:bg-gray-50 transition-colors"
+          onClick={() => toggleFilterExpansion(cliente)}
+        >
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm flex items-center">
+              <Filter className="h-4 w-4 mr-2" />
+              Filtros para {cliente}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  clearClientFilters(cliente)
+                }}
+              >
+                <RotateCcw className="h-3 w-3 mr-1" />
+                Limpar
+              </Button>
+              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </div>
+          </div>
+        </CardHeader>
+        {isExpanded && (
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Site</label>
+                <Select 
+                  value={filters.site || 'all'} 
+                  onValueChange={(value) => handleClientFilterChange(cliente, 'site', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Sites</SelectItem>
+                    {getUniqueValuesForCliente(cliente, 'site').map(site => (
+                      <SelectItem key={site} value={site}>{site}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Categoria</label>
+                <Select 
+                  value={filters.categoria || 'all'} 
+                  onValueChange={(value) => handleClientFilterChange(cliente, 'categoria', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as Categorias</SelectItem>
+                    {getUniqueValuesForCliente(cliente, 'categoria').map(categoria => (
+                      <SelectItem key={categoria} value={categoria}>{categoria}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Cargo</label>
+                <Select 
+                  value={filters.cargo || 'all'} 
+                  onValueChange={(value) => handleClientFilterChange(cliente, 'cargo', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Cargos</SelectItem>
+                    {getUniqueValuesForCliente(cliente, 'cargo').map(cargo => (
+                      <SelectItem key={cargo} value={cargo}>{cargo}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Produto</label>
+                <Select 
+                  value={filters.produto || 'all'} 
+                  onValueChange={(value) => handleClientFilterChange(cliente, 'produto', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Produtos</SelectItem>
+                    {getUniqueValuesForCliente(cliente, 'produto').map(produto => (
+                      <SelectItem key={produto} value={produto}>{produto}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -141,99 +265,11 @@ export default function ComparativoClientes() {
             Compare vagas entre diferentes clientes
           </p>
         </div>
-        <Button variant="outline" onClick={clearFilters}>
+        <Button variant="outline" onClick={clearAllFilters}>
           <RotateCcw className="h-4 w-4 mr-2" />
           Limpar Filtros
         </Button>
       </div>
-
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Filter className="h-5 w-5 mr-2" />
-            Filtros Avançados
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Cliente</label>
-              <Select value={filters.cliente || 'all'} onValueChange={(value) => handleFilterChange('cliente', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Clientes</SelectItem>
-                  {clientes.map(cliente => (
-                    <SelectItem key={cliente} value={cliente}>{cliente}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Site</label>
-              <Select value={filters.site || 'all'} onValueChange={(value) => handleFilterChange('site', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Sites</SelectItem>
-                  {sites.map(site => (
-                    <SelectItem key={site} value={site}>{site}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Categoria</label>
-              <Select value={filters.categoria || 'all'} onValueChange={(value) => handleFilterChange('categoria', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as Categorias</SelectItem>
-                  {categorias.map(categoria => (
-                    <SelectItem key={categoria} value={categoria}>{categoria}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Cargo</label>
-              <Select value={filters.cargo || 'all'} onValueChange={(value) => handleFilterChange('cargo', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Cargos</SelectItem>
-                  {cargos.map(cargo => (
-                    <SelectItem key={cargo} value={cargo}>{cargo}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Produto</label>
-              <Select value={filters.produto || 'all'} onValueChange={(value) => handleFilterChange('produto', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Produtos</SelectItem>
-                  {produtos.map(produto => (
-                    <SelectItem key={produto} value={produto}>{produto}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Seleção de Clientes */}
       <Card>
@@ -245,7 +281,7 @@ export default function ComparativoClientes() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {comparisonData.clientes.map(cliente => (
+            {clientes.map(cliente => (
               <Button
                 key={cliente}
                 variant={selectedClientes.includes(cliente) ? "default" : "outline"}
@@ -269,24 +305,37 @@ export default function ComparativoClientes() {
 
       {/* Comparativo */}
       {selectedClientes.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {selectedClientes.map(cliente => {
-            const vagasCliente = getVagasByCliente(cliente)
-            return (
-              <Card key={cliente} className="h-fit">
-                <CardHeader>
-                  <CardTitle className="text-center text-lg">{cliente}</CardTitle>
-                  <CardDescription className="text-center">
-                    {vagasCliente.length} vaga(s) encontrada(s)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+        <div className="space-y-6">
+          {/* Filtros por Cliente */}
+          {selectedClientes.map(cliente => renderClientFilters(cliente))}
+
+          {/* Cards de Comparação */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {selectedClientes.map(cliente => {
+              const vagasCliente = getVagasByCliente(cliente)
+              return (
+                <div key={cliente} className="space-y-4">
+                  {/* Header da Coluna */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-center text-lg">{cliente}</CardTitle>
+                      <CardDescription className="text-center">
+                        {vagasCliente.length} vaga(s) encontrada(s)
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+
+                  {/* Cards Expansíveis */}
                   {vagasCliente.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">
-                      Nenhuma vaga encontrada para este cliente
-                    </p>
+                    <Card>
+                      <CardContent className="text-center py-8">
+                        <p className="text-gray-500">
+                          Nenhuma vaga encontrada para este cliente
+                        </p>
+                      </CardContent>
+                    </Card>
                   ) : (
-                    <Accordion type="multiple" className="space-y-2">
+                    <div className="space-y-3">
                       {[
                         { key: 'descricao', title: 'Descrição da Vaga' },
                         { key: 'responsabilidades', title: 'Responsabilidades e Atribuições' },
@@ -297,34 +346,42 @@ export default function ComparativoClientes() {
                         { key: 'beneficios', title: 'Benefícios' },
                         { key: 'local', title: 'Local de Trabalho' },
                         { key: 'etapas', title: 'Etapas do Processo' }
-                      ].map(section => (
-                        <AccordionItem key={section.key} value={section.key}>
-                          <AccordionTrigger 
-                            className="text-sm"
-                            onClick={() => toggleSection(section.key)}
-                          >
-                            {section.title}
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            {vagasCliente.map((vaga, index) => (
-                              <div key={vaga.id} className="mb-4 last:mb-0">
-                                {vagasCliente.length > 1 && (
-                                  <div className="text-xs text-gray-500 mb-2">
-                                    Vaga {index + 1}: {vaga.cargo} - {vaga.produto}
-                                  </div>
-                                )}
-                                {renderVagaContent(vaga, section.key)}
+                      ].map(section => {
+                        const isExpanded = expandedSections.has(section.key)
+                        return (
+                          <Card key={section.key} className="transition-all duration-200">
+                            <CardHeader 
+                              className="cursor-pointer hover:bg-gray-50 transition-colors"
+                              onClick={() => toggleSection(section.key)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <CardTitle className="text-sm">{section.title}</CardTitle>
+                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                               </div>
-                            ))}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
+                            </CardHeader>
+                            {isExpanded && (
+                              <CardContent>
+                                {vagasCliente.map((vaga, index) => (
+                                  <div key={vaga.id} className="mb-4 last:mb-0">
+                                    {vagasCliente.length > 1 && (
+                                      <div className="text-xs text-gray-500 mb-2 font-medium">
+                                        Vaga {index + 1}: {vaga.cargo} - {vaga.produto}
+                                      </div>
+                                    )}
+                                    {renderVagaContent(vaga, section.key)}
+                                  </div>
+                                ))}
+                              </CardContent>
+                            )}
+                          </Card>
+                        )
+                      })}
+                    </div>
                   )}
-                </CardContent>
-              </Card>
-            )
-          })}
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>
