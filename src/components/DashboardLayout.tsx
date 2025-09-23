@@ -90,7 +90,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <TooltipTrigger asChild>
                     <Button
                       variant={isActiveItem ? "default" : "ghost"}
-                      className={`w-full justify-start transition-all duration-200 ${
+                      className={`w-full transition-all duration-200 ${
+                        isCollapsed 
+                          ? "justify-center px-2" 
+                          : "justify-start"
+                      } ${
                         isActiveItem 
                           ? "bg-primary text-primary-foreground shadow-md" 
                           : "hover:bg-primary/10 hover:shadow-sm"
@@ -117,7 +121,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+                    className={`w-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 ${
+                      isCollapsed 
+                        ? "justify-center px-2" 
+                        : "justify-start"
+                    }`}
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />

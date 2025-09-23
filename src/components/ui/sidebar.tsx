@@ -23,7 +23,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          {!isCollapsed && (
+          {!isCollapsed ? (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">RV</span>
@@ -31,6 +31,12 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
               <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 Repositório
               </h2>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">RV</span>
+              </div>
             </div>
           )}
           <Button
@@ -71,6 +77,7 @@ const SidebarItem = React.forwardRef<HTMLDivElement, SidebarItemProps>(
         ref={ref}
         className={cn(
           "flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:shadow-sm group",
+          isCollapsed ? "justify-center" : "justify-start",
           className
         )}
       >

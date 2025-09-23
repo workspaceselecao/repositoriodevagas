@@ -9,17 +9,19 @@ const themes = [
     name: 'Claro', 
     value: 'light', 
     icon: Sun,
-    colors: 'from-yellow-400 to-orange-400',
-    bgColor: 'bg-gradient-to-r from-yellow-400 to-orange-400',
-    textColor: 'text-yellow-600'
+    colors: 'from-amber-400 to-orange-500',
+    bgColor: 'bg-gradient-to-r from-amber-400 to-orange-500',
+    textColor: 'text-amber-600',
+    buttonColor: 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700'
   },
   { 
     name: 'Escuro', 
     value: 'dark', 
     icon: Moon,
-    colors: 'from-slate-600 to-slate-800',
-    bgColor: 'bg-gradient-to-r from-slate-600 to-slate-800',
-    textColor: 'text-slate-600'
+    colors: 'from-slate-700 to-slate-900',
+    bgColor: 'bg-gradient-to-r from-slate-700 to-slate-900',
+    textColor: 'text-slate-700',
+    buttonColor: 'bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-900 hover:to-black'
   },
   { 
     name: 'Azul', 
@@ -27,7 +29,8 @@ const themes = [
     icon: Droplets,
     colors: 'from-blue-400 to-blue-600',
     bgColor: 'bg-gradient-to-r from-blue-400 to-blue-600',
-    textColor: 'text-blue-600'
+    textColor: 'text-blue-600',
+    buttonColor: 'bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800'
   },
   { 
     name: 'Roxo', 
@@ -35,7 +38,8 @@ const themes = [
     icon: Sparkles,
     colors: 'from-purple-400 to-purple-600',
     bgColor: 'bg-gradient-to-r from-purple-400 to-purple-600',
-    textColor: 'text-purple-600'
+    textColor: 'text-purple-600',
+    buttonColor: 'bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800'
   },
   { 
     name: 'Laranja', 
@@ -43,7 +47,8 @@ const themes = [
     icon: Zap,
     colors: 'from-orange-400 to-red-500',
     bgColor: 'bg-gradient-to-r from-orange-400 to-red-500',
-    textColor: 'text-orange-600'
+    textColor: 'text-orange-600',
+    buttonColor: 'bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700'
   },
   { 
     name: 'Verde', 
@@ -51,7 +56,8 @@ const themes = [
     icon: Leaf,
     colors: 'from-green-400 to-green-600',
     bgColor: 'bg-gradient-to-r from-green-400 to-green-600',
-    textColor: 'text-green-600'
+    textColor: 'text-green-600',
+    buttonColor: 'bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800'
   },
 ]
 
