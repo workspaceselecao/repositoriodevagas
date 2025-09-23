@@ -77,101 +77,150 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = fal
         </div>
       </CardHeader>
 
-      {/* Conteúdo Expansível - Layout exato do HTML fornecido */}
+      {/* Conteúdo Expansível - Layout com todos os 9 campos obrigatórios */}
       {isExpanded && (
         <CardContent className="space-y-8">
           {/* Descrição da vaga */}
-          {vaga.descricao_vaga && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-                Descrição da vaga
-              </h2>
-              <div className="text-gray-700 leading-relaxed">
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              Descrição da vaga
+            </h2>
+            <div className="text-gray-700 leading-relaxed">
+              {vaga.descricao_vaga ? (
                 <div dangerouslySetInnerHTML={{ __html: vaga.descricao_vaga }} />
-              </div>
+              ) : (
+                <p className="text-gray-500 italic">Informação não disponível</p>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Responsabilidades e atribuições */}
-          {vaga.responsabilidades_atribuicoes && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-                Responsabilidades e atribuições
-              </h2>
-              <div className="text-gray-700 leading-relaxed">
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              Responsabilidades e atribuições
+            </h2>
+            <div className="text-gray-700 leading-relaxed">
+              {vaga.responsabilidades_atribuicoes ? (
                 <div dangerouslySetInnerHTML={{ __html: vaga.responsabilidades_atribuicoes }} />
-              </div>
+              ) : (
+                <p className="text-gray-500 italic">Informação não disponível</p>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Requisitos e qualificações */}
-          {vaga.requisitos_qualificacoes && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-                Requisitos e qualificações
-              </h2>
-              <div className="text-gray-700 leading-relaxed">
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              Requisitos e qualificações
+            </h2>
+            <div className="text-gray-700 leading-relaxed">
+              {vaga.requisitos_qualificacoes ? (
                 <div dangerouslySetInnerHTML={{ __html: vaga.requisitos_qualificacoes }} />
-              </div>
+              ) : (
+                <p className="text-gray-500 italic">Informação não disponível</p>
+              )}
             </div>
-          )}
+          </div>
 
-          {/* Informações adicionais */}
-          {(vaga.salario || vaga.horario_trabalho || vaga.jornada_trabalho || vaga.beneficios || vaga.local_trabalho) && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-                Informações adicionais
-              </h2>
-              <div className="text-gray-700 leading-relaxed space-y-4">
-                {vaga.salario && (
-                  <div>
-                    <p><strong>Salário: {vaga.salario}</strong></p>
-                  </div>
-                )}
-                
-                {vaga.horario_trabalho && (
-                  <div>
-                    <p><strong>Horário de Trabalho</strong></p>
-                    <ul className="list-disc pl-6 mt-2">
-                      <li>{vaga.horario_trabalho}</li>
-                    </ul>
-                  </div>
-                )}
-                
-                {vaga.jornada_trabalho && (
-                  <div>
-                    <p><strong>Jornada de Trabalho</strong></p>
-                    <p>{vaga.jornada_trabalho}</p>
-                  </div>
-                )}
-                
-                {vaga.beneficios && (
-                  <div>
-                    <p><strong>Benefícios</strong></p>
-                    <div dangerouslySetInnerHTML={{ __html: vaga.beneficios }} />
-                  </div>
-                )}
-                
-                {vaga.local_trabalho && (
-                  <div>
-                    <p><strong>Local de trabalho:</strong> {vaga.local_trabalho}</p>
-                  </div>
-                )}
-              </div>
+          {/* Salário */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              Salário
+            </h2>
+            <div className="text-gray-700 leading-relaxed">
+              {vaga.salario ? (
+                <p><strong>{vaga.salario}</strong></p>
+              ) : (
+                <p className="text-gray-500 italic">Informação não disponível</p>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Horário de Trabalho */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              Horário de Trabalho
+            </h2>
+            <div className="text-gray-700 leading-relaxed">
+              {vaga.horario_trabalho ? (
+                <p>{vaga.horario_trabalho}</p>
+              ) : (
+                <p className="text-gray-500 italic">Informação não disponível</p>
+              )}
+            </div>
+          </div>
+
+          {/* Jornada de Trabalho */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              Jornada de Trabalho
+            </h2>
+            <div className="text-gray-700 leading-relaxed">
+              {vaga.jornada_trabalho ? (
+                <p>{vaga.jornada_trabalho}</p>
+              ) : (
+                <p className="text-gray-500 italic">Informação não disponível</p>
+              )}
+            </div>
+          </div>
+
+          {/* Benefícios */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              Benefícios
+            </h2>
+            <div className="text-gray-700 leading-relaxed">
+              {vaga.beneficios ? (
+                <div className="space-y-2">
+                  {vaga.beneficios.split(';').map((beneficio, index) => (
+                    <div key={index} className="flex items-start">
+                      <span className="text-gray-400 mr-2 mt-1">•</span>
+                      <span>{beneficio.trim()}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">Informação não disponível</p>
+              )}
+            </div>
+          </div>
+
+          {/* Local de Trabalho */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              Local de Trabalho
+            </h2>
+            <div className="text-gray-700 leading-relaxed">
+              {vaga.local_trabalho ? (
+                <p>{vaga.local_trabalho}</p>
+              ) : (
+                <p className="text-gray-500 italic">Informação não disponível</p>
+              )}
+            </div>
+          </div>
 
           {/* Etapas do processo */}
-          {vaga.etapas_processo && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-                Etapas do processo
-              </h2>
-              <div className="text-gray-700">
-                <div dangerouslySetInnerHTML={{ __html: vaga.etapas_processo }} />
-              </div>
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
+              Etapas do processo
+            </h2>
+            <div className="text-gray-700 leading-relaxed">
+              {vaga.etapas_processo ? (
+                <div className="space-y-3">
+                  {vaga.etapas_processo.split('\n').filter(etapa => etapa.trim()).map((etapa, index) => (
+                    <div key={index} className="flex items-center">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gray-800 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                        {index + 1}
+                      </div>
+                      <span>{etapa.trim()}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">Informação não disponível</p>
+              )}
             </div>
-          )}
+          </div>
         </CardContent>
       )}
     </Card>
