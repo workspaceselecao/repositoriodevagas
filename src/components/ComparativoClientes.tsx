@@ -115,8 +115,25 @@ export default function ComparativoClientes() {
     return filtered
   }
 
-  const getUniqueValuesForCliente = (cliente: string, field: keyof Vaga) => {
-    const vagasCliente = allVagas.filter(vaga => vaga.cliente === cliente)
+  const getUniqueValuesForCliente = (cliente: string, field: keyof Vaga, appliedFilters?: VagaFilter) => {
+    let vagasCliente = allVagas.filter(vaga => vaga.cliente === cliente)
+    
+    // Aplicar filtros condicionais
+    if (appliedFilters) {
+      if (appliedFilters.site) {
+        vagasCliente = vagasCliente.filter(vaga => vaga.site === appliedFilters.site)
+      }
+      if (appliedFilters.categoria) {
+        vagasCliente = vagasCliente.filter(vaga => vaga.categoria === appliedFilters.categoria)
+      }
+      if (appliedFilters.cargo) {
+        vagasCliente = vagasCliente.filter(vaga => vaga.cargo === appliedFilters.cargo)
+      }
+      if (appliedFilters.produto) {
+        vagasCliente = vagasCliente.filter(vaga => vaga.produto === appliedFilters.produto)
+      }
+    }
+    
     return [...new Set(vagasCliente.map(vaga => vaga[field]).filter(Boolean))].sort() as string[]
   }
 
@@ -147,6 +164,19 @@ export default function ComparativoClientes() {
     const filters = clientFilters[cliente] || {}
     const isExpanded = expandedFilters[cliente] || false
 
+    // Calcular filtros condicionais
+    const sitesDisponiveis = getUniqueValuesForCliente(cliente, 'site')
+    const categoriasDisponiveis = getUniqueValuesForCliente(cliente, 'categoria', { site: filters.site })
+    const cargosDisponiveis = getUniqueValuesForCliente(cliente, 'cargo', { 
+      site: filters.site, 
+      categoria: filters.categoria 
+    })
+    const produtosDisponiveis = getUniqueValuesForCliente(cliente, 'produto', { 
+      site: filters.site, 
+      categoria: filters.categoria, 
+      cargo: filters.cargo 
+    })
+
     return (
       <Card className="mb-4">
         <CardHeader 
@@ -176,61 +206,106 @@ export default function ComparativoClientes() {
         </CardHeader>
         {isExpanded && (
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-4">
+              {/* Site */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Site</label>
                 <Select 
                   value={filters.site || 'all'} 
-                  onValueChange={(value) => handleClientFilterChange(cliente, 'site', value)}
+                  onValueChange={(value) => {
+                    handleClientFilterChange(cliente, 'site', value)
+                    // Limpar filtros dependentes quando site muda
+                    if (value !== 'all') {
+                      setClientFilters(prev => ({
+                        ...prev,
+                        [cliente]: {
+                          site: value === 'all' ? undefined : value,
+                          categoria: undefined,
+                          cargo: undefined,
+                          produto: undefined
+                        }
+                      }))
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Sites</SelectItem>
-                    {getUniqueValuesForCliente(cliente, 'site').map(site => (
+                    {sitesDisponiveis.map(site => (
                       <SelectItem key={site} value={site}>{site}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Categoria */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Categoria</label>
                 <Select 
                   value={filters.categoria || 'all'} 
-                  onValueChange={(value) => handleClientFilterChange(cliente, 'categoria', value)}
+                  onValueChange={(value) => {
+                    handleClientFilterChange(cliente, 'categoria', value)
+                    // Limpar filtros dependentes quando categoria muda
+                    if (value !== 'all') {
+                      setClientFilters(prev => ({
+                        ...prev,
+                        [cliente]: {
+                          ...prev[cliente],
+                          categoria: value === 'all' ? undefined : value,
+                          cargo: undefined,
+                          produto: undefined
+                        }
+                      }))
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas as Categorias</SelectItem>
-                    {getUniqueValuesForCliente(cliente, 'categoria').map(categoria => (
+                    {categoriasDisponiveis.map(categoria => (
                       <SelectItem key={categoria} value={categoria}>{categoria}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Cargo */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Cargo</label>
                 <Select 
                   value={filters.cargo || 'all'} 
-                  onValueChange={(value) => handleClientFilterChange(cliente, 'cargo', value)}
+                  onValueChange={(value) => {
+                    handleClientFilterChange(cliente, 'cargo', value)
+                    // Limpar filtros dependentes quando cargo muda
+                    if (value !== 'all') {
+                      setClientFilters(prev => ({
+                        ...prev,
+                        [cliente]: {
+                          ...prev[cliente],
+                          cargo: value === 'all' ? undefined : value,
+                          produto: undefined
+                        }
+                      }))
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Cargos</SelectItem>
-                    {getUniqueValuesForCliente(cliente, 'cargo').map(cargo => (
+                    {cargosDisponiveis.map(cargo => (
                       <SelectItem key={cargo} value={cargo}>{cargo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Produto */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Produto</label>
                 <Select 
@@ -242,7 +317,7 @@ export default function ComparativoClientes() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Produtos</SelectItem>
-                    {getUniqueValuesForCliente(cliente, 'produto').map(produto => (
+                    {produtosDisponiveis.map(produto => (
                       <SelectItem key={produto} value={produto}>{produto}</SelectItem>
                     ))}
                   </SelectContent>
