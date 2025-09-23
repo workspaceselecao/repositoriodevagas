@@ -6,7 +6,8 @@ import { Input } from './ui/input'
 import { Vaga } from '../types/database'
 import { getVagas, deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, Clock, DollarSign, Calendar, Eye, Users, Building2, TrendingUp } from 'lucide-react'
+import { Search, Download, Plus, Users, Building2, TrendingUp } from 'lucide-react'
+import VagaTemplate from './VagaTemplate'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function ListaClientes() {
@@ -14,7 +15,6 @@ export default function ListaClientes() {
   const [filteredVagas, setFilteredVagas] = useState<Vaga[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
-  const [expandedSections, setExpandedSections] = useState<{[vagaId: string]: Set<string>}>({})
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -97,28 +97,6 @@ export default function ListaClientes() {
     return text.substring(0, maxLength) + '...'
   }
 
-  const toggleSection = (vagaId: string, section: string) => {
-    setExpandedSections(prev => {
-      const newExpanded = { ...prev }
-      if (!newExpanded[vagaId]) {
-        newExpanded[vagaId] = new Set()
-      }
-      
-      const sections = new Set(newExpanded[vagaId])
-      if (sections.has(section)) {
-        sections.delete(section)
-      } else {
-        sections.add(section)
-      }
-      
-      newExpanded[vagaId] = sections
-      return newExpanded
-    })
-  }
-
-  const isSectionExpanded = (vagaId: string, section: string) => {
-    return expandedSections[vagaId]?.has(section) || false
-  }
 
   if (loading) {
     return (
@@ -222,232 +200,13 @@ export default function ListaClientes() {
       {/* Vagas List */}
       <div className="space-y-6">
         {filteredVagas.map((vaga) => (
-          <Card key={vaga.id} className="hover:shadow-lg transition-shadow">
-            {/* Header da Vaga */}
-            <CardHeader className="pb-4">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2 flex-1">
-                  <CardTitle className="text-2xl font-bold text-gray-900">
-                    {vaga.cargo}
-                  </CardTitle>
-                  <CardDescription className="text-lg text-blue-600 font-semibold">
-                    {vaga.cliente} - {vaga.site}
-                  </CardDescription>
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleViewVaga(vaga)}
-                    className="flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                  >
-                    <Eye className="h-4 w-4" />
-                    Ver Vaga
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(vaga)}
-                    className="flex items-center gap-1"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Editar
-                  </Button>
-                  {user?.role === 'ADMIN' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDelete(vaga.id)}
-                      className="text-red-600 hover:text-red-700 flex items-center gap-1"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Excluir
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-
-            {/* Informações Principais */}
-            <CardContent className="space-y-6">
-              {/* Informações Básicas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {vaga.salario && (
-                  <div className="flex items-center space-x-2 p-3 bg-green-50 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-green-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Salário</p>
-                      <p className="font-semibold text-green-700">{vaga.salario}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {vaga.horario_trabalho && (
-                  <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
-                    <Clock className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Horário</p>
-                      <p className="font-semibold text-blue-700">{vaga.horario_trabalho}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {vaga.jornada_trabalho && (
-                  <div className="flex items-center space-x-2 p-3 bg-purple-50 rounded-lg">
-                    <Calendar className="h-5 w-5 text-purple-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Jornada</p>
-                      <p className="font-semibold text-purple-700">{vaga.jornada_trabalho}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {vaga.local_trabalho && (
-                  <div className="flex items-center space-x-2 p-3 bg-orange-50 rounded-lg">
-                    <MapPin className="h-5 w-5 text-orange-600" />
-                    <div>
-                      <p className="text-sm text-gray-600">Local</p>
-                      <p className="font-semibold text-orange-700">{formatText(vaga.local_trabalho, 30)}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Informações Adicionais */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">Produto:</span>
-                  <span className="ml-2 font-medium">{vaga.produto}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Categoria:</span>
-                  <span className="ml-2 font-medium">{vaga.categoria}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Site:</span>
-                  <span className="ml-2 font-medium">{vaga.site}</span>
-                </div>
-              </div>
-
-              {/* Seções Expansíveis */}
-              <div className="space-y-3">
-                {/* Descrição da Vaga */}
-                {vaga.descricao_vaga && (
-                  <div className="border rounded-lg">
-                    <button
-                      className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                      onClick={() => toggleSection(vaga.id, 'descricao')}
-                    >
-                      <span className="font-semibold">Descrição da vaga</span>
-                      {isSectionExpanded(vaga.id, 'descricao') ? 
-                        <ChevronUp className="h-5 w-5" /> : 
-                        <ChevronDown className="h-5 w-5" />
-                      }
-                    </button>
-                    {isSectionExpanded(vaga.id, 'descricao') && (
-                      <div className="px-4 pb-4 border-t">
-                        <p className="text-gray-700 whitespace-pre-wrap mt-3">
-                          {vaga.descricao_vaga}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Responsabilidades e Atribuições */}
-                {vaga.responsabilidades_atribuicoes && (
-                  <div className="border rounded-lg">
-                    <button
-                      className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                      onClick={() => toggleSection(vaga.id, 'responsabilidades')}
-                    >
-                      <span className="font-semibold">Responsabilidades e atribuições</span>
-                      {isSectionExpanded(vaga.id, 'responsabilidades') ? 
-                        <ChevronUp className="h-5 w-5" /> : 
-                        <ChevronDown className="h-5 w-5" />
-                      }
-                    </button>
-                    {isSectionExpanded(vaga.id, 'responsabilidades') && (
-                      <div className="px-4 pb-4 border-t">
-                        <div className="text-gray-700 whitespace-pre-wrap mt-3">
-                          {vaga.responsabilidades_atribuicoes}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Requisitos e Qualificações */}
-                {vaga.requisitos_qualificacoes && (
-                  <div className="border rounded-lg">
-                    <button
-                      className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                      onClick={() => toggleSection(vaga.id, 'requisitos')}
-                    >
-                      <span className="font-semibold">Requisitos e qualificações</span>
-                      {isSectionExpanded(vaga.id, 'requisitos') ? 
-                        <ChevronUp className="h-5 w-5" /> : 
-                        <ChevronDown className="h-5 w-5" />
-                      }
-                    </button>
-                    {isSectionExpanded(vaga.id, 'requisitos') && (
-                      <div className="px-4 pb-4 border-t">
-                        <div className="text-gray-700 whitespace-pre-wrap mt-3">
-                          {vaga.requisitos_qualificacoes}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Benefícios */}
-                {vaga.beneficios && (
-                  <div className="border rounded-lg">
-                    <button
-                      className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                      onClick={() => toggleSection(vaga.id, 'beneficios')}
-                    >
-                      <span className="font-semibold">Benefícios</span>
-                      {isSectionExpanded(vaga.id, 'beneficios') ? 
-                        <ChevronUp className="h-5 w-5" /> : 
-                        <ChevronDown className="h-5 w-5" />
-                      }
-                    </button>
-                    {isSectionExpanded(vaga.id, 'beneficios') && (
-                      <div className="px-4 pb-4 border-t">
-                        <div className="text-gray-700 whitespace-pre-wrap mt-3">
-                          {vaga.beneficios}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Etapas do Processo */}
-                {vaga.etapas_processo && (
-                  <div className="border rounded-lg">
-                    <button
-                      className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                      onClick={() => toggleSection(vaga.id, 'etapas')}
-                    >
-                      <span className="font-semibold">Etapas do processo</span>
-                      {isSectionExpanded(vaga.id, 'etapas') ? 
-                        <ChevronUp className="h-5 w-5" /> : 
-                        <ChevronDown className="h-5 w-5" />
-                      }
-                    </button>
-                    {isSectionExpanded(vaga.id, 'etapas') && (
-                      <div className="px-4 pb-4 border-t">
-                        <div className="text-gray-700 whitespace-pre-wrap mt-3">
-                          {vaga.etapas_processo}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <VagaTemplate
+            key={vaga.id}
+            vaga={vaga}
+            showActions={true}
+            onEdit={() => handleEdit(vaga)}
+            onDelete={() => handleDelete(vaga.id)}
+          />
         ))}
       </div>
 
