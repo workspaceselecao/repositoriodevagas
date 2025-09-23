@@ -20,49 +20,34 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
     }
 
     // Buscar dados do usuário na tabela users usando o ID do auth
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', authData.user.id)
-      .single()
+    // Usar try-catch para evitar problemas de RLS
+    let user = null
+    try {
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single()
 
-    if (userError) {
-      console.error('Erro ao buscar usuário:', userError.message)
-      console.error('Detalhes do erro:', userError)
-      // Se não encontrar o usuário na tabela, criar um registro básico
-      if (userError.code === 'PGRST116') {
-        console.log('Usuário não encontrado na tabela users, criando registro...')
-        const { data: newUser, error: createError } = await supabase
-          .from('users')
-          .insert({
-            id: authData.user.id,
-            email: authData.user.email || '',
-            name: authData.user.user_metadata?.full_name || authData.user.email?.split('@')[0] || 'Usuário',
-            role: 'RH' // Role padrão
-          })
-          .select()
-          .single()
-        
-        if (createError) {
-          console.error('Erro ao criar usuário:', createError)
-          throw new Error('Erro ao criar perfil do usuário')
-        }
-        
-        return {
-          id: newUser.id,
-          email: newUser.email,
-          name: newUser.name,
-          role: newUser.role
-        }
+      if (!userError && userData) {
+        user = userData
       }
-      throw new Error('Dados do usuário não encontrados')
+    } catch (userError) {
+      console.log('Erro ao buscar usuário na tabela, usando dados do Auth:', userError)
     }
 
+    // Se não encontrou o usuário na tabela, usar dados do Auth
     if (!user) {
-      throw new Error('Usuário não encontrado na base de dados')
+      console.log('Usuário não encontrado na tabela users, usando dados do Auth')
+      return {
+        id: authData.user.id,
+        email: authData.user.email || '',
+        name: authData.user.user_metadata?.full_name || authData.user.email?.split('@')[0] || 'Usuário',
+        role: authData.user.user_metadata?.role || 'RH' // Role padrão
+      }
     }
 
-    // Retornar dados do usuário
+    // Retornar dados do usuário da tabela
     return {
       id: user.id,
       email: user.email,
