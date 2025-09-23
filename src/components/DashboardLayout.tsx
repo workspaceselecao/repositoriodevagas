@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Sidebar, SidebarItem } from './ui/sidebar'
 import { Button } from './ui/button'
+import { ThemeToggle } from './ThemeToggle'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { 
   Home, 
   Users, 
@@ -73,63 +75,103 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
-        {menuItems.map((item, index) => {
-          if (!item.show) return null
+    <TooltipProvider>
+      <div className="flex h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
+          {menuItems.map((item, index) => {
+            if (!item.show) return null
+            
+            const Icon = item.icon
+            const isActiveItem = isActive(item.href)
+            
+            return (
+              <SidebarItem key={index} isCollapsed={isCollapsed}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={isActiveItem ? "default" : "ghost"}
+                      className={`w-full justify-start transition-all duration-200 ${
+                        isActiveItem 
+                          ? "bg-primary text-primary-foreground shadow-md" 
+                          : "hover:bg-primary/10 hover:shadow-sm"
+                      }`}
+                      onClick={() => navigate(item.href)}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {!isCollapsed && <span className="ml-2">{item.label}</span>}
+                    </Button>
+                  </TooltipTrigger>
+                  {isCollapsed && (
+                    <TooltipContent side="right" className="ml-2">
+                      <p>{item.label}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </SidebarItem>
+            )
+          })}
           
-          const Icon = item.icon
-          return (
-            <SidebarItem key={index} isCollapsed={isCollapsed}>
-              <Button
-                variant={isActive(item.href) ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => navigate(item.href)}
-              >
-                <Icon className="h-4 w-4" />
-                {!isCollapsed && <span className="ml-2">{item.label}</span>}
-              </Button>
+          <div className="mt-auto p-4 space-y-2">
+            <SidebarItem isCollapsed={isCollapsed}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {!isCollapsed && <span className="ml-2">Sair</span>}
+                  </Button>
+                </TooltipTrigger>
+                {isCollapsed && (
+                  <TooltipContent side="right" className="ml-2">
+                    <p>Sair</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
             </SidebarItem>
-          )
-        })}
-        
-        <div className="mt-auto p-4">
-          <SidebarItem isCollapsed={isCollapsed}>
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">Sair</span>}
-            </Button>
-          </SidebarItem>
-        </div>
-      </Sidebar>
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b px-6 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-900">
-              Repositório de Vagas
-            </h1>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                Olá, {user?.name}
-              </span>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {user?.role}
-              </span>
-            </div>
           </div>
-        </header>
+        </Sidebar>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto p-6">
-          {children}
-        </main>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Header */}
+          <header className="bg-card/50 backdrop-blur-sm shadow-sm border-b px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  Repositório de Vagas
+                </h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <ThemeToggle />
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-foreground">
+                      Olá, {user?.name}
+                    </p>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                      {user?.role}
+                    </span>
+                  </div>
+                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center">
+                    <span className="text-primary-foreground font-bold text-sm">
+                      {user?.name?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 overflow-auto p-6 bg-gradient-to-br from-background via-background to-muted/10">
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   )
 }

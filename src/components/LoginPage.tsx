@@ -5,7 +5,9 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { ThemeToggle } from './ThemeToggle'
 import { LoginFormData } from '../types/database'
+import { Building2, Lock, Mail } from 'lucide-react'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({
@@ -45,20 +47,36 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4 relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.05%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
+      
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+
+      <Card className="w-full max-w-md relative z-10">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center shadow-lg">
+              <Building2 className="h-8 w-8 text-primary-foreground" />
+            </div>
+          </div>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
             Repositório de Vagas
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground">
             Faça login para acessar o sistema
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Email
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -71,7 +89,10 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password" className="flex items-center gap-2">
+                <Lock className="h-4 w-4" />
+                Senha
+              </Label>
               <Input
                 id="password"
                 name="password"
@@ -84,20 +105,20 @@ export default function LoginPage() {
               />
             </div>
             {error && (
-              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-md">
+              <div className="text-destructive text-sm text-center bg-destructive/10 border border-destructive/20 p-3 rounded-xl">
                 {error}
               </div>
             )}
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-12 text-base font-semibold"
               disabled={loading}
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          <div className="mt-6 p-4 bg-blue-50 rounded-md">
-            <p className="text-sm text-blue-800 text-center">
+          <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+            <p className="text-sm text-primary text-center">
               <strong>Credenciais de teste:</strong><br />
               Email: roberio.gomes@atento.com<br />
               Senha: admin123

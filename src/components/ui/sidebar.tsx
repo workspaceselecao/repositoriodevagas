@@ -16,21 +16,28 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
       <div
         ref={ref}
         className={cn(
-          "relative flex h-screen flex-col border-r bg-card transition-all duration-300",
+          "relative flex h-screen flex-col border-r bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out shadow-lg",
           isCollapsed ? "w-16" : "w-64",
           className
         )}
       >
-        {/* Toggle Button */}
-        <div className="flex items-center justify-between p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b">
           {!isCollapsed && (
-            <h2 className="text-lg font-semibold">Menu</h2>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">RV</span>
+              </div>
+              <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Repositório
+              </h2>
+            </div>
           )}
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggle}
-            className="h-8 w-8"
+            className="h-8 w-8 hover:bg-primary/10 transition-colors"
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -41,7 +48,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-2 p-4">
+        <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
           {children}
         </nav>
       </div>
@@ -63,7 +70,7 @@ const SidebarItem = React.forwardRef<HTMLDivElement, SidebarItemProps>(
       <div
         ref={ref}
         className={cn(
-          "flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+          "flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:shadow-sm group",
           className
         )}
       >

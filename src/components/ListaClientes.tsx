@@ -6,7 +6,7 @@ import { Input } from './ui/input'
 import { Vaga } from '../types/database'
 import { getVagas, deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, Clock, DollarSign, Calendar, Eye } from 'lucide-react'
+import { Search, Download, Edit, Trash2, Plus, ChevronDown, ChevronUp, MapPin, Clock, DollarSign, Calendar, Eye, Users, Building2, TrendingUp } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function ListaClientes() {
@@ -123,72 +123,98 @@ export default function ListaClientes() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent"></div>
+          <p className="text-muted-foreground">Carregando vagas...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Lista de Clientes</h1>
-          <p className="text-gray-600 mt-2">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            Lista de Clientes
+          </h1>
+          <p className="text-muted-foreground text-lg">
             Gerencie todas as vagas de emprego disponíveis
           </p>
         </div>
-        <div className="flex space-x-3">
-          <Button onClick={() => navigate('/dashboard/nova-vaga')}>
-            <Plus className="h-4 w-4 mr-2" />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button onClick={() => navigate('/dashboard/nova-vaga')} size="lg" className="h-12">
+            <Plus className="h-5 w-5 mr-2" />
             Nova Vaga
           </Button>
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
+          <Button variant="outline" onClick={handleExport} size="lg" className="h-12">
+            <Download className="h-5 w-5 mr-2" />
             Exportar Excel
           </Button>
         </div>
       </div>
 
       {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+      <div className="relative max-w-2xl">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
         <Input
           placeholder="Buscar por cliente, cargo, site ou produto..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+          className="pl-12 h-12 text-base"
         />
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total de Vagas</CardTitle>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full -translate-y-10 translate-x-10"></div>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
+                <Users className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <CardTitle className="text-sm font-semibold text-muted-foreground">Total de Vagas</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{vagas.length}</div>
+            <div className="text-3xl font-bold text-primary">{vagas.length}</div>
+            <p className="text-sm text-muted-foreground mt-1">vagas cadastradas</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Clientes Únicos</CardTitle>
+        <Card className="relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full -translate-y-10 translate-x-10"></div>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
+                <Building2 className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <CardTitle className="text-sm font-semibold text-muted-foreground">Clientes Únicos</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-bold text-primary">
               {new Set(vagas.map(v => v.cliente)).size}
             </div>
+            <p className="text-sm text-muted-foreground mt-1">empresas parceiras</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Sites Ativos</CardTitle>
+        <Card className="relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full -translate-y-10 translate-x-10"></div>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <CardTitle className="text-sm font-semibold text-muted-foreground">Sites Ativos</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-bold text-primary">
               {new Set(vagas.map(v => v.site)).size}
             </div>
+            <p className="text-sm text-muted-foreground mt-1">locais de trabalho</p>
           </CardContent>
         </Card>
       </div>
