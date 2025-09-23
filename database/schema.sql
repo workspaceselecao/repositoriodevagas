@@ -64,78 +64,165 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Triggers para atualizar updated_at
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Triggers para atualizar updated_at (com verificação de existência)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_trigger 
+        WHERE tgname = 'update_users_updated_at' 
+        AND tgrelid = 'users'::regclass
+    ) THEN
+        CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;
 
-CREATE TRIGGER update_vagas_updated_at BEFORE UPDATE ON vagas
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_trigger 
+        WHERE tgname = 'update_vagas_updated_at' 
+        AND tgrelid = 'vagas'::regclass
+    ) THEN
+        CREATE TRIGGER update_vagas_updated_at BEFORE UPDATE ON vagas
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;
 
--- Inserir usuário ADMIN padrão (senha: admin123)
--- A senha será hashada pela aplicação
-INSERT INTO users (email, password_hash, name, role) 
-VALUES (
-  'roberio.gomes@atento.com', 
-  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- admin123
-  'Robério Gomes', 
-  'ADMIN'
-) ON CONFLICT (email) DO NOTHING;
+-- Nota: O usuário ADMIN será criado via Supabase Auth
+-- Email: roberio.gomes@atento.com
+-- Senha: admin123
+-- Role: ADMIN
 
 -- RLS (Row Level Security) para proteger os dados
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vagas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE backup_logs ENABLE ROW LEVEL SECURITY;
 
--- Políticas RLS para users
-CREATE POLICY "Users can view their own data" ON users
-  FOR SELECT USING (auth.uid()::text = id::text);
+-- Políticas RLS para users (com verificação de existência)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'users' 
+        AND policyname = 'Users can view their own data'
+    ) THEN
+        CREATE POLICY "Users can view their own data" ON users
+          FOR SELECT USING (auth.uid()::text = id::text);
+    END IF;
+END $$;
 
-CREATE POLICY "Admins can view all users" ON users
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM users 
-      WHERE id::text = auth.uid()::text 
-      AND role = 'ADMIN'
-    )
-  );
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'users' 
+        AND policyname = 'Admins can view all users'
+    ) THEN
+        CREATE POLICY "Admins can view all users" ON users
+          FOR SELECT USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
 
--- Políticas RLS para vagas
-CREATE POLICY "Authenticated users can view vagas" ON vagas
-  FOR SELECT USING (auth.role() = 'authenticated');
+-- Políticas RLS para vagas (com verificação de existência)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'vagas' 
+        AND policyname = 'Authenticated users can view vagas'
+    ) THEN
+        CREATE POLICY "Authenticated users can view vagas" ON vagas
+          FOR SELECT USING (auth.role() = 'authenticated');
+    END IF;
+END $$;
 
-CREATE POLICY "RH and Admin can insert vagas" ON vagas
-  FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM users 
-      WHERE id::text = auth.uid()::text 
-      AND role IN ('RH', 'ADMIN')
-    )
-  );
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'vagas' 
+        AND policyname = 'RH and Admin can insert vagas'
+    ) THEN
+        CREATE POLICY "RH and Admin can insert vagas" ON vagas
+          FOR INSERT WITH CHECK (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role IN ('RH', 'ADMIN')
+            )
+          );
+    END IF;
+END $$;
 
-CREATE POLICY "RH and Admin can update vagas" ON vagas
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM users 
-      WHERE id::text = auth.uid()::text 
-      AND role IN ('RH', 'ADMIN')
-    )
-  );
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'vagas' 
+        AND policyname = 'RH and Admin can update vagas'
+    ) THEN
+        CREATE POLICY "RH and Admin can update vagas" ON vagas
+          FOR UPDATE USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role IN ('RH', 'ADMIN')
+            )
+          );
+    END IF;
+END $$;
 
-CREATE POLICY "Admin can delete vagas" ON vagas
-  FOR DELETE USING (
-    EXISTS (
-      SELECT 1 FROM users 
-      WHERE id::text = auth.uid()::text 
-      AND role = 'ADMIN'
-    )
-  );
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'vagas' 
+        AND policyname = 'Admin can delete vagas'
+    ) THEN
+        CREATE POLICY "Admin can delete vagas" ON vagas
+          FOR DELETE USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
 
--- Políticas RLS para backup_logs
-CREATE POLICY "Admin can manage backup logs" ON backup_logs
-  FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM users 
-      WHERE id::text = auth.uid()::text 
-      AND role = 'ADMIN'
-    )
-  );
+-- Políticas RLS para backup_logs (com verificação de existência)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'backup_logs' 
+        AND policyname = 'Admin can manage backup logs'
+    ) THEN
+        CREATE POLICY "Admin can manage backup logs" ON backup_logs
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+-- ========================================
+-- INSTRUÇÕES DE USO:
+-- ========================================
+-- 1. Execute este script no SQL Editor do Supabase
+-- 2. Crie o usuário ADMIN via Authentication → Users:
+--    - Email: roberio.gomes@atento.com
+--    - Senha: admin123
+-- 3. Execute o script de população: scripts/populate-database.ts
+-- 4. Configure as URLs de redirecionamento em Authentication → URL Configuration
+-- ========================================
