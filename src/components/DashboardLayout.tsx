@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       icon: Users,
       label: 'Usuários',
       href: '/dashboard/usuarios',
-      show: user?.role === 'ADMIN' || user?.role === 'RH'
+      show: user?.role === 'ADMIN'
     },
     {
       icon: Settings,
