@@ -13,17 +13,18 @@ export interface ScrapingResult {
   etapas_processo: string
   confidence: number // Percentual de assertividade (0-100)
   extractedFields: {
-    titulo: { found: boolean; confidence: number }
-    descricao_vaga: { found: boolean; confidence: number }
-    responsabilidades_atribuicoes: { found: boolean; confidence: number }
-    requisitos_qualificacoes: { found: boolean; confidence: number }
-    salario: { found: boolean; confidence: number }
-    horario_trabalho: { found: boolean; confidence: number }
-    jornada_trabalho: { found: boolean; confidence: number }
-    beneficios: { found: boolean; confidence: number }
-    local_trabalho: { found: boolean; confidence: number }
-    etapas_processo: { found: boolean; confidence: number }
+    titulo: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
+    descricao_vaga: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
+    responsabilidades_atribuicoes: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
+    requisitos_qualificacoes: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
+    salario: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
+    horario_trabalho: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
+    jornada_trabalho: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
+    beneficios: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
+    local_trabalho: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
+    etapas_processo: { found: boolean; confidence: number; source: string; rawValue: string; cleanedValue: string }
   }
+  source: 'html' | 'json' | 'combined' | 'manual'
 }
 
 export interface ScrapingError {

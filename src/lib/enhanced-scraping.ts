@@ -383,7 +383,22 @@ export class EnhancedJobScrapingService {
     result.extractedFields = combinedFields as FieldConfidence
     result.confidence = Math.round(totalConfidence / fields.length)
 
-    return result as ScrapingResult
+    return {
+      titulo: result.titulo || '',
+      descricao_vaga: result.descricao_vaga || '',
+      responsabilidades_atribuicoes: result.responsabilidades_atribuicoes || '',
+      requisitos_qualificacoes: result.requisitos_qualificacoes || '',
+      salario: result.salario || '',
+      horario_trabalho: result.horario_trabalho || '',
+      jornada_trabalho: result.jornada_trabalho || '',
+      beneficios: result.beneficios || '',
+      local_trabalho: result.local_trabalho || '',
+      etapas_processo: result.etapas_processo || '',
+      confidence: result.confidence || 0,
+      extractedFields: result.extractedFields || {} as FieldConfidence,
+      source: result.source || 'mixed',
+      url: result.url
+    }
   }
 
   /**

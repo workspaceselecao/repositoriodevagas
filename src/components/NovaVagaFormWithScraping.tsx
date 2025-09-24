@@ -133,18 +133,18 @@ export default function NovaVagaFormWithScraping() {
         
         let result: ScrapingResult | null = null
         if ('message' in htmlResult) {
-          if (jsonResult) {
-            result = jsonResult
+          if (jsonResult && !('message' in jsonResult)) {
+            result = jsonResult as ScrapingResult
           } else {
             setScrapingError(htmlResult.message)
             return
           }
         } else {
           // Combinar resultados HTML e JSON se ambos existirem
-          if (jsonResult) {
+          if (jsonResult && !('message' in jsonResult)) {
             result = EnhancedJobScrapingService.combineResults(htmlResult, jsonResult, '')
           } else {
-            result = htmlResult
+            result = htmlResult as ScrapingResult
           }
         }
 
