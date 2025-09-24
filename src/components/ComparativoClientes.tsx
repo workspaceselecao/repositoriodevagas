@@ -14,6 +14,7 @@ export default function ComparativoClientes() {
   const [clientFilters, setClientFilters] = useState<{[cliente: string]: VagaFilter}>({})
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const [expandedFilters, setExpandedFilters] = useState<{[cliente: string]: boolean}>({})
+  const [activeSection, setActiveSection] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
@@ -70,6 +71,7 @@ export default function ComparativoClientes() {
     setSelectedClientes([])
     setExpandedSections(new Set())
     setExpandedFilters({})
+    setActiveSection(null)
   }
 
   const clearClientFilters = (cliente: string) => {
@@ -83,8 +85,10 @@ export default function ComparativoClientes() {
     const newExpanded = new Set(expandedSections)
     if (newExpanded.has(section)) {
       newExpanded.delete(section)
+      setActiveSection(null) // Nenhuma seção ativa se fechou
     } else {
       newExpanded.add(section)
+      setActiveSection(section) // Definir seção ativa quando expandir
     }
     setExpandedSections(newExpanded)
   }
@@ -373,6 +377,24 @@ export default function ComparativoClientes() {
           <p className="text-gray-600 mt-2">
             Compare vagas entre diferentes clientes
           </p>
+          {activeSection && (
+            <div className="mt-2 inline-flex items-center px-3 py-1 bg-primary/10 text-primary text-sm rounded-full border border-primary/20">
+              <div className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></div>
+              Seção ativa: {
+                {
+                  'descricao': 'Descrição da Vaga',
+                  'responsabilidades': 'Responsabilidades e Atribuições',
+                  'requisitos': 'Requisitos e Qualificações',
+                  'salario': 'Salário',
+                  'horario': 'Horário de Trabalho',
+                  'jornada': 'Jornada de Trabalho',
+                  'beneficios': 'Benefícios',
+                  'local': 'Local de Trabalho',
+                  'etapas': 'Etapas do Processo'
+                }[activeSection] || activeSection
+              }
+            </div>
+          )}
         </div>
         <Button variant="outline" onClick={clearAllFilters}>
           <RotateCcw className="h-4 w-4 mr-2" />
@@ -457,19 +479,45 @@ export default function ComparativoClientes() {
                         { key: 'etapas', title: 'Etapas do Processo' }
                       ].map(section => {
                         const isExpanded = expandedSections.has(section.key)
+                        const isActive = activeSection === section.key
+                        const isInactive = activeSection !== null && activeSection !== section.key
+                        
                         return (
-                          <Card key={section.key} className="transition-all duration-200">
+                          <Card 
+                            key={section.key} 
+                            className={`transition-all duration-300 ${
+                              isActive 
+                                ? 'ring-2 ring-primary shadow-lg scale-[1.02]' 
+                                : isInactive 
+                                  ? 'opacity-40 grayscale-[0.3]' 
+                                  : 'hover:shadow-md'
+                            }`}
+                          >
                             <CardHeader 
-                              className="cursor-pointer hover:bg-gray-50 transition-colors"
+                              className={`cursor-pointer transition-colors ${
+                                isActive 
+                                  ? 'bg-primary/5' 
+                                  : 'hover:bg-gray-50'
+                              }`}
                               onClick={() => toggleSection(section.key)}
                             >
                               <div className="flex items-center justify-between">
-                                <CardTitle className="text-sm">{section.title}</CardTitle>
-                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                <CardTitle className={`text-sm transition-colors ${
+                                  isActive ? 'text-primary font-semibold' : ''
+                                }`}>
+                                  {section.title}
+                                </CardTitle>
+                                <div className={`transition-colors ${
+                                  isActive ? 'text-primary' : ''
+                                }`}>
+                                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                </div>
                               </div>
                             </CardHeader>
                             {isExpanded && (
-                              <CardContent>
+                              <CardContent className={`transition-all duration-300 ${
+                                isActive ? 'bg-primary/5' : ''
+                              }`}>
                                 {vagasCliente.map((vaga, index) => (
                                   <div key={vaga.id} className="mb-4 last:mb-0">
                                     {vagasCliente.length > 1 && (
