@@ -122,7 +122,42 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             )
           })}
           
-          <div className="mt-auto p-4 space-y-2">
+          <div className="mt-auto p-4 space-y-3">
+            {/* Informações do Usuário */}
+            <SidebarItem isCollapsed={isCollapsed}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className={`w-full flex items-center space-x-3 p-3 rounded-lg bg-primary/5 border border-primary/10 ${
+                    isCollapsed ? "justify-center" : "justify-start"
+                  }`}>
+                    <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary-foreground font-bold text-sm">
+                        {user?.name?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    {!isCollapsed && (
+                      <div className="flex flex-col min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          Olá, {user?.name}
+                        </p>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                          {user?.role}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                {isCollapsed && (
+                  <TooltipContent side="right" className="ml-2">
+                    <div className="text-center">
+                      <p className="font-medium">{user?.name}</p>
+                      <p className="text-xs text-muted-foreground">{user?.role}</p>
+                    </div>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </SidebarItem>
+            
             <SidebarItem isCollapsed={isCollapsed}>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -153,29 +188,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Header */}
           <header className="bg-card/50 backdrop-blur-sm shadow-sm border-b px-6 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                  Repositório de Vagas
-                </h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <ThemeToggle />
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-foreground">
-                      Olá, {user?.name}
-                    </p>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                      {user?.role}
-                    </span>
-                  </div>
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-sm">
-                      {user?.name?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Repositório de Vagas
+              </h1>
+              <ThemeToggle />
             </div>
           </header>
 
