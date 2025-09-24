@@ -6,7 +6,8 @@ import {
   ChevronDown,
   ChevronUp,
   Edit,
-  Trash2
+  Trash2,
+  Eye
 } from 'lucide-react'
 import { useThemeClasses } from '../hooks/useThemeClasses'
 import VagaSection from './VagaSection'
@@ -15,11 +16,12 @@ interface VagaTemplateProps {
   vaga: Vaga
   onEdit?: () => void
   onDelete?: () => void
+  onFocus?: () => void
   showActions?: boolean
   variantIndex?: number
 }
 
-export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = false, variantIndex = 0 }: VagaTemplateProps) {
+export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActions = false, variantIndex = 0 }: VagaTemplateProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const { textClasses, cardClasses, getCardVariant } = useThemeClasses()
 
@@ -46,6 +48,20 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = fal
           <div className="flex items-center space-x-2">
             {showActions && (
               <>
+                {onFocus && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onFocus()
+                    }}
+                    className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border-primary/20"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Focar
+                  </Button>
+                )}
                 {onEdit && (
                   <Button
                     size="sm"

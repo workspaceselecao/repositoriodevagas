@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Vaga } from '../types/database'
 import { deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Plus, Users, Building2, TrendingUp } from 'lucide-react'
+import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, Maximize2, Minimize2 } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
 import { useAuth } from '../contexts/AuthContext'
 import { useVagas } from '../hooks/useCacheData'
@@ -14,6 +15,8 @@ import { useCache } from '../contexts/CacheContext'
 
 export default function ListaClientes() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [focusedVaga, setFocusedVaga] = useState<Vaga | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
   const { vagas, loading } = useVagas()
@@ -40,6 +43,19 @@ export default function ListaClientes() {
 
   const handleViewVaga = (vaga: Vaga) => {
     navigate(`/dashboard/vaga/${vaga.id}`)
+  }
+
+  const handleFocusVaga = (vaga: Vaga) => {
+    setFocusedVaga(vaga)
+  }
+
+  const handleCloseFocus = () => {
+    setFocusedVaga(null)
+    setIsFullscreen(false)
+  }
+
+  const handleToggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen)
   }
 
   const handleDelete = async (id: string) => {
@@ -189,6 +205,7 @@ export default function ListaClientes() {
               variantIndex={index}
               onEdit={() => handleEdit(vaga)}
               onDelete={() => handleDelete(vaga.id)}
+              onFocus={() => handleFocusVaga(vaga)}
             />
           ))}
         </div>
@@ -200,6 +217,106 @@ export default function ListaClientes() {
           </div>
         </div>
       )}
+
+      {/* Modal de Visualização Focada */}
+      <Dialog open={!!focusedVaga} onOpenChange={handleCloseFocus}>
+        <DialogContent className={`${isFullscreen ? 'max-w-none w-screen h-screen' : 'max-w-4xl'} p-0`}>
+          <div className={`${isFullscreen ? 'h-screen flex flex-col' : ''}`}>
+            {/* Header do Modal */}
+            <DialogHeader className={`${isFullscreen ? 'p-6 border-b bg-gradient-to-r from-primary/10 to-primary/5' : 'p-6 border-b'}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
+                    <Eye className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-xl font-bold">
+                      Visualização Focada
+                    </DialogTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Modo de estudo - apenas esta vaga está visível
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleToggleFullscreen}
+                    className="flex items-center space-x-2"
+                  >
+                    {isFullscreen ? (
+                      <>
+                        <Minimize2 className="h-4 w-4" />
+                        <span>Sair do Fullscreen</span>
+                      </>
+                    ) : (
+                      <>
+                        <Maximize2 className="h-4 w-4" />
+                        <span>Fullscreen</span>
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCloseFocus}
+                    className="flex items-center space-x-2"
+                  >
+                    <X className="h-4 w-4" />
+                    <span>Fechar</span>
+                  </Button>
+                </div>
+              </div>
+            </DialogHeader>
+
+            {/* Conteúdo da Vaga */}
+            <div className={`${isFullscreen ? 'flex-1 overflow-auto p-6' : 'p-6'}`}>
+              {focusedVaga && (
+                <div className="space-y-6">
+                  {/* Informações da Vaga */}
+                  <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg p-6 border border-primary/20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-primary mb-2">
+                          {focusedVaga.titulo || focusedVaga.cargo}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Cliente:</strong> {focusedVaga.cliente}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Célula:</strong> {focusedVaga.celula}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Site:</strong> {focusedVaga.site}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Categoria:</strong> {focusedVaga.categoria}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Cargo:</strong> {focusedVaga.cargo}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Criado em:</strong> {new Date(focusedVaga.created_at).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Template da Vaga Expandido */}
+                  <VagaTemplate
+                    vaga={focusedVaga}
+                    showActions={false}
+                    variantIndex={0}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
