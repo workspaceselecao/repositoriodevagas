@@ -4,10 +4,15 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { BackupOptions, BackupLog } from '../types/database'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
+import { Switch } from './ui/switch'
+import { Textarea } from './ui/textarea'
+import { BackupOptions, BackupLog, Noticia, NoticiaFormData } from '../types/database'
 import { createManualBackup, getBackupLogs } from '../lib/backup'
+import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticiaStatus } from '../lib/noticias'
 import { useAuth } from '../contexts/AuthContext'
-import { Download, Database, FileText } from 'lucide-react'
+import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell } from 'lucide-react'
 
 export default function Configuracoes() {
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
@@ -15,17 +20,30 @@ export default function Configuracoes() {
     data: {
       vagas: true,
       users: false,
-      backup_logs: false
+      backup_logs: false,
+      noticias: false
     },
     format: 'excel'
   })
   const [backupLogs, setBackupLogs] = useState<BackupLog[]>([])
+  const [noticias, setNoticias] = useState<Noticia[]>([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [showCreateNoticiaDialog, setShowCreateNoticiaDialog] = useState(false)
+  const [showEditNoticiaDialog, setShowEditNoticiaDialog] = useState(false)
+  const [editingNoticia, setEditingNoticia] = useState<Noticia | null>(null)
+  const [noticiaForm, setNoticiaForm] = useState<NoticiaFormData>({
+    titulo: '',
+    conteudo: '',
+    tipo: 'info',
+    ativa: true,
+    prioridade: 'media'
+  })
   const { user } = useAuth()
 
   useEffect(() => {
     loadBackupLogs()
+    loadNoticias()
   }, [])
 
   const loadBackupLogs = async () => {
@@ -34,6 +52,15 @@ export default function Configuracoes() {
       setBackupLogs(logs)
     } catch (error) {
       console.error('Erro ao carregar logs de backup:', error)
+    }
+  }
+
+  const loadNoticias = async () => {
+    try {
+      const noticiasData = await getNoticias()
+      setNoticias(noticiasData)
+    } catch (error) {
+      console.error('Erro ao carregar notícias:', error)
     }
   }
 
@@ -60,7 +87,7 @@ export default function Configuracoes() {
   }
 
 
-  const handleBackupDataChange = (field: 'vagas' | 'users' | 'backup_logs', checked: boolean) => {
+  const handleBackupDataChange = (field: 'vagas' | 'users' | 'backup_logs' | 'noticias', checked: boolean) => {
     setBackupOptions(prev => ({
       ...prev,
       data: {
@@ -70,12 +97,130 @@ export default function Configuracoes() {
     }))
   }
 
+  // Funções para notícias
+  const handleCreateNoticia = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user) return
+
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const newNoticia = await createNoticia(noticiaForm, user.id)
+      if (newNoticia) {
+        setMessage('Notícia criada com sucesso!')
+        setNoticiaForm({
+          titulo: '',
+          conteudo: '',
+          tipo: 'info',
+          ativa: true,
+          prioridade: 'media'
+        })
+        setShowCreateNoticiaDialog(false)
+        loadNoticias()
+      } else {
+        setMessage('Erro ao criar notícia')
+      }
+    } catch (error: any) {
+      console.error('Erro ao criar notícia:', error)
+      setMessage(`Erro ao criar notícia: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEditNoticia = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingNoticia) return
+
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const updatedNoticia = await updateNoticia(editingNoticia.id, noticiaForm)
+      if (updatedNoticia) {
+        setMessage('Notícia atualizada com sucesso!')
+        setShowEditNoticiaDialog(false)
+        setEditingNoticia(null)
+        loadNoticias()
+      } else {
+        setMessage('Erro ao atualizar notícia')
+      }
+    } catch (error: any) {
+      console.error('Erro ao atualizar notícia:', error)
+      setMessage(`Erro ao atualizar notícia: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteNoticia = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta notícia?')) return
+
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const success = await deleteNoticia(id)
+      if (success) {
+        setMessage('Notícia excluída com sucesso!')
+        loadNoticias()
+      } else {
+        setMessage('Erro ao excluir notícia')
+      }
+    } catch (error: any) {
+      console.error('Erro ao excluir notícia:', error)
+      setMessage(`Erro ao excluir notícia: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleToggleNoticiaStatus = async (id: string, currentStatus: boolean) => {
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const updatedNoticia = await toggleNoticiaStatus(id, !currentStatus)
+      if (updatedNoticia) {
+        setMessage(`Notícia ${!currentStatus ? 'ativada' : 'desativada'} com sucesso!`)
+        loadNoticias()
+      } else {
+        setMessage('Erro ao alterar status da notícia')
+      }
+    } catch (error: any) {
+      console.error('Erro ao alterar status da notícia:', error)
+      setMessage(`Erro ao alterar status: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openEditDialog = (noticia: Noticia) => {
+    setEditingNoticia(noticia)
+    setNoticiaForm({
+      titulo: noticia.titulo,
+      conteudo: noticia.conteudo,
+      tipo: noticia.tipo,
+      ativa: noticia.ativa,
+      prioridade: noticia.prioridade
+    })
+    setShowEditNoticiaDialog(true)
+  }
+
+  const handleNoticiaInputChange = (field: keyof NoticiaFormData, value: any) => {
+    setNoticiaForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
         <p className="text-gray-600 mt-2">
-          Gerencie backups do sistema e configurações gerais
+          Gerencie backups do sistema, notícias e configurações gerais
         </p>
       </div>
 
@@ -89,7 +234,14 @@ export default function Configuracoes() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-8">
+      <Tabs defaultValue="backup" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="backup">Backup do Sistema</TabsTrigger>
+          <TabsTrigger value="noticias">Gerenciar Notícias</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="backup" className="space-y-6">
+          <div className="grid grid-cols-1 gap-8">
         {/* Backup do Sistema */}
         <Card>
           <CardHeader>
@@ -134,6 +286,16 @@ export default function Configuracoes() {
                     className="rounded"
                   />
                   <Label htmlFor="logs" className="text-sm">Logs de Backup</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="noticias"
+                    checked={backupOptions.data?.noticias || false}
+                    onChange={(e) => handleBackupDataChange('noticias', e.target.checked)}
+                    className="rounded"
+                  />
+                  <Label htmlFor="noticias" className="text-sm">Notícias</Label>
                 </div>
               </div>
             </div>
@@ -219,6 +381,284 @@ export default function Configuracoes() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="noticias" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Gerenciar Notícias</h2>
+              <p className="text-gray-600 text-sm">Crie e gerencie notícias, avisos e anúncios do sistema</p>
+            </div>
+            <Dialog open={showCreateNoticiaDialog} onOpenChange={setShowCreateNoticiaDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Notícia
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Criar Nova Notícia</DialogTitle>
+                  <DialogDescription>
+                    Preencha os dados para criar uma nova notícia ou aviso
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleCreateNoticia}>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="titulo">Título</Label>
+                      <Input
+                        id="titulo"
+                        value={noticiaForm.titulo}
+                        onChange={(e) => handleNoticiaInputChange('titulo', e.target.value)}
+                        placeholder="Digite o título da notícia"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="conteudo">Conteúdo</Label>
+                      <Textarea
+                        id="conteudo"
+                        value={noticiaForm.conteudo}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleNoticiaInputChange('conteudo', e.target.value)}
+                        placeholder="Digite o conteúdo da notícia (suporte a emojis)"
+                        rows={6}
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="tipo">Tipo</Label>
+                        <Select
+                          value={noticiaForm.tipo}
+                          onValueChange={(value: 'info' | 'alerta' | 'anuncio') => 
+                            handleNoticiaInputChange('tipo', value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="info">ℹ️ Informação</SelectItem>
+                            <SelectItem value="alerta">⚠️ Alerta</SelectItem>
+                            <SelectItem value="anuncio">📢 Anúncio</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="prioridade">Prioridade</Label>
+                        <Select
+                          value={noticiaForm.prioridade}
+                          onValueChange={(value: 'baixa' | 'media' | 'alta') => 
+                            handleNoticiaInputChange('prioridade', value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="baixa">🟢 Baixa</SelectItem>
+                            <SelectItem value="media">🟡 Média</SelectItem>
+                            <SelectItem value="alta">🔴 Alta</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="ativa"
+                        checked={noticiaForm.ativa}
+                        onCheckedChange={(checked) => handleNoticiaInputChange('ativa', checked)}
+                      />
+                      <Label htmlFor="ativa">Notícia ativa</Label>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setShowCreateNoticiaDialog(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={loading}>
+                      {loading ? 'Criando...' : 'Criar Notícia'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Dialog de Edição */}
+          <Dialog open={showEditNoticiaDialog} onOpenChange={setShowEditNoticiaDialog}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Editar Notícia</DialogTitle>
+                <DialogDescription>
+                  Atualize as informações da notícia
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleEditNoticia}>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-titulo">Título</Label>
+                    <Input
+                      id="edit-titulo"
+                      value={noticiaForm.titulo}
+                      onChange={(e) => handleNoticiaInputChange('titulo', e.target.value)}
+                      placeholder="Digite o título da notícia"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-conteudo">Conteúdo</Label>
+                    <Textarea
+                      id="edit-conteudo"
+                      value={noticiaForm.conteudo}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleNoticiaInputChange('conteudo', e.target.value)}
+                      placeholder="Digite o conteúdo da notícia (suporte a emojis)"
+                      rows={6}
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-tipo">Tipo</Label>
+                      <Select
+                        value={noticiaForm.tipo}
+                        onValueChange={(value: 'info' | 'alerta' | 'anuncio') => 
+                          handleNoticiaInputChange('tipo', value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="info">ℹ️ Informação</SelectItem>
+                          <SelectItem value="alerta">⚠️ Alerta</SelectItem>
+                          <SelectItem value="anuncio">📢 Anúncio</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-prioridade">Prioridade</Label>
+                      <Select
+                        value={noticiaForm.prioridade}
+                        onValueChange={(value: 'baixa' | 'media' | 'alta') => 
+                          handleNoticiaInputChange('prioridade', value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="baixa">🟢 Baixa</SelectItem>
+                          <SelectItem value="media">🟡 Média</SelectItem>
+                          <SelectItem value="alta">🔴 Alta</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="edit-ativa"
+                      checked={noticiaForm.ativa}
+                      onCheckedChange={(checked) => handleNoticiaInputChange('ativa', checked)}
+                    />
+                    <Label htmlFor="edit-ativa">Notícia ativa</Label>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowEditNoticiaDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? 'Salvando...' : 'Salvar Alterações'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Megaphone className="h-5 w-5 mr-2" />
+                Lista de Notícias
+              </CardTitle>
+              <CardDescription>
+                {noticias.length} notícia{noticias.length !== 1 ? 's' : ''} cadastrada{noticias.length !== 1 ? 's' : ''}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {noticias.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Megaphone className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium">Nenhuma notícia cadastrada</p>
+                  <p className="text-sm">Clique em "Nova Notícia" para criar a primeira</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {noticias.map((noticia) => (
+                    <div key={noticia.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center space-x-4">
+                        <div className={`p-2 rounded-full ${
+                          noticia.tipo === 'alerta' ? 'bg-red-100 text-red-800' :
+                          noticia.tipo === 'anuncio' ? 'bg-blue-100 text-blue-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {noticia.tipo === 'alerta' ? <AlertCircle className="h-4 w-4" /> :
+                           noticia.tipo === 'anuncio' ? <Bell className="h-4 w-4" /> :
+                           <Info className="h-4 w-4" />}
+                        </div>
+                        <div>
+                          <div className="font-medium">{noticia.titulo}</div>
+                          <div className="text-sm text-gray-600 line-clamp-2">{noticia.conteudo}</div>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              noticia.prioridade === 'alta' ? 'bg-red-100 text-red-800' :
+                              noticia.prioridade === 'media' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-green-100 text-green-800'
+                            }`}>
+                              {noticia.prioridade}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              noticia.ativa ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {noticia.ativa ? 'Ativa' : 'Inativa'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleToggleNoticiaStatus(noticia.id, noticia.ativa)}
+                        >
+                          {noticia.ativa ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openEditDialog(noticia)}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteNoticia(noticia.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

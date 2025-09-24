@@ -92,6 +92,27 @@ export interface ComparisonData {
   vagas: Vaga[];
 }
 
+// Tipos para notícias
+export interface Noticia {
+  id: string;
+  titulo: string;
+  conteudo: string;
+  tipo: 'info' | 'alerta' | 'anuncio';
+  ativa: boolean;
+  prioridade: 'baixa' | 'media' | 'alta';
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+}
+
+export interface NoticiaFormData {
+  titulo: string;
+  conteudo: string;
+  tipo: 'info' | 'alerta' | 'anuncio';
+  ativa: boolean;
+  prioridade: 'baixa' | 'media' | 'alta';
+}
+
 // Tipos para backup
 export interface BackupOptions {
   type: 'manual' | 'automatic' | 'export';
@@ -99,6 +120,7 @@ export interface BackupOptions {
     vagas?: boolean;
     users?: boolean;
     backup_logs?: boolean;
+    noticias?: boolean;
   };
   format?: 'json' | 'excel' | 'csv';
 }

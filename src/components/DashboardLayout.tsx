@@ -13,7 +13,8 @@ import {
   UserPlus,
   FileText,
   BarChart3,
-  Activity
+  Activity,
+  Building2
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -34,8 +35,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const menuItems = [
     {
       icon: Home,
-      label: 'Lista de Clientes',
+      label: 'Dashboard',
       href: '/dashboard',
+      show: true
+    },
+    {
+      icon: Building2,
+      label: 'Lista de Clientes',
+      href: '/dashboard/clientes',
       show: true
     },
     {

@@ -4,6 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { useCleanup } from './hooks/useCleanup'
 import LoginPage from './components/LoginPage'
 import DashboardLayout from './components/DashboardLayout'
+import Dashboard from './components/Dashboard'
 import ListaClientes from './components/ListaClientes'
 import ComparativoClientes from './components/ComparativoClientes'
 import NovaVagaFormWithScraping from './components/NovaVagaFormWithScraping'
@@ -56,6 +57,13 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <DashboardLayout>
+            <Dashboard />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/clientes" element={
         <ProtectedRoute>
           <DashboardLayout>
             <ListaClientes />
