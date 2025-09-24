@@ -33,10 +33,10 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = fal
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <CardTitle className="text-xl font-bold text-gray-900 mb-1">
-              {vaga.cargo} - {vaga.cliente}
+              {vaga.titulo || vaga.cargo} - {vaga.cliente}
             </CardTitle>
             <CardDescription className="text-lg text-blue-600 font-semibold">
-              {vaga.produto}
+              {vaga.celula}
             </CardDescription>
           </div>
           <div className="flex items-center space-x-2">

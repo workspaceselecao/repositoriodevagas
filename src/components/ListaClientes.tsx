@@ -48,7 +48,8 @@ export default function ListaClientes() {
       vaga.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vaga.cargo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vaga.site.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vaga.produto.toLowerCase().includes(searchTerm.toLowerCase())
+      vaga.celula.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (vaga.titulo && vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()))
     )
     setFilteredVagas(filtered)
   }

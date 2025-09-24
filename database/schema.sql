@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS vagas (
   categoria VARCHAR(255) NOT NULL,
   cargo VARCHAR(255) NOT NULL,
   cliente VARCHAR(255) NOT NULL,
-  produto VARCHAR(255) NOT NULL,
+  titulo VARCHAR(255),
+  celula VARCHAR(255) NOT NULL,
   descricao_vaga TEXT,
   responsabilidades_atribuicoes TEXT,
   requisitos_qualificacoes TEXT,
@@ -51,7 +52,8 @@ CREATE INDEX IF NOT EXISTS idx_vagas_cliente ON vagas(cliente);
 CREATE INDEX IF NOT EXISTS idx_vagas_site ON vagas(site);
 CREATE INDEX IF NOT EXISTS idx_vagas_categoria ON vagas(categoria);
 CREATE INDEX IF NOT EXISTS idx_vagas_cargo ON vagas(cargo);
-CREATE INDEX IF NOT EXISTS idx_vagas_produto ON vagas(produto);
+CREATE INDEX IF NOT EXISTS idx_vagas_celula ON vagas(celula);
+CREATE INDEX IF NOT EXISTS idx_vagas_titulo ON vagas(titulo);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 

@@ -36,7 +36,8 @@ function formatVagaForInsert(vaga: VagaData) {
     categoria: vaga.CATEGORIA,
     cargo: vaga.CARGO,
     cliente: vaga.CLIENTE,
-    produto: vaga.PRODUTO,
+    titulo: null, // Nova coluna - será preenchida posteriormente
+    celula: vaga.PRODUTO, // Renomeado de produto para celula
     // Campos TEXT não devem ser truncados para preservar informações completas
     descricao_vaga: vaga['Descrição da vaga'] || null,
     responsabilidades_atribuicoes: vaga['Responsabilidades e atribuições'] || null,

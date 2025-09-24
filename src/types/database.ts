@@ -14,7 +14,8 @@ export interface Vaga {
   categoria: string;
   cargo: string;
   cliente: string;
-  produto: string;
+  titulo?: string;
+  celula: string;
   descricao_vaga?: string;
   responsabilidades_atribuicoes?: string;
   requisitos_qualificacoes?: string;
@@ -45,7 +46,8 @@ export interface VagaFormData {
   categoria: string;
   cargo: string;
   cliente: string;
-  produto: string;
+  titulo?: string;
+  celula: string;
   descricao_vaga?: string;
   responsabilidades_atribuicoes?: string;
   requisitos_qualificacoes?: string;
@@ -82,7 +84,7 @@ export interface VagaFilter {
   site?: string;
   categoria?: string;
   cargo?: string;
-  produto?: string;
+  celula?: string;
 }
 
 export interface ComparisonData {

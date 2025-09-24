@@ -22,8 +22,8 @@ export async function getVagas(filter?: VagaFilter): Promise<Vaga[]> {
     if (filter?.cargo) {
       query = query.eq('cargo', filter.cargo)
     }
-    if (filter?.produto) {
-      query = query.eq('produto', filter.produto)
+    if (filter?.celula) {
+      query = query.eq('celula', filter.celula)
     }
 
     const { data: vagas, error } = await query
@@ -207,22 +207,22 @@ export async function getCargos(): Promise<string[]> {
   }
 }
 
-// Função para buscar produtos únicos
-export async function getProdutos(): Promise<string[]> {
+// Função para buscar células únicas
+export async function getCelulas(): Promise<string[]> {
   try {
     const { data, error } = await supabase
       .from('vagas')
-      .select('produto')
-      .order('produto')
+      .select('celula')
+      .order('celula')
 
     if (error) {
       throw new Error(error.message)
     }
 
-    const produtos = [...new Set(data?.map(item => item.produto) || [])]
-    return produtos
+    const celulas = [...new Set(data?.map(item => item.celula) || [])]
+    return celulas
   } catch (error) {
-    console.error('Erro ao buscar produtos:', error)
+    console.error('Erro ao buscar células:', error)
     return []
   }
 }

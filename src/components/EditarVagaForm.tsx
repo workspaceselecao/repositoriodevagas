@@ -18,7 +18,8 @@ export default function EditarVagaForm() {
     categoria: '',
     cargo: '',
     cliente: '',
-    produto: '',
+    titulo: '',
+    celula: '',
     descricao_vaga: '',
     responsabilidades_atribuicoes: '',
     requisitos_qualificacoes: '',
@@ -50,7 +51,8 @@ export default function EditarVagaForm() {
             categoria: vaga.categoria || '',
             cargo: vaga.cargo || '',
             cliente: vaga.cliente || '',
-            produto: vaga.produto || '',
+            titulo: vaga.titulo || '',
+            celula: vaga.celula || '',
             descricao_vaga: vaga.descricao_vaga || '',
             responsabilidades_atribuicoes: vaga.responsabilidades_atribuicoes || '',
             requisitos_qualificacoes: vaga.requisitos_qualificacoes || '',
@@ -215,12 +217,22 @@ export default function EditarVagaForm() {
                   required
                 />
               </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="produto">Produto</Label>
+              <div className="space-y-2">
+                <Label htmlFor="titulo">Título da Vaga</Label>
                 <Input
-                  id="produto"
-                  name="produto"
-                  value={formData.produto}
+                  id="titulo"
+                  name="titulo"
+                  value={formData.titulo}
+                  onChange={handleInputChange}
+                  placeholder="Ex: Desenvolvedor Full Stack"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="celula">Célula</Label>
+                <Input
+                  id="celula"
+                  name="celula"
+                  value={formData.celula}
                   onChange={handleInputChange}
                   placeholder="Ex: VIVO - Telecom I"
                   required

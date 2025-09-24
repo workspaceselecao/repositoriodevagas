@@ -4,7 +4,7 @@ import { Button } from './ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion'
 import { Vaga, VagaFilter, ComparisonData } from '../types/database'
-import { getVagas, getClientes, getSites, getCategorias, getCargos, getProdutos } from '../lib/vagas'
+import { getVagas, getClientes, getSites, getCategorias, getCargos, getCelulas } from '../lib/vagas'
 import { X, Filter, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
 
 export default function ComparativoClientes() {
@@ -129,8 +129,8 @@ export default function ComparativoClientes() {
       if (appliedFilters.cargo) {
         vagasCliente = vagasCliente.filter(vaga => vaga.cargo === appliedFilters.cargo)
       }
-      if (appliedFilters.produto) {
-        vagasCliente = vagasCliente.filter(vaga => vaga.produto === appliedFilters.produto)
+      if (appliedFilters.celula) {
+        vagasCliente = vagasCliente.filter(vaga => vaga.celula === appliedFilters.celula)
       }
     }
     
@@ -171,7 +171,7 @@ export default function ComparativoClientes() {
       site: filters.site, 
       categoria: filters.categoria 
     })
-    const produtosDisponiveis = getUniqueValuesForCliente(cliente, 'produto', { 
+    const celulasDisponiveis = getUniqueValuesForCliente(cliente, 'celula', { 
       site: filters.site, 
       categoria: filters.categoria, 
       cargo: filters.cargo 
@@ -207,6 +207,72 @@ export default function ComparativoClientes() {
         {isExpanded && (
           <CardContent>
             <div className="space-y-4">
+              {/* Célula */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Célula</label>
+                <Select 
+                  value={filters.celula || 'all'} 
+                  onValueChange={(value) => {
+                    handleClientFilterChange(cliente, 'celula', value)
+                    // Limpar filtros dependentes quando célula muda
+                    if (value !== 'all') {
+                      setClientFilters(prev => ({
+                        ...prev,
+                        [cliente]: {
+                          celula: value === 'all' ? undefined : value,
+                          cargo: undefined,
+                          site: undefined,
+                          categoria: undefined
+                        }
+                      }))
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as Células</SelectItem>
+                    {celulasDisponiveis.map(celula => (
+                      <SelectItem key={celula} value={celula}>{celula}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Cargo */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Cargo</label>
+                <Select 
+                  value={filters.cargo || 'all'} 
+                  onValueChange={(value) => {
+                    handleClientFilterChange(cliente, 'cargo', value)
+                    // Limpar filtros dependentes quando cargo muda
+                    if (value !== 'all') {
+                      setClientFilters(prev => ({
+                        ...prev,
+                        [cliente]: {
+                          ...prev[cliente],
+                          cargo: value === 'all' ? undefined : value,
+                          site: undefined,
+                          categoria: undefined
+                        }
+                      }))
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Cargos</SelectItem>
+                    {cargosDisponiveis.map(cargo => (
+                      <SelectItem key={cargo} value={cargo}>{cargo}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Site */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Site</label>
@@ -219,10 +285,9 @@ export default function ComparativoClientes() {
                       setClientFilters(prev => ({
                         ...prev,
                         [cliente]: {
+                          ...prev[cliente],
                           site: value === 'all' ? undefined : value,
-                          categoria: undefined,
-                          cargo: undefined,
-                          produto: undefined
+                          categoria: undefined
                         }
                       }))
                     }
@@ -245,21 +310,7 @@ export default function ComparativoClientes() {
                 <label className="text-sm font-medium">Categoria</label>
                 <Select 
                   value={filters.categoria || 'all'} 
-                  onValueChange={(value) => {
-                    handleClientFilterChange(cliente, 'categoria', value)
-                    // Limpar filtros dependentes quando categoria muda
-                    if (value !== 'all') {
-                      setClientFilters(prev => ({
-                        ...prev,
-                        [cliente]: {
-                          ...prev[cliente],
-                          categoria: value === 'all' ? undefined : value,
-                          cargo: undefined,
-                          produto: undefined
-                        }
-                      }))
-                    }
-                  }}
+                  onValueChange={(value) => handleClientFilterChange(cliente, 'categoria', value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -268,57 +319,6 @@ export default function ComparativoClientes() {
                     <SelectItem value="all">Todas as Categorias</SelectItem>
                     {categoriasDisponiveis.map(categoria => (
                       <SelectItem key={categoria} value={categoria}>{categoria}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Cargo */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Cargo</label>
-                <Select 
-                  value={filters.cargo || 'all'} 
-                  onValueChange={(value) => {
-                    handleClientFilterChange(cliente, 'cargo', value)
-                    // Limpar filtros dependentes quando cargo muda
-                    if (value !== 'all') {
-                      setClientFilters(prev => ({
-                        ...prev,
-                        [cliente]: {
-                          ...prev[cliente],
-                          cargo: value === 'all' ? undefined : value,
-                          produto: undefined
-                        }
-                      }))
-                    }
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Cargos</SelectItem>
-                    {cargosDisponiveis.map(cargo => (
-                      <SelectItem key={cargo} value={cargo}>{cargo}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Produto */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Produto</label>
-                <Select 
-                  value={filters.produto || 'all'} 
-                  onValueChange={(value) => handleClientFilterChange(cliente, 'produto', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Produtos</SelectItem>
-                    {produtosDisponiveis.map(produto => (
-                      <SelectItem key={produto} value={produto}>{produto}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
