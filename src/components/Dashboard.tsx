@@ -312,37 +312,6 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Ações Rápidas */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ações Rápidas</CardTitle>
-          <CardDescription>
-            Acesso rápido às principais funcionalidades do sistema
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-              <Building2 className="h-6 w-6" />
-              <span className="text-sm">Nova Vaga</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-              <Users className="h-6 w-6" />
-              <span className="text-sm">Lista de Clientes</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-              <TrendingUp className="h-6 w-6" />
-              <span className="text-sm">Comparativo</span>
-            </Button>
-            {user?.role === 'ADMIN' && (
-              <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
-                <Megaphone className="h-6 w-6" />
-                <span className="text-sm">Gerenciar Notícias</span>
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

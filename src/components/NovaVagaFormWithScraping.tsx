@@ -10,7 +10,7 @@ import { VagaFormData } from '../types/database'
 import { createVaga, refreshVagasList } from '../lib/vagas'
 import { EnhancedJobScrapingService, ScrapingResult, ScrapingError } from '../lib/enhanced-scraping'
 import { ConfidenceIndicator, FieldConfidenceIndicator, ConfidenceBar } from './ConfidenceIndicator'
-import { Plus, ArrowLeft, Download, Edit, Trash2, Save, RefreshCw } from 'lucide-react'
+import { Plus, Download, Edit, Trash2, Save, RefreshCw } from 'lucide-react'
 
 export default function NovaVagaFormWithScraping() {
   const [formData, setFormData] = useState<VagaFormData>({
@@ -280,20 +280,11 @@ export default function NovaVagaFormWithScraping() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Button
-          variant="outline"
-          onClick={() => navigate('/dashboard')}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nova Vaga</h1>
-          <p className="text-gray-600 mt-2">
-            Adicione uma nova vaga ao sistema com extração automática ou manual
-          </p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Nova Vaga</h1>
+        <p className="text-gray-600 mt-2">
+          Adicione uma nova vaga ao sistema com extração automática ou manual
+        </p>
       </div>
 
       {/* Mensagem principal - sempre visível no topo */}
