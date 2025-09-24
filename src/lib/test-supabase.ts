@@ -117,8 +117,24 @@ export async function testSupabaseConnection(): Promise<TestResult> {
     if (hasProdutoColumn && !hasCelulaColumn) {
       return {
         success: false,
-        message: 'Migração necessária: Tabela ainda usa coluna "produto" em vez de "celula"',
-        details: { hasProdutoColumn, hasCelulaColumn }
+        message: '❌ MIGRAÇÃO NECESSÁRIA: Tabela ainda usa coluna "produto". Execute o script de migração no Supabase SQL Editor.',
+        details: { 
+          hasProdutoColumn, 
+          hasCelulaColumn,
+          action: 'Execute: scripts/migrate-produto-to-celula.sql no Supabase'
+        }
+      }
+    }
+
+    if (hasProdutoColumn && hasCelulaColumn) {
+      return {
+        success: false,
+        message: '⚠️ AMBIGUIDADE: Ambas as colunas "produto" e "celula" existem. Execute o script de limpeza.',
+        details: { 
+          hasProdutoColumn, 
+          hasCelulaColumn,
+          action: 'Execute: scripts/check-database-columns.sql no Supabase'
+        }
       }
     }
 

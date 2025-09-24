@@ -138,7 +138,7 @@ export default function ListaClientes() {
       <div className="relative max-w-2xl">
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
         <Input
-          placeholder="Buscar por cliente, cargo, site ou produto..."
+          placeholder="Buscar por cliente, cargo, site ou célula..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-12 h-12 text-base"

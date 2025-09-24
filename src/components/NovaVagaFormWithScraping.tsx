@@ -103,7 +103,7 @@ export default function NovaVagaFormWithScraping() {
         if (error.message.includes('Timeout')) {
           errorMessage = '⏰ Timeout: A operação demorou muito. Tente novamente.'
         } else if (error.message.includes('null value in column "produto"')) {
-          errorMessage = '❌ Erro de banco de dados: Coluna "produto" não encontrada. Execute o script de migração no Supabase.'
+          errorMessage = '❌ MIGRAÇÃO NECESSÁRIA: O banco ainda usa coluna "produto". Execute o script "migrate-produto-to-celula.sql" no Supabase SQL Editor.'
         } else if (error.message.includes('null value in column "celula"')) {
           errorMessage = '❌ Erro: Campo "Célula" é obrigatório e não foi preenchido.'
         } else if (error.message.includes('violates not-null constraint')) {
