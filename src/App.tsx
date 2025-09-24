@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
 import DebugInfo from './components/DebugInfo'
+import EmergencyRefresh from './components/EmergencyRefresh'
 import LoginPage from './components/LoginPage'
 import DashboardLayout from './components/DashboardLayout'
 import Dashboard from './components/Dashboard'
@@ -116,12 +117,20 @@ function App() {
   // Hook para limpeza de cache
   useCleanup()
   
+  const handleEmergencyRefresh = () => {
+    // Limpar todos os caches e recarregar
+    localStorage.clear()
+    sessionStorage.clear()
+    window.location.reload()
+  }
+  
   return (
     <ThemeProvider>
       <AuthProvider>
         <CacheProvider>
           <AppRoutes />
           <DebugInfo />
+          <EmergencyRefresh onRefresh={handleEmergencyRefresh} />
         </CacheProvider>
       </AuthProvider>
     </ThemeProvider>

@@ -191,7 +191,7 @@ export async function getClientes(): Promise<string[]> {
     }
 
     // Remover duplicatas e retornar array de strings
-    const clientes = [...new Set(data?.map(item => item.cliente) || [])]
+    const clientes = [...new Set(data?.map((item: any) => item.cliente) || [])] as string[]
     return clientes
   } catch (error) {
     console.error('Erro ao buscar clientes:', error)
@@ -211,7 +211,7 @@ export async function getSites(): Promise<string[]> {
       throw new Error(error.message)
     }
 
-    const sites = [...new Set(data?.map(item => item.site) || [])]
+    const sites = [...new Set(data?.map((item: any) => item.site) || [])] as string[]
     return sites
   } catch (error) {
     console.error('Erro ao buscar sites:', error)
@@ -231,7 +231,7 @@ export async function getCategorias(): Promise<string[]> {
       throw new Error(error.message)
     }
 
-    const categorias = [...new Set(data?.map(item => item.categoria) || [])]
+    const categorias = [...new Set(data?.map((item: any) => item.categoria) || [])] as string[]
     return categorias
   } catch (error) {
     console.error('Erro ao buscar categorias:', error)
@@ -251,7 +251,7 @@ export async function getCargos(): Promise<string[]> {
       throw new Error(error.message)
     }
 
-    const cargos = [...new Set(data?.map(item => item.cargo) || [])]
+    const cargos = [...new Set(data?.map((item: any) => item.cargo) || [])] as string[]
     return cargos
   } catch (error) {
     console.error('Erro ao buscar cargos:', error)
@@ -271,7 +271,7 @@ export async function getCelulas(): Promise<string[]> {
       throw new Error(error.message)
     }
 
-    const celulas = [...new Set(data?.map(item => item.celula) || [])]
+    const celulas = [...new Set(data?.map((item: any) => item.celula) || [])] as string[]
     return celulas
   } catch (error) {
     console.error('Erro ao buscar células:', error)

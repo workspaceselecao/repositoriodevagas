@@ -303,7 +303,7 @@ export function canAccessSettings(user: AuthUser | null): boolean {
 export async function signOut(): Promise<void> {
   try {
     // Fazer logout de forma assíncrona sem aguardar
-    supabase.auth.signOut().catch(error => {
+    supabase.auth.signOut().catch((error: any) => {
       console.warn('Erro ao fazer logout (não crítico):', error)
     })
     

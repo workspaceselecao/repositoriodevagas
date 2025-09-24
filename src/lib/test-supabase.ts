@@ -99,7 +99,7 @@ export async function testSupabaseConnection(): Promise<TestResult> {
 
     // Teste 6: Verificar se as colunas obrigatórias existem
     const requiredColumns = ['site', 'categoria', 'cargo', 'cliente', 'celula']
-    const existingColumns = columns?.map(col => col.column_name) || []
+    const existingColumns = columns?.map((col: any) => col.column_name) || []
     const missingColumns = requiredColumns.filter(col => !existingColumns.includes(col))
 
     if (missingColumns.length > 0) {

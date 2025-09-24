@@ -20,29 +20,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true
-    let retryCount = 0
-    const maxRetries = 3
     let hasInitialized = false
+    let timeoutId: NodeJS.Timeout | null = null
 
-    // Verificar sessão atual do Supabase com retry
+    // Timeout de segurança para evitar travamento
+    const safetyTimeout = setTimeout(() => {
+      if (isMounted && !hasInitialized) {
+        console.warn('⚠️ Timeout de segurança - forçando inicialização')
+        setUser(null)
+        setLoading(false)
+        setInitialized(true)
+        setIsInitializing(false)
+        hasInitialized = true
+      }
+    }, 5000) // 5 segundos máximo
+
+    // Verificar sessão atual do Supabase de forma rápida
     const checkUser = async () => {
-      if (hasInitialized || isInitializing) return // Evitar múltiplas inicializações
+      if (hasInitialized || isInitializing) return
       
       setIsInitializing(true)
       
       try {
-        // Primeiro, verificar se já existe uma sessão ativa
-        const { data: { session } } = await supabase.auth.getSession()
+        // Verificar sessão com timeout curto
+        const sessionPromise = supabase.auth.getSession()
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error('Session timeout')), 2000)
+        })
+
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any
+        
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+        }
         
         if (session?.user && isMounted) {
-          // Se há sessão, buscar dados do usuário
-          const currentUser = await getCurrentUser()
+          // Usar dados do Auth diretamente para ser mais rápido
+          const authUser = session.user
+          const currentUser = {
+            id: authUser.id,
+            email: authUser.email || '',
+            name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
+            role: authUser.user_metadata?.role || 'RH'
+          }
+          
           if (isMounted) {
             setUser(currentUser)
             hasInitialized = true
             setLoading(false)
             setInitialized(true)
             setIsInitializing(false)
+            clearTimeout(safetyTimeout)
             return
           }
         }
@@ -54,63 +83,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false)
           setInitialized(true)
           setIsInitializing(false)
+          clearTimeout(safetyTimeout)
         }
       } catch (error) {
         console.error('Erro ao verificar usuário:', error)
         
-        // Retry logic para evitar loop infinito
-        if (retryCount < maxRetries && isMounted && !hasInitialized) {
-          retryCount++
-          console.log(`Tentativa ${retryCount} de verificar usuário...`)
-          setIsInitializing(false)
-          setTimeout(checkUser, 1000 * retryCount) // Delay progressivo
-          return
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+          timeoutId = null
         }
         
-        // Se falhou todas as tentativas, limpar estado
+        // Em caso de erro, limpar estado imediatamente
         if (isMounted) {
           setUser(null)
           hasInitialized = true
           setLoading(false)
           setInitialized(true)
           setIsInitializing(false)
-          // Limpar cache do Supabase apenas se necessário
-          try {
-            await supabase.auth.signOut()
-          } catch (signOutError) {
-            console.log('Erro ao fazer signOut:', signOutError)
-          }
+          clearTimeout(safetyTimeout)
         }
       }
     }
 
     checkUser()
 
-    // Escutar mudanças de autenticação
+    // Escutar mudanças de autenticação (simplificado)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!isMounted || hasInitialized) return
+      async (event: any, session: any) => {
+        if (!isMounted) return
         
         console.log('Auth state change:', event)
         
         if (event === 'SIGNED_IN' && session) {
-          try {
-            const currentUser = await getCurrentUser()
-            if (isMounted) {
-              setUser(currentUser)
-              setLoading(false)
-            }
-          } catch (error) {
-            console.error('Erro ao buscar usuário após login:', error)
-            if (isMounted) {
-              setUser(null)
-              setLoading(false)
-            }
+          // Usar dados do Auth diretamente para ser mais rápido
+          const authUser = session.user
+          const currentUser = {
+            id: authUser.id,
+            email: authUser.email || '',
+            name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
+            role: authUser.user_metadata?.role || 'RH'
+          }
+          
+          if (isMounted) {
+            setUser(currentUser)
+            setLoading(false)
+            setInitialized(true)
           }
         } else if (event === 'SIGNED_OUT') {
           if (isMounted) {
             setUser(null)
             setLoading(false)
+            setInitialized(true)
             // Limpar cache local
             const supabaseProjectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
             if (supabaseProjectId) {
@@ -119,7 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }
         } else if (event === 'TOKEN_REFRESHED') {
-          // Token foi renovado, não precisa fazer nada
           console.log('Token renovado com sucesso')
         }
       }
