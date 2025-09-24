@@ -10,7 +10,6 @@ import { VagaFormData } from '../types/database'
 import { createVaga, refreshVagasList } from '../lib/vagas'
 import { EnhancedJobScrapingService, ScrapingResult, ScrapingError } from '../lib/enhanced-scraping'
 import { ConfidenceIndicator, FieldConfidenceIndicator, ConfidenceBar } from './ConfidenceIndicator'
-import { testSupabaseConnection, testInsertVaga, testRealInsert } from '../lib/test-supabase'
 import { Plus, ArrowLeft, Download, Edit, Trash2, Save, RefreshCw } from 'lucide-react'
 
 export default function NovaVagaFormWithScraping() {
@@ -228,49 +227,6 @@ export default function NovaVagaFormWithScraping() {
     setMessage('')
   }
 
-  const testConnection = async () => {
-    setLoading(true)
-    setMessage('🔍 Testando conexão com Supabase...')
-    
-    try {
-      const result = await testSupabaseConnection()
-      
-      if (result.success) {
-        setMessage(`✅ ${result.message}`)
-        console.log('Teste de conexão bem-sucedido:', result.details)
-      } else {
-        setMessage(`❌ ${result.message}`)
-        console.error('Teste de conexão falhou:', result.details)
-      }
-    } catch (error: any) {
-      setMessage(`❌ Erro no teste: ${error.message}`)
-      console.error('Erro no teste de conexão:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const testInsert = async () => {
-    setLoading(true)
-    setMessage('🧪 Testando inserção no banco de dados...')
-    
-    try {
-      const result = await testRealInsert()
-      
-      if (result.success) {
-        setMessage(`✅ ${result.message}`)
-        console.log('Teste de inserção bem-sucedido:', result.details)
-      } else {
-        setMessage(`❌ ${result.message}`)
-        console.error('Teste de inserção falhou:', result.details)
-      }
-    } catch (error: any) {
-      setMessage(`❌ Erro no teste de inserção: ${error.message}`)
-      console.error('Erro no teste de inserção:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const applyScrapedData = (data: ScrapingResult) => {
     setFormData(prev => ({
@@ -546,34 +502,14 @@ export default function NovaVagaFormWithScraping() {
 
                 {/* Botões */}
                 <div className="flex justify-between space-x-4 pt-6">
-                  <div className="space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={clearForm}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Limpar Formulário
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={testConnection}
-                      disabled={loading}
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Testar Conexão
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={testInsert}
-                      disabled={loading}
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Testar Inserção
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={clearForm}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Limpar Formulário
+                  </Button>
                   <div className="space-x-2">
                     <Button
                       type="button"
