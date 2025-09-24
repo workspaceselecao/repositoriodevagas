@@ -20,7 +20,9 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  UserPlus,
+  Settings
 } from 'lucide-react'
 
 interface DashboardStats {
@@ -106,7 +108,7 @@ export default function Dashboard() {
           }
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         })
-        .slice(0, 6) // Mostrar apenas as 6 mais relevantes
+        .slice(0, 9) // Mostrar até 9 notícias
 
       setNoticias(noticiasOrdenadas)
     } catch (error) {
@@ -239,69 +241,42 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Gráfico de Tendências */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      {/* Ações Rápidas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/dashboard/nova-vaga'}>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="h-5 w-5 mr-2" />
-              Atividade Recente
+            <CardTitle className="flex items-center text-primary">
+              <UserPlus className="h-5 w-5 mr-2" />
+              Nova Vaga
             </CardTitle>
             <CardDescription>
-              Vagas criadas nos últimos 7 dias
+              Criar uma nova vaga de emprego
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Novas vagas</span>
-                <span className="text-2xl font-bold text-primary">{stats.vagasRecentes}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-primary h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min((stats.vagasRecentes / Math.max(stats.totalVagas, 1)) * 100, 100)}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {stats.vagasRecentes > 0 ? 'Ótima atividade!' : 'Nenhuma vaga nova esta semana'}
-              </p>
-            </div>
-          </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/dashboard/clientes'}>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Megaphone className="h-5 w-5 mr-2" />
-              Notícias Ativas
+            <CardTitle className="flex items-center text-primary">
+              <Building2 className="h-5 w-5 mr-2" />
+              Lista de Clientes
             </CardTitle>
             <CardDescription>
-              Avisos e anúncios do sistema
+              Visualizar e gerenciar vagas
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Notícias ativas</span>
-                <span className="text-2xl font-bold text-blue-600">{stats.noticiasAtivas}</span>
-              </div>
-              <div className="flex space-x-2">
-                <Badge variant="outline" className="text-xs">
-                  <Info className="h-3 w-3 mr-1" />
-                  Informações
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  Alertas
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  <Megaphone className="h-3 w-3 mr-1" />
-                  Anúncios
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/dashboard/configuracoes'}>
+          <CardHeader>
+            <CardTitle className="flex items-center text-primary">
+              <Settings className="h-5 w-5 mr-2" />
+              Configurações
+            </CardTitle>
+            <CardDescription>
+              Gerenciar sistema e notícias
+            </CardDescription>
+          </CardHeader>
         </Card>
       </div>
 
@@ -314,6 +289,11 @@ export default function Dashboard() {
           </CardTitle>
           <CardDescription>
             Avisos, anúncios e informações importantes do sistema
+            {noticias.length >= 9 && (
+              <span className="block mt-2 text-amber-600 text-sm font-medium">
+                ⚠️ Mural completo! Para adicionar nova notícia, faça backup e remova uma notícia ativa nas Configurações.
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>

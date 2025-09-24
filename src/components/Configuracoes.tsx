@@ -388,6 +388,22 @@ export default function Configuracoes() {
             <div>
               <h2 className="text-xl font-semibold">Gerenciar Notícias</h2>
               <p className="text-gray-600 text-sm">Crie e gerencie notícias, avisos e anúncios do sistema</p>
+              {noticias.filter(n => n.ativa).length >= 9 && (
+                <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center">
+                    <AlertCircle className="h-5 w-5 text-amber-600 mr-2" />
+                    <div>
+                      <p className="text-amber-800 font-medium text-sm">
+                        ⚠️ Mural de Notícias Completo!
+                      </p>
+                      <p className="text-amber-700 text-xs">
+                        Você tem {noticias.filter(n => n.ativa).length} notícias ativas. Para adicionar uma nova, 
+                        faça backup das notícias atuais e desative ou remova uma notícia existente.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <Dialog open={showCreateNoticiaDialog} onOpenChange={setShowCreateNoticiaDialog}>
               <DialogTrigger asChild>

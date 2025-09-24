@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 interface AuthContextType {
   user: AuthUser | null
   login: (credentials: LoginFormData) => Promise<boolean>
-  logout: () => void
+  logout: () => Promise<void>
   loading: boolean
 }
 

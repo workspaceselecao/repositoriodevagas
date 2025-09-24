@@ -299,9 +299,44 @@ export function canAccessSettings(user: AuthUser | null): boolean {
   return user?.role === 'ADMIN'
 }
 
-// Função para fazer logout
+// Função para fazer logout otimizada
 export async function signOut(): Promise<void> {
-  await supabase.auth.signOut()
+  try {
+    // Fazer logout de forma assíncrona sem aguardar
+    supabase.auth.signOut().catch(error => {
+      console.warn('Erro ao fazer logout (não crítico):', error)
+    })
+    
+    // Limpar cache local imediatamente
+    if (typeof window !== 'undefined') {
+      // Limpar localStorage
+      localStorage.removeItem('supabase.auth.token')
+      // Limpar chaves do Supabase
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-') && key.includes('auth-token')) {
+          localStorage.removeItem(key)
+        }
+      })
+      
+      // Limpar sessionStorage
+      sessionStorage.clear()
+      
+      // Limpar cache do navegador se possível
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            if (name.includes('supabase') || name.includes('auth')) {
+              caches.delete(name)
+            }
+          })
+        }).catch(() => {
+          // Ignorar erros de cache
+        })
+      }
+    }
+  } catch (error) {
+    console.warn('Erro durante logout (não crítico):', error)
+  }
 }
 
 // Função para verificar sessão atual
