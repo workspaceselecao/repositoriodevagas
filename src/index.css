@@ -46,6 +46,26 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 94.1%;
+    
+    /* Variantes de cartões com tons pastéis suaves */
+    --card-blue: 220 25% 12%;
+    --card-blue-foreground: 210 40% 95%;
+    --card-purple: 280 25% 12%;
+    --card-purple-foreground: 210 40% 95%;
+    --card-green: 140 25% 12%;
+    --card-green-foreground: 210 40% 95%;
+    --card-orange: 30 25% 12%;
+    --card-orange-foreground: 210 40% 95%;
+    --card-pink: 320 25% 12%;
+    --card-pink-foreground: 210 40% 95%;
+    --card-teal: 180 25% 12%;
+    --card-teal-foreground: 210 40% 95%;
+    
+    /* Cores de texto com melhor contraste */
+    --text-primary: 210 40% 98%;
+    --text-secondary: 215 20.2% 75%;
+    --text-muted: 215 20.2% 65%;
+    --text-accent: 217.2 91.2% 70%;
   }
 
   /* Tema Azul Suave */
@@ -182,13 +202,71 @@
     @apply bg-gradient-to-r from-muted to-muted/70;
   }
   
-  /* Efeitos de hover */
+  /* Cartões com tons pastéis suaves para tema escuro */
+  .card-pastel-blue {
+    background: hsl(var(--card-blue));
+    color: hsl(var(--card-blue-foreground));
+    border: 1px solid hsl(var(--card-blue) / 0.3);
+  }
+  
+  .card-pastel-purple {
+    background: hsl(var(--card-purple));
+    color: hsl(var(--card-purple-foreground));
+    border: 1px solid hsl(var(--card-purple) / 0.3);
+  }
+  
+  .card-pastel-green {
+    background: hsl(var(--card-green));
+    color: hsl(var(--card-green-foreground));
+    border: 1px solid hsl(var(--card-green) / 0.3);
+  }
+  
+  .card-pastel-orange {
+    background: hsl(var(--card-orange));
+    color: hsl(var(--card-orange-foreground));
+    border: 1px solid hsl(var(--card-orange) / 0.3);
+  }
+  
+  .card-pastel-pink {
+    background: hsl(var(--card-pink));
+    color: hsl(var(--card-pink-foreground));
+    border: 1px solid hsl(var(--card-pink) / 0.3);
+  }
+  
+  .card-pastel-teal {
+    background: hsl(var(--card-teal));
+    color: hsl(var(--card-teal-foreground));
+    border: 1px solid hsl(var(--card-teal) / 0.3);
+  }
+  
+  /* Classes de texto com melhor contraste */
+  .text-contrast-primary {
+    color: hsl(var(--text-primary));
+  }
+  
+  .text-contrast-secondary {
+    color: hsl(var(--text-secondary));
+  }
+  
+  .text-contrast-muted {
+    color: hsl(var(--text-muted));
+  }
+  
+  .text-contrast-accent {
+    color: hsl(var(--text-accent));
+  }
+  
+  /* Efeitos de hover melhorados */
   .hover-lift {
     @apply transition-all duration-300 hover:scale-105 hover:shadow-lg;
   }
   
   .hover-glow {
     @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/25;
+  }
+  
+  .hover-pastel {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:brightness-110;
   }
   
   /* Animações de entrada */
@@ -202,5 +280,30 @@
   
   .animate-bounce-in {
     animation: bounce-in 0.6s ease-out;
+  }
+  
+  /* Gradientes suaves para cartões */
+  .gradient-pastel-blue {
+    background: linear-gradient(135deg, hsl(var(--card-blue)), hsl(var(--card-blue) / 0.8));
+  }
+  
+  .gradient-pastel-purple {
+    background: linear-gradient(135deg, hsl(var(--card-purple)), hsl(var(--card-purple) / 0.8));
+  }
+  
+  .gradient-pastel-green {
+    background: linear-gradient(135deg, hsl(var(--card-green)), hsl(var(--card-green) / 0.8));
+  }
+  
+  .gradient-pastel-orange {
+    background: linear-gradient(135deg, hsl(var(--card-orange)), hsl(var(--card-orange) / 0.8));
+  }
+  
+  .gradient-pastel-pink {
+    background: linear-gradient(135deg, hsl(var(--card-pink)), hsl(var(--card-pink) / 0.8));
+  }
+  
+  .gradient-pastel-teal {
+    background: linear-gradient(135deg, hsl(var(--card-teal)), hsl(var(--card-teal) / 0.8));
   }
 }

@@ -8,34 +8,38 @@ import {
   Edit,
   Trash2
 } from 'lucide-react'
+import { useThemeClasses } from '../hooks/useThemeClasses'
+import VagaSection from './VagaSection'
 
 interface VagaTemplateProps {
   vaga: Vaga
   onEdit?: () => void
   onDelete?: () => void
   showActions?: boolean
+  variantIndex?: number
 }
 
-export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = false }: VagaTemplateProps) {
+export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = false, variantIndex = 0 }: VagaTemplateProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const { textClasses, cardClasses, getCardVariant } = useThemeClasses()
 
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded)
   }
 
   return (
-    <Card className="w-full hover:shadow-lg transition-shadow">
+    <Card className={`${cardClasses.base} ${getCardVariant(variantIndex)} dark:${getCardVariant(variantIndex)}`}>
       {/* Header do Card */}
       <CardHeader 
-        className="cursor-pointer hover:bg-gray-50 transition-colors"
+        className={cardClasses.header}
         onClick={toggleExpansion}
       >
         <div className="flex items-center justify-between">
           <div className="flex-1">
-            <CardTitle className="text-xl font-bold text-gray-900 mb-1">
+            <CardTitle className={`${textClasses.heading} mb-1`}>
               {vaga.titulo || vaga.cargo} - {vaga.cliente}
             </CardTitle>
-            <CardDescription className="text-lg text-blue-600 font-semibold">
+            <CardDescription className={`text-lg ${textClasses.accent} font-semibold`}>
               {vaga.celula}
             </CardDescription>
           </div>
@@ -80,151 +84,64 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, showActions = fal
       {/* Conteúdo Expansível - Layout com todos os 9 campos obrigatórios */}
       {isExpanded && (
         <CardContent className="space-y-8">
-          {/* Descrição da vaga */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-              Descrição da vaga
-            </h2>
-            <div className="text-gray-700 leading-relaxed">
-              {vaga.descricao_vaga ? (
-                <div className="whitespace-pre-wrap">{vaga.descricao_vaga}</div>
-              ) : (
-                <p className="text-gray-500 italic">Informação não disponível</p>
-              )}
-            </div>
-          </div>
+        {/* Descrição da vaga */}
+        <VagaSection title="Descrição da vaga" content={vaga.descricao_vaga} />
 
-          {/* Responsabilidades e atribuições */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-              Responsabilidades e atribuições
-            </h2>
-            <div className="text-gray-700 leading-relaxed">
-              {vaga.responsabilidades_atribuicoes ? (
-                <div className="whitespace-pre-wrap">{vaga.responsabilidades_atribuicoes}</div>
-              ) : (
-                <p className="text-gray-500 italic">Informação não disponível</p>
-              )}
-            </div>
-          </div>
+        {/* Responsabilidades e atribuições */}
+        <VagaSection title="Responsabilidades e atribuições" content={vaga.responsabilidades_atribuicoes} />
 
-          {/* Requisitos e qualificações */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-              Requisitos e qualificações
-            </h2>
-            <div className="text-gray-700 leading-relaxed">
-              {vaga.requisitos_qualificacoes ? (
-                <div className="whitespace-pre-wrap">{vaga.requisitos_qualificacoes}</div>
-              ) : (
-                <p className="text-gray-500 italic">Informação não disponível</p>
-              )}
-            </div>
-          </div>
+        {/* Requisitos e qualificações */}
+        <VagaSection title="Requisitos e qualificações" content={vaga.requisitos_qualificacoes} />
 
-          {/* Salário */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-              Salário
-            </h2>
-            <div className="text-gray-700 leading-relaxed">
-              {vaga.salario ? (
-                <p><strong>{vaga.salario}</strong></p>
-              ) : (
-                <p className="text-gray-500 italic">Informação não disponível</p>
-              )}
-            </div>
-          </div>
+        {/* Salário */}
+        <VagaSection title="Salário">
+          {vaga.salario ? (
+            <p><strong>{vaga.salario}</strong></p>
+          ) : null}
+        </VagaSection>
 
-          {/* Horário de Trabalho */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-              Horário de Trabalho
-            </h2>
-            <div className="text-gray-700 leading-relaxed">
-              {vaga.horario_trabalho ? (
-                <p>{vaga.horario_trabalho}</p>
-              ) : (
-                <p className="text-gray-500 italic">Informação não disponível</p>
-              )}
-            </div>
-          </div>
+        {/* Horário de Trabalho */}
+        <VagaSection title="Horário de Trabalho" content={vaga.horario_trabalho} />
 
-          {/* Jornada de Trabalho */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-              Jornada de Trabalho
-            </h2>
-            <div className="text-gray-700 leading-relaxed">
-              {vaga.jornada_trabalho ? (
-                <p>{vaga.jornada_trabalho}</p>
-              ) : (
-                <p className="text-gray-500 italic">Informação não disponível</p>
-              )}
-            </div>
-          </div>
+        {/* Jornada de Trabalho */}
+        <VagaSection title="Jornada de Trabalho" content={vaga.jornada_trabalho} />
 
-          {/* Benefícios */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-              Benefícios
-            </h2>
-            <div className="text-gray-700 leading-relaxed">
-              {vaga.beneficios ? (
-                <div className="space-y-2">
-                  {vaga.beneficios.split(';').map((beneficio, index) => (
-                    <div key={index} className="flex items-start">
-                      <span className="text-gray-400 mr-2 mt-1">•</span>
-                      <span>{beneficio.trim()}</span>
+        {/* Benefícios */}
+        <VagaSection title="Benefícios">
+          {vaga.beneficios ? (
+            <div className="space-y-2">
+              {vaga.beneficios.split(';').map((beneficio, index) => (
+                <div key={index} className="flex items-start">
+                  <span className="text-gray-400 dark:text-contrast-muted mr-2 mt-1">•</span>
+                  <span>{beneficio.trim()}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </VagaSection>
+
+        {/* Local de Trabalho */}
+        <VagaSection title="Local de Trabalho" content={vaga.local_trabalho} />
+
+        {/* Etapas do processo */}
+        <VagaSection title="Etapas do processo">
+          {vaga.etapas_processo ? (
+            <div className="space-y-3">
+              {vaga.etapas_processo.split('\n').filter(etapa => etapa.trim()).map((etapa, index) => {
+                // Remove "Etapa X:" do texto, mantendo apenas o conteúdo da etapa
+                const cleanEtapa = etapa.trim().replace(/^Etapa\s+\d+:\s*/i, '')
+                return (
+                  <div key={index} className="flex items-center">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gray-800 dark:bg-gray-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                      {index + 1}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">Informação não disponível</p>
-              )}
+                    <span>{cleanEtapa}</span>
+                  </div>
+                )
+              })}
             </div>
-          </div>
-
-          {/* Local de Trabalho */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-              Local de Trabalho
-            </h2>
-            <div className="text-gray-700 leading-relaxed">
-              {vaga.local_trabalho ? (
-                <p>{vaga.local_trabalho}</p>
-              ) : (
-                <p className="text-gray-500 italic">Informação não disponível</p>
-              )}
-            </div>
-          </div>
-
-          {/* Etapas do processo */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wide">
-              Etapas do processo
-            </h2>
-            <div className="text-gray-700 leading-relaxed">
-              {vaga.etapas_processo ? (
-                <div className="space-y-3">
-                  {vaga.etapas_processo.split('\n').filter(etapa => etapa.trim()).map((etapa, index) => {
-                    // Remove "Etapa X:" do texto, mantendo apenas o conteúdo da etapa
-                    const cleanEtapa = etapa.trim().replace(/^Etapa\s+\d+:\s*/i, '')
-                    return (
-                      <div key={index} className="flex items-center">
-                        <div className="flex-shrink-0 w-8 h-8 bg-gray-800 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                          {index + 1}
-                        </div>
-                        <span>{cleanEtapa}</span>
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">Informação não disponível</p>
-              )}
-            </div>
-          </div>
+          ) : null}
+        </VagaSection>
         </CardContent>
       )}
     </Card>

@@ -198,18 +198,19 @@ export default function ListaClientes() {
         </Card>
       </div>
 
-      {/* Vagas List */}
-      <div className="space-y-6">
-        {filteredVagas.map((vaga) => (
-          <VagaTemplate
-            key={vaga.id}
-            vaga={vaga}
-            showActions={true}
-            onEdit={() => handleEdit(vaga)}
-            onDelete={() => handleDelete(vaga.id)}
-          />
-        ))}
-      </div>
+        {/* Vagas List */}
+        <div className="space-y-6">
+          {filteredVagas.map((vaga, index) => (
+            <VagaTemplate
+              key={vaga.id}
+              vaga={vaga}
+              showActions={true}
+              variantIndex={index}
+              onEdit={() => handleEdit(vaga)}
+              onDelete={() => handleDelete(vaga.id)}
+            />
+          ))}
+        </div>
 
       {filteredVagas.length === 0 && !loading && (
         <div className="text-center py-12">
