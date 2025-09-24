@@ -42,8 +42,23 @@ export default function Configuracoes() {
   const { user } = useAuth()
 
   useEffect(() => {
-    loadBackupLogs()
-    loadNoticias()
+    let isMounted = true
+    const load = async () => {
+      try {
+        const [logs, noticiasData] = await Promise.all([
+          getBackupLogs(),
+          getNoticias()
+        ])
+        if (isMounted) {
+          setBackupLogs(logs)
+          setNoticias(noticiasData)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error)
+      }
+    }
+    load()
+    return () => { isMounted = false }
   }, [])
 
   const loadBackupLogs = async () => {

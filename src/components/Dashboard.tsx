@@ -4,6 +4,7 @@ import { Badge } from './ui/badge'
 import { useAuth } from '../contexts/AuthContext'
 import { useDashboardStats, useNoticias } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
+import { APP_VERSION, checkForUpdates, forceReload } from '../version'
 import { 
   Users, 
   Building2, 
@@ -17,7 +18,8 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  Download
 } from 'lucide-react'
 
 export default function Dashboard() {
@@ -28,6 +30,18 @@ export default function Dashboard() {
 
   // Limitar notícias exibidas
   const noticiasExibidas = noticias.slice(0, 9)
+
+  // Verificar atualizações
+  const handleCheckUpdates = async () => {
+    const hasUpdate = await checkForUpdates()
+    if (hasUpdate) {
+      if (confirm('Nova versão disponível! Deseja atualizar agora?')) {
+        forceReload()
+      }
+    } else {
+      alert('Você está usando a versão mais recente!')
+    }
+  }
 
   const getTipoIcon = (tipo: string) => {
     switch (tipo) {
@@ -91,10 +105,16 @@ export default function Dashboard() {
             Visão geral do sistema e notícias importantes
           </p>
         </div>
-        <Button onClick={refreshAll} variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Atualizar
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={refreshAll} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar
+          </Button>
+          <Button onClick={handleCheckUpdates} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Verificar Atualizações
+          </Button>
+        </div>
       </div>
 
       {/* Métricas Principais */}
@@ -224,6 +244,11 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Rodapé com versão */}
+      <div className="text-center text-sm text-gray-500 mt-8">
+        <p>Repositório de Vagas v{APP_VERSION}</p>
+      </div>
 
     </div>
   )

@@ -372,7 +372,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
         console.log('📦 Usando cache existente')
       }
     }
-  }, [user, loading, cache.lastUpdated, cacheStatus.vagas, refreshAll])
+  }, [user, loading, cache.lastUpdated, cacheStatus.vagas])
 
   // Escutar eventos de atualização de vagas
   useEffect(() => {

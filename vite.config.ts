@@ -12,10 +12,18 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    host: true
+    host: true,
+    headers: {
+      'Cache-Control': 'no-store, max-age=0, must-revalidate'
+    }
   },
   build: {
     outDir: 'dist',
     sourcemap: true
+  },
+  preview: {
+    headers: {
+      'Cache-Control': 'no-store, max-age=0, must-revalidate'
+    }
   }
 })

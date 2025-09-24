@@ -17,7 +17,23 @@ export default function ComparativoClientes() {
   const [activeSection, setActiveSection] = useState<string | null>(null)
 
   useEffect(() => {
-    loadData()
+    let isMounted = true
+    const load = async () => {
+      try {
+        const [clientesData, vagasData] = await Promise.all([
+          getClientes(),
+          getVagas()
+        ])
+        if (isMounted) {
+          setClientes(clientesData)
+          setAllVagas(vagasData)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error)
+      }
+    }
+    load()
+    return () => { isMounted = false }
   }, [])
 
   useEffect(() => {
@@ -29,19 +45,6 @@ export default function ComparativoClientes() {
     setClientFilters(newClientFilters)
   }, [selectedClientes])
 
-  const loadData = async () => {
-    try {
-      const [clientesData, vagasData] = await Promise.all([
-        getClientes(),
-        getVagas()
-      ])
-
-      setClientes(clientesData)
-      setAllVagas(vagasData)
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-    }
-  }
 
   const handleClienteSelect = (cliente: string) => {
     if (selectedClientes.includes(cliente)) {

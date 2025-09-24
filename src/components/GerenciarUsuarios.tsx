@@ -35,7 +35,24 @@ export default function GerenciarUsuarios() {
   const { user: currentUser } = useAuth()
 
   useEffect(() => {
-    loadUsers()
+    let isMounted = true
+    const load = async () => {
+      try {
+        setLoading(true)
+        const data = await getAllUsers()
+        if (isMounted) {
+          setUsers(data)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar usuários:', error)
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+    load()
+    return () => { isMounted = false }
   }, [])
 
   useEffect(() => {
