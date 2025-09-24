@@ -16,9 +16,24 @@ export const checkForUpdates = async (): Promise<boolean> => {
       return data.version !== APP_VERSION
     }
     
+    // Para desenvolvimento/teste: simular nova versão disponível
+    // Remover esta linha em produção
+    if (import.meta.env.DEV) {
+      console.log('🔧 Modo desenvolvimento: simulando nova versão disponível')
+      return true
+    }
+    
     return false
   } catch (error) {
     console.log('Não foi possível verificar atualizações:', error)
+    
+    // Para desenvolvimento/teste: simular nova versão disponível
+    // Remover esta linha em produção
+    if (import.meta.env.DEV) {
+      console.log('🔧 Modo desenvolvimento: simulando nova versão disponível (erro na verificação)')
+      return true
+    }
+    
     return false
   }
 }
