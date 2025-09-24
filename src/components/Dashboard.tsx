@@ -20,9 +20,7 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  RefreshCw,
-  UserPlus,
-  Settings
+  RefreshCw
 } from 'lucide-react'
 
 interface DashboardStats {
@@ -241,44 +239,6 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Ações Rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/dashboard/nova-vaga'}>
-          <CardHeader>
-            <CardTitle className="flex items-center text-primary">
-              <UserPlus className="h-5 w-5 mr-2" />
-              Nova Vaga
-            </CardTitle>
-            <CardDescription>
-              Criar uma nova vaga de emprego
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/dashboard/clientes'}>
-          <CardHeader>
-            <CardTitle className="flex items-center text-primary">
-              <Building2 className="h-5 w-5 mr-2" />
-              Lista de Clientes
-            </CardTitle>
-            <CardDescription>
-              Visualizar e gerenciar vagas
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = '/dashboard/configuracoes'}>
-          <CardHeader>
-            <CardTitle className="flex items-center text-primary">
-              <Settings className="h-5 w-5 mr-2" />
-              Configurações
-            </CardTitle>
-            <CardDescription>
-              Gerenciar sistema e notícias
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
 
       {/* Mural de Notícias */}
       <Card>

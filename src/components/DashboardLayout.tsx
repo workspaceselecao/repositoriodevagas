@@ -127,47 +127,42 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             )
           })}
           
+          {/* Informações do Usuário e Logout no final */}
           <div className="mt-auto p-4 space-y-3">
-            {/* Informações do Usuário - Simplificadas */}
-            <div className={`w-full flex items-center space-x-3 p-3 rounded-lg ${
-              isCollapsed ? "justify-center" : "justify-start"
-            }`}>
-              <div className={`${isCollapsed ? "w-10 h-10" : "w-8 h-8"} bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center flex-shrink-0`}>
-                <span className="text-primary-foreground font-bold text-sm">
-                  {user?.name?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              {!isCollapsed && (
-                <div className="flex flex-col min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    Olá, {user?.name}
-                  </p>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                    {user?.role}
-                  </span>
-                </div>
-              )}
-            </div>
-            {isCollapsed && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="w-full flex justify-center">
-                    <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center">
-                      <span className="text-primary-foreground font-bold text-sm">
-                        {user?.name?.charAt(0).toUpperCase()}
+            {/* Informações do Usuário */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className={`w-full flex items-center space-x-3 p-3 rounded-lg ${
+                  isCollapsed ? "justify-center" : "justify-start"
+                }`}>
+                  <div className={`${isCollapsed ? "w-10 h-10" : "w-8 h-8"} bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center flex-shrink-0`}>
+                    <span className="text-primary-foreground font-bold text-sm">
+                      {user?.name?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  {!isCollapsed && (
+                    <div className="flex flex-col min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        Olá, {user?.name}
+                      </p>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                        {user?.role}
                       </span>
                     </div>
-                  </div>
-                </TooltipTrigger>
+                  )}
+                </div>
+              </TooltipTrigger>
+              {isCollapsed && (
                 <TooltipContent side="right" className="ml-2">
                   <div className="text-center">
                     <p className="font-medium">{user?.name}</p>
                     <p className="text-xs text-muted-foreground">{user?.role}</p>
                   </div>
                 </TooltipContent>
-              </Tooltip>
-            )}
+              )}
+            </Tooltip>
             
+            {/* Botão de Logout */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
