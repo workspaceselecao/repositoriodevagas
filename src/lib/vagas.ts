@@ -76,10 +76,35 @@ export async function createVaga(vagaData: VagaFormData, userId: string): Promis
       throw new Error(error.message)
     }
 
+    // Disparar evento de atualização
+    window.dispatchEvent(new CustomEvent('vaga-created', { detail: vaga }))
+
     return vaga
   } catch (error) {
     console.error('Erro ao criar vaga:', error)
     return null
+  }
+}
+
+// Função para atualizar lista de vagas
+export async function refreshVagasList(): Promise<Vaga[]> {
+  try {
+    const { data, error } = await supabase
+      .from('vagas')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    // Disparar evento de atualização
+    window.dispatchEvent(new CustomEvent('vagas-updated', { detail: data || [] }))
+
+    return data || []
+  } catch (error) {
+    console.error('Erro ao atualizar vagas:', error)
+    return []
   }
 }
 

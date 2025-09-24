@@ -6,7 +6,7 @@ import LoginPage from './components/LoginPage'
 import DashboardLayout from './components/DashboardLayout'
 import ListaClientes from './components/ListaClientes'
 import ComparativoClientes from './components/ComparativoClientes'
-import NovaVagaForm from './components/NovaVagaForm'
+import NovaVagaFormWithScraping from './components/NovaVagaFormWithScraping'
 import Configuracoes from './components/Configuracoes'
 import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
@@ -71,7 +71,7 @@ function AppRoutes() {
       <Route path="/dashboard/nova-vaga" element={
         <ProtectedRoute>
           <DashboardLayout>
-            <NovaVagaForm />
+            <NovaVagaFormWithScraping />
           </DashboardLayout>
         </ProtectedRoute>
       } />
