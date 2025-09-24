@@ -357,36 +357,52 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
     const authUser = session.user
 
-    // Buscar dados do usuário na tabela users com timeout
-    const userPromise = supabase
-      .from('users')
-      .select('*')
-      .eq('id', authUser.id)
-      .single()
-
-    // Adicionar timeout para evitar travamento
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Timeout ao buscar usuário')), 5000)
-    })
-
-    const { data: user, error } = await Promise.race([userPromise, timeoutPromise]) as any
-
-    if (error || !user) {
-      console.log('Usuário não encontrado na tabela, usando dados do Auth')
-      // Se não encontrou na tabela, usar dados do Auth
+    // Primeiro, tentar usar dados do Auth se disponíveis
+    if (authUser.user_metadata?.role) {
+      console.log('Usando dados do Auth (role disponível)')
       return {
         id: authUser.id,
         email: authUser.email || '',
         name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
-        role: authUser.user_metadata?.role || 'RH'
+        role: authUser.user_metadata.role
       }
     }
 
+    // Se não tem role no metadata, buscar na tabela users com timeout reduzido
+    try {
+      const userPromise = supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
+        .single()
+
+      // Timeout reduzido para evitar travamento
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout ao buscar usuário')), 2000)
+      })
+
+      const { data: user, error } = await Promise.race([userPromise, timeoutPromise]) as any
+
+      if (!error && user) {
+        console.log('Usuário encontrado na tabela')
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        }
+      }
+    } catch (tableError) {
+      console.log('Erro ao buscar na tabela users:', tableError)
+    }
+
+    // Fallback: usar dados do Auth
+    console.log('Usando dados do Auth (fallback)')
     return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role
+      id: authUser.id,
+      email: authUser.email || '',
+      name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
+      role: authUser.user_metadata?.role || 'RH'
     }
   } catch (error) {
     console.error('Erro ao buscar usuário atual:', error)

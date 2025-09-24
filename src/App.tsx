@@ -4,6 +4,7 @@ import { CacheProvider } from './contexts/CacheContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
+import DebugInfo from './components/DebugInfo'
 import LoginPage from './components/LoginPage'
 import DashboardLayout from './components/DashboardLayout'
 import Dashboard from './components/Dashboard'
@@ -120,6 +121,7 @@ function App() {
       <AuthProvider>
         <CacheProvider>
           <AppRoutes />
+          <DebugInfo />
         </CacheProvider>
       </AuthProvider>
     </ThemeProvider>

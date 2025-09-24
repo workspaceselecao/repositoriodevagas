@@ -16,6 +16,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
+  const [isInitializing, setIsInitializing] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -25,7 +26,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Verificar sessão atual do Supabase com retry
     const checkUser = async () => {
-      if (hasInitialized) return // Evitar múltiplas inicializações
+      if (hasInitialized || isInitializing) return // Evitar múltiplas inicializações
+      
+      setIsInitializing(true)
       
       try {
         // Primeiro, verificar se já existe uma sessão ativa
@@ -39,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             hasInitialized = true
             setLoading(false)
             setInitialized(true)
+            setIsInitializing(false)
             return
           }
         }
@@ -49,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           hasInitialized = true
           setLoading(false)
           setInitialized(true)
+          setIsInitializing(false)
         }
       } catch (error) {
         console.error('Erro ao verificar usuário:', error)
@@ -57,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (retryCount < maxRetries && isMounted && !hasInitialized) {
           retryCount++
           console.log(`Tentativa ${retryCount} de verificar usuário...`)
+          setIsInitializing(false)
           setTimeout(checkUser, 1000 * retryCount) // Delay progressivo
           return
         }
@@ -67,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           hasInitialized = true
           setLoading(false)
           setInitialized(true)
+          setIsInitializing(false)
           // Limpar cache do Supabase apenas se necessário
           try {
             await supabase.auth.signOut()

@@ -1,0 +1,3 @@
+[33m41a3d70[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m feat: implementar melhorias para prevenção de loop F5
+[33meef7c2d[m feat: implementar correções de loop infinito e cache
+[33md9e5a73[m feat: Implementa visualização focada (navegador privativo) na Lista de Clientes
