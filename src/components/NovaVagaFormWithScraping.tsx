@@ -429,41 +429,42 @@ export default function NovaVagaFormWithScraping() {
                       </div>
                     </div>
 
-                  {/* Indicador de Confiança Detalhado */}
-                  <FieldConfidenceIndicator extractedFields={scrapedData.extractedFields} />
+                    {/* Indicador de Confiança Detalhado */}
+                    <FieldConfidenceIndicator extractedFields={scrapedData.extractedFields} />
 
-                  {/* Dados Extraídos */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(scrapedData).filter(([key]) => !['confidence', 'extractedFields', 'source', 'url'].includes(key)).map(([key, value]) => {
-                      const fieldStatus = scrapedData.extractedFields[key as keyof typeof scrapedData.extractedFields]
-                      return (
-                        <div key={key} className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <Label className="text-sm font-medium capitalize">
-                              {key.replace(/_/g, ' ')}
-                            </Label>
-                            {fieldStatus && (
-                              <div className="flex items-center space-x-1">
-                                <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                  fieldStatus.found ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                }`}>
-                                  {fieldStatus.confidence}%
-                                </span>
-                                <span className="text-xs text-gray-400">
-                                  {fieldStatus.source}
-                                </span>
-                              </div>
-                            )}
+                    {/* Dados Extraídos */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(scrapedData).filter(([key]) => !['confidence', 'extractedFields', 'source', 'url'].includes(key)).map(([key, value]) => {
+                        const fieldStatus = scrapedData.extractedFields[key as keyof typeof scrapedData.extractedFields]
+                        return (
+                          <div key={key} className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium capitalize">
+                                {key.replace(/_/g, ' ')}
+                              </Label>
+                              {fieldStatus && (
+                                <div className="flex items-center space-x-1">
+                                  <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                    fieldStatus.found ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                  }`}>
+                                    {fieldStatus.confidence}%
+                                  </span>
+                                  <span className="text-xs text-gray-400">
+                                    {fieldStatus.source}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className={`p-2 rounded border text-sm max-h-32 overflow-y-auto ${
+                              fieldStatus?.found ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                            }`}>
+                              {value || 'Não encontrado'}
+                            </div>
+                            <ConfidenceBar confidence={fieldStatus?.confidence || 0} className="h-1" />
                           </div>
-                          <div className={`p-2 rounded border text-sm max-h-32 overflow-y-auto ${
-                            fieldStatus?.found ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                          }`}>
-                            {value || 'Não encontrado'}
-                          </div>
-                          <ConfidenceBar confidence={fieldStatus?.confidence || 0} className="h-1" />
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
