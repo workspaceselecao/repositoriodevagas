@@ -10,6 +10,7 @@ import { VagaFormData } from '../types/database'
 import { createVaga, refreshVagasList } from '../lib/vagas'
 import { EnhancedJobScrapingService, ScrapingResult, ScrapingError } from '../lib/enhanced-scraping'
 import { ConfidenceIndicator, FieldConfidenceIndicator, ConfidenceBar } from './ConfidenceIndicator'
+import { testSupabaseConnection, testInsertVaga } from '../lib/test-supabase'
 import { Plus, ArrowLeft, Download, Upload, Edit, Trash2, Save, RefreshCw } from 'lucide-react'
 
 export default function NovaVagaFormWithScraping() {
@@ -46,6 +47,12 @@ export default function NovaVagaFormWithScraping() {
     e.preventDefault()
     if (!user) return
 
+    // Prevenir múltiplos envios
+    if (loading) {
+      console.log('Formulário já está sendo enviado, ignorando...')
+      return
+    }
+
     setLoading(true)
     setMessage('')
     setScrapingError('')
@@ -57,37 +64,55 @@ export default function NovaVagaFormWithScraping() {
       
       if (missingFields.length > 0) {
         setMessage(`❌ Campos obrigatórios não preenchidos: ${missingFields.join(', ')}`)
-        setLoading(false)
         return
       }
 
-      console.log('Enviando dados do formulário:', formData)
-      const novaVaga = await createVaga(formData, user.id)
+      console.log('🚀 Iniciando envio do formulário...')
+      console.log('Dados do formulário:', formData)
+      
+      setMessage('⏳ Salvando vaga no banco de dados...')
+      
+      // Timeout para evitar loops infinitos
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout: Operação demorou muito para responder')), 30000)
+      })
+      
+      const createPromise = createVaga(formData, user.id)
+      
+      const novaVaga = await Promise.race([createPromise, timeoutPromise])
       
       if (novaVaga) {
-        setMessage('✅ Vaga criada com sucesso! Atualizando lista...')
+        setMessage('✅ Vaga criada com sucesso!')
+        console.log('Vaga criada:', novaVaga)
         
-        // Atualizar lista de vagas automaticamente
-        await refreshVagasList()
+        // Limpar formulário após sucesso
+        clearForm()
         
+        // Navegar após um delay para mostrar a mensagem
         setTimeout(() => {
           navigate('/dashboard')
-        }, 2000)
+        }, 1500)
       } else {
-        setMessage('❌ Erro ao criar vaga: Falha na comunicação com o servidor')
+        setMessage('❌ Erro: Vaga não foi criada (retorno nulo)')
       }
     } catch (error: any) {
-      console.error('Erro detalhado ao criar vaga:', error)
+      console.error('❌ Erro detalhado ao criar vaga:', error)
       
       let errorMessage = 'Erro desconhecido ao criar vaga'
       
       if (error?.message) {
-        if (error.message.includes('null value in column "produto"')) {
+        if (error.message.includes('Timeout')) {
+          errorMessage = '⏰ Timeout: A operação demorou muito. Tente novamente.'
+        } else if (error.message.includes('null value in column "produto"')) {
           errorMessage = '❌ Erro de banco de dados: Coluna "produto" não encontrada. Execute o script de migração no Supabase.'
         } else if (error.message.includes('null value in column "celula"')) {
           errorMessage = '❌ Erro: Campo "Célula" é obrigatório e não foi preenchido.'
         } else if (error.message.includes('violates not-null constraint')) {
           errorMessage = '❌ Erro: Algum campo obrigatório não foi preenchido corretamente.'
+        } else if (error.message.includes('JWT')) {
+          errorMessage = '🔐 Erro de autenticação: Faça login novamente.'
+        } else if (error.message.includes('permission')) {
+          errorMessage = '🚫 Erro de permissão: Você não tem permissão para criar vagas.'
         } else {
           errorMessage = `❌ ${error.message}`
         }
@@ -277,6 +302,28 @@ export default function NovaVagaFormWithScraping() {
     setScrapedData(null)
     setScrapingError('')
     setMessage('')
+  }
+
+  const testConnection = async () => {
+    setLoading(true)
+    setMessage('🔍 Testando conexão com Supabase...')
+    
+    try {
+      const result = await testSupabaseConnection()
+      
+      if (result.success) {
+        setMessage(`✅ ${result.message}`)
+        console.log('Teste de conexão bem-sucedido:', result.details)
+      } else {
+        setMessage(`❌ ${result.message}`)
+        console.error('Teste de conexão falhou:', result.details)
+      }
+    } catch (error: any) {
+      setMessage(`❌ Erro no teste: ${error.message}`)
+      console.error('Erro no teste de conexão:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const applyScrapedData = (data: ScrapingResult) => {
@@ -543,14 +590,25 @@ export default function NovaVagaFormWithScraping() {
 
                 {/* Botões */}
                 <div className="flex justify-between space-x-4 pt-6">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={clearForm}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Limpar Formulário
-                  </Button>
+                  <div className="space-x-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={clearForm}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Limpar Formulário
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={testConnection}
+                      disabled={loading}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Testar Conexão
+                    </Button>
+                  </div>
                   <div className="space-x-2">
                     <Button
                       type="button"
@@ -560,7 +618,17 @@ export default function NovaVagaFormWithScraping() {
                       Cancelar
                     </Button>
                     <Button type="submit" disabled={loading}>
-                      {loading ? 'Salvando...' : 'Criar Vaga'}
+                      {loading ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Salvar Vaga
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>

@@ -62,19 +62,29 @@ export async function getVagaById(id: string): Promise<Vaga | null> {
 // Função para criar uma nova vaga
 export async function createVaga(vagaData: VagaFormData, userId: string): Promise<Vaga | null> {
   try {
+    console.log('Iniciando criação de vaga com dados:', vagaData)
+    console.log('User ID:', userId)
+
+    const insertData = {
+      ...vagaData,
+      created_by: userId,
+      updated_by: userId
+    }
+
+    console.log('Dados para inserção:', insertData)
+
     const { data: vaga, error } = await supabase
       .from('vagas')
-      .insert({
-        ...vagaData,
-        created_by: userId,
-        updated_by: userId
-      })
+      .insert(insertData)
       .select()
       .single()
 
     if (error) {
+      console.error('Erro do Supabase:', error)
       throw new Error(error.message)
     }
+
+    console.log('Vaga criada com sucesso:', vaga)
 
     // Disparar evento de atualização
     window.dispatchEvent(new CustomEvent('vaga-created', { detail: vaga }))
@@ -82,7 +92,7 @@ export async function createVaga(vagaData: VagaFormData, userId: string): Promis
     return vaga
   } catch (error) {
     console.error('Erro ao criar vaga:', error)
-    return null
+    throw error // Re-throw para que o componente possa tratar
   }
 }
 
