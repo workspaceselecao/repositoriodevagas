@@ -21,19 +21,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true
     let retryCount = 0
     const maxRetries = 3
+    let hasInitialized = false
 
     // Verificar sessão atual do Supabase com retry
     const checkUser = async () => {
+      if (hasInitialized) return // Evitar múltiplas inicializações
+      
       try {
-        const currentUser = await getCurrentUser()
+        // Primeiro, verificar se já existe uma sessão ativa
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session?.user && isMounted) {
+          // Se há sessão, buscar dados do usuário
+          const currentUser = await getCurrentUser()
+          if (isMounted) {
+            setUser(currentUser)
+            hasInitialized = true
+            setLoading(false)
+            setInitialized(true)
+            return
+          }
+        }
+        
+        // Se não há sessão, limpar estado
         if (isMounted) {
-          setUser(currentUser)
+          setUser(null)
+          hasInitialized = true
+          setLoading(false)
+          setInitialized(true)
         }
       } catch (error) {
         console.error('Erro ao verificar usuário:', error)
         
         // Retry logic para evitar loop infinito
-        if (retryCount < maxRetries && isMounted) {
+        if (retryCount < maxRetries && isMounted && !hasInitialized) {
           retryCount++
           console.log(`Tentativa ${retryCount} de verificar usuário...`)
           setTimeout(checkUser, 1000 * retryCount) // Delay progressivo
@@ -43,13 +64,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Se falhou todas as tentativas, limpar estado
         if (isMounted) {
           setUser(null)
-          // Limpar cache do Supabase
-          await supabase.auth.signOut()
-        }
-      } finally {
-        if (isMounted) {
+          hasInitialized = true
           setLoading(false)
           setInitialized(true)
+          // Limpar cache do Supabase apenas se necessário
+          try {
+            await supabase.auth.signOut()
+          } catch (signOutError) {
+            console.log('Erro ao fazer signOut:', signOutError)
+          }
         }
       }
     }
@@ -59,29 +82,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Escutar mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!isMounted) return
+        if (!isMounted || hasInitialized) return
         
         console.log('Auth state change:', event)
         
         if (event === 'SIGNED_IN' && session) {
           try {
             const currentUser = await getCurrentUser()
-            setUser(currentUser)
+            if (isMounted) {
+              setUser(currentUser)
+              setLoading(false)
+            }
           } catch (error) {
             console.error('Erro ao buscar usuário após login:', error)
-            setUser(null)
+            if (isMounted) {
+              setUser(null)
+              setLoading(false)
+            }
           }
         } else if (event === 'SIGNED_OUT') {
-          setUser(null)
-          // Limpar cache local
-          localStorage.removeItem('sb-' + import.meta.env.VITE_SUPABASE_PROJECT_ID + '-auth-token')
+          if (isMounted) {
+            setUser(null)
+            setLoading(false)
+            // Limpar cache local
+            const supabaseProjectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
+            if (supabaseProjectId) {
+              localStorage.removeItem(`sb-${supabaseProjectId}-auth-token`)
+              localStorage.removeItem(`sb-${supabaseProjectId}-auth-token-code-verifier`)
+            }
+          }
         } else if (event === 'TOKEN_REFRESHED') {
           // Token foi renovado, não precisa fazer nada
           console.log('Token renovado com sucesso')
-        }
-        
-        if (isMounted) {
-          setLoading(false)
         }
       }
     )

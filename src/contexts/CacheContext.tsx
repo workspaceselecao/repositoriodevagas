@@ -365,6 +365,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       const now = Date.now()
       const shouldRefresh = now - cache.lastUpdated > CACHE_EXPIRY
       
+      // Evitar múltiplas execuções simultâneas
       if (shouldRefresh || !cacheStatus.vagas) {
         console.log('👤 Usuário logado, carregando dados...')
         refreshAll()
@@ -372,7 +373,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
         console.log('📦 Usando cache existente')
       }
     }
-  }, [user, loading, cache.lastUpdated, cacheStatus.vagas])
+  }, [user, loading, cache.lastUpdated, cacheStatus.vagas, refreshAll])
 
   // Escutar eventos de atualização de vagas
   useEffect(() => {

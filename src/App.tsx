@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { CacheProvider } from './contexts/CacheContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { useCleanup } from './hooks/useCleanup'
+import LoadingScreen from './components/LoadingScreen'
 import LoginPage from './components/LoginPage'
 import DashboardLayout from './components/DashboardLayout'
 import Dashboard from './components/Dashboard'
@@ -19,14 +20,7 @@ function ProtectedRoute({ children, requireAdmin = false }: { children: React.Re
   const { user, loading } = useAuth()
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent"></div>
-          <p className="text-muted-foreground text-sm">Carregando...</p>
-        </div>
-      </div>
-    )
+    return <LoadingScreen message="Verificando autenticação..." />
   }
 
   if (!user) {
@@ -45,12 +39,9 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent"></div>
-          <p className="text-muted-foreground text-sm">Inicializando aplicação...</p>
-        </div>
-      </div>
+      <LoadingScreen 
+        message={user ? 'Carregando dados...' : 'Inicializando aplicação...'} 
+      />
     )
   }
 
