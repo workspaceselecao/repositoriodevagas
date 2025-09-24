@@ -10,6 +10,7 @@ import { Switch } from './ui/switch'
 import { Textarea } from './ui/textarea'
 import { BackupOptions, BackupLog, Noticia, NoticiaFormData } from '../types/database'
 import { createManualBackup, getBackupLogs } from '../lib/backup'
+import * as XLSX from 'xlsx'
 import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticiaStatus } from '../lib/noticias'
 import { useAuth } from '../contexts/AuthContext'
 import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell } from 'lucide-react'
@@ -76,6 +77,92 @@ export default function Configuracoes() {
       setNoticias(noticiasData)
     } catch (error) {
       console.error('Erro ao carregar notícias:', error)
+    }
+  }
+
+  const generateExcelFromBackup = async (backupData: any): Promise<Buffer> => {
+    const workbook = XLSX.utils.book_new()
+    
+    // Adicionar cada tabela como uma planilha
+    Object.keys(backupData).forEach(tableName => {
+      if (backupData[tableName] && Array.isArray(backupData[tableName])) {
+        const worksheet = XLSX.utils.json_to_sheet(backupData[tableName])
+        XLSX.utils.book_append_sheet(workbook, worksheet, tableName)
+      }
+    })
+    
+    return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
+  }
+
+  const generateCSVFromBackup = async (backupData: any): Promise<string> => {
+    const csvData: string[] = []
+    
+    Object.keys(backupData).forEach(tableName => {
+      if (backupData[tableName] && Array.isArray(backupData[tableName])) {
+        csvData.push(`\n=== ${tableName.toUpperCase()} ===\n`)
+        
+        if (backupData[tableName].length > 0) {
+          // Cabeçalhos
+          const headers = Object.keys(backupData[tableName][0])
+          csvData.push(headers.join(','))
+          
+          // Dados
+          backupData[tableName].forEach((row: any) => {
+            const values = headers.map(header => {
+              const value = row[header]
+              // Escapar vírgulas e aspas
+              if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+                return `"${value.replace(/"/g, '""')}"`
+              }
+              return value || ''
+            })
+            csvData.push(values.join(','))
+          })
+        }
+      }
+    })
+    
+    return csvData.join('\n')
+  }
+
+  const handleDownloadBackup = async (backupLog: BackupLog) => {
+    try {
+      if (!backupLog.backup_data) {
+        setMessage('Dados do backup não disponíveis')
+        return
+      }
+
+      // Gerar arquivo baseado no formato do backup
+      let fileName = backupLog.file_path || `backup_${new Date().toISOString().split('T')[0]}.xlsx`
+      let fileData: any = null
+
+      if (fileName.endsWith('.xlsx')) {
+        fileData = await generateExcelFromBackup(backupLog.backup_data)
+      } else if (fileName.endsWith('.csv')) {
+        fileData = await generateCSVFromBackup(backupLog.backup_data)
+      } else {
+        fileData = JSON.stringify(backupLog.backup_data, null, 2)
+      }
+
+      // Criar blob e fazer download
+      const blob = new Blob([fileData], { 
+        type: fileName.endsWith('.xlsx') ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' :
+              fileName.endsWith('.csv') ? 'text/csv' : 'application/json'
+      })
+      
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      setMessage('Download iniciado com sucesso!')
+    } catch (error) {
+      console.error('Erro ao fazer download do backup:', error)
+      setMessage('Erro ao fazer download do backup')
     }
   }
 
@@ -385,7 +472,12 @@ export default function Configuracoes() {
                        log.status === 'failed' ? 'Falhou' : 'Pendente'}
                     </span>
                     {log.file_path && (
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleDownloadBackup(log)}
+                        title="Baixar backup"
+                      >
                         <Download className="h-3 w-3" />
                       </Button>
                     )}
