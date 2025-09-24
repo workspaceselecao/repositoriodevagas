@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
@@ -15,6 +15,45 @@ export default function ComparativoClientes() {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const [expandedFilters, setExpandedFilters] = useState<{[cliente: string]: boolean}>({})
   const [activeSection, setActiveSection] = useState<string | null>(null)
+  
+  // Refs para controle de rolagem
+  const comparativoRef = useRef<HTMLDivElement>(null)
+  const clientHeadersRef = useRef<HTMLDivElement>(null)
+
+  // Função para rolagem inteligente
+  const scrollToClientHeaders = () => {
+    if (clientHeadersRef.current) {
+      const headerElement = clientHeadersRef.current
+      const headerRect = headerElement.getBoundingClientRect()
+      const windowHeight = window.innerHeight
+      
+      // Calcular posição para mostrar os cabeçalhos dos clientes
+      const scrollPosition = window.scrollY + headerRect.top - 100 // 100px de margem do topo
+      
+      window.scrollTo({
+        top: scrollPosition,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  // Função para rolagem após expandir card
+  const scrollAfterExpand = (expandedElement: HTMLElement) => {
+    setTimeout(() => {
+      const elementRect = expandedElement.getBoundingClientRect()
+      const windowHeight = window.innerHeight
+      
+      // Se o elemento expandido não está visível, rolar para ele
+      if (elementRect.bottom > windowHeight || elementRect.top < 0) {
+        const scrollPosition = window.scrollY + elementRect.top - 120 // Manter cabeçalhos visíveis
+        
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: 'smooth'
+        })
+      }
+    }, 100) // Pequeno delay para permitir animação de expansão
+  }
 
   useEffect(() => {
     let isMounted = true
@@ -43,6 +82,16 @@ export default function ComparativoClientes() {
       newClientFilters[cliente] = clientFilters[cliente] || {}
     })
     setClientFilters(newClientFilters)
+  }, [selectedClientes])
+
+  // Rolagem inicial quando clientes são selecionados
+  useEffect(() => {
+    if (selectedClientes.length > 0) {
+      // Pequeno delay para permitir renderização dos elementos
+      setTimeout(() => {
+        scrollToClientHeaders()
+      }, 200)
+    }
   }, [selectedClientes])
 
 
@@ -84,8 +133,10 @@ export default function ComparativoClientes() {
     }))
   }
 
-  const toggleSection = (section: string) => {
+  const toggleSection = (section: string, event?: React.MouseEvent) => {
     const newExpanded = new Set(expandedSections)
+    const isExpanding = !newExpanded.has(section)
+    
     if (newExpanded.has(section)) {
       newExpanded.delete(section)
       setActiveSection(null) // Nenhuma seção ativa se fechou
@@ -94,6 +145,12 @@ export default function ComparativoClientes() {
       setActiveSection(section) // Definir seção ativa quando expandir
     }
     setExpandedSections(newExpanded)
+    
+    // Rolagem inteligente ao expandir
+    if (isExpanding && event) {
+      const targetElement = event.currentTarget as HTMLElement
+      scrollAfterExpand(targetElement)
+    }
   }
 
   const toggleFilterExpansion = (cliente: string) => {
@@ -439,21 +496,21 @@ export default function ComparativoClientes() {
 
       {/* Comparativo */}
       {selectedClientes.length > 0 && (
-        <div className="space-y-6">
+        <div ref={comparativoRef} className="space-y-4">
           {/* Layout em Colunas com Filtros Acima */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div ref={clientHeadersRef} className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {selectedClientes.map(cliente => {
               const vagasCliente = getVagasByCliente(cliente)
               return (
-                <div key={cliente} className="space-y-4">
+                <div key={cliente} className="space-y-3">
                   {/* Filtros para este Cliente */}
                   {renderClientFilters(cliente)}
 
                   {/* Header da Coluna */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-center text-lg">{cliente}</CardTitle>
-                      <CardDescription className="text-center">
+                  <Card className="py-2">
+                    <CardHeader className="py-3">
+                      <CardTitle className="text-center text-base">{cliente}</CardTitle>
+                      <CardDescription className="text-center text-sm">
                         {vagasCliente.length} vaga(s) encontrada(s)
                       </CardDescription>
                     </CardHeader>
@@ -469,7 +526,7 @@ export default function ComparativoClientes() {
                       </CardContent>
                     </Card>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {[
                         { key: 'descricao', title: 'Descrição da Vaga' },
                         { key: 'responsabilidades', title: 'Responsabilidades e Atribuições' },
@@ -497,12 +554,12 @@ export default function ComparativoClientes() {
                             }`}
                           >
                             <CardHeader 
-                              className={`cursor-pointer transition-colors ${
+                              className={`cursor-pointer transition-colors py-3 ${
                                 isActive 
                                   ? 'bg-primary/5' 
                                   : 'hover:bg-gray-50'
                               }`}
-                              onClick={() => toggleSection(section.key)}
+                              onClick={(e) => toggleSection(section.key, e)}
                             >
                               <div className="flex items-center justify-between">
                                 <CardTitle className={`text-sm transition-colors ${
