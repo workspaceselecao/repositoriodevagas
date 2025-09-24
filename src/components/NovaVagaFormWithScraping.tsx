@@ -11,7 +11,7 @@ import { createVaga, refreshVagasList } from '../lib/vagas'
 import { EnhancedJobScrapingService, ScrapingResult, ScrapingError } from '../lib/enhanced-scraping'
 import { ConfidenceIndicator, FieldConfidenceIndicator, ConfidenceBar } from './ConfidenceIndicator'
 import { testSupabaseConnection, testInsertVaga } from '../lib/test-supabase'
-import { Plus, ArrowLeft, Download, Upload, Edit, Trash2, Save, RefreshCw } from 'lucide-react'
+import { Plus, ArrowLeft, Download, Edit, Trash2, Save, RefreshCw } from 'lucide-react'
 
 export default function NovaVagaFormWithScraping() {
   const [formData, setFormData] = useState<VagaFormData>({
@@ -39,7 +39,6 @@ export default function NovaVagaFormWithScraping() {
   const [scrapedData, setScrapedData] = useState<ScrapingResult | null>(null)
   const [scrapingError, setScrapingError] = useState<string>('')
   const [activeTab, setActiveTab] = useState('manual')
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -194,92 +193,6 @@ export default function NovaVagaFormWithScraping() {
     }
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // Validar tipo de arquivo
-    if (!file.name.toLowerCase().endsWith('.html')) {
-      setScrapingError('⚠️ Por favor, selecione um arquivo HTML válido (.html)')
-      return
-    }
-
-    setScrapingError('')
-    setMessage('Processando arquivo HTML...')
-
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const htmlContent = event.target?.result as string
-      
-      try {
-        console.log('Processando arquivo HTML:', file.name)
-        const htmlResult = EnhancedJobScrapingService.extractFromHTML(htmlContent)
-        const jsonResult = EnhancedJobScrapingService.extractFromJSON(htmlContent)
-        
-        let result: ScrapingResult | null = null
-        if ('message' in htmlResult) {
-          if (jsonResult && !('message' in jsonResult)) {
-            result = jsonResult as ScrapingResult
-            console.log('Usando dados extraídos do JSON do arquivo')
-          } else {
-            setScrapingError(`❌ ${htmlResult.message}`)
-            setMessage('')
-            return
-          }
-        } else {
-          // Combinar resultados HTML e JSON se ambos existirem
-          if (jsonResult && !('message' in jsonResult)) {
-            result = EnhancedJobScrapingService.combineResults(htmlResult, jsonResult, '')
-            console.log('Combinando dados HTML e JSON do arquivo')
-          } else {
-            result = htmlResult as ScrapingResult
-            console.log('Usando dados extraídos do HTML do arquivo')
-          }
-        }
-
-        if (!result) {
-          setScrapingError('❌ Não foi possível extrair dados do arquivo. Verifique se é um arquivo HTML válido de uma vaga do Gupy.')
-          setMessage('')
-          return
-        }
-        
-        console.log('Extração do arquivo bem-sucedida!', result)
-        setScrapedData(result)
-        
-        // Aplicar dados extraídos automaticamente aos campos
-        setFormData(prev => ({
-          ...prev,
-          titulo: result.titulo,
-          descricao_vaga: result.descricao_vaga,
-          responsabilidades_atribuicoes: result.responsabilidades_atribuicoes,
-          requisitos_qualificacoes: result.requisitos_qualificacoes,
-          salario: result.salario,
-          horario_trabalho: result.horario_trabalho,
-          jornada_trabalho: result.jornada_trabalho,
-          beneficios: result.beneficios,
-          local_trabalho: result.local_trabalho,
-          etapas_processo: result.etapas_processo
-        }))
-        
-        const confidenceText = result.confidence >= 80 ? 'Excelente' : 
-                              result.confidence >= 60 ? 'Boa' : 
-                              result.confidence >= 40 ? 'Regular' : 'Baixa'
-        
-        setMessage(`✅ Dados extraídos do arquivo "${file.name}" com sucesso! Assertividade: ${result.confidence}% (${confidenceText}). Revise e ajuste conforme necessário.`)
-      } catch (error: any) {
-        console.error('Erro ao processar arquivo:', error)
-        setScrapingError(`❌ Erro ao processar arquivo: ${error.message}`)
-        setMessage('')
-      }
-    }
-    
-    reader.onerror = () => {
-      setScrapingError('❌ Erro ao ler o arquivo. Verifique se o arquivo não está corrompido.')
-      setMessage('')
-    }
-    
-    reader.readAsText(file)
-  }
 
   const clearForm = () => {
     setFormData({
@@ -340,7 +253,9 @@ export default function NovaVagaFormWithScraping() {
       local_trabalho: data.local_trabalho,
       etapas_processo: data.etapas_processo
     }))
-    setMessage('Dados aplicados ao formulário!')
+    setScrapedData(null)
+    setActiveTab('manual') // Mudar para aba manual
+    setMessage('✅ Dados aplicados ao formulário! Você está na aba de extração manual para revisar e editar.')
   }
 
   const renderFormField = (
@@ -392,15 +307,18 @@ export default function NovaVagaFormWithScraping() {
         </div>
       </div>
 
-      {message && (
-        <div className={`p-4 rounded-md ${
-          message.includes('sucesso') 
-            ? 'bg-green-50 text-green-800 border border-green-200' 
-            : 'bg-red-50 text-red-800 border border-red-200'
-        }`}>
-          {message}
-        </div>
-      )}
+      {/* Mensagem principal - sempre visível no topo */}
+      <div className={`mb-6 p-4 rounded-lg shadow-sm border-l-4 ${
+        message.includes('✅') || message.includes('sucesso')
+          ? 'bg-green-50 text-green-800 border-green-400 border-l-green-500' 
+          : message.includes('❌') || message.includes('erro')
+          ? 'bg-red-50 text-red-800 border-red-400 border-l-red-500'
+          : message.includes('⏳') || message.includes('Testando')
+          ? 'bg-blue-50 text-blue-800 border-blue-400 border-l-blue-500'
+          : 'bg-gray-50 text-gray-800 border-gray-400 border-l-gray-500'
+      }`}>
+        {message || '💡 Preencha os campos obrigatórios e clique em "Salvar Vaga" para criar uma nova vaga.'}
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
@@ -442,70 +360,74 @@ export default function NovaVagaFormWithScraping() {
                     disabled={scrapingLoading || !scrapingUrl.trim()}
                   >
                     {scrapingLoading ? (
-                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                        Extraindo...
+                      </>
                     ) : (
-                      <Download className="h-4 w-4" />
+                      <>
+                        <Download className="h-4 w-4 mr-2" />
+                        Extrair
+                      </>
                     )}
                   </Button>
                 </div>
               </div>
 
-              {/* Upload de arquivo */}
-              <div className="space-y-2">
-                <Label htmlFor="file-upload">Ou faça upload de um arquivo HTML</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".html,.htm"
-                    onChange={handleFileUpload}
-                    className="flex-1"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
 
               {scrapingError && (
-                <div className="p-3 rounded-md bg-red-50 text-red-800 border border-red-200">
-                  {scrapingError}
+                <div className="mt-4 p-4 rounded-lg bg-red-50 text-red-800 border-2 border-red-200 shadow-sm">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm font-medium">{scrapingError}</p>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {scrapedData && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">Dados Extraídos</h3>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <ConfidenceIndicator confidence={scrapedData.confidence} size="sm" />
-                        <span className="text-xs text-gray-500">
-                          Fonte: {scrapedData.source === 'json' ? 'JSON' : scrapedData.source === 'html' ? 'HTML' : 'Mista'}
-                        </span>
+                <div className="mt-6 p-4 bg-green-50 border-2 border-green-200 rounded-lg shadow-sm">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-green-800 flex items-center">
+                          <svg className="h-5 w-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Dados Extraídos com Sucesso!
+                        </h3>
+                        <div className="flex items-center space-x-3 mt-2">
+                          <ConfidenceIndicator confidence={scrapedData.confidence} size="sm" />
+                          <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                            Fonte: {scrapedData.source === 'json' ? 'JSON' : scrapedData.source === 'html' ? 'HTML' : 'Mista'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-x-2">
+                        <Button
+                          size="sm"
+                          onClick={() => applyScrapedData(scrapedData)}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          <Save className="h-4 w-4 mr-1" />
+                          Aplicar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setScrapedData(null)}
+                          className="border-green-300 text-green-700 hover:bg-green-50"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Limpar
+                        </Button>
                       </div>
                     </div>
-                    <div className="space-x-2">
-                      <Button
-                        size="sm"
-                        onClick={() => applyScrapedData(scrapedData)}
-                      >
-                        <Save className="h-4 w-4 mr-1" />
-                        Aplicar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setScrapedData(null)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Limpar
-                      </Button>
-                    </div>
-                  </div>
 
                   {/* Indicador de Confiança Detalhado */}
                   <FieldConfidenceIndicator extractedFields={scrapedData.extractedFields} />
