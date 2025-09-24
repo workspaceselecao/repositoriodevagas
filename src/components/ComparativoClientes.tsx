@@ -108,8 +108,8 @@ export default function ComparativoClientes() {
     if (filters.cargo) {
       filtered = filtered.filter(vaga => vaga.cargo === filters.cargo)
     }
-    if (filters.produto) {
-      filtered = filtered.filter(vaga => vaga.produto === filters.produto)
+    if (filters.celula) {
+      filtered = filtered.filter(vaga => vaga.celula === filters.celula)
     }
 
     return filtered
@@ -440,7 +440,7 @@ export default function ComparativoClientes() {
                                   <div key={vaga.id} className="mb-4 last:mb-0">
                                     {vagasCliente.length > 1 && (
                                       <div className="text-xs text-gray-500 mb-2 font-medium">
-                                        Vaga {index + 1}: {vaga.cargo} - {vaga.produto}
+                                        Vaga {index + 1}: {vaga.cargo} - {vaga.celula}
                                       </div>
                                     )}
                                     {renderVagaContent(vaga, section.key)}
