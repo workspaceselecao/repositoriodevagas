@@ -175,16 +175,16 @@ export class JobScrapingService {
 
       // Mapear campos extraídos
       result.extractedFields = {
-        titulo: { found: !!tituloResult.text, confidence: tituloResult.confidence },
-        descricao_vaga: { found: !!descricaoResult.text, confidence: descricaoResult.confidence },
-        responsabilidades_atribuicoes: { found: !!responsabilidadesResult.text, confidence: responsabilidadesResult.confidence },
-        requisitos_qualificacoes: { found: !!requisitosResult.text, confidence: requisitosResult.confidence },
-        salario: { found: !!salarioResult.text, confidence: salarioResult.confidence },
-        horario_trabalho: { found: !!horarioResult.text, confidence: horarioResult.confidence },
-        jornada_trabalho: { found: !!jornadaResult.text, confidence: jornadaResult.confidence },
-        beneficios: { found: !!beneficiosResult.text, confidence: beneficiosResult.confidence },
-        local_trabalho: { found: !!localResult.text, confidence: localResult.confidence },
-        etapas_processo: { found: !!etapasResult.text, confidence: etapasResult.confidence }
+        titulo: { found: !!tituloResult.text, confidence: tituloResult.confidence, source: 'xpath', rawValue: tituloResult.text, cleanedValue: tituloResult.text },
+        descricao_vaga: { found: !!descricaoResult.text, confidence: descricaoResult.confidence, source: 'xpath', rawValue: descricaoResult.text, cleanedValue: descricaoResult.text },
+        responsabilidades_atribuicoes: { found: !!responsabilidadesResult.text, confidence: responsabilidadesResult.confidence, source: 'xpath', rawValue: responsabilidadesResult.text, cleanedValue: responsabilidadesResult.text },
+        requisitos_qualificacoes: { found: !!requisitosResult.text, confidence: requisitosResult.confidence, source: 'xpath', rawValue: requisitosResult.text, cleanedValue: requisitosResult.text },
+        salario: { found: !!salarioResult.text, confidence: salarioResult.confidence, source: 'xpath', rawValue: salarioResult.text, cleanedValue: salarioResult.text },
+        horario_trabalho: { found: !!horarioResult.text, confidence: horarioResult.confidence, source: 'xpath', rawValue: horarioResult.text, cleanedValue: horarioResult.text },
+        jornada_trabalho: { found: !!jornadaResult.text, confidence: jornadaResult.confidence, source: 'xpath', rawValue: jornadaResult.text, cleanedValue: jornadaResult.text },
+        beneficios: { found: !!beneficiosResult.text, confidence: beneficiosResult.confidence, source: 'xpath', rawValue: beneficiosResult.text, cleanedValue: beneficiosResult.text },
+        local_trabalho: { found: !!localResult.text, confidence: localResult.confidence, source: 'xpath', rawValue: localResult.text, cleanedValue: localResult.text },
+        etapas_processo: { found: !!etapasResult.text, confidence: etapasResult.confidence, source: 'xpath', rawValue: etapasResult.text, cleanedValue: etapasResult.text }
       }
 
       return result as ScrapingResult
