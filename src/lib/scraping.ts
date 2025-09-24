@@ -35,73 +35,71 @@ export interface ScrapingError {
 export class JobScrapingService {
   private static readonly XPATH_PATTERNS = {
     titulo: [
-      '//h1[@id="h1"]',
+      '//h1[@id="h1" and @class="sc-ccd5d36-6 gdqSpl"]',
       '//meta[@property="og:title"]/@content',
       '//title',
-      '//h1[contains(@class, "gdqSpl")]',
-      '//h1[contains(@class, "sc-ccd5d36-6")]'
+      '//h1[@id="h1"]',
+      '//h1[contains(@class, "gdqSpl")]'
     ],
     descricao_vaga: [
-      '//h2[@data-testid="section-Descrição da vaga-title"]/following-sibling::div[@class="sc-add46fb1-3 cOkxvQ"]',
       '//div[@data-testid="text-section" and .//h2[@data-testid="section-Descrição da vaga-title"]]/div[@class="sc-add46fb1-3 cOkxvQ"]',
-      '//h2[contains(text(), "Descrição da vaga")]/following-sibling::div',
-      '//section[.//h2[contains(text(), "Descrição da vaga")]]//div[contains(@class, "cOkxvQ")]'
+      '//h2[@data-testid="section-Descrição da vaga-title"]/following-sibling::div[@class="sc-add46fb1-3 cOkxvQ"]',
+      '//div[@class="sc-add46fb1-3 cOkxvQ" and preceding-sibling::h2[@data-testid="section-Descrição da vaga-title"]]',
+      '//h2[contains(text(), "Descrição da vaga")]/following-sibling::div[@class="sc-add46fb1-3 cOkxvQ"]'
     ],
     responsabilidades_atribuicoes: [
-      '//h2[@data-testid="section-Responsabilidades e atribuições-title"]/following-sibling::div[@class="sc-add46fb1-3 cOkxvQ"]',
       '//div[@data-testid="text-section" and .//h2[@data-testid="section-Responsabilidades e atribuições-title"]]/div[@class="sc-add46fb1-3 cOkxvQ"]',
-      '//h2[contains(text(), "Responsabilidades e atribuições")]/following-sibling::div',
-      '//section[.//h2[contains(text(), "Responsabilidades e atribuições")]]//div[contains(@class, "cOkxvQ")]'
+      '//h2[@data-testid="section-Responsabilidades e atribuições-title"]/following-sibling::div[@class="sc-add46fb1-3 cOkxvQ"]',
+      '//div[@class="sc-add46fb1-3 cOkxvQ" and preceding-sibling::h2[@data-testid="section-Responsabilidades e atribuições-title"]]',
+      '//h2[contains(text(), "Responsabilidades e atribuições")]/following-sibling::div[@class="sc-add46fb1-3 cOkxvQ"]'
     ],
     requisitos_qualificacoes: [
-      '//h2[@data-testid="section-Requisitos e qualificações-title"]/following-sibling::div[@class="sc-add46fb1-3 cOkxvQ"]',
       '//div[@data-testid="text-section" and .//h2[@data-testid="section-Requisitos e qualificações-title"]]/div[@class="sc-add46fb1-3 cOkxvQ"]',
-      '//h2[contains(text(), "Requisitos e qualificações")]/following-sibling::div',
-      '//section[.//h2[contains(text(), "Requisitos e qualificações")]]//div[contains(@class, "cOkxvQ")]'
+      '//h2[@data-testid="section-Requisitos e qualificações-title"]/following-sibling::div[@class="sc-add46fb1-3 cOkxvQ"]',
+      '//div[@class="sc-add46fb1-3 cOkxvQ" and preceding-sibling::h2[@data-testid="section-Requisitos e qualificações-title"]]',
+      '//h2[contains(text(), "Requisitos e qualificações")]/following-sibling::div[@class="sc-add46fb1-3 cOkxvQ"]'
     ],
     salario: [
-      '//p[contains(strong, "Salário")]',
-      '//p[contains(text(), "Salário:")]',
+      '//div[@data-testid="text-section" and .//h2[@data-testid="section-Informações adicionais-title"]]//p[contains(strong, "Salário")]',
       '//div[@class="sc-add46fb1-3 cOkxvQ"]//p[contains(strong, "Salário")]',
-      '//p[contains(text(), "Salário")]',
+      '//p[contains(strong, "Salário")]',
       '//strong[contains(text(), "Salário")]/parent::p',
       '//*[contains(text(), "R$") and contains(text(), ",")]'
     ],
     horario_trabalho: [
-      '//p[contains(strong, "Horário de Trabalho")]/following-sibling::ul/li',
+      '//div[@data-testid="text-section" and .//h2[@data-testid="section-Informações adicionais-title"]]//p[contains(strong, "Horário de Trabalho")]/following-sibling::ul/li',
       '//div[@class="sc-add46fb1-3 cOkxvQ"]//p[contains(strong, "Horário de Trabalho")]/following-sibling::ul/li',
-      '//p[contains(text(), "Horário de Trabalho")]/following-sibling::ul/li',
-      '//strong[contains(text(), "Horário de Trabalho")]/following-sibling::text()',
-      '//*[contains(text(), "20h30") or contains(text(), "21H00") or contains(text(), "22H00")]'
+      '//p[contains(strong, "Horário de Trabalho")]/following-sibling::ul/li',
+      '//strong[contains(text(), "Horário de Trabalho")]/following-sibling::ul/li',
+      '//*[contains(text(), "Das ") and contains(text(), " às ")]'
     ],
     jornada_trabalho: [
-      '//p[contains(strong, "Jornada de Trabalho")]/following-sibling::p',
+      '//div[@data-testid="text-section" and .//h2[@data-testid="section-Informações adicionais-title"]]//p[contains(strong, "Jornada de Trabalho")]/following-sibling::p',
       '//div[@class="sc-add46fb1-3 cOkxvQ"]//p[contains(strong, "Jornada de Trabalho")]/following-sibling::p',
-      '//p[contains(text(), "Jornada de Trabalho")]/following-sibling::p',
+      '//p[contains(strong, "Jornada de Trabalho")]/following-sibling::p',
       '//strong[contains(text(), "Jornada de Trabalho")]/following-sibling::text()',
-      '//*[contains(text(), "180h") or contains(text(), "220h") or contains(text(), "6x1") or contains(text(), "5x2")]'
+      '//*[contains(text(), "h/mês") or contains(text(), "x2") or contains(text(), "x1")]'
     ],
     beneficios: [
-      '//p[contains(strong, "Benefícios")]/following-sibling::ul',
+      '//div[@data-testid="text-section" and .//h2[@data-testid="section-Informações adicionais-title"]]//p[contains(strong, "Benefícios")]/following-sibling::ul',
       '//div[@class="sc-add46fb1-3 cOkxvQ"]//p[contains(strong, "Benefícios")]/following-sibling::ul',
-      '//p[contains(text(), "Benefícios")]/following-sibling::ul',
+      '//p[contains(strong, "Benefícios")]/following-sibling::ul',
       '//strong[contains(text(), "Benefícios")]/following-sibling::ul',
       '//ul[.//li[contains(text(), "Vale Transporte") or contains(text(), "Vale refeição")]]'
     ],
     local_trabalho: [
-      '//p[contains(strong, "Local de trabalho")]',
-      '//p[contains(text(), "Local de trabalho:")]',
+      '//div[@data-testid="text-section" and .//h2[@data-testid="section-Informações adicionais-title"]]//p[contains(strong, "Local de trabalho")]',
       '//div[@class="sc-add46fb1-3 cOkxvQ"]//p[contains(strong, "Local de trabalho")]',
-      '//p[contains(text(), "Local de Trabalho")]',
+      '//p[contains(strong, "Local de trabalho")]',
       '//strong[contains(text(), "Local de trabalho")]/parent::p',
-      '//*[contains(text(), "Praça") or contains(text(), "Avenida") or contains(text(), "Rua")]'
+      '//*[contains(text(), "Av ") or contains(text(), "Rua ") or contains(text(), "Praça ")]'
     ],
     etapas_processo: [
-      '//ol[@data-testid="job-steps-list"]',
+      '//ol[@data-testid="job-steps-list" and @class="sc-97f6c339-0 wTJDe"]',
+      '//div[@data-testid="text-section" and .//h2[@data-testid="section-Etapas do processo-title"]]//ol[@data-testid="job-steps-list"]',
       '//h2[@data-testid="section-Etapas do processo-title"]/following-sibling::ol[@data-testid="job-steps-list"]',
       '//ol[.//li[contains(text(), "Etapa 1:")]]',
-      '//h2[contains(text(), "Etapas do processo")]/following-sibling::ol',
-      '//section[.//h2[contains(text(), "Etapas do processo")]]//ol'
+      '//ol[@class="sc-97f6c339-0 wTJDe"]'
     ]
   }
 
