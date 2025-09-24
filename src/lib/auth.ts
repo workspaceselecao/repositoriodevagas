@@ -180,6 +180,115 @@ export function isAdmin(user: AuthUser | null): boolean {
   return user?.role === 'ADMIN'
 }
 
+// Função para listar todos os usuários (apenas para admins)
+export async function getAllUsers(): Promise<User[]> {
+  try {
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Erro ao buscar usuários:', error)
+      throw new Error(error.message)
+    }
+
+    return users || []
+  } catch (error) {
+    console.error('Erro ao listar usuários:', error)
+    throw error
+  }
+}
+
+// Função para atualizar usuário
+export async function updateUser(userId: string, userData: Partial<UserFormData>): Promise<User | null> {
+  try {
+    const updateData: any = {}
+    
+    if (userData.name) updateData.name = userData.name
+    if (userData.email) updateData.email = userData.email
+    if (userData.role) updateData.role = userData.role
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', userId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Erro ao atualizar usuário:', error)
+      throw new Error(error.message)
+    }
+
+    return user
+  } catch (error) {
+    console.error('Erro ao atualizar usuário:', error)
+    throw error
+  }
+}
+
+// Função para excluir usuário
+export async function deleteUser(userId: string): Promise<boolean> {
+  try {
+    // Verificar se temos Service Key disponível para excluir do Auth
+    const hasServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_KEY && 
+                        import.meta.env.VITE_SUPABASE_SERVICE_KEY !== 'your_supabase_service_role_key_here'
+
+    if (hasServiceKey) {
+      // Excluir do Supabase Auth usando cliente administrativo
+      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+      if (authError) {
+        console.error('Erro ao excluir usuário do Auth:', authError)
+        throw new Error(authError.message)
+      }
+    }
+
+    // Excluir da tabela users
+    const { error: userError } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', userId)
+
+    if (userError) {
+      console.error('Erro ao excluir usuário da tabela:', userError)
+      throw new Error(userError.message)
+    }
+
+    return true
+  } catch (error) {
+    console.error('Erro ao excluir usuário:', error)
+    throw error
+  }
+}
+
+// Função para redefinir senha de usuário
+export async function resetUserPassword(userId: string, newPassword: string): Promise<boolean> {
+  try {
+    const hasServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_KEY && 
+                        import.meta.env.VITE_SUPABASE_SERVICE_KEY !== 'your_supabase_service_role_key_here'
+
+    if (hasServiceKey) {
+      // Redefinir senha usando cliente administrativo
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password: newPassword
+      })
+
+      if (error) {
+        console.error('Erro ao redefinir senha:', error)
+        throw new Error(error.message)
+      }
+
+      return true
+    } else {
+      throw new Error('Service Key não disponível para redefinir senha')
+    }
+  } catch (error) {
+    console.error('Erro ao redefinir senha:', error)
+    throw error
+  }
+}
+
 // Função para verificar se o usuário é RH ou Admin
 export function canManageUsers(user: AuthUser | null): boolean {
   return user?.role === 'ADMIN' || user?.role === 'RH'

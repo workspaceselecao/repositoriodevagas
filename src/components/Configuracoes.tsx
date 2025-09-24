@@ -4,19 +4,12 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { UserFormData, BackupOptions, BackupLog } from '../types/database'
-import { createUser } from '../lib/auth'
+import { BackupOptions, BackupLog } from '../types/database'
 import { createManualBackup, getBackupLogs } from '../lib/backup'
 import { useAuth } from '../contexts/AuthContext'
-import { UserPlus, Download, Database, Users, FileText } from 'lucide-react'
+import { Download, Database, FileText } from 'lucide-react'
 
 export default function Configuracoes() {
-  const [userForm, setUserForm] = useState<UserFormData>({
-    name: '',
-    email: '',
-    password: '',
-    role: 'RH'
-  })
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
     type: 'manual',
     data: {
@@ -44,45 +37,6 @@ export default function Configuracoes() {
     }
   }
 
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setMessage('')
-
-    try {
-      const newUser = await createUser(userForm)
-      if (newUser) {
-        setMessage('Usuário criado com sucesso!')
-        setUserForm({
-          name: '',
-          email: '',
-          password: '',
-          role: 'RH'
-        })
-      } else {
-        setMessage('Erro ao criar usuário')
-      }
-    } catch (error: any) {
-      console.error('Erro detalhado ao criar usuário:', error)
-      let errorMessage = 'Erro ao criar usuário'
-      
-      if (error?.message) {
-        if (error.message.includes('Invalid API key')) {
-          errorMessage = 'Chave de API inválida. Verifique a configuração do Supabase.'
-        } else if (error.message.includes('User already registered')) {
-          errorMessage = 'Este email já está cadastrado no sistema.'
-        } else if (error.message.includes('Password should be at least')) {
-          errorMessage = 'A senha deve ter pelo menos 6 caracteres.'
-        } else {
-          errorMessage = error.message
-        }
-      }
-      
-      setMessage(`Erro ao criar usuário: ${errorMessage}`)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleBackup = async () => {
     if (!user) return
@@ -105,13 +59,6 @@ export default function Configuracoes() {
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setUserForm(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
 
   const handleBackupDataChange = (field: 'vagas' | 'users' | 'backup_logs', checked: boolean) => {
     setBackupOptions(prev => ({
@@ -128,7 +75,7 @@ export default function Configuracoes() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
         <p className="text-gray-600 mt-2">
-          Gerencie usuários e backups do sistema
+          Gerencie backups do sistema e configurações gerais
         </p>
       </div>
 
@@ -142,79 +89,7 @@ export default function Configuracoes() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Cadastro de Usuários */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <UserPlus className="h-5 w-5 mr-2" />
-              Cadastrar Usuário
-            </CardTitle>
-            <CardDescription>
-              Adicione novos usuários ao sistema com permissões específicas
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleCreateUser} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={userForm.name}
-                  onChange={handleInputChange}
-                  placeholder="Nome completo"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={userForm.email}
-                  onChange={handleInputChange}
-                  placeholder="email@exemplo.com"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha Provisória</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={userForm.password}
-                  onChange={handleInputChange}
-                  placeholder="Senha temporária"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Tipo de Usuário</Label>
-                <Select
-                  value={userForm.role}
-                  onValueChange={(value: 'ADMIN' | 'RH') => 
-                    setUserForm(prev => ({ ...prev, role: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="RH">RH - Recursos Humanos</SelectItem>
-                    <SelectItem value="ADMIN">ADMIN - Administrador</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? 'Criando...' : 'Criar Usuário'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 gap-8">
         {/* Backup do Sistema */}
         <Card>
           <CardHeader>

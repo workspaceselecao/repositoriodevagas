@@ -8,6 +8,7 @@ import ListaClientes from './components/ListaClientes'
 import ComparativoClientes from './components/ComparativoClientes'
 import NovaVagaFormWithScraping from './components/NovaVagaFormWithScraping'
 import Configuracoes from './components/Configuracoes'
+import GerenciarUsuarios from './components/GerenciarUsuarios'
 import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
 import Diagnostico from './components/Diagnostico'
@@ -72,6 +73,13 @@ function AppRoutes() {
         <ProtectedRoute>
           <DashboardLayout>
             <NovaVagaFormWithScraping />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/usuarios" element={
+        <ProtectedRoute requireAdmin={true}>
+          <DashboardLayout>
+            <GerenciarUsuarios />
           </DashboardLayout>
         </ProtectedRoute>
       } />
