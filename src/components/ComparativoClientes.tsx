@@ -22,35 +22,52 @@ export default function ComparativoClientes() {
 
   // Função para rolagem inteligente
   const scrollToClientHeaders = () => {
-    if (clientHeadersRef.current) {
-      const headerElement = clientHeadersRef.current
-      const headerRect = headerElement.getBoundingClientRect()
+    console.log('🔄 scrollToClientHeaders chamada')
+    
+    // Tentar encontrar o primeiro cabeçalho de cliente usando seletor CSS
+    const firstClientHeader = document.querySelector('[data-client-header="true"]')
+    
+    if (firstClientHeader) {
+      const headerRect = firstClientHeader.getBoundingClientRect()
       const windowHeight = window.innerHeight
+      
+      console.log('📍 Posição do header:', headerRect.top, 'Window height:', windowHeight)
       
       // Calcular posição para mostrar os cabeçalhos dos clientes
       const scrollPosition = window.scrollY + headerRect.top - 100 // 100px de margem do topo
+      
+      console.log('🎯 Rolando para posição:', scrollPosition)
       
       window.scrollTo({
         top: scrollPosition,
         behavior: 'smooth'
       })
+    } else {
+      console.log('❌ Não foi possível encontrar cabeçalho de cliente')
     }
   }
 
   // Função para rolagem após expandir card
   const scrollAfterExpand = (expandedElement: HTMLElement) => {
+    console.log('🔄 scrollAfterExpand chamada')
     setTimeout(() => {
       const elementRect = expandedElement.getBoundingClientRect()
       const windowHeight = window.innerHeight
+      
+      console.log('📍 Elemento expandido - top:', elementRect.top, 'bottom:', elementRect.bottom, 'window height:', windowHeight)
       
       // Se o elemento expandido não está visível, rolar para ele
       if (elementRect.bottom > windowHeight || elementRect.top < 0) {
         const scrollPosition = window.scrollY + elementRect.top - 120 // Manter cabeçalhos visíveis
         
+        console.log('🎯 Rolando após expandir para posição:', scrollPosition)
+        
         window.scrollTo({
           top: scrollPosition,
           behavior: 'smooth'
         })
+      } else {
+        console.log('✅ Elemento já está visível, não precisa rolar')
       }
     }, 100) // Pequeno delay para permitir animação de expansão
   }
@@ -86,7 +103,9 @@ export default function ComparativoClientes() {
 
   // Rolagem inicial quando clientes são selecionados
   useEffect(() => {
+    console.log('👀 useEffect rolagem inicial - selectedClientes:', selectedClientes)
     if (selectedClientes.length > 0) {
+      console.log('⏰ Agendando rolagem em 200ms...')
       // Pequeno delay para permitir renderização dos elementos
       setTimeout(() => {
         scrollToClientHeaders()
@@ -456,10 +475,15 @@ export default function ComparativoClientes() {
             </div>
           )}
         </div>
-        <Button variant="outline" onClick={clearAllFilters}>
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Limpar Filtros
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={clearAllFilters}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Limpar Filtros
+          </Button>
+          <Button variant="outline" onClick={scrollToClientHeaders}>
+            🔄 Testar Rolagem
+          </Button>
+        </div>
       </div>
 
       {/* Seleção de Clientes */}
@@ -498,7 +522,7 @@ export default function ComparativoClientes() {
       {selectedClientes.length > 0 && (
         <div ref={comparativoRef} className="space-y-4">
           {/* Layout em Colunas com Filtros Acima */}
-          <div ref={clientHeadersRef} className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {selectedClientes.map(cliente => {
               const vagasCliente = getVagasByCliente(cliente)
               return (
@@ -507,7 +531,11 @@ export default function ComparativoClientes() {
                   {renderClientFilters(cliente)}
 
                   {/* Header da Coluna */}
-                  <Card className="py-2">
+                  <Card 
+                    ref={selectedClientes.indexOf(cliente) === 0 ? clientHeadersRef : null} 
+                    data-client-header={selectedClientes.indexOf(cliente) === 0 ? "true" : "false"}
+                    className="py-2"
+                  >
                     <CardHeader className="py-3">
                       <CardTitle className="text-center text-base">{cliente}</CardTitle>
                       <CardDescription className="text-center text-sm">
