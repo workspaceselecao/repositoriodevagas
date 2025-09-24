@@ -163,6 +163,9 @@ export async function testSupabaseConnection(): Promise<TestResult> {
 export async function testInsertVaga(testData: any): Promise<TestResult> {
   try {
     console.log('🧪 Testando inserção de dados...')
+    console.log('📊 Dados de teste:', testData)
+    
+    const startTime = Date.now()
     
     const { data, error } = await supabase
       .from('vagas')
@@ -170,7 +173,11 @@ export async function testInsertVaga(testData: any): Promise<TestResult> {
       .select()
       .single()
 
+    const endTime = Date.now()
+    console.log(`⏱️ Inserção concluída em ${endTime - startTime}ms`)
+
     if (error) {
+      console.error('❌ Erro na inserção:', error)
       return {
         success: false,
         message: `Erro na inserção: ${error.message}`,
@@ -178,11 +185,19 @@ export async function testInsertVaga(testData: any): Promise<TestResult> {
       }
     }
 
+    console.log('✅ Inserção bem-sucedida:', data)
+
     // Limpar dados de teste
-    await supabase
+    const { error: deleteError } = await supabase
       .from('vagas')
       .delete()
       .eq('id', data.id)
+
+    if (deleteError) {
+      console.warn('⚠️ Erro ao limpar dados de teste:', deleteError)
+    } else {
+      console.log('🧹 Dados de teste removidos')
+    }
 
     return {
       success: true,
@@ -191,9 +206,35 @@ export async function testInsertVaga(testData: any): Promise<TestResult> {
     }
 
   } catch (error: any) {
+    console.error('💥 Erro no teste de inserção:', error)
     return {
       success: false,
       message: `Erro no teste de inserção: ${error.message}`,
+      details: error
+    }
+  }
+}
+
+// Função para testar inserção com dados reais do formulário
+export async function testRealInsert(): Promise<TestResult> {
+  try {
+    console.log('🧪 Testando inserção com dados reais...')
+    
+    const testData = {
+      site: 'TESTE',
+      categoria: 'TESTE',
+      cargo: 'TESTE',
+      cliente: 'TESTE',
+      celula: 'TESTE',
+      titulo: 'Teste de inserção real'
+    }
+
+    return await testInsertVaga(testData)
+
+  } catch (error: any) {
+    return {
+      success: false,
+      message: `Erro no teste real: ${error.message}`,
       details: error
     }
   }

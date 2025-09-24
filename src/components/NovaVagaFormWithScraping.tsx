@@ -10,7 +10,7 @@ import { VagaFormData } from '../types/database'
 import { createVaga, refreshVagasList } from '../lib/vagas'
 import { EnhancedJobScrapingService, ScrapingResult, ScrapingError } from '../lib/enhanced-scraping'
 import { ConfidenceIndicator, FieldConfidenceIndicator, ConfidenceBar } from './ConfidenceIndicator'
-import { testSupabaseConnection, testInsertVaga } from '../lib/test-supabase'
+import { testSupabaseConnection, testInsertVaga, testRealInsert } from '../lib/test-supabase'
 import { Plus, ArrowLeft, Download, Edit, Trash2, Save, RefreshCw } from 'lucide-react'
 
 export default function NovaVagaFormWithScraping() {
@@ -71,9 +71,9 @@ export default function NovaVagaFormWithScraping() {
       
       setMessage('⏳ Salvando vaga no banco de dados...')
       
-      // Timeout para evitar loops infinitos
+      // Timeout para evitar loops infinitos (aumentado para 60 segundos)
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout: Operação demorou muito para responder')), 30000)
+        setTimeout(() => reject(new Error('Timeout: Operação demorou muito para responder')), 60000)
       })
       
       const createPromise = createVaga(formData, user.id)
@@ -95,26 +95,37 @@ export default function NovaVagaFormWithScraping() {
         setMessage('❌ Erro: Vaga não foi criada (retorno nulo)')
       }
     } catch (error: any) {
-      console.error('❌ Erro detalhado ao criar vaga:', error)
+      console.error('💥 [handleSubmit] Erro detalhado ao criar vaga:', error)
+      console.error('💥 [handleSubmit] Tipo do erro:', typeof error)
+      console.error('💥 [handleSubmit] Stack trace:', error.stack)
       
       let errorMessage = 'Erro desconhecido ao criar vaga'
       
       if (error?.message) {
+        console.log('📝 [handleSubmit] Mensagem do erro:', error.message)
+        
         if (error.message.includes('Timeout')) {
-          errorMessage = '⏰ Timeout: A operação demorou muito. Tente novamente.'
+          errorMessage = '⏰ Timeout: A operação demorou muito. Verifique sua conexão e tente novamente.'
         } else if (error.message.includes('null value in column "produto"')) {
           errorMessage = '❌ MIGRAÇÃO NECESSÁRIA: O banco ainda usa coluna "produto". Execute o script "migrate-produto-to-celula.sql" no Supabase SQL Editor.'
         } else if (error.message.includes('null value in column "celula"')) {
           errorMessage = '❌ Erro: Campo "Célula" é obrigatório e não foi preenchido.'
         } else if (error.message.includes('violates not-null constraint')) {
           errorMessage = '❌ Erro: Algum campo obrigatório não foi preenchido corretamente.'
-        } else if (error.message.includes('JWT')) {
+        } else if (error.message.includes('JWT') || error.message.includes('auth')) {
           errorMessage = '🔐 Erro de autenticação: Faça login novamente.'
-        } else if (error.message.includes('permission')) {
+        } else if (error.message.includes('permission') || error.message.includes('policy')) {
           errorMessage = '🚫 Erro de permissão: Você não tem permissão para criar vagas.'
-        } else {
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = '🌐 Erro de rede: Verifique sua conexão com a internet.'
+        } else if (error.message.includes('Campos obrigatórios não preenchidos')) {
           errorMessage = `❌ ${error.message}`
+        } else {
+          errorMessage = `❌ Erro inesperado: ${error.message}`
         }
+      } else {
+        console.error('❌ [handleSubmit] Erro sem mensagem:', error)
+        errorMessage = '❌ Erro desconhecido. Verifique o console para mais detalhes.'
       }
       
       setMessage(errorMessage)
@@ -234,6 +245,28 @@ export default function NovaVagaFormWithScraping() {
     } catch (error: any) {
       setMessage(`❌ Erro no teste: ${error.message}`)
       console.error('Erro no teste de conexão:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const testInsert = async () => {
+    setLoading(true)
+    setMessage('🧪 Testando inserção no banco de dados...')
+    
+    try {
+      const result = await testRealInsert()
+      
+      if (result.success) {
+        setMessage(`✅ ${result.message}`)
+        console.log('Teste de inserção bem-sucedido:', result.details)
+      } else {
+        setMessage(`❌ ${result.message}`)
+        console.error('Teste de inserção falhou:', result.details)
+      }
+    } catch (error: any) {
+      setMessage(`❌ Erro no teste de inserção: ${error.message}`)
+      console.error('Erro no teste de inserção:', error)
     } finally {
       setLoading(false)
     }
@@ -530,6 +563,15 @@ export default function NovaVagaFormWithScraping() {
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Testar Conexão
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={testInsert}
+                      disabled={loading}
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      Testar Inserção
                     </Button>
                   </div>
                   <div className="space-x-2">

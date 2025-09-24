@@ -62,8 +62,17 @@ export async function getVagaById(id: string): Promise<Vaga | null> {
 // Função para criar uma nova vaga
 export async function createVaga(vagaData: VagaFormData, userId: string): Promise<Vaga | null> {
   try {
-    console.log('Iniciando criação de vaga com dados:', vagaData)
-    console.log('User ID:', userId)
+    console.log('🔍 [createVaga] Iniciando criação de vaga')
+    console.log('📊 [createVaga] Dados recebidos:', vagaData)
+    console.log('👤 [createVaga] User ID:', userId)
+
+    // Validar dados obrigatórios
+    const requiredFields = ['site', 'categoria', 'cargo', 'cliente', 'celula']
+    const missingFields = requiredFields.filter(field => !vagaData[field as keyof VagaFormData]?.trim())
+    
+    if (missingFields.length > 0) {
+      throw new Error(`Campos obrigatórios não preenchidos: ${missingFields.join(', ')}`)
+    }
 
     const insertData = {
       ...vagaData,
@@ -71,27 +80,35 @@ export async function createVaga(vagaData: VagaFormData, userId: string): Promis
       updated_by: userId
     }
 
-    console.log('Dados para inserção:', insertData)
+    console.log('💾 [createVaga] Dados para inserção:', insertData)
+    console.log('🌐 [createVaga] Iniciando inserção no Supabase...')
 
+    const startTime = Date.now()
+    
     const { data: vaga, error } = await supabase
       .from('vagas')
       .insert(insertData)
       .select()
       .single()
 
+    const endTime = Date.now()
+    console.log(`⏱️ [createVaga] Operação concluída em ${endTime - startTime}ms`)
+
     if (error) {
-      console.error('Erro do Supabase:', error)
-      throw new Error(error.message)
+      console.error('❌ [createVaga] Erro do Supabase:', error)
+      console.error('❌ [createVaga] Código do erro:', error.code)
+      console.error('❌ [createVaga] Detalhes do erro:', error.details)
+      throw new Error(`Erro do banco de dados: ${error.message}`)
     }
 
-    console.log('Vaga criada com sucesso:', vaga)
+    console.log('✅ [createVaga] Vaga criada com sucesso:', vaga)
 
     // Disparar evento de atualização
     window.dispatchEvent(new CustomEvent('vaga-created', { detail: vaga }))
 
     return vaga
   } catch (error) {
-    console.error('Erro ao criar vaga:', error)
+    console.error('💥 [createVaga] Erro geral:', error)
     throw error // Re-throw para que o componente possa tratar
   }
 }
