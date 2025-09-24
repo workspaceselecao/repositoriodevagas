@@ -22,7 +22,9 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className={`flex items-center border-b ${
+          isCollapsed ? "justify-center p-4" : "justify-between p-4"
+        }`}>
           {!isCollapsed ? (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
@@ -33,24 +35,30 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
               </h2>
             </div>
           ) : (
-            <div className="flex justify-center">
+            <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">RV</span>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                className="h-8 w-8 hover:bg-primary/10 transition-colors"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggle}
-            className="h-8 w-8 hover:bg-primary/10 transition-colors"
-          >
-            {isCollapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
+          {!isCollapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggle}
+              className="h-8 w-8 hover:bg-primary/10 transition-colors"
+            >
               <ChevronLeft className="h-4 w-4" />
-            )}
-          </Button>
+            </Button>
+          )}
         </div>
 
         {/* Navigation */}
@@ -76,8 +84,8 @@ const SidebarItem = React.forwardRef<HTMLDivElement, SidebarItemProps>(
       <div
         ref={ref}
         className={cn(
-          "flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-primary/10 hover:shadow-sm group",
-          isCollapsed ? "justify-center" : "justify-start",
+          "flex items-center rounded-xl transition-all duration-200 hover:bg-primary/10 hover:shadow-sm group",
+          isCollapsed ? "justify-center px-2 py-3" : "justify-start px-3 py-2.5",
           className
         )}
       >

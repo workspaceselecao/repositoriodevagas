@@ -92,8 +92,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       variant={isActiveItem ? "default" : "ghost"}
                       className={`w-full transition-all duration-200 ${
                         isCollapsed 
-                          ? "justify-center px-2" 
-                          : "justify-start"
+                          ? "justify-center p-2" 
+                          : "justify-start px-3 py-2"
                       } ${
                         isActiveItem 
                           ? "bg-primary text-primary-foreground shadow-md" 
@@ -102,7 +102,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       onClick={() => navigate(item.href)}
                     >
                       <Icon className="h-4 w-4" />
-                      {!isCollapsed && <span className="ml-2">{item.label}</span>}
+                      {!isCollapsed && <span className="ml-3 text-sm font-medium">{item.label}</span>}
                     </Button>
                   </TooltipTrigger>
                   {isCollapsed && (
@@ -117,27 +117,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           
           <div className="mt-auto p-4 space-y-2">
             <SidebarItem isCollapsed={isCollapsed}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className={`w-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 ${
-                      isCollapsed 
-                        ? "justify-center px-2" 
-                        : "justify-start"
-                    }`}
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    {!isCollapsed && <span className="ml-2">Sair</span>}
-                  </Button>
-                </TooltipTrigger>
-                {isCollapsed && (
-                  <TooltipContent side="right" className="ml-2">
-                    <p>Sair</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={`w-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 ${
+                        isCollapsed 
+                          ? "justify-center p-2" 
+                          : "justify-start px-3 py-2"
+                      }`}
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      {!isCollapsed && <span className="ml-3 text-sm font-medium">Sair</span>}
+                    </Button>
+                  </TooltipTrigger>
+                  {isCollapsed && (
+                    <TooltipContent side="right" className="ml-2">
+                      <p>Sair</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
             </SidebarItem>
           </div>
         </Sidebar>
