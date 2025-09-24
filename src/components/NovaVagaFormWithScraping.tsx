@@ -88,14 +88,30 @@ export default function NovaVagaFormWithScraping() {
 
     setScrapingLoading(true)
     setScrapingError('')
+    setMessage('Iniciando extração de dados...')
 
     try {
+      console.log('Iniciando extração de URL:', scrapingUrl)
       const result = await EnhancedJobScrapingService.extractFromURL(scrapingUrl)
       
       if ('message' in result) {
-        setScrapingError(`${result.message} (Código: ${result.code})`)
+        let errorMessage = result.message
+        
+        // Melhorar mensagens de erro específicas
+        if (result.code === 'CORS_ERROR') {
+          errorMessage = '🚫 Erro de CORS: Não foi possível acessar a URL diretamente. Tente fazer upload do arquivo HTML ou use uma URL diferente.'
+        } else if (result.code === 'NETWORK_ERROR') {
+          errorMessage = '🌐 Erro de rede: Verifique sua conexão e tente novamente. Se o problema persistir, faça upload do arquivo HTML.'
+        } else if (result.code === 'VALIDATION_ERROR') {
+          errorMessage = '⚠️ URL inválida: Certifique-se de que a URL é do domínio gupy.io'
+        }
+        
+        setScrapingError(`${errorMessage} (Código: ${result.code})`)
+        setMessage('')
       } else {
+        console.log('Extração bem-sucedida!', result)
         setScrapedData(result)
+        
         // Aplicar dados extraídos automaticamente aos campos
         setFormData(prev => ({
           ...prev,
@@ -110,10 +126,17 @@ export default function NovaVagaFormWithScraping() {
           local_trabalho: result.local_trabalho,
           etapas_processo: result.etapas_processo
         }))
-        setMessage(`Dados extraídos com sucesso! Assertividade: ${result.confidence}%. Revise e ajuste conforme necessário.`)
+        
+        const confidenceText = result.confidence >= 80 ? 'Excelente' : 
+                              result.confidence >= 60 ? 'Boa' : 
+                              result.confidence >= 40 ? 'Regular' : 'Baixa'
+        
+        setMessage(`✅ Dados extraídos com sucesso! Assertividade: ${result.confidence}% (${confidenceText}). Revise e ajuste conforme necessário.`)
       }
     } catch (error: any) {
-      setScrapingError(`Erro ao extrair dados: ${error.message}`)
+      console.error('Erro inesperado:', error)
+      setScrapingError(`❌ Erro inesperado ao extrair dados: ${error.message}`)
+      setMessage('')
     } finally {
       setScrapingLoading(false)
     }
@@ -123,11 +146,21 @@ export default function NovaVagaFormWithScraping() {
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Validar tipo de arquivo
+    if (!file.name.toLowerCase().endsWith('.html')) {
+      setScrapingError('⚠️ Por favor, selecione um arquivo HTML válido (.html)')
+      return
+    }
+
+    setScrapingError('')
+    setMessage('Processando arquivo HTML...')
+
     const reader = new FileReader()
     reader.onload = (event) => {
       const htmlContent = event.target?.result as string
       
       try {
+        console.log('Processando arquivo HTML:', file.name)
         const htmlResult = EnhancedJobScrapingService.extractFromHTML(htmlContent)
         const jsonResult = EnhancedJobScrapingService.extractFromJSON(htmlContent)
         
@@ -135,25 +168,32 @@ export default function NovaVagaFormWithScraping() {
         if ('message' in htmlResult) {
           if (jsonResult && !('message' in jsonResult)) {
             result = jsonResult as ScrapingResult
+            console.log('Usando dados extraídos do JSON do arquivo')
           } else {
-            setScrapingError(htmlResult.message)
+            setScrapingError(`❌ ${htmlResult.message}`)
+            setMessage('')
             return
           }
         } else {
           // Combinar resultados HTML e JSON se ambos existirem
           if (jsonResult && !('message' in jsonResult)) {
             result = EnhancedJobScrapingService.combineResults(htmlResult, jsonResult, '')
+            console.log('Combinando dados HTML e JSON do arquivo')
           } else {
             result = htmlResult as ScrapingResult
+            console.log('Usando dados extraídos do HTML do arquivo')
           }
         }
 
         if (!result) {
-          setScrapingError('Não foi possível extrair dados do arquivo')
+          setScrapingError('❌ Não foi possível extrair dados do arquivo. Verifique se é um arquivo HTML válido de uma vaga do Gupy.')
+          setMessage('')
           return
         }
         
+        console.log('Extração do arquivo bem-sucedida!', result)
         setScrapedData(result)
+        
         // Aplicar dados extraídos automaticamente aos campos
         setFormData(prev => ({
           ...prev,
@@ -168,10 +208,22 @@ export default function NovaVagaFormWithScraping() {
           local_trabalho: result.local_trabalho,
           etapas_processo: result.etapas_processo
         }))
-        setMessage(`Dados extraídos do arquivo com sucesso! Assertividade: ${result.confidence}%. Revise e ajuste conforme necessário.`)
+        
+        const confidenceText = result.confidence >= 80 ? 'Excelente' : 
+                              result.confidence >= 60 ? 'Boa' : 
+                              result.confidence >= 40 ? 'Regular' : 'Baixa'
+        
+        setMessage(`✅ Dados extraídos do arquivo "${file.name}" com sucesso! Assertividade: ${result.confidence}% (${confidenceText}). Revise e ajuste conforme necessário.`)
       } catch (error: any) {
-        setScrapingError(`Erro ao processar arquivo: ${error.message}`)
+        console.error('Erro ao processar arquivo:', error)
+        setScrapingError(`❌ Erro ao processar arquivo: ${error.message}`)
+        setMessage('')
       }
+    }
+    
+    reader.onerror = () => {
+      setScrapingError('❌ Erro ao ler o arquivo. Verifique se o arquivo não está corrompido.')
+      setMessage('')
     }
     
     reader.readAsText(file)

@@ -489,12 +489,41 @@ export class EnhancedJobScrapingService {
 
       return await response.text()
     } catch (error) {
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        return {
-          message: 'Erro de CORS: Não foi possível acessar a URL. Tente fazer upload do arquivo HTML.',
-          code: 'CORS_ERROR'
+      // Se der erro de CORS ou rede, tentar usar proxy
+      if (error instanceof TypeError && 
+          (error.message.includes('fetch') || 
+           error.message.includes('CORS') || 
+           error.message.includes('Failed to fetch') ||
+           error.message.includes('ERR_FAILED'))) {
+        
+        console.log('Tentando usar proxy para contornar CORS...')
+        
+        try {
+          const proxyUrl = `/api/proxy-scrape?url=${encodeURIComponent(url)}`
+          const proxyResponse = await fetch(proxyUrl)
+          
+          if (!proxyResponse.ok) {
+            const errorText = await proxyResponse.text()
+            console.error('Erro no proxy:', errorText)
+            return {
+              message: `Erro no proxy (${proxyResponse.status}): ${errorText}. Tente fazer upload do arquivo HTML.`,
+              code: 'NETWORK_ERROR'
+            }
+          }
+
+          const htmlContent = await proxyResponse.text()
+          console.log('Proxy funcionou! HTML recebido via proxy.')
+          return htmlContent
+          
+        } catch (proxyError) {
+          console.error('Erro no proxy:', proxyError)
+          return {
+            message: 'Erro de CORS: Não foi possível acessar a URL. Tente fazer upload do arquivo HTML.',
+            code: 'CORS_ERROR'
+          }
         }
       }
+      
       return {
         message: `Erro de rede: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
         code: 'NETWORK_ERROR'
