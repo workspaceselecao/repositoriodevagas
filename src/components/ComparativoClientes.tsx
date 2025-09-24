@@ -55,11 +55,12 @@ export default function ComparativoClientes() {
   }
 
   const handleClientFilterChange = (cliente: string, key: keyof VagaFilter, value: string) => {
+    const newValue = value === 'all' ? undefined : value
     setClientFilters(prev => ({
       ...prev,
       [cliente]: {
         ...prev[cliente],
-        [key]: value === 'all' ? undefined : value
+        [key]: newValue
       }
     }))
   }
@@ -118,19 +119,26 @@ export default function ComparativoClientes() {
   const getUniqueValuesForCliente = (cliente: string, field: keyof Vaga, appliedFilters?: VagaFilter) => {
     let vagasCliente = allVagas.filter(vaga => vaga.cliente === cliente)
     
-    // Aplicar filtros condicionais
+    // Aplicar filtros condicionais em ordem hierárquica
     if (appliedFilters) {
-      if (appliedFilters.site) {
-        vagasCliente = vagasCliente.filter(vaga => vaga.site === appliedFilters.site)
+      // 1. Célula é o filtro principal - sempre aplicado primeiro
+      if (appliedFilters.celula) {
+        vagasCliente = vagasCliente.filter(vaga => vaga.celula === appliedFilters.celula)
       }
-      if (appliedFilters.categoria) {
-        vagasCliente = vagasCliente.filter(vaga => vaga.categoria === appliedFilters.categoria)
-      }
+      
+      // 2. Cargo (depende da célula)
       if (appliedFilters.cargo) {
         vagasCliente = vagasCliente.filter(vaga => vaga.cargo === appliedFilters.cargo)
       }
-      if (appliedFilters.celula) {
-        vagasCliente = vagasCliente.filter(vaga => vaga.celula === appliedFilters.celula)
+      
+      // 3. Site (depende de célula e cargo)
+      if (appliedFilters.site) {
+        vagasCliente = vagasCliente.filter(vaga => vaga.site === appliedFilters.site)
+      }
+      
+      // 4. Categoria (depende de célula, cargo e site)
+      if (appliedFilters.categoria) {
+        vagasCliente = vagasCliente.filter(vaga => vaga.categoria === appliedFilters.categoria)
       }
     }
     
@@ -164,17 +172,19 @@ export default function ComparativoClientes() {
     const filters = clientFilters[cliente] || {}
     const isExpanded = expandedFilters[cliente] || false
 
-    // Calcular filtros condicionais
-    const sitesDisponiveis = getUniqueValuesForCliente(cliente, 'site')
-    const categoriasDisponiveis = getUniqueValuesForCliente(cliente, 'categoria', { site: filters.site })
+    // Calcular filtros condicionais - CÉLULA é o filtro principal
+    const celulasDisponiveis = getUniqueValuesForCliente(cliente, 'celula')
     const cargosDisponiveis = getUniqueValuesForCliente(cliente, 'cargo', { 
-      site: filters.site, 
-      categoria: filters.categoria 
+      celula: filters.celula 
     })
-    const celulasDisponiveis = getUniqueValuesForCliente(cliente, 'celula', { 
-      site: filters.site, 
-      categoria: filters.categoria, 
+    const sitesDisponiveis = getUniqueValuesForCliente(cliente, 'site', { 
+      celula: filters.celula,
       cargo: filters.cargo 
+    })
+    const categoriasDisponiveis = getUniqueValuesForCliente(cliente, 'categoria', { 
+      celula: filters.celula,
+      cargo: filters.cargo,
+      site: filters.site 
     })
 
     return (
@@ -207,25 +217,26 @@ export default function ComparativoClientes() {
         {isExpanded && (
           <CardContent>
             <div className="space-y-4">
-              {/* Célula */}
+              {/* Célula - Filtro Principal */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Célula</label>
+                <label className="text-sm font-medium flex items-center">
+                  Célula
+                  <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Principal</span>
+                </label>
                 <Select 
                   value={filters.celula || 'all'} 
                   onValueChange={(value) => {
-                    handleClientFilterChange(cliente, 'celula', value)
-                    // Limpar filtros dependentes quando célula muda
-                    if (value !== 'all') {
-                      setClientFilters(prev => ({
-                        ...prev,
-                        [cliente]: {
-                          celula: value === 'all' ? undefined : value,
-                          cargo: undefined,
-                          site: undefined,
-                          categoria: undefined
-                        }
-                      }))
-                    }
+                    const newValue = value === 'all' ? undefined : value
+                    // Limpar TODOS os filtros dependentes quando célula muda
+                    setClientFilters(prev => ({
+                      ...prev,
+                      [cliente]: {
+                        celula: newValue,
+                        cargo: undefined,
+                        site: undefined,
+                        categoria: undefined
+                      }
+                    }))
                   }}
                 >
                   <SelectTrigger>
@@ -240,25 +251,26 @@ export default function ComparativoClientes() {
                 </Select>
               </div>
 
-              {/* Cargo */}
+              {/* Cargo - Depende da Célula */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Cargo</label>
+                <label className="text-sm font-medium flex items-center">
+                  Cargo
+                  <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Depende da Célula</span>
+                </label>
                 <Select 
                   value={filters.cargo || 'all'} 
                   onValueChange={(value) => {
-                    handleClientFilterChange(cliente, 'cargo', value)
+                    const newValue = value === 'all' ? undefined : value
                     // Limpar filtros dependentes quando cargo muda
-                    if (value !== 'all') {
-                      setClientFilters(prev => ({
-                        ...prev,
-                        [cliente]: {
-                          ...prev[cliente],
-                          cargo: value === 'all' ? undefined : value,
-                          site: undefined,
-                          categoria: undefined
-                        }
-                      }))
-                    }
+                    setClientFilters(prev => ({
+                      ...prev,
+                      [cliente]: {
+                        ...prev[cliente],
+                        cargo: newValue,
+                        site: undefined,
+                        categoria: undefined
+                      }
+                    }))
                   }}
                 >
                   <SelectTrigger>
@@ -266,31 +278,38 @@ export default function ComparativoClientes() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Cargos</SelectItem>
-                    {cargosDisponiveis.map(cargo => (
-                      <SelectItem key={cargo} value={cargo}>{cargo}</SelectItem>
-                    ))}
+                    {cargosDisponiveis.length > 0 ? (
+                      cargosDisponiveis.map(cargo => (
+                        <SelectItem key={cargo} value={cargo}>{cargo}</SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-data" disabled>
+                        {filters.celula ? 'Nenhum cargo disponível para esta célula' : 'Selecione uma célula primeiro'}
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Site */}
+              {/* Site - Depende da Célula e Cargo */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Site</label>
+                <label className="text-sm font-medium flex items-center">
+                  Site
+                  <span className="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">Depende da Célula + Cargo</span>
+                </label>
                 <Select 
                   value={filters.site || 'all'} 
                   onValueChange={(value) => {
-                    handleClientFilterChange(cliente, 'site', value)
+                    const newValue = value === 'all' ? undefined : value
                     // Limpar filtros dependentes quando site muda
-                    if (value !== 'all') {
-                      setClientFilters(prev => ({
-                        ...prev,
-                        [cliente]: {
-                          ...prev[cliente],
-                          site: value === 'all' ? undefined : value,
-                          categoria: undefined
-                        }
-                      }))
-                    }
+                    setClientFilters(prev => ({
+                      ...prev,
+                      [cliente]: {
+                        ...prev[cliente],
+                        site: newValue,
+                        categoria: undefined
+                      }
+                    }))
                   }}
                 >
                   <SelectTrigger>
@@ -298,16 +317,25 @@ export default function ComparativoClientes() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Sites</SelectItem>
-                    {sitesDisponiveis.map(site => (
-                      <SelectItem key={site} value={site}>{site}</SelectItem>
-                    ))}
+                    {sitesDisponiveis.length > 0 ? (
+                      sitesDisponiveis.map(site => (
+                        <SelectItem key={site} value={site}>{site}</SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-data" disabled>
+                        {filters.celula || filters.cargo ? 'Nenhum site disponível' : 'Selecione célula e cargo primeiro'}
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Categoria */}
+              {/* Categoria - Depende de todos os outros */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Categoria</label>
+                <label className="text-sm font-medium flex items-center">
+                  Categoria
+                  <span className="ml-2 px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">Depende de todos</span>
+                </label>
                 <Select 
                   value={filters.categoria || 'all'} 
                   onValueChange={(value) => handleClientFilterChange(cliente, 'categoria', value)}
@@ -317,9 +345,15 @@ export default function ComparativoClientes() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas as Categorias</SelectItem>
-                    {categoriasDisponiveis.map(categoria => (
-                      <SelectItem key={categoria} value={categoria}>{categoria}</SelectItem>
-                    ))}
+                    {categoriasDisponiveis.length > 0 ? (
+                      categoriasDisponiveis.map(categoria => (
+                        <SelectItem key={categoria} value={categoria}>{categoria}</SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-data" disabled>
+                        {filters.celula || filters.cargo || filters.site ? 'Nenhuma categoria disponível' : 'Selecione outros filtros primeiro'}
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
