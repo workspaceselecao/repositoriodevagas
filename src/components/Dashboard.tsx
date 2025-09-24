@@ -19,7 +19,8 @@ import {
   CheckCircle2,
   XCircle,
   RefreshCw,
-  Download
+  Download,
+  AlertTriangle
 } from 'lucide-react'
 
 export default function Dashboard() {
@@ -40,6 +41,31 @@ export default function Dashboard() {
       }
     } else {
       alert('Você está usando a versão mais recente!')
+    }
+  }
+
+  // Emergency refresh
+  const handleEmergencyRefresh = () => {
+    if (confirm('⚠️ ATENÇÃO: Isso irá limpar todos os caches e recarregar a página. Continuar?')) {
+      // Limpar todos os caches
+      localStorage.clear()
+      sessionStorage.clear()
+      
+      // Limpar cache do Supabase
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            if (name.includes('supabase') || name.includes('auth')) {
+              caches.delete(name)
+            }
+          })
+        }).catch(() => {
+          // Ignorar erros de cache
+        })
+      }
+      
+      // Forçar reload da página
+      window.location.reload()
     }
   }
 
@@ -113,6 +139,10 @@ export default function Dashboard() {
           <Button onClick={handleCheckUpdates} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Verificar Atualizações
+          </Button>
+          <Button onClick={handleEmergencyRefresh} variant="destructive" size="sm">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            Emergency Refresh
           </Button>
         </div>
       </div>
