@@ -172,6 +172,7 @@ export class JobScrapingService {
       ) / 10
 
       result.confidence = Math.round(totalConfidence)
+      result.source = 'html'
 
       // Mapear campos extraídos
       result.extractedFields = {
