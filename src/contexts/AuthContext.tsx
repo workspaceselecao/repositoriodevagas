@@ -129,6 +129,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem(`sb-${supabaseProjectId}-auth-token-code-verifier`)
       }
       
+      // Limpar cache do sistema de vagas
+      localStorage.removeItem('repositoriodevagas_cache')
+      
       // Limpar cache do sessionStorage
       sessionStorage.clear()
       

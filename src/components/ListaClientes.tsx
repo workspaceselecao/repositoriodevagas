@@ -1,58 +1,38 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Vaga } from '../types/database'
-import { getVagas, deleteVaga } from '../lib/vagas'
+import { deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
 import { Search, Download, Plus, Users, Building2, TrendingUp } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
 import { useAuth } from '../contexts/AuthContext'
+import { useVagas } from '../hooks/useCacheData'
+import { useCache } from '../contexts/CacheContext'
 
 export default function ListaClientes() {
-  const [vagas, setVagas] = useState<Vaga[]>([])
-  const [filteredVagas, setFilteredVagas] = useState<Vaga[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [loading, setLoading] = useState(true)
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { vagas, loading } = useVagas()
+  const { removeVaga } = useCache()
 
-  useEffect(() => {
-    loadVagas()
-  }, [])
-
-  useEffect(() => {
-    filterVagas()
-  }, [searchTerm, vagas])
-
-  const loadVagas = async () => {
-    try {
-      setLoading(true)
-      const data = await getVagas()
-      setVagas(data)
-    } catch (error) {
-      console.error('Erro ao carregar vagas:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const filterVagas = () => {
+  // Filtrar vagas baseado no termo de busca
+  const filteredVagas = useMemo(() => {
     if (!searchTerm) {
-      setFilteredVagas(vagas)
-      return
+      return vagas
     }
 
-    const filtered = vagas.filter(vaga =>
+    return vagas.filter(vaga =>
       vaga.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vaga.cargo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vaga.site.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vaga.celula.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (vaga.titulo && vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()))
     )
-    setFilteredVagas(filtered)
-  }
+  }, [vagas, searchTerm])
 
   const handleEdit = (vaga: Vaga) => {
     navigate(`/dashboard/editar-vaga/${vaga.id}`)
@@ -72,7 +52,8 @@ export default function ListaClientes() {
       try {
         const success = await deleteVaga(id)
         if (success) {
-          setVagas(vagas.filter(vaga => vaga.id !== id))
+          // Remover do cache
+          removeVaga(id)
         } else {
           alert('Erro ao excluir vaga')
         }

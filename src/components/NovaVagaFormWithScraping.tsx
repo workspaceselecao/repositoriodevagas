@@ -1,13 +1,14 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useCache } from '../contexts/CacheContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { VagaFormData } from '../types/database'
-import { createVaga, refreshVagasList } from '../lib/vagas'
+import { createVaga } from '../lib/vagas'
 import { EnhancedJobScrapingService, ScrapingResult, ScrapingError } from '../lib/enhanced-scraping'
 import { ConfidenceIndicator, FieldConfidenceIndicator, ConfidenceBar } from './ConfidenceIndicator'
 import { Plus, Download, Edit, Trash2, Save, RefreshCw } from 'lucide-react'
@@ -39,6 +40,7 @@ export default function NovaVagaFormWithScraping() {
   const [scrapingError, setScrapingError] = useState<string>('')
   const [activeTab, setActiveTab] = useState('manual')
   const { user } = useAuth()
+  const { addVaga } = useCache()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,6 +84,11 @@ export default function NovaVagaFormWithScraping() {
       if (novaVaga) {
         setMessage('✅ Vaga criada com sucesso!')
         console.log('Vaga criada:', novaVaga)
+        
+        // Adicionar vaga ao cache
+        if (novaVaga && typeof novaVaga === 'object' && 'id' in novaVaga) {
+          addVaga(novaVaga as any)
+        }
         
         // Limpar formulário após sucesso
         clearForm()

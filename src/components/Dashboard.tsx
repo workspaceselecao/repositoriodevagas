@@ -1,12 +1,9 @@
-import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
-import { Vaga } from '../types/database'
-import { getVagas, getClientes, getSites } from '../lib/vagas'
-import { getAllUsers } from '../lib/auth'
-import { getNoticias } from '../lib/noticias'
 import { useAuth } from '../contexts/AuthContext'
+import { useDashboardStats, useNoticias } from '../hooks/useCacheData'
+import { useCache } from '../contexts/CacheContext'
 import { 
   Users, 
   Building2, 
@@ -23,98 +20,14 @@ import {
   RefreshCw
 } from 'lucide-react'
 
-interface DashboardStats {
-  totalVagas: number
-  totalClientes: number
-  totalSites: number
-  totalUsuarios: number
-  vagasAtivas: number
-  vagasRecentes: number
-  noticiasAtivas: number
-}
-
-interface Noticia {
-  id: string
-  titulo: string
-  conteudo: string
-  tipo: 'info' | 'alerta' | 'anuncio'
-  ativa: boolean
-  prioridade: 'baixa' | 'media' | 'alta'
-  created_at: string
-  updated_at: string
-  created_by: string
-}
-
 export default function Dashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalVagas: 0,
-    totalClientes: 0,
-    totalSites: 0,
-    totalUsuarios: 0,
-    vagasAtivas: 0,
-    vagasRecentes: 0,
-    noticiasAtivas: 0
-  })
-  const [noticias, setNoticias] = useState<Noticia[]>([])
-  const [loading, setLoading] = useState(true)
   const { user } = useAuth()
+  const { stats, loading } = useDashboardStats()
+  const { noticias } = useNoticias()
+  const { refreshAll } = useCache()
 
-  useEffect(() => {
-    loadDashboardData()
-  }, [])
-
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true)
-      
-      // Carregar dados em paralelo
-      const [vagas, clientes, sites, usuarios, noticiasData] = await Promise.all([
-        getVagas(),
-        getClientes(),
-        getSites(),
-        getAllUsers(),
-        getNoticias()
-      ])
-
-      // Calcular estatísticas
-      const now = new Date()
-      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-      
-      const vagasRecentes = vagas.filter(vaga => 
-        new Date(vaga.created_at) > sevenDaysAgo
-      ).length
-
-      const noticiasAtivas = noticiasData.filter(noticia => noticia.ativa).length
-
-      setStats({
-        totalVagas: vagas.length,
-        totalClientes: clientes.length,
-        totalSites: sites.length,
-        totalUsuarios: usuarios.length,
-        vagasAtivas: vagas.length, // Todas as vagas são consideradas ativas
-        vagasRecentes,
-        noticiasAtivas
-      })
-
-      // Ordenar notícias por prioridade e data
-      const noticiasOrdenadas = noticiasData
-        .filter(noticia => noticia.ativa)
-        .sort((a, b) => {
-          const prioridadeOrder = { alta: 3, media: 2, baixa: 1 }
-          if (prioridadeOrder[a.prioridade] !== prioridadeOrder[b.prioridade]) {
-            return prioridadeOrder[b.prioridade] - prioridadeOrder[a.prioridade]
-          }
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        })
-        .slice(0, 9) // Mostrar até 9 notícias
-
-      setNoticias(noticiasOrdenadas)
-    } catch (error) {
-      console.error('Erro ao carregar dados do dashboard:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Limitar notícias exibidas
+  const noticiasExibidas = noticias.slice(0, 9)
 
   const getTipoIcon = (tipo: string) => {
     switch (tipo) {
@@ -178,7 +91,7 @@ export default function Dashboard() {
             Visão geral do sistema e notícias importantes
           </p>
         </div>
-        <Button onClick={loadDashboardData} variant="outline" size="sm">
+        <Button onClick={refreshAll} variant="outline" size="sm">
           <RefreshCw className="h-4 w-4 mr-2" />
           Atualizar
         </Button>
@@ -249,7 +162,7 @@ export default function Dashboard() {
           </CardTitle>
           <CardDescription>
             Avisos, anúncios e informações importantes do sistema
-            {noticias.length >= 9 && (
+            {noticiasExibidas.length >= 9 && (
               <span className="block mt-2 text-amber-600 text-sm font-medium">
                 ⚠️ Mural completo! Para adicionar nova notícia, faça backup e remova uma notícia ativa nas Configurações.
               </span>
@@ -257,7 +170,7 @@ export default function Dashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {noticias.length === 0 ? (
+          {noticiasExibidas.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Megaphone className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium">Nenhuma notícia ativa</p>
@@ -265,7 +178,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {noticias.map((noticia) => (
+              {noticiasExibidas.map((noticia) => (
                 <Card key={noticia.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">

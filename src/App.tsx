@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { CacheProvider } from './contexts/CacheContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { useCleanup } from './hooks/useCleanup'
 import LoginPage from './components/LoginPage'
@@ -126,7 +127,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppRoutes />
+        <CacheProvider>
+          <AppRoutes />
+        </CacheProvider>
       </AuthProvider>
     </ThemeProvider>
   )

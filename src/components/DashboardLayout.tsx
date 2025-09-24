@@ -105,7 +105,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     variant={isActiveItem ? "default" : "ghost"}
                     className={`w-full transition-all duration-200 rounded-xl ${
                       isCollapsed 
-                        ? "justify-center p-4 h-12" 
+                        ? "justify-center p-3 h-12 w-12" 
                         : "justify-start px-3 py-2"
                     } ${
                       isActiveItem 
@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     }`}
                     onClick={() => navigate(item.href)}
                   >
-                    <Icon className={`${isCollapsed ? "h-6 w-6" : "h-4 w-4"}`} />
+                    <Icon className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
                     {!isCollapsed && <span className="ml-3 text-sm font-medium">{item.label}</span>}
                   </Button>
                 </TooltipTrigger>
@@ -128,16 +128,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           })}
           
           {/* Informações do Usuário e Logout no final */}
-          <div className="mt-auto p-4 space-y-3">
+          <div className={`mt-auto space-y-3 ${
+            isCollapsed ? "p-2" : "p-4"
+          }`}>
             {/* Informações do Usuário */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className={`w-full flex items-center space-x-3 p-3 rounded-lg ${
-                  isCollapsed ? "justify-center" : "justify-start"
+                <div className={`w-full flex items-center space-x-3 rounded-lg ${
+                  isCollapsed ? "justify-center p-2" : "justify-start p-3"
                 }`}>
                   <div className={`${isCollapsed ? "w-10 h-10" : "w-8 h-8"} bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center flex-shrink-0`}>
                     <span className="text-primary-foreground font-bold text-sm">
-                      {user?.name?.charAt(0).toUpperCase()}
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
                     </span>
                   </div>
                   {!isCollapsed && (
@@ -169,12 +171,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   variant="ghost"
                   className={`w-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 rounded-xl ${
                     isCollapsed 
-                      ? "justify-center p-4 h-12" 
+                      ? "justify-center p-3 h-12 w-12" 
                       : "justify-start px-3 py-2"
                   }`}
                   onClick={handleLogout}
                 >
-                  <LogOut className={`${isCollapsed ? "h-6 w-6" : "h-4 w-4"}`} />
+                  <LogOut className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
                   {!isCollapsed && <span className="ml-3 text-sm font-medium">Sair</span>}
                 </Button>
               </TooltipTrigger>
