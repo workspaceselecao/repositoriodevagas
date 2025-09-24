@@ -560,13 +560,23 @@ export class EnhancedJobScrapingService {
    */
   private static cleanText(text: string): string {
     return text
-      .replace(/\s+/g, ' ')
-      .replace(/\n\s*\n/g, '\n')
+      // Preservar quebras de linha duplas (parágrafos)
+      .replace(/\n\s*\n/g, '\n\n')
+      // Normalizar espaços múltiplos, mas preservar quebras de linha
+      .replace(/[ \t]+/g, ' ')
+      // Limpar espaços no início e fim de linhas
+      .replace(/[ \t]+$/gm, '')
+      .replace(/^[ \t]+/gm, '')
       .trim()
-      .replace(/^\s*Salário:\s*/, '')
-      .replace(/^\s*Local de trabalho:\s*/, '')
-      .replace(/^\s*Horário de Trabalho:\s*/, '')
-      .replace(/^\s*Jornada de Trabalho:\s*/, '')
+      // Remover labels específicos apenas no início
+      .replace(/^\s*Salário[:\s]*/i, '')
+      .replace(/^\s*Local de trabalho[:\s]*/i, '')
+      .replace(/^\s*Horário de Trabalho[:\s]*/i, '')
+      .replace(/^\s*Jornada de Trabalho[:\s]*/i, '')
+      .replace(/^\s*Benefícios[:\s]*/i, '')
+      .replace(/^\s*Responsabilidades[:\s]*/i, '')
+      .replace(/^\s*Requisitos[:\s]*/i, '')
+      .replace(/^\s*Etapas do processo[:\s]*/i, '')
   }
 
   /**
@@ -574,13 +584,28 @@ export class EnhancedJobScrapingService {
    */
   private static cleanHTML(htmlText: string): string {
     return htmlText
+      // Converter quebras de linha HTML para quebras de linha reais
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<\/div>/gi, '\n')
+      .replace(/<\/li>/gi, '\n')
+      .replace(/<\/h[1-6]>/gi, '\n\n')
+      // Converter listas para marcadores
+      .replace(/<li[^>]*>/gi, '• ')
+      // Remover todas as tags HTML
       .replace(/<[^>]*>/g, '')
+      // Decodificar entidades HTML
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
-      .replace(/\s+/g, ' ')
+      .replace(/&apos;/g, "'")
+      // Normalizar espaços e quebras de linha
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Máximo 2 quebras consecutivas
+      .replace(/[ \t]+/g, ' ') // Normalizar espaços múltiplos
+      .replace(/[ \t]+$/gm, '') // Remover espaços no final das linhas
+      .replace(/^[ \t]+/gm, '') // Remover espaços no início das linhas
       .trim()
   }
 
