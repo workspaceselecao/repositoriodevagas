@@ -48,11 +48,24 @@ export default function NovaVagaFormWithScraping() {
 
     setLoading(true)
     setMessage('')
+    setScrapingError('')
 
     try {
+      // Validar campos obrigatórios
+      const requiredFields = ['site', 'categoria', 'cargo', 'cliente', 'celula']
+      const missingFields = requiredFields.filter(field => !formData[field as keyof VagaFormData]?.trim())
+      
+      if (missingFields.length > 0) {
+        setMessage(`❌ Campos obrigatórios não preenchidos: ${missingFields.join(', ')}`)
+        setLoading(false)
+        return
+      }
+
+      console.log('Enviando dados do formulário:', formData)
       const novaVaga = await createVaga(formData, user.id)
+      
       if (novaVaga) {
-        setMessage('Vaga criada com sucesso! Atualizando lista...')
+        setMessage('✅ Vaga criada com sucesso! Atualizando lista...')
         
         // Atualizar lista de vagas automaticamente
         await refreshVagasList()
@@ -61,12 +74,26 @@ export default function NovaVagaFormWithScraping() {
           navigate('/dashboard')
         }, 2000)
       } else {
-        setMessage('Erro ao criar vaga')
+        setMessage('❌ Erro ao criar vaga: Falha na comunicação com o servidor')
       }
     } catch (error: any) {
       console.error('Erro detalhado ao criar vaga:', error)
-      const errorMessage = error?.message || 'Erro ao criar vaga'
-      setMessage(`Erro ao criar vaga: ${errorMessage}`)
+      
+      let errorMessage = 'Erro desconhecido ao criar vaga'
+      
+      if (error?.message) {
+        if (error.message.includes('null value in column "produto"')) {
+          errorMessage = '❌ Erro de banco de dados: Coluna "produto" não encontrada. Execute o script de migração no Supabase.'
+        } else if (error.message.includes('null value in column "celula"')) {
+          errorMessage = '❌ Erro: Campo "Célula" é obrigatório e não foi preenchido.'
+        } else if (error.message.includes('violates not-null constraint')) {
+          errorMessage = '❌ Erro: Algum campo obrigatório não foi preenchido corretamente.'
+        } else {
+          errorMessage = `❌ ${error.message}`
+        }
+      }
+      
+      setMessage(errorMessage)
     } finally {
       setLoading(false)
     }
