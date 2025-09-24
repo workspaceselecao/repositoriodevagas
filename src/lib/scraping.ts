@@ -121,7 +121,7 @@ export class JobScrapingService {
           try {
             const element = this.evaluateXPath(doc, xpaths[i])
             if (element) {
-              const text = this.cleanText(element.textContent || element.innerText || '')
+              const text = this.cleanText(element.textContent || (element as HTMLElement).innerText || '')
               if (text.trim()) {
                 // Calcular confiança baseada na posição do XPath e qualidade do conteúdo
                 const baseConfidence = Math.max(0, 100 - (i * 10)) // Primeiros XPaths têm maior confiança
@@ -359,7 +359,21 @@ export class JobScrapingService {
         jornada_trabalho: this.extractJornadaFromText(jobData.relevantExperiences || ''),
         beneficios: this.extractBeneficiosFromText(jobData.relevantExperiences || ''),
         local_trabalho: jobData.addressLine || '',
-        etapas_processo: this.formatEtapasProcesso(jobData.jobSteps || [])
+        etapas_processo: this.formatEtapasProcesso(jobData.jobSteps || []),
+        confidence: 85, // JSON é mais confiável que HTML
+        extractedFields: {
+          titulo: { found: !!jobData.name, confidence: 90, source: 'json', rawValue: jobData.name || '', cleanedValue: jobData.name || '' },
+          descricao_vaga: { found: !!jobData.description, confidence: 85, source: 'json', rawValue: jobData.description || '', cleanedValue: this.cleanHTML(jobData.description || '') },
+          responsabilidades_atribuicoes: { found: !!jobData.responsibilities, confidence: 85, source: 'json', rawValue: jobData.responsibilities || '', cleanedValue: this.cleanHTML(jobData.responsibilities || '') },
+          requisitos_qualificacoes: { found: !!jobData.prerequisites, confidence: 85, source: 'json', rawValue: jobData.prerequisites || '', cleanedValue: this.cleanHTML(jobData.prerequisites || '') },
+          salario: { found: !!(jobData.relevantExperiences && jobData.relevantExperiences.includes('Salário')), confidence: 80, source: 'json', rawValue: jobData.relevantExperiences || '', cleanedValue: this.extractSalaryFromText(jobData.relevantExperiences || '') },
+          horario_trabalho: { found: !!(jobData.relevantExperiences && jobData.relevantExperiences.includes('Horário')), confidence: 80, source: 'json', rawValue: jobData.relevantExperiences || '', cleanedValue: this.extractHorarioFromText(jobData.relevantExperiences || '') },
+          jornada_trabalho: { found: !!(jobData.relevantExperiences && jobData.relevantExperiences.includes('Jornada')), confidence: 80, source: 'json', rawValue: jobData.relevantExperiences || '', cleanedValue: this.extractJornadaFromText(jobData.relevantExperiences || '') },
+          beneficios: { found: !!(jobData.relevantExperiences && jobData.relevantExperiences.includes('Benefícios')), confidence: 80, source: 'json', rawValue: jobData.relevantExperiences || '', cleanedValue: this.extractBeneficiosFromText(jobData.relevantExperiences || '') },
+          local_trabalho: { found: !!jobData.addressLine, confidence: 90, source: 'json', rawValue: jobData.addressLine || '', cleanedValue: jobData.addressLine || '' },
+          etapas_processo: { found: !!(jobData.jobSteps && jobData.jobSteps.length > 0), confidence: 85, source: 'json', rawValue: JSON.stringify(jobData.jobSteps || []), cleanedValue: this.formatEtapasProcesso(jobData.jobSteps || []) }
+        },
+        source: 'json'
       }
     } catch (error) {
       console.warn('Erro ao extrair dados do JSON:', error)

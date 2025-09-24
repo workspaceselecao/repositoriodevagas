@@ -131,7 +131,7 @@ export default function NovaVagaFormWithScraping() {
         const htmlResult = EnhancedJobScrapingService.extractFromHTML(htmlContent)
         const jsonResult = EnhancedJobScrapingService.extractFromJSON(htmlContent)
         
-        let result: ScrapingResult
+        let result: ScrapingResult | null = null
         if ('message' in htmlResult) {
           if (jsonResult) {
             result = jsonResult
@@ -144,8 +144,13 @@ export default function NovaVagaFormWithScraping() {
           if (jsonResult) {
             result = EnhancedJobScrapingService.combineResults(htmlResult, jsonResult, '')
           } else {
-            result = htmlResult as ScrapingResult
+            result = htmlResult
           }
+        }
+
+        if (!result) {
+          setScrapingError('Não foi possível extrair dados do arquivo')
+          return
         }
         
         setScrapedData(result)

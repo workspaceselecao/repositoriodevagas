@@ -269,7 +269,7 @@ export class EnhancedJobScrapingService {
       try {
         const element = this.evaluateXPath(doc, xpaths[i])
         if (element) {
-          const rawValue = element.textContent || element.innerText || ''
+          const rawValue = element.textContent || (element as HTMLElement).innerText || ''
           const cleanedValue = this.cleanText(rawValue)
           
           if (cleanedValue.trim()) {
@@ -319,7 +319,7 @@ export class EnhancedJobScrapingService {
   /**
    * Combina resultados de HTML e JSON
    */
-  private static combineResults(
+  public static combineResults(
     htmlResult: Partial<ScrapingResult> | ScrapingError,
     jsonResult: Partial<ScrapingResult> | null,
     url: string
