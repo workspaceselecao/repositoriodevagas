@@ -19,6 +19,7 @@ export default function ComparativoClientes() {
   // Refs para controle de rolagem
   const comparativoRef = useRef<HTMLDivElement>(null)
   const clientHeadersRef = useRef<HTMLDivElement>(null)
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Função para rolagem inteligente
   const scrollToClientHeaders = () => {
@@ -33,15 +34,20 @@ export default function ComparativoClientes() {
       
       console.log('📍 Posição do header:', headerRect.top, 'Window height:', windowHeight)
       
-      // Calcular posição para mostrar os cabeçalhos dos clientes
-      const scrollPosition = window.scrollY + headerRect.top - 100 // 100px de margem do topo
-      
-      console.log('🎯 Rolando para posição:', scrollPosition)
-      
-      window.scrollTo({
-        top: scrollPosition,
-        behavior: 'smooth'
-      })
+      // Verificar se o cabeçalho já está visível (dentro de uma margem de 150px do topo)
+      if (headerRect.top > 150) {
+        // Calcular posição para mostrar os cabeçalhos dos clientes
+        const scrollPosition = window.scrollY + headerRect.top - 100 // 100px de margem do topo
+        
+        console.log('🎯 Rolando para posição:', scrollPosition)
+        
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: 'smooth'
+        })
+      } else {
+        console.log('✅ Cabeçalho já está visível, não precisa rolar')
+      }
     } else {
       console.log('❌ Não foi possível encontrar cabeçalho de cliente')
     }
@@ -99,17 +105,29 @@ export default function ComparativoClientes() {
       newClientFilters[cliente] = clientFilters[cliente] || {}
     })
     setClientFilters(newClientFilters)
-  }, [selectedClientes])
+  }, [selectedClientes]) // Removido clientFilters da dependência para evitar loop
 
   // Rolagem inicial quando clientes são selecionados
   useEffect(() => {
     console.log('👀 useEffect rolagem inicial - selectedClientes:', selectedClientes)
     if (selectedClientes.length > 0) {
+      // Limpar timeout anterior se existir
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+      
       console.log('⏰ Agendando rolagem em 200ms...')
       // Pequeno delay para permitir renderização dos elementos
-      setTimeout(() => {
+      scrollTimeoutRef.current = setTimeout(() => {
         scrollToClientHeaders()
       }, 200)
+    }
+    
+    // Cleanup function
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
     }
   }, [selectedClientes])
 
