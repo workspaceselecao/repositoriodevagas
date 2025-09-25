@@ -156,13 +156,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <TooltipTrigger asChild>
                       <Button
                         variant={isActiveItem ? "default" : "ghost"}
-                        className={`w-full transition-all duration-200 rounded-xl hover-scale ${
+                        className={`w-full transition-all duration-200 rounded-xl hover-modern ${
                           isCollapsed 
                             ? "justify-center p-3 h-12 w-12" 
                             : "justify-start px-3 py-2"
                         } ${
                           isActiveItem 
-                            ? "bg-primary text-primary-foreground shadow-md hover-lift-3d" 
+                            ? "bg-primary text-primary-foreground shadow-md hover-gradient" 
                             : "hover:bg-primary/10 hover:shadow-sm"
                         }`}
                         onClick={() => navigate(item.href)}
@@ -223,7 +223,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    className={`w-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 rounded-xl hover-scale ${
+                    className={`w-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 rounded-xl hover-button ${
                       isCollapsed 
                         ? "justify-center p-3 h-12 w-12" 
                         : "justify-start px-3 py-2"
@@ -272,9 +272,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Button
                         key={index}
                         variant={isActiveItem ? "default" : "ghost"}
-                        className={`w-full justify-start px-3 py-2 transition-all duration-200 rounded-xl hover-scale ${
+                        className={`w-full justify-start px-3 py-2 transition-all duration-200 rounded-xl hover-modern ${
                           isActiveItem 
-                            ? "bg-primary text-primary-foreground shadow-md" 
+                            ? "bg-primary text-primary-foreground shadow-md hover-gradient" 
                             : "hover:bg-primary/10"
                         }`}
                         onClick={() => {

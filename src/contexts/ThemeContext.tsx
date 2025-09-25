@@ -14,8 +14,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<ThemeMode>('light')
-  const [profile, setProfile] = useState<ColorProfile>('corporate')
-  const [config, setConfig] = useState<ThemeConfig>(getThemeConfig('light', 'corporate'))
+  const [profile, setProfile] = useState<ColorProfile>('default')
+  const [config, setConfig] = useState<ThemeConfig>(getThemeConfig('light', 'default'))
 
   useEffect(() => {
     const savedMode = localStorage.getItem('theme-mode') as ThemeMode

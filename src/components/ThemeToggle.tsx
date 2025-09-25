@@ -21,35 +21,65 @@ const profileConfigs: Record<ColorProfile, {
   emoji: string;
   description: string;
 }> = {
-  corporate: {
-    name: 'Corporate',
-    icon: Building2,
-    emoji: '🏢',
-    description: 'Azul + cinza, mais sério'
-  },
-  vibrant: {
-    name: 'Vibrant',
-    icon: Sparkles,
-    emoji: '🌈',
-    description: 'Gradientes neon e contrastes ousados'
-  },
-  pastel: {
-    name: 'Pastel Soft',
-    icon: Heart,
-    emoji: '🌸',
-    description: 'Cores suaves, mais humanizado'
-  },
-  glassmorphism: {
-    name: 'Dark Glassmorphism',
-    icon: Gem,
-    emoji: '💎',
-    description: 'Fundo blur + transparências elegantes'
-  },
-  minimal: {
-    name: 'Minimal White',
+  default: {
+    name: 'Padrão',
     icon: Circle,
     emoji: '⚪',
-    description: 'Super clean, bordas sutis'
+    description: 'Tema padrão do sistema'
+  },
+  blue: {
+    name: 'Azul',
+    icon: Building2,
+    emoji: '🔵',
+    description: 'Azul profissional e confiável'
+  },
+  purple: {
+    name: 'Roxo',
+    icon: Gem,
+    emoji: '🟣',
+    description: 'Roxo criativo e inovador'
+  },
+  green: {
+    name: 'Verde',
+    icon: Heart,
+    emoji: '🟢',
+    description: 'Verde natural e equilibrado'
+  },
+  orange: {
+    name: 'Laranja',
+    icon: Sparkles,
+    emoji: '🟠',
+    description: 'Laranja energético e vibrante'
+  },
+  rose: {
+    name: 'Rosa',
+    icon: Heart,
+    emoji: '🌹',
+    description: 'Rosa elegante e sofisticado'
+  },
+  violet: {
+    name: 'Violeta',
+    icon: Gem,
+    emoji: '💜',
+    description: 'Violeta místico e profundo'
+  },
+  emerald: {
+    name: 'Esmeralda',
+    icon: Heart,
+    emoji: '💚',
+    description: 'Esmeralda luxuoso e refinado'
+  },
+  amber: {
+    name: 'Âmbar',
+    icon: Sparkles,
+    emoji: '🟡',
+    description: 'Âmbar quente e acolhedor'
+  },
+  cyan: {
+    name: 'Ciano',
+    icon: Circle,
+    emoji: '🔵',
+    description: 'Ciano moderno e tecnológico'
   }
 }
 
@@ -72,7 +102,7 @@ export function ThemeToggle() {
         <Button 
           variant="outline" 
           size="icon" 
-          className="relative transition-all duration-200 hover:scale-105 hover:shadow-md"
+          className="relative transition-all duration-200 hover-button"
         >
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

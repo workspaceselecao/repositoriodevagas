@@ -13,7 +13,8 @@ import { createManualBackup, getBackupLogs } from '../lib/backup'
 import * as XLSX from 'xlsx'
 import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticiaStatus } from '../lib/noticias'
 import { useAuth } from '../contexts/AuthContext'
-import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell } from 'lucide-react'
+import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette } from 'lucide-react'
+import { ThemeSelector } from './ThemeSelector'
 
 export default function Configuracoes() {
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
@@ -337,9 +338,10 @@ export default function Configuracoes() {
       )}
 
       <Tabs defaultValue="backup" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="backup">Backup do Sistema</TabsTrigger>
           <TabsTrigger value="noticias">Gerenciar Notícias</TabsTrigger>
+          <TabsTrigger value="personalizacao">Personalização Visual</TabsTrigger>
         </TabsList>
 
         <TabsContent value="backup" className="space-y-6">
@@ -780,6 +782,22 @@ export default function Configuracoes() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="personalizacao" className="space-y-6">
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Palette className="h-5 w-5" />
+                Personalização Visual
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                Personalize a aparência da aplicação com diferentes temas e cores
+              </p>
+            </div>
+            
+            <ThemeSelector />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
