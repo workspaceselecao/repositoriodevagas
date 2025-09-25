@@ -25,31 +25,26 @@ export default function ComparativoClientes() {
   const scrollToClientHeaders = () => {
     console.log('🔄 scrollToClientHeaders chamada')
     
-    // Tentar encontrar o primeiro cabeçalho de cliente usando seletor CSS
-    const firstClientHeader = document.querySelector('[data-client-header="true"]')
+    // Tentar encontrar o container dos cabeçalhos dos clientes
+    const clientHeadersContainer = document.querySelector('[data-client-headers="true"]')
     
-    if (firstClientHeader) {
-      const headerRect = firstClientHeader.getBoundingClientRect()
+    if (clientHeadersContainer) {
+      const containerRect = clientHeadersContainer.getBoundingClientRect()
       const windowHeight = window.innerHeight
       
-      console.log('📍 Posição do header:', headerRect.top, 'Window height:', windowHeight)
+      console.log('📍 Posição do container:', containerRect.top, 'Window height:', windowHeight)
       
-      // Verificar se o cabeçalho já está visível (dentro de uma margem de 150px do topo)
-      if (headerRect.top > 150) {
-        // Calcular posição para mostrar os cabeçalhos dos clientes
-        const scrollPosition = window.scrollY + headerRect.top - 100 // 100px de margem do topo
-        
-        console.log('🎯 Rolando para posição:', scrollPosition)
-        
-        window.scrollTo({
-          top: scrollPosition,
-          behavior: 'smooth'
-        })
-      } else {
-        console.log('✅ Cabeçalho já está visível, não precisa rolar')
-      }
+      // Calcular posição para manter os cabeçalhos sempre visíveis
+      const scrollPosition = window.scrollY + containerRect.top - 80 // 80px de margem do topo
+      
+      console.log('🎯 Rolando para posição:', scrollPosition)
+      
+      window.scrollTo({
+        top: scrollPosition,
+        behavior: 'smooth'
+      })
     } else {
-      console.log('❌ Não foi possível encontrar cabeçalho de cliente')
+      console.log('❌ Não foi possível encontrar container dos cabeçalhos')
     }
   }
 
@@ -62,18 +57,28 @@ export default function ComparativoClientes() {
       
       console.log('📍 Elemento expandido - top:', elementRect.top, 'bottom:', elementRect.bottom, 'window height:', windowHeight)
       
-      // Se o elemento expandido não está visível, rolar para ele
-      if (elementRect.bottom > windowHeight || elementRect.top < 0) {
-        const scrollPosition = window.scrollY + elementRect.top - 120 // Manter cabeçalhos visíveis
+      // Verificar se os cabeçalhos dos clientes ainda estão visíveis
+      const clientHeadersContainer = document.querySelector('[data-client-headers="true"]')
+      let headersVisible = true
+      
+      if (clientHeadersContainer) {
+        const headersRect = clientHeadersContainer.getBoundingClientRect()
+        headersVisible = headersRect.bottom > 0 && headersRect.top < windowHeight
+      }
+      
+      // Se o elemento expandido não está visível OU os cabeçalhos não estão visíveis
+      if (elementRect.bottom > windowHeight || elementRect.top < 0 || !headersVisible) {
+        // Calcular posição para manter cabeçalhos visíveis E mostrar o conteúdo expandido
+        const scrollPosition = window.scrollY + elementRect.top - 150 // Margem maior para manter cabeçalhos
         
-        console.log('🎯 Rolando após expandir para posição:', scrollPosition)
+        console.log('🎯 Rolando após expandir para posição:', scrollPosition, 'Headers visíveis:', headersVisible)
         
         window.scrollTo({
           top: scrollPosition,
           behavior: 'smooth'
         })
       } else {
-        console.log('✅ Elemento já está visível, não precisa rolar')
+        console.log('✅ Elemento e cabeçalhos já estão visíveis, não precisa rolar')
       }
     }, 100) // Pequeno delay para permitir animação de expansão
   }
@@ -499,7 +504,7 @@ export default function ComparativoClientes() {
             Limpar Filtros
           </Button>
           <Button variant="outline" onClick={scrollToClientHeaders}>
-            🔄 Testar Rolagem
+            📍 Ir para Clientes
           </Button>
         </div>
       </div>
@@ -540,7 +545,7 @@ export default function ComparativoClientes() {
       {selectedClientes.length > 0 && (
         <div ref={comparativoRef} className="space-y-4">
           {/* Layout em Colunas com Filtros Acima */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div data-client-headers="true" className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {selectedClientes.map(cliente => {
               const vagasCliente = getVagasByCliente(cliente)
               return (
@@ -552,11 +557,11 @@ export default function ComparativoClientes() {
                   <Card 
                     ref={selectedClientes.indexOf(cliente) === 0 ? clientHeadersRef : null} 
                     data-client-header={selectedClientes.indexOf(cliente) === 0 ? "true" : "false"}
-                    className="py-2"
+                    className="py-2 border-2 border-blue-200 bg-blue-50/30 shadow-sm"
                   >
                     <CardHeader className="py-3">
-                      <CardTitle className="text-center text-base">{cliente}</CardTitle>
-                      <CardDescription className="text-center text-sm">
+                      <CardTitle className="text-center text-base font-semibold text-blue-900">{cliente}</CardTitle>
+                      <CardDescription className="text-center text-sm text-blue-700">
                         {vagasCliente.length} vaga(s) encontrada(s)
                       </CardDescription>
                     </CardHeader>
