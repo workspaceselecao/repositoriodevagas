@@ -110,11 +110,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           isCollapsed ? 'w-16' : 'w-64'
         }`}>
           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
-
-            {/* Menu Items */}
-            <div className={`flex-1 space-y-2 ${
-              isCollapsed ? "p-2 flex flex-col items-center" : "p-4"
-            }`}>
+            <div className="flex flex-col h-full">
+              {/* Menu Items */}
+              <div className={`flex-1 space-y-2 ${
+                isCollapsed ? "p-2 flex flex-col items-center" : "p-4"
+              }`}>
               {menuItems.map((item, index) => {
                 if (!item.show) return null
                 
@@ -149,39 +149,39 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </Tooltip>
                 )
               })}
-            </div>
-            
-            {/* Botão Sobre */}
-            <div className={`border-t ${
-              isCollapsed ? "p-2 flex flex-col items-center" : "p-4"
-            }`}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className={`w-full transition-all duration-200 rounded-xl hover-modern ${
-                      isCollapsed 
-                        ? "justify-center p-3 h-12 w-12" 
-                        : "justify-start px-3 py-2"
-                    }`}
-                  >
-                    <Info className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
-                    {!isCollapsed && <span className="ml-3 text-sm font-medium">Sobre</span>}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => setIsSobreModalOpen(true)}>
-                    <Info className="mr-2 h-4 w-4" />
-                    Informações da Aplicação
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+              </div>
+              
+              {/* Botão Sobre */}
+              <div className={`border-t ${
+                isCollapsed ? "p-2 flex flex-col items-center" : "p-4"
+              }`}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={`w-full transition-all duration-200 rounded-xl hover-modern ${
+                        isCollapsed 
+                          ? "justify-center p-3 h-12 w-12" 
+                          : "justify-start px-3 py-2"
+                      }`}
+                    >
+                      <Info className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
+                      {!isCollapsed && <span className="ml-3 text-sm font-medium">Sobre</span>}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem onClick={() => setIsSobreModalOpen(true)}>
+                      <Info className="mr-2 h-4 w-4" />
+                      Informações da Aplicação
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
-            {/* Rodapé - Informações do Usuário */}
-            <div className={`border-t mt-auto ${
-              isCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-4 space-y-3"
-            }`}>
+              {/* Rodapé - Informações do Usuário */}
+              <div className={`border-t mt-auto ${
+                isCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-4 space-y-3"
+              }`}>
               {/* Informações do Usuário */}
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -237,6 +237,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </TooltipContent>
                 )}
               </Tooltip>
+              </div>
             </div>
           </Sidebar>
         </div>

@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useDashboardStats, useNoticias } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
-import { APP_VERSION, checkForUpdates, forceReload } from '../version'
+import { checkForUpdates, forceReload } from '../version'
 import { 
   Users, 
   Building2, 
@@ -413,10 +413,6 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Rodapé com versão */}
-      <div className="text-center text-sm text-gray-500 mt-8">
-        <p>Repositório de Vagas v{APP_VERSION}</p>
-      </div>
 
     </div>
   )
