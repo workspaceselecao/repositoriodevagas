@@ -154,7 +154,7 @@ export default function UpdateModal({ isOpen, onClose, onUpdate }: UpdateModalPr
         </div>
 
         <div className="text-xs text-center text-muted-foreground pt-2 bg-muted/30 p-2 rounded">
-          💡 Você pode atualizar mais tarde usando o botão "Verificar Atualizações" no Dashboard
+          💡 Você pode verificar atualizações manualmente usando o botão "Verificar Atualizações" no menu "Sobre"
         </div>
       </DialogContent>
     </Dialog>

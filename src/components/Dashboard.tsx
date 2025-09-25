@@ -7,7 +7,6 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useDashboardStats, useNoticias } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
-import { checkForUpdates, forceReload } from '../version'
 import { 
   Users, 
   Building2, 
@@ -22,7 +21,6 @@ import {
   CheckCircle2,
   XCircle,
   RefreshCw,
-  Download,
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
@@ -40,17 +38,6 @@ export default function Dashboard() {
   // Limitar notícias exibidas
   const noticiasExibidas = noticias.slice(0, 9)
 
-  // Verificar atualizações
-  const handleCheckUpdates = async () => {
-    const hasUpdate = await checkForUpdates()
-    if (hasUpdate) {
-      if (confirm('Nova versão disponível! Deseja atualizar agora?')) {
-        forceReload()
-      }
-    } else {
-      alert('Você está usando a versão mais recente!')
-    }
-  }
 
   // Emergency refresh
   const handleEmergencyRefresh = () => {
@@ -194,10 +181,6 @@ export default function Dashboard() {
           <Button onClick={refreshAll} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
-          </Button>
-          <Button onClick={handleCheckUpdates} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Verificar Atualizações
           </Button>
           <Button onClick={handleEmergencyRefresh} variant="destructive" size="sm">
             <AlertTriangle className="h-4 w-4 mr-2" />

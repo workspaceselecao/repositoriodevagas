@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
@@ -11,9 +11,11 @@ import {
   Package,
   Calendar,
   User,
-  Shield
+  Shield,
+  Download,
+  RefreshCw
 } from 'lucide-react'
-import { APP_VERSION } from '../version'
+import { APP_VERSION, checkForUpdates, forceReload } from '../version'
 
 interface SobreModalProps {
   isOpen: boolean
@@ -25,8 +27,30 @@ interface SobreModalProps {
 }
 
 export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false)
   const buildDate = new Date().toLocaleDateString('pt-BR')
   const buildTime = new Date().toLocaleTimeString('pt-BR')
+
+  // Função para verificar atualizações
+  const handleCheckUpdates = async () => {
+    setIsCheckingUpdates(true)
+    try {
+      console.log('🔍 Verificando atualizações manualmente...')
+      const hasUpdate = await checkForUpdates()
+      if (hasUpdate) {
+        if (confirm('Nova versão disponível! Deseja atualizar agora?')) {
+          forceReload()
+        }
+      } else {
+        alert('Você está usando a versão mais recente!')
+      }
+    } catch (error) {
+      console.error('Erro ao verificar atualizações:', error)
+      alert('Erro ao verificar atualizações. Tente novamente.')
+    } finally {
+      setIsCheckingUpdates(false)
+    }
+  }
 
   const techStack = [
     { name: 'React', version: '18.x', icon: '⚛️' },
@@ -80,6 +104,31 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
                   <p className="text-sm text-muted-foreground">Build Time</p>
                   <p className="text-sm font-medium">{buildTime}</p>
                 </div>
+              </div>
+              
+              {/* Botão Verificar Atualizações */}
+              <div className="pt-3 border-t">
+                <Button
+                  onClick={handleCheckUpdates}
+                  disabled={isCheckingUpdates}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isCheckingUpdates ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Verificando...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Verificar Atualizações
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Verifica se há uma nova versão disponível
+                </p>
               </div>
             </CardContent>
           </Card>
