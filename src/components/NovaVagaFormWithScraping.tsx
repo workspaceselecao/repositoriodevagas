@@ -339,7 +339,7 @@ export default function NovaVagaFormWithScraping() {
                     id="scraping-url"
                     value={scrapingUrl}
                     onChange={(e) => setScrapingUrl(e.target.value)}
-                    placeholder="https://exemplo.com/vaga/123"
+                    placeholder="https://atento.gupy.io/jobs/XXXXXXXXXX?jobBoardSource=share_link"
                     className="flex-1"
                   />
                   <Button

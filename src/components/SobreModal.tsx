@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
@@ -15,7 +15,7 @@ import {
   Download,
   RefreshCw
 } from 'lucide-react'
-import { APP_VERSION, checkForUpdates, forceReload } from '../version'
+import { APP_VERSION, checkForUpdates, forceReload, fetchServerVersion, getCurrentStoredVersion } from '../version'
 
 interface SobreModalProps {
   isOpen: boolean
@@ -28,14 +28,57 @@ interface SobreModalProps {
 
 export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false)
+  const [serverVersionInfo, setServerVersionInfo] = useState<{version: string, buildDate: string, description?: string} | null>(null)
+  const [currentStoredVersion, setCurrentStoredVersion] = useState<string>(APP_VERSION)
+  const [isLoadingInfo, setIsLoadingInfo] = useState(false)
+  
+  // Informações locais (fallback)
   const buildDate = new Date().toLocaleDateString('pt-BR')
   const buildTime = new Date().toLocaleTimeString('pt-BR')
+
+  // Função para carregar informações atualizadas do servidor
+  const loadServerInfo = async () => {
+    setIsLoadingInfo(true)
+    try {
+      console.log('📡 Carregando informações atualizadas do servidor...')
+      
+      // Buscar informações da versão do servidor
+      const serverInfo = await fetchServerVersion()
+      if (serverInfo) {
+        setServerVersionInfo(serverInfo)
+        console.log('✅ Informações do servidor carregadas:', serverInfo.version)
+      }
+      
+      // Obter versão armazenada localmente
+      const storedVersion = getCurrentStoredVersion()
+      if (storedVersion) {
+        setCurrentStoredVersion(storedVersion)
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro ao carregar informações do servidor:', error)
+    } finally {
+      setIsLoadingInfo(false)
+    }
+  }
+
+  // Carregar informações automaticamente quando o modal abrir
+  useEffect(() => {
+    if (isOpen) {
+      loadServerInfo()
+    }
+  }, [isOpen])
 
   // Função para verificar atualizações
   const handleCheckUpdates = async () => {
     setIsCheckingUpdates(true)
     try {
       console.log('🔍 Verificando atualizações manualmente...')
+      
+      // Primeiro, carregar informações atualizadas
+      await loadServerInfo()
+      
+      // Depois verificar se há atualizações
       const hasUpdate = await checkForUpdates()
       if (hasUpdate) {
         if (confirm('Nova versão disponível! Deseja atualizar agora?')) {
@@ -83,51 +126,88 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Versão</p>
+                  <p className="text-sm text-muted-foreground">Versão Atual</p>
                   <Badge variant="secondary" className="mt-1">
-                    v{APP_VERSION}
+                    {isLoadingInfo ? (
+                      <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                    ) : null}
+                    v{serverVersionInfo?.version || APP_VERSION}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Build</p>
-                  <p className="text-sm font-medium">{buildDate}</p>
+                  <p className="text-sm text-muted-foreground">Versão Armazenada</p>
+                  <Badge variant="outline" className="mt-1">
+                    v{currentStoredVersion}
+                  </Badge>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Data do Build</p>
+                  <p className="text-sm font-medium">
+                    {serverVersionInfo?.buildDate 
+                      ? new Date(serverVersionInfo.buildDate).toLocaleDateString('pt-BR')
+                      : buildDate
+                    }
+                  </p>
+                </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Ambiente</p>
                   <Badge variant={import.meta.env.DEV ? "destructive" : "default"}>
                     {import.meta.env.DEV ? 'Desenvolvimento' : 'Produção'}
                   </Badge>
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Build Time</p>
-                  <p className="text-sm font-medium">{buildTime}</p>
+                  <p className="text-sm text-muted-foreground">Hora do Build</p>
+                  <p className="text-sm font-medium">
+                    {serverVersionInfo?.buildDate 
+                      ? new Date(serverVersionInfo.buildDate).toLocaleTimeString('pt-BR')
+                      : buildTime
+                    }
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <Badge variant={serverVersionInfo ? "default" : "secondary"}>
+                    {isLoadingInfo ? "Carregando..." : serverVersionInfo ? "Atualizado" : "Local"}
+                  </Badge>
                 </div>
               </div>
               
-              {/* Botão Verificar Atualizações */}
-              <div className="pt-3 border-t">
-                <Button
-                  onClick={handleCheckUpdates}
-                  disabled={isCheckingUpdates}
-                  variant="outline"
-                  className="w-full"
-                >
-                  {isCheckingUpdates ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Verificando...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-4 w-4 mr-2" />
-                      Verificar Atualizações
-                    </>
-                  )}
-                </Button>
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Verifica se há uma nova versão disponível
+              {/* Botões de Ação */}
+              <div className="pt-3 border-t space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    onClick={loadServerInfo}
+                    disabled={isLoadingInfo}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {isLoadingInfo ? (
+                      <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                    ) : (
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                    )}
+                    Atualizar Info
+                  </Button>
+                  <Button
+                    onClick={handleCheckUpdates}
+                    disabled={isCheckingUpdates}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {isCheckingUpdates ? (
+                      <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                    ) : (
+                      <Download className="h-3 w-3 mr-1" />
+                    )}
+                    Verificar Atualizações
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  As informações são atualizadas automaticamente ao abrir este modal
                 </p>
               </div>
             </CardContent>
@@ -183,6 +263,45 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Informações de Deploy */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Globe className="h-4 w-4 text-primary" />
+                Informações de Deploy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Última Atualização</p>
+                  <p className="text-sm font-medium">
+                    {serverVersionInfo?.buildDate 
+                      ? new Date(serverVersionInfo.buildDate).toLocaleString('pt-BR')
+                      : 'Não disponível'
+                    }
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Status da Versão</p>
+                  <Badge variant={
+                    serverVersionInfo?.version === currentStoredVersion ? "default" : "destructive"
+                  }>
+                    {serverVersionInfo?.version === currentStoredVersion ? "Atualizado" : "Desatualizado"}
+                  </Badge>
+                </div>
+              </div>
+              {serverVersionInfo?.description && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Descrição</p>
+                  <p className="text-sm font-medium bg-muted p-2 rounded">
+                    {serverVersionInfo.description}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
