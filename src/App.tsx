@@ -15,7 +15,6 @@ import Configuracoes from './components/Configuracoes'
 import GerenciarUsuarios from './components/GerenciarUsuarios'
 import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
-import Diagnostico from './components/Diagnostico'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
@@ -99,11 +98,6 @@ function AppRoutes() {
               <Route path="/dashboard/editar-vaga/:id" element={
                 <ProtectedRoute>
                   <EditarVagaForm />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/diagnostico" element={
-                <ProtectedRoute>
-                  <Diagnostico />
                 </ProtectedRoute>
               } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />

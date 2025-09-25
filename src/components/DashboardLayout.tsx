@@ -15,7 +15,6 @@ import {
   UserPlus,
   FileText,
   BarChart3,
-  Activity,
   Building2,
   Menu
 } from 'lucide-react'
@@ -93,12 +92,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       href: '/dashboard/configuracoes',
       show: user?.role === 'ADMIN'
     },
-    {
-      icon: Activity,
-      label: 'Diagnóstico',
-      href: '/dashboard/diagnostico',
-      show: user?.role === 'ADMIN'
-    }
   ]
 
   const isActive = (href: string) => {
@@ -115,7 +108,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
 
             {/* Menu Items */}
-            <div className="flex-1 p-4 space-y-2">
+            <div className={`flex-1 space-y-2 ${
+              isCollapsed ? "p-2 flex flex-col items-center" : "p-4"
+            }`}>
               {menuItems.map((item, index) => {
                 if (!item.show) return null
                 
@@ -127,10 +122,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <TooltipTrigger asChild>
                       <Button
                         variant={isActiveItem ? "default" : "ghost"}
-                        className={`w-full transition-all duration-200 rounded-xl hover-modern ${
+                        className={`transition-all duration-200 rounded-xl hover-modern ${
                           isCollapsed 
                             ? "justify-center p-3 h-12 w-12" 
-                            : "justify-start px-3 py-2"
+                            : "justify-start px-3 py-2 w-full"
                         } ${
                           isActiveItem 
                             ? "bg-primary text-primary-foreground shadow-md hover-gradient" 
@@ -153,8 +148,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             
             {/* Informações do Usuário e Logout */}
-            <div className={`p-4 border-t space-y-3 ${
-              isCollapsed ? "space-y-2" : "space-y-3"
+            <div className={`border-t space-y-3 ${
+              isCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-4 space-y-3"
             }`}>
               {/* Informações do Usuário */}
               <Tooltip>
