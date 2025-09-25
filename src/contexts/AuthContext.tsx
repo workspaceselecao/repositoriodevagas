@@ -132,11 +132,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(currentUser)
             setLoading(false)
             setInitialized(true)
-            
-            // Verificar atualizações após login bem-sucedido
-            setTimeout(() => {
-              checkForUpdates()
-            }, 1000) // Aguardar 1 segundo após login
           }
         } else if (event === 'SIGNED_OUT') {
           if (isMounted) {

@@ -163,7 +163,7 @@ export const forceReload = () => {
   }).finally(() => {
     // Forçar reload com cache bypass para garantir nova versão
     setTimeout(() => {
-      window.location.reload(true) // Força reload sem cache
+      window.location.reload() // Força reload sem cache
     }, 100)
   })
 }
