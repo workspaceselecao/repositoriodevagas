@@ -6,8 +6,8 @@ import { ToastProvider } from './components/ui/toast'
 import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
 import DebugInfo from './components/DebugInfo'
-import LoginPage from './components/LoginPage'
-import DashboardLayout from './components/DashboardLayout'
+import LoginPageNew from './components/LoginPageNew'
+import { DashboardLayout } from './components/layouts/DashboardLayout'
 import Dashboard from './components/Dashboard'
 import ListaClientes from './components/ListaClientes'
 import ComparativoClientes from './components/ComparativoClientes'
@@ -50,62 +50,119 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/login" element={!user ? <LoginPageNew /> : <Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={
         <ProtectedRoute>
-          <DashboardLayout>
+          <DashboardLayout
+            title="Dashboard"
+            breadcrumbs={[{ label: 'Dashboard' }]}
+          >
             <Dashboard />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/clientes" element={
         <ProtectedRoute>
-          <DashboardLayout>
+          <DashboardLayout
+            title="Lista de Clientes"
+            breadcrumbs={[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Clientes' }
+            ]}
+          >
             <ListaClientes />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/comparativo" element={
         <ProtectedRoute>
-          <DashboardLayout>
+          <DashboardLayout
+            title="Comparativo de Clientes"
+            breadcrumbs={[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Comparativo' }
+            ]}
+          >
             <ComparativoClientes />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/nova-vaga" element={
         <ProtectedRoute>
-          <DashboardLayout>
+          <DashboardLayout
+            title="Nova Vaga"
+            breadcrumbs={[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Nova Vaga' }
+            ]}
+          >
             <NovaVagaFormWithScraping />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/usuarios" element={
         <ProtectedRoute requireAdmin={true}>
-          <DashboardLayout>
+          <DashboardLayout
+            title="Gerenciar Usuários"
+            breadcrumbs={[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Usuários' }
+            ]}
+          >
             <GerenciarUsuarios />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/configuracoes" element={
         <ProtectedRoute requireAdmin={true}>
-          <DashboardLayout>
+          <DashboardLayout
+            title="Configurações"
+            breadcrumbs={[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Configurações' }
+            ]}
+          >
             <Configuracoes />
           </DashboardLayout>
         </ProtectedRoute>
       } />
               <Route path="/dashboard/vaga/:id" element={
                 <ProtectedRoute>
-                  <VagaView />
+                  <DashboardLayout
+                    title="Visualizar Vaga"
+                    breadcrumbs={[
+                      { label: 'Dashboard', href: '/dashboard' },
+                      { label: 'Vaga' }
+                    ]}
+                  >
+                    <VagaView />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/editar-vaga/:id" element={
                 <ProtectedRoute>
-                  <EditarVagaForm />
+                  <DashboardLayout
+                    title="Editar Vaga"
+                    breadcrumbs={[
+                      { label: 'Dashboard', href: '/dashboard' },
+                      { label: 'Editar Vaga' }
+                    ]}
+                  >
+                    <EditarVagaForm />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/diagnostico" element={
                 <ProtectedRoute>
-                  <Diagnostico />
+                  <DashboardLayout
+                    title="Diagnóstico"
+                    breadcrumbs={[
+                      { label: 'Dashboard', href: '/dashboard' },
+                      { label: 'Diagnóstico' }
+                    ]}
+                  >
+                    <Diagnostico />
+                  </DashboardLayout>
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/demo" element={

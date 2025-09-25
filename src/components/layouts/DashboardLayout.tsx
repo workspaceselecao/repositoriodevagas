@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import { 
   Menu, 
   X, 
@@ -12,7 +14,10 @@ import {
   Search,
   User,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  Building2,
+  UserPlus,
+  Activity
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Card } from '../ui/card'
@@ -36,18 +41,35 @@ interface SidebarItem {
   label: string
   href: string
   badge?: string | number
+  show?: boolean
 }
 
-const sidebarItems: SidebarItem[] = [
+const getSidebarItems = (userRole?: string): SidebarItem[] => [
   { icon: Home, label: 'Dashboard', href: '/dashboard' },
-  { icon: Briefcase, label: 'Vagas', href: '/vagas', badge: 12 },
-  { icon: Users, label: 'Candidatos', href: '/candidatos', badge: 156 },
-  { icon: BarChart3, label: 'Relatórios', href: '/relatorios' },
-  { icon: Settings, label: 'Configurações', href: '/configuracoes' },
+  { icon: Building2, label: 'Lista de Clientes', href: '/dashboard/clientes' },
+  { icon: BarChart3, label: 'Comparativo', href: '/dashboard/comparativo' },
+  { icon: UserPlus, label: 'Nova Vaga', href: '/dashboard/nova-vaga' },
+  { icon: Users, label: 'Usuários', href: '/dashboard/usuarios', show: userRole === 'ADMIN' },
+  { icon: Settings, label: 'Configurações', href: '/dashboard/configuracoes', show: userRole === 'ADMIN' },
+  { icon: Activity, label: 'Diagnóstico', href: '/dashboard/diagnostico', show: userRole === 'ADMIN' },
 ]
 
 export function DashboardLayout({ children, title, breadcrumbs }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const handleLogout = () => {
+    navigate('/login')
+    setTimeout(() => {
+      logout().catch((error: any) => {
+        console.warn('Erro durante logout em segundo plano:', error)
+      })
+    }, 100)
+  }
+
+  const sidebarItems = getSidebarItems(user?.role)
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,24 +120,35 @@ export function DashboardLayout({ children, title, breadcrumbs }: DashboardLayou
 
           {/* Navigation */}
           <nav className="flex-1 space-y-2 p-4">
-            {sidebarItems.map((item, index) => (
-              <motion.a
-                key={item.href}
-                href={item.href}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200 group"
-              >
-                <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
-                <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <span className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </motion.a>
-            ))}
+            {sidebarItems.map((item, index) => {
+              if (item.show === false) return null
+              
+              const isActive = location.pathname === item.href
+              
+              return (
+                <motion.button
+                  key={item.href}
+                  onClick={() => navigate(item.href)}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className={cn(
+                    "w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group",
+                    isActive 
+                      ? "bg-primary text-primary-foreground shadow-md" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  )}
+                >
+                  <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.badge && (
+                    <span className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </motion.button>
+              )
+            })}
           </nav>
 
           {/* User Section */}
@@ -127,8 +160,8 @@ export function DashboardLayout({ children, title, breadcrumbs }: DashboardLayou
                     <User className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-medium">João Silva</p>
-                    <p className="text-xs text-muted-foreground">Administrador</p>
+                    <p className="text-sm font-medium">{user?.name || 'Usuário'}</p>
+                    <p className="text-xs text-muted-foreground">{user?.role || 'USER'}</p>
                   </div>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
@@ -142,7 +175,10 @@ export function DashboardLayout({ children, title, breadcrumbs }: DashboardLayou
                   <Settings className="mr-2 h-4 w-4" />
                   Configurações
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-destructive">
+                <DropdownMenuItem 
+                  className="text-destructive"
+                  onClick={handleLogout}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sair
                 </DropdownMenuItem>
