@@ -1,77 +1,138 @@
-import { useState, useEffect, useCallback } from 'react'
-import { checkForUpdates, forceReload } from '../version'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { checkForUpdates, forceReload, getCurrentStoredVersion, setCurrentStoredVersion } from '../version'
 
 interface UseUpdateCheckOptions {
   checkOnMount?: boolean
   checkInterval?: number // em milissegundos
   showModalDelay?: number // delay antes de mostrar o modal
+  autoCheckOnFocus?: boolean // verificar quando a janela ganha foco
 }
 
 export function useUpdateCheck(options: UseUpdateCheckOptions = {}) {
   const {
     checkOnMount = true,
     checkInterval = 0, // 0 = não verificar automaticamente
-    showModalDelay = 2000 // 2 segundos de delay
+    showModalDelay = 2000, // 2 segundos de delay
+    autoCheckOnFocus = true // verificar quando a janela ganha foco
   } = options
 
   const [hasUpdate, setHasUpdate] = useState(false)
   const [isChecking, setIsChecking] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [lastChecked, setLastChecked] = useState<Date | null>(null)
+  const [serverVersion, setServerVersion] = useState<string | null>(null)
+  
+  // Ref para evitar múltiplas verificações simultâneas
+  const isCheckingRef = useRef(false)
 
-  const checkForUpdatesNow = useCallback(async () => {
-    if (isChecking) return false
+  const checkForUpdatesNow = useCallback(async (forceShowModal = false) => {
+    // Evitar múltiplas verificações simultâneas
+    if (isCheckingRef.current) {
+      console.log('⏳ Verificação já em andamento, aguardando...')
+      return false
+    }
 
+    isCheckingRef.current = true
     setIsChecking(true)
+    
     try {
+      console.log('🔍 Iniciando verificação de atualizações...')
       const hasNewVersion = await checkForUpdates()
+      
       setHasUpdate(hasNewVersion)
       setLastChecked(new Date())
       
-      // Se há atualização e ainda não mostrou o modal, mostrar após delay
-      if (hasNewVersion && !showModal) {
+      // Se há atualização, mostrar modal
+      if (hasNewVersion && (forceShowModal || !showModal)) {
+        console.log('🆕 Nova versão encontrada, mostrando modal em', showModalDelay, 'ms')
         setTimeout(() => {
           setShowModal(true)
         }, showModalDelay)
       }
       
+      console.log('✅ Verificação concluída. Nova versão:', hasNewVersion ? 'SIM' : 'NÃO')
       return hasNewVersion
     } catch (error) {
-      console.error('Erro ao verificar atualizações:', error)
+      console.error('❌ Erro ao verificar atualizações:', error)
       return false
     } finally {
       setIsChecking(false)
+      isCheckingRef.current = false
     }
-  }, [isChecking, showModal, showModalDelay])
+  }, [showModal, showModalDelay])
 
   const handleUpdate = useCallback(() => {
+    console.log('🚀 Iniciando atualização da aplicação...')
     forceReload()
   }, [])
 
   const handleCloseModal = useCallback(() => {
+    console.log('❌ Modal de atualização fechado pelo usuário')
     setShowModal(false)
   }, [])
 
   // Verificar atualizações na montagem do componente
   useEffect(() => {
     if (checkOnMount) {
-      checkForUpdatesNow()
+      // Pequeno delay para garantir que a aplicação esteja carregada
+      const timer = setTimeout(() => {
+        checkForUpdatesNow()
+      }, 1000)
+      
+      return () => clearTimeout(timer)
     }
   }, [checkOnMount, checkForUpdatesNow])
 
   // Verificar atualizações em intervalos regulares (se configurado)
   useEffect(() => {
     if (checkInterval > 0) {
-      const interval = setInterval(checkForUpdatesNow, checkInterval)
-      return () => clearInterval(interval)
+      console.log(`⏰ Configurando verificação automática a cada ${checkInterval}ms`)
+      const interval = setInterval(() => {
+        checkForUpdatesNow()
+      }, checkInterval)
+      return () => {
+        console.log('🛑 Parando verificação automática')
+        clearInterval(interval)
+      }
     }
   }, [checkInterval, checkForUpdatesNow])
+
+  // Verificar atualizações quando a janela ganha foco (se configurado)
+  useEffect(() => {
+    if (!autoCheckOnFocus) return
+
+    const handleFocus = () => {
+      console.log('👁️ Janela ganhou foco, verificando atualizações...')
+      // Pequeno delay para evitar verificações muito frequentes
+      setTimeout(() => {
+        checkForUpdatesNow()
+      }, 500)
+    }
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('👁️ Página ficou visível, verificando atualizações...')
+        setTimeout(() => {
+          checkForUpdatesNow()
+        }, 500)
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [autoCheckOnFocus, checkForUpdatesNow])
 
   return {
     hasUpdate,
     isChecking,
     showModal,
     lastChecked,
+    serverVersion,
     checkForUpdates: checkForUpdatesNow,
     handleUpdate,
     handleCloseModal

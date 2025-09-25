@@ -1,34 +1,117 @@
 export const APP_VERSION = "1.0.1"
+export const BUILD_DATE = "2024-01-15T10:00:00Z"
+
+// Chave para armazenar a versão atual no localStorage
+const VERSION_STORAGE_KEY = 'repositoriodevagas_current_version'
+const LAST_CHECK_KEY = 'repositoriodevagas_last_check'
+
+interface VersionInfo {
+  version: string
+  buildDate: string
+  description?: string
+}
+
+// Função para obter a versão atual armazenada
+export const getCurrentStoredVersion = (): string | null => {
+  try {
+    return localStorage.getItem(VERSION_STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+// Função para armazenar a versão atual
+export const setCurrentStoredVersion = (version: string): void => {
+  try {
+    localStorage.setItem(VERSION_STORAGE_KEY, version)
+    localStorage.setItem(LAST_CHECK_KEY, new Date().toISOString())
+  } catch (error) {
+    console.warn('Não foi possível armazenar a versão:', error)
+  }
+}
+
+// Função para buscar informações da versão do servidor
+export const fetchServerVersion = async (): Promise<VersionInfo | null> => {
+  try {
+    // Adicionar timestamp para evitar cache
+    const timestamp = Date.now()
+    const response = await fetch(`/version.json?t=${timestamp}`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+    
+    const data = await response.json()
+    
+    if (!data.version) {
+      throw new Error('Versão não encontrada na resposta do servidor')
+    }
+    
+    console.log('📦 Versão do servidor:', data.version, '| Versão local:', APP_VERSION)
+    return data
+  } catch (error) {
+    console.error('❌ Erro ao buscar versão do servidor:', error)
+    return null
+  }
+}
 
 // Função para verificar se há nova versão disponível
 export const checkForUpdates = async (): Promise<boolean> => {
   try {
-    // Tentar buscar a versão atual do servidor
-    const response = await fetch('/version.json', { 
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-store, max-age=0, must-revalidate'
-      }
-    })
+    console.log('🔍 Verificando atualizações...')
     
-    if (response.ok) {
-      const data = await response.json()
-      return data.version !== APP_VERSION
+    // Buscar versão do servidor
+    const serverVersion = await fetchServerVersion()
+    
+    if (!serverVersion) {
+      console.log('⚠️ Não foi possível obter versão do servidor')
+      
+      // Em desenvolvimento, simular nova versão para teste
+      if (import.meta.env.DEV) {
+        console.log('🔧 Modo desenvolvimento: simulando nova versão disponível')
+        return true
+      }
+      
+      return false
     }
     
-    // Para desenvolvimento/teste: simular nova versão disponível
-    // Remover esta linha em produção
-    if (import.meta.env.DEV) {
-      console.log('🔧 Modo desenvolvimento: simulando nova versão disponível')
+    // Obter versão armazenada localmente
+    const storedVersion = getCurrentStoredVersion()
+    
+    // Se não há versão armazenada, armazenar a atual e não mostrar atualização
+    if (!storedVersion) {
+      console.log('📝 Primeira verificação, armazenando versão atual')
+      setCurrentStoredVersion(APP_VERSION)
+      return false
+    }
+    
+    // Comparar versões
+    const hasUpdate = serverVersion.version !== storedVersion
+    
+    console.log('🔄 Comparação de versões:')
+    console.log(`   Local (armazenada): ${storedVersion}`)
+    console.log(`   Servidor: ${serverVersion.version}`)
+    console.log(`   Nova versão disponível: ${hasUpdate ? '✅ SIM' : '❌ NÃO'}`)
+    
+    // Em desenvolvimento, sempre retornar true para teste
+    if (import.meta.env.DEV && serverVersion.version === APP_VERSION) {
+      console.log('🔧 Modo desenvolvimento: forçando nova versão para teste')
       return true
     }
     
-    return false
+    return hasUpdate
   } catch (error) {
-    console.log('Não foi possível verificar atualizações:', error)
+    console.error('❌ Erro ao verificar atualizações:', error)
     
-    // Para desenvolvimento/teste: simular nova versão disponível
-    // Remover esta linha em produção
+    // Em desenvolvimento, simular nova versão para teste
     if (import.meta.env.DEV) {
       console.log('🔧 Modo desenvolvimento: simulando nova versão disponível (erro na verificação)')
       return true
@@ -41,5 +124,36 @@ export const checkForUpdates = async (): Promise<boolean> => {
 // Função para forçar reload da aplicação
 export const forceReload = () => {
   console.log('🔄 Forçando reload da aplicação...')
-  window.location.reload()
+  
+  // Buscar a versão atual do servidor e atualizar o localStorage antes do reload
+  fetchServerVersion().then(serverVersion => {
+    if (serverVersion) {
+      setCurrentStoredVersion(serverVersion.version)
+      console.log('✅ Versão atualizada no localStorage:', serverVersion.version)
+    }
+  }).catch(error => {
+    console.warn('⚠️ Não foi possível atualizar versão antes do reload:', error)
+  }).finally(() => {
+    // Forçar reload após um pequeno delay para garantir que o localStorage seja atualizado
+    setTimeout(() => {
+      window.location.reload()
+    }, 100)
+  })
+}
+
+// Função para inicializar o sistema de versão (chamada na inicialização da app)
+export const initializeVersionSystem = () => {
+  try {
+    const storedVersion = getCurrentStoredVersion()
+    
+    if (!storedVersion) {
+      // Primeira vez que a aplicação é executada
+      setCurrentStoredVersion(APP_VERSION)
+      console.log('🚀 Sistema de versão inicializado com versão:', APP_VERSION)
+    } else {
+      console.log('📋 Versão armazenada:', storedVersion, '| Versão atual:', APP_VERSION)
+    }
+  } catch (error) {
+    console.warn('⚠️ Erro ao inicializar sistema de versão:', error)
+  }
 }

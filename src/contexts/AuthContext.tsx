@@ -3,6 +3,7 @@ import { AuthUser, LoginFormData } from '../types/database'
 import { signIn, signOut, getCurrentUser } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { useUpdateCheck } from '../hooks/useUpdateCheck'
+import { initializeVersionSystem } from '../version'
 import UpdateModal from '../components/UpdateModal'
 
 interface AuthContextType {
@@ -28,13 +29,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkForUpdates
   } = useUpdateCheck({
     checkOnMount: false, // Não verificar na montagem
-    showModalDelay: 3000 // 3 segundos após login
+    checkInterval: 5 * 60 * 1000, // Verificar a cada 5 minutos
+    showModalDelay: 3000, // 3 segundos após login
+    autoCheckOnFocus: true // Verificar quando a janela ganha foco
   })
 
   useEffect(() => {
     let isMounted = true
     let hasInitialized = false
     let timeoutId: NodeJS.Timeout | null = null
+
+    // Inicializar sistema de versão
+    initializeVersionSystem()
 
     // Timeout de segurança para evitar travamento
     const safetyTimeout = setTimeout(() => {
