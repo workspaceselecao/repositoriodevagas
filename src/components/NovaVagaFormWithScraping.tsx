@@ -288,8 +288,8 @@ export default function NovaVagaFormWithScraping() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Nova Vaga</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Nova Vaga</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">
           Adicione uma nova vaga ao sistema com extração automática ou manual
         </p>
       </div>
@@ -297,12 +297,12 @@ export default function NovaVagaFormWithScraping() {
       {/* Mensagem principal - sempre visível no topo */}
       <div className={`mb-6 p-4 rounded-lg shadow-sm border-l-4 ${
         message.includes('✅') || message.includes('sucesso')
-          ? 'bg-green-50 text-green-800 border-green-400 border-l-green-500' 
+          ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-400 dark:border-green-600 border-l-green-500 dark:border-l-green-400' 
           : message.includes('❌') || message.includes('erro')
-          ? 'bg-red-50 text-red-800 border-red-400 border-l-red-500'
+          ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border-red-400 dark:border-red-600 border-l-red-500 dark:border-l-red-400'
           : message.includes('⏳') || message.includes('Testando')
-          ? 'bg-blue-50 text-blue-800 border-blue-400 border-l-blue-500'
-          : 'bg-gray-50 text-gray-800 border-gray-400 border-l-gray-500'
+          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border-blue-400 dark:border-blue-600 border-l-blue-500 dark:border-l-blue-400'
+          : 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-400 dark:border-gray-600 border-l-gray-500 dark:border-l-gray-400'
       }`}>
         {message || '💡 Preencha os campos obrigatórios e clique em "Salvar Vaga" para criar uma nova vaga.'}
       </div>
@@ -378,19 +378,19 @@ export default function NovaVagaFormWithScraping() {
               )}
 
               {scrapedData && (
-                <div className="mt-6 p-4 bg-green-50 border-2 border-green-200 rounded-lg shadow-sm">
+                <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-lg shadow-sm">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-lg font-semibold text-green-800 flex items-center">
-                          <svg className="h-5 w-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 flex items-center">
+                          <svg className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           Dados Extraídos com Sucesso!
                         </h3>
                         <div className="flex items-center space-x-3 mt-2">
                           <ConfidenceIndicator confidence={scrapedData.confidence} size="sm" />
-                          <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                          <span className="text-xs text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
                             Fonte: {scrapedData.source === 'json' ? 'JSON' : scrapedData.source === 'html' ? 'HTML' : 'Mista'}
                           </span>
                         </div>

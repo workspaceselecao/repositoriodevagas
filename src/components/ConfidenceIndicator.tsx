@@ -13,10 +13,10 @@ interface FieldConfidenceIndicatorProps {
 
 export function ConfidenceIndicator({ confidence, size = 'md', showPercentage = true }: ConfidenceIndicatorProps) {
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 80) return 'text-green-600 bg-green-100'
-    if (confidence >= 60) return 'text-yellow-600 bg-yellow-100'
-    if (confidence >= 40) return 'text-orange-600 bg-orange-100'
-    return 'text-red-600 bg-red-100'
+    if (confidence >= 80) return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30'
+    if (confidence >= 60) return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30'
+    if (confidence >= 40) return 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30'
+    return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30'
   }
 
   const getConfidenceIcon = (confidence: number) => {
@@ -86,47 +86,44 @@ export function FieldConfidenceIndicator({ extractedFields }: FieldConfidenceInd
   return (
     <div className="space-y-4">
       {/* Resumo Geral */}
-      <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold text-gray-900">Resumo da Extração</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Resumo da Extração</h3>
           <ConfidenceIndicator confidence={avgConfidence} />
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="font-medium">Campos encontrados:</span>
-            <span className="ml-2 text-blue-600">{foundFields}/{totalFields}</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">Campos encontrados:</span>
+            <span className="ml-2 text-blue-600 dark:text-blue-400">{foundFields}/{totalFields}</span>
           </div>
           <div>
-            <span className="font-medium">Assertividade média:</span>
-            <span className="ml-2 text-blue-600">{avgConfidence}%</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100">Assertividade média:</span>
+            <span className="ml-2 text-blue-600 dark:text-blue-400">{avgConfidence}%</span>
           </div>
         </div>
       </div>
 
       {/* Detalhamento por Campo */}
       <div className="space-y-2">
-        <h4 className="font-medium text-gray-900">Detalhamento por Campo</h4>
+        <h4 className="font-medium text-gray-900 dark:text-gray-100">Detalhamento por Campo</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {fields.map(([fieldName, field]) => (
             <div
               key={fieldName}
               className={`flex items-center justify-between p-3 rounded-lg border ${
-                field.found ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                field.found ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
               }`}
             >
               <div className="flex items-center space-x-2">
                 <span className="text-lg">{getFieldIcon(field)}</span>
-                <span className="font-medium text-sm">{getFieldLabel(fieldName)}</span>
+                <span className="font-medium text-sm text-gray-900 dark:text-gray-100">{getFieldLabel(fieldName)}</span>
               </div>
               <div className="flex items-center space-x-2">
                 {field.found && (
-                  <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
+                  <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
                     {field.confidence}%
                   </span>
                 )}
-                <span className="text-xs text-gray-500">
-                  {field.source === 'json' ? 'JSON' : field.source === 'xpath' ? 'XPath' : 'Fallback'}
-                </span>
               </div>
             </div>
           ))}
