@@ -277,115 +277,97 @@
     color: hsl(var(--text-accent));
   }
 
-  /* Melhorias específicas para tema escuro */
-  .dark .text-muted-foreground {
-    color: hsl(var(--muted-foreground));
-    opacity: 1;
-  }
+/* CORREÇÃO CRÍTICA - CONTRASTE DAS FONTES NO TEMA ESCURO */
+.dark {
+  --muted-foreground: 210 20% 90%;
+  --secondary-foreground: 210 20% 95%;
+  --accent-foreground: 210 20% 95%;
+  --card-foreground: 210 20% 98%;
+  --popover-foreground: 210 20% 98%;
+}
 
-  .dark .text-secondary-foreground {
-    color: hsl(var(--secondary-foreground));
-    opacity: 1;
-  }
+/* FORÇAR CONTRASTE EM TODOS OS ELEMENTOS DE TEXTO */
+.dark .text-muted-foreground {
+  color: hsl(210 20% 90%) !important;
+}
 
-  .dark .text-accent-foreground {
-    color: hsl(var(--accent-foreground));
-    opacity: 1;
-  }
+.dark .text-secondary-foreground {
+  color: hsl(210 20% 95%) !important;
+}
 
-  /* Contraste automático para elementos de texto */
-  .dark .card-foreground,
-  .dark .popover-foreground {
-    color: hsl(210 20% 98%);
-  }
+.dark .text-accent-foreground {
+  color: hsl(210 20% 95%) !important;
+}
 
-  /* Melhor contraste para elementos específicos */
-  .dark .comparativo-card {
-    background: hsl(var(--card));
-    color: hsl(var(--card-foreground));
-    border: 1px solid hsl(var(--border));
-  }
+.dark .text-foreground {
+  color: hsl(210 20% 98%) !important;
+}
 
-  .dark .comparativo-card .text-muted-foreground {
-    color: hsl(210 20% 85%);
-  }
+.dark .card-foreground {
+  color: hsl(210 20% 98%) !important;
+}
 
-  /* Garantir contraste adequado para todos os textos */
-  .dark .text-foreground {
-    color: hsl(210 20% 98%) !important;
-  }
+.dark .popover-foreground {
+  color: hsl(210 20% 98%) !important;
+}
 
-  .dark .text-muted-foreground {
-    color: hsl(217.9 10.6% 85%) !important;
-  }
+/* CONTRASTE ESPECÍFICO PARA CARTÕES */
+.dark .card {
+  background: hsl(var(--card)) !important;
+  color: hsl(210 20% 98%) !important;
+  border-color: hsl(var(--border)) !important;
+}
 
-  .dark .text-secondary-foreground {
-    color: hsl(210 20% 98%) !important;
-  }
+.dark .card .text-muted-foreground {
+  color: hsl(210 20% 90%) !important;
+}
 
-  /* Melhorar contraste dos cartões */
-  .dark .card {
-    background: hsl(var(--card));
-    color: hsl(var(--card-foreground));
-    border-color: hsl(var(--border));
-  }
+.dark .card .text-secondary-foreground {
+  color: hsl(210 20% 95%) !important;
+}
 
-  .dark .card .text-muted-foreground {
-    color: hsl(217.9 10.6% 85%);
-  }
+.dark .card .text-accent-foreground {
+  color: hsl(210 20% 95%) !important;
+}
 
-  /* Garantir contraste em todos os perfis de cor */
-  .dark .text-muted-foreground {
-    color: hsl(217.9 10.6% 85%) !important;
-  }
+/* CONTRASTE PARA TODOS OS PERFIS DE COR */
+.dark.blue .text-muted-foreground,
+.dark.purple .text-muted-foreground,
+.dark.green .text-muted-foreground,
+.dark.orange .text-muted-foreground,
+.dark.rose .text-muted-foreground,
+.dark.violet .text-muted-foreground,
+.dark.emerald .text-muted-foreground,
+.dark.amber .text-muted-foreground,
+.dark.cyan .text-muted-foreground {
+  color: hsl(210 20% 90%) !important;
+}
 
-  .dark .text-secondary-foreground {
-    color: hsl(210 20% 98%) !important;
-  }
+.dark.blue .card,
+.dark.purple .card,
+.dark.green .card,
+.dark.orange .card,
+.dark.rose .card,
+.dark.violet .card,
+.dark.emerald .card,
+.dark.amber .card,
+.dark.cyan .card {
+  background: hsl(var(--card)) !important;
+  color: hsl(210 20% 98%) !important;
+  border-color: hsl(var(--border)) !important;
+}
 
-  .dark .text-accent-foreground {
-    color: hsl(210 20% 98%) !important;
-  }
-
-  /* Contraste específico para perfis de cor */
-  .dark.blue .text-muted-foreground,
-  .dark.purple .text-muted-foreground,
-  .dark.green .text-muted-foreground,
-  .dark.orange .text-muted-foreground,
-  .dark.rose .text-muted-foreground,
-  .dark.violet .text-muted-foreground,
-  .dark.emerald .text-muted-foreground,
-  .dark.amber .text-muted-foreground,
-  .dark.cyan .text-muted-foreground {
-    color: hsl(210 20% 85%) !important;
-  }
-
-  /* Garantir contraste dos cartões em todos os perfis */
-  .dark.blue .card,
-  .dark.purple .card,
-  .dark.green .card,
-  .dark.orange .card,
-  .dark.rose .card,
-  .dark.violet .card,
-  .dark.emerald .card,
-  .dark.amber .card,
-  .dark.cyan .card {
-    background: hsl(var(--card));
-    color: hsl(var(--card-foreground));
-    border-color: hsl(var(--border));
-  }
-
-  .dark.blue .card .text-muted-foreground,
-  .dark.purple .card .text-muted-foreground,
-  .dark.green .card .text-muted-foreground,
-  .dark.orange .card .text-muted-foreground,
-  .dark.rose .card .text-muted-foreground,
-  .dark.violet .card .text-muted-foreground,
-  .dark.emerald .card .text-muted-foreground,
-  .dark.amber .card .text-muted-foreground,
-  .dark.cyan .card .text-muted-foreground {
-    color: hsl(210 20% 85%) !important;
-  }
+.dark.blue .card .text-muted-foreground,
+.dark.purple .card .text-muted-foreground,
+.dark.green .card .text-muted-foreground,
+.dark.orange .card .text-muted-foreground,
+.dark.rose .card .text-muted-foreground,
+.dark.violet .card .text-muted-foreground,
+.dark.emerald .card .text-muted-foreground,
+.dark.amber .card .text-muted-foreground,
+.dark.cyan .card .text-muted-foreground {
+  color: hsl(210 20% 90%) !important;
+}
   
   /* Efeitos de hover melhorados */
   .hover-lift {
