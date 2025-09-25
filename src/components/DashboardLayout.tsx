@@ -7,6 +7,8 @@ import { Button } from './ui/button'
 import { ThemeToggle } from './ThemeToggle'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { Badge } from './ui/badge'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import SobreModal from './SobreModal'
 import { 
   Home, 
   Users, 
@@ -16,7 +18,8 @@ import {
   FileText,
   BarChart3,
   Building2,
-  Menu
+  Menu,
+  Info
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -26,6 +29,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isSobreModalOpen, setIsSobreModalOpen] = useState(false)
   const { user, logout } = useAuth()
   const { config } = useTheme()
   const navigate = useNavigate()
@@ -147,8 +151,35 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               })}
             </div>
             
-            {/* Informações do Usuário e Logout */}
-            <div className={`border-t space-y-3 ${
+            {/* Botão Sobre */}
+            <div className={`border-t ${
+              isCollapsed ? "p-2 flex flex-col items-center" : "p-4"
+            }`}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={`w-full transition-all duration-200 rounded-xl hover-modern ${
+                      isCollapsed 
+                        ? "justify-center p-3 h-12 w-12" 
+                        : "justify-start px-3 py-2"
+                    }`}
+                  >
+                    <Info className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
+                    {!isCollapsed && <span className="ml-3 text-sm font-medium">Sobre</span>}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => setIsSobreModalOpen(true)}>
+                    <Info className="mr-2 h-4 w-4" />
+                    Informações da Aplicação
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Rodapé - Informações do Usuário */}
+            <div className={`border-t mt-auto ${
               isCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-4 space-y-3"
             }`}>
               {/* Informações do Usuário */}
@@ -165,7 +196,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {!isCollapsed && (
                       <div className="flex flex-col min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">
-                          Olá, {user?.name}
+                          {user?.name || 'Usuário'}
                         </p>
                         <Badge variant="outline" className="text-xs w-fit">
                           {user?.role}
@@ -177,7 +208,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {isCollapsed && (
                   <TooltipContent side="right" className="ml-2">
                     <div className="text-center">
-                      <p className="font-medium">{user?.name}</p>
+                      <p className="font-medium">{user?.name || 'Usuário'}</p>
                       <p className="text-xs text-muted-foreground">{user?.role}</p>
                     </div>
                   </TooltipContent>
@@ -306,6 +337,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </main>
         </div>
       </div>
+
+      {/* Modal Sobre */}
+      <SobreModal 
+        isOpen={isSobreModalOpen} 
+        onClose={() => setIsSobreModalOpen(false)}
+        user={user}
+      />
     </TooltipProvider>
   )
 }
