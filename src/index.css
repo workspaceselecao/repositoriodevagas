@@ -50,7 +50,7 @@
     --secondary: 215 27.9% 16.9%;
     --secondary-foreground: 210 20% 98%;
     --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 75%;
+    --muted-foreground: 217.9 10.6% 85%;
     --accent: 215 27.9% 16.9%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
@@ -79,9 +79,9 @@
     
     /* Cores de texto com melhor contraste */
     --text-primary: 210 40% 98%;
-    --text-secondary: 215 20.2% 85%;
-    --text-muted: 215 20.2% 75%;
-    --text-accent: 217.2 91.2% 80%;
+    --text-secondary: 215 20.2% 90%;
+    --text-muted: 215 20.2% 80%;
+    --text-accent: 217.2 91.2% 85%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -275,6 +275,39 @@
   
   .text-contrast-accent {
     color: hsl(var(--text-accent));
+  }
+
+  /* Melhorias específicas para tema escuro */
+  .dark .text-muted-foreground {
+    color: hsl(var(--muted-foreground));
+    opacity: 1;
+  }
+
+  .dark .text-secondary-foreground {
+    color: hsl(var(--secondary-foreground));
+    opacity: 1;
+  }
+
+  .dark .text-accent-foreground {
+    color: hsl(var(--accent-foreground));
+    opacity: 1;
+  }
+
+  /* Contraste automático para elementos de texto */
+  .dark .card-foreground,
+  .dark .popover-foreground {
+    color: hsl(210 20% 98%);
+  }
+
+  /* Melhor contraste para elementos específicos */
+  .dark .comparativo-card {
+    background: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border: 1px solid hsl(var(--border));
+  }
+
+  .dark .comparativo-card .text-muted-foreground {
+    color: hsl(210 20% 85%);
   }
   
   /* Efeitos de hover melhorados */

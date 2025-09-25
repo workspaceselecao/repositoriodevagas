@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
+import { useUpdateCheck } from '../hooks/useUpdateCheck'
 import { Sidebar, SidebarItem } from './ui/sidebar'
 import { Button } from './ui/button'
 import { ThemeToggle } from './ThemeToggle'
@@ -9,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { Badge } from './ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import SobreModal from './SobreModal'
+import UpdateModal from './UpdateModal'
 import { 
   Home, 
   Users, 
@@ -34,6 +36,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { config } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
+
+  // Hook para verificar atualizações automaticamente
+  const {
+    showModal: showUpdateModal,
+    handleUpdate: handleAppUpdate,
+    handleCloseModal: handleCloseUpdateModal,
+    checkForUpdates
+  } = useUpdateCheck({
+    checkOnMount: true, // Verificar na montagem
+    checkInterval: 10 * 60 * 1000, // Verificar a cada 10 minutos
+    showModalDelay: 2000, // 2 segundos de delay
+    autoCheckOnFocus: true // Verificar quando a janela ganha foco
+  })
 
 
   // Fechar menu mobile ao redimensionar
@@ -344,6 +359,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         isOpen={isSobreModalOpen} 
         onClose={() => setIsSobreModalOpen(false)}
         user={user}
+      />
+
+      {/* Modal de Atualização */}
+      <UpdateModal
+        isOpen={showUpdateModal}
+        onClose={handleCloseUpdateModal}
+        onUpdate={handleAppUpdate}
       />
     </TooltipProvider>
   )

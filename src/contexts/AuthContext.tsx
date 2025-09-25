@@ -2,9 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { AuthUser, LoginFormData } from '../types/database'
 import { signIn, signOut, getCurrentUser } from '../lib/auth'
 import { supabase } from '../lib/supabase'
-import { useUpdateCheck } from '../hooks/useUpdateCheck'
 import { initializeVersionSystem } from '../version'
-import UpdateModal from '../components/UpdateModal'
 
 interface AuthContextType {
   user: AuthUser | null
@@ -20,19 +18,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
   const [isInitializing, setIsInitializing] = useState(false)
-  
-  // Hook para verificar atualizações quando usuário faz login
-  const {
-    showModal,
-    handleUpdate,
-    handleCloseModal,
-    checkForUpdates
-  } = useUpdateCheck({
-    checkOnMount: false, // Não verificar na montagem
-    checkInterval: 5 * 60 * 1000, // Verificar a cada 5 minutos
-    showModalDelay: 3000, // 3 segundos após login
-    autoCheckOnFocus: true // Verificar quando a janela ganha foco
-  })
 
   useEffect(() => {
     let isMounted = true
@@ -251,13 +236,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={value}>
       {children}
-      
-      {/* Modal de atualização */}
-      <UpdateModal
-        isOpen={showModal}
-        onClose={handleCloseModal}
-        onUpdate={handleUpdate}
-      />
     </AuthContext.Provider>
   )
 }

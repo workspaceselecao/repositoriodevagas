@@ -68,6 +68,20 @@ export const checkForUpdates = async (): Promise<boolean> => {
   try {
     console.log('🔍 Verificando atualizações...')
     
+    // Verificar se já verificamos recentemente (evitar spam)
+    const lastCheck = localStorage.getItem(LAST_CHECK_KEY)
+    if (lastCheck) {
+      const lastCheckTime = new Date(lastCheck).getTime()
+      const now = Date.now()
+      const timeDiff = now - lastCheckTime
+      
+      // Se verificamos há menos de 5 minutos, não verificar novamente
+      if (timeDiff < 5 * 60 * 1000) {
+        console.log('⏰ Verificação muito recente, pulando...')
+        return false
+      }
+    }
+    
     // Buscar versão do servidor
     const serverVersion = await fetchServerVersion()
     
@@ -101,6 +115,9 @@ export const checkForUpdates = async (): Promise<boolean> => {
     console.log(`   Servidor: ${serverVersion.version}`)
     console.log(`   Nova versão disponível: ${hasUpdate ? '✅ SIM' : '❌ NÃO'}`)
     
+    // Atualizar timestamp da última verificação
+    localStorage.setItem(LAST_CHECK_KEY, new Date().toISOString())
+    
     // Em desenvolvimento, sempre retornar true para teste
     if (import.meta.env.DEV && serverVersion.version === APP_VERSION) {
       console.log('🔧 Modo desenvolvimento: forçando nova versão para teste')
@@ -130,13 +147,23 @@ export const forceReload = () => {
     if (serverVersion) {
       setCurrentStoredVersion(serverVersion.version)
       console.log('✅ Versão atualizada no localStorage:', serverVersion.version)
+      
+      // Limpar cache do navegador para garantir que a nova versão seja carregada
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            caches.delete(name)
+          })
+          console.log('🗑️ Cache limpo para nova versão')
+        })
+      }
     }
   }).catch(error => {
     console.warn('⚠️ Não foi possível atualizar versão antes do reload:', error)
   }).finally(() => {
-    // Forçar reload após um pequeno delay para garantir que o localStorage seja atualizado
+    // Forçar reload com cache bypass para garantir nova versão
     setTimeout(() => {
-      window.location.reload()
+      window.location.reload(true) // Força reload sem cache
     }, 100)
   })
 }

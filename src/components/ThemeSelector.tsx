@@ -13,6 +13,24 @@ function getProfileColor(profile: string, mode: 'light' | 'dark'): string {
   return `hsl(${colors.primary})`
 }
 
+// Função para obter cores específicas de cada perfil para os círculos
+function getProfileDisplayColors(profile: string): { primary: string, secondary: string } {
+  const profileColors: Record<string, { primary: string, secondary: string }> = {
+    default: { primary: 'hsl(220.9 39.3% 11%)', secondary: 'hsl(220 14.3% 95.9%)' },
+    blue: { primary: 'hsl(221.2 83.2% 53.3%)', secondary: 'hsl(210 40% 96%)' },
+    purple: { primary: 'hsl(262.1 83.3% 57.8%)', secondary: 'hsl(220 14.3% 95.9%)' },
+    green: { primary: 'hsl(142.1 76.2% 36.3%)', secondary: 'hsl(240 4.8% 95.9%)' },
+    orange: { primary: 'hsl(24.6 95% 53.1%)', secondary: 'hsl(60 4.8% 95.9%)' },
+    rose: { primary: 'hsl(346.8 77.2% 49.8%)', secondary: 'hsl(240 4.8% 95.9%)' },
+    violet: { primary: 'hsl(262.1 83.3% 57.8%)', secondary: 'hsl(240 4.8% 95.9%)' },
+    emerald: { primary: 'hsl(158.1 64.4% 51.6%)', secondary: 'hsl(240 4.8% 95.9%)' },
+    amber: { primary: 'hsl(25 95% 53%)', secondary: 'hsl(240 4.8% 95.9%)' },
+    cyan: { primary: 'hsl(188.7 94.5% 42.7%)', secondary: 'hsl(240 4.8% 95.9%)' }
+  }
+  
+  return profileColors[profile] || profileColors.default
+}
+
 export function ThemeSelector() {
   const { mode, profile, setMode, setProfile } = useTheme()
   const availableProfiles = getAvailableColorProfiles()
@@ -74,6 +92,7 @@ export function ThemeSelector() {
             {availableProfiles.map((colorProfile) => {
               const profileInfo = getColorProfileInfo(colorProfile)
               const isSelected = profile === colorProfile
+              const displayColors = getProfileDisplayColors(colorProfile)
               
               return (
                 <Button
@@ -95,8 +114,8 @@ export function ThemeSelector() {
                       ${isSelected ? 'scale-110 shadow-lg' : ''}
                     `}
                     style={{
-                      backgroundColor: getProfileColor(colorProfile, mode),
-                      borderColor: getProfileColor(colorProfile, mode)
+                      backgroundColor: displayColors.primary,
+                      borderColor: displayColors.primary
                     }}
                   />
                   <span className="text-xs font-medium">
