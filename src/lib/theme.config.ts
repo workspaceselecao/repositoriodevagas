@@ -78,7 +78,7 @@ export const colorSchemes = {
       secondary: '215 27.9% 16.9%',
       secondaryForeground: '210 20% 98%',
       muted: '215 27.9% 16.9%',
-      mutedForeground: '217.9 10.6% 64.9%',
+      mutedForeground: '217.9 10.6% 75%',
       accent: '215 27.9% 16.9%',
       accentForeground: '210 20% 98%',
       destructive: '0 62.8% 30.6%',

@@ -1,10 +1,17 @@
 import React from 'react'
 import { useTheme } from '../contexts/ThemeContext'
-import { getAvailableColorProfiles, getColorProfileInfo } from '../lib/theme.config'
+import { getAvailableColorProfiles, getColorProfileInfo, colorSchemes } from '../lib/theme.config'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Separator } from './ui/separator'
 import { Sun, Moon, Palette, Sparkles } from 'lucide-react'
+
+// Função para obter a cor específica de um perfil
+function getProfileColor(profile: string, mode: 'light' | 'dark'): string {
+  const colorScheme = colorSchemes[profile as keyof typeof colorSchemes] || colorSchemes.default
+  const colors = mode === 'dark' ? colorScheme.dark : colorScheme.light
+  return `hsl(${colors.primary})`
+}
 
 export function ThemeSelector() {
   const { mode, profile, setMode, setProfile } = useTheme()
@@ -88,8 +95,8 @@ export function ThemeSelector() {
                       ${isSelected ? 'scale-110 shadow-lg' : ''}
                     `}
                     style={{
-                      backgroundColor: `hsl(var(--primary))`,
-                      borderColor: `hsl(var(--primary))`
+                      backgroundColor: getProfileColor(colorProfile, mode),
+                      borderColor: getProfileColor(colorProfile, mode)
                     }}
                   />
                   <span className="text-xs font-medium">
