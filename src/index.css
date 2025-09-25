@@ -309,6 +309,30 @@
   .dark .comparativo-card .text-muted-foreground {
     color: hsl(210 20% 85%);
   }
+
+  /* Garantir contraste adequado para todos os textos */
+  .dark .text-foreground {
+    color: hsl(210 20% 98%) !important;
+  }
+
+  .dark .text-muted-foreground {
+    color: hsl(217.9 10.6% 85%) !important;
+  }
+
+  .dark .text-secondary-foreground {
+    color: hsl(210 20% 98%) !important;
+  }
+
+  /* Melhorar contraste dos cartões */
+  .dark .card {
+    background: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-color: hsl(var(--border));
+  }
+
+  .dark .card .text-muted-foreground {
+    color: hsl(217.9 10.6% 85%);
+  }
   
   /* Efeitos de hover melhorados */
   .hover-lift {

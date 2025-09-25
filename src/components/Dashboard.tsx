@@ -78,11 +78,11 @@ export default function Dashboard() {
   const getTipoColor = (tipo: string) => {
     switch (tipo) {
       case 'alerta':
-        return 'bg-red-100 text-red-800 border-red-200'
+        return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'
       case 'anuncio':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800'
       default:
-        return 'bg-green-100 text-green-800 border-green-200'
+        return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800'
     }
   }
 
@@ -172,8 +172,8 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
             Visão geral do sistema e notícias importantes
           </p>
         </div>
@@ -207,7 +207,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="text-3xl font-bold text-foreground">{stats.totalVagas}</div>
-              <div className="flex items-center text-green-600 text-sm">
+              <div className="flex items-center text-green-600 dark:text-green-400 text-sm">
                 <ArrowUpRight className="h-4 w-4 mr-1" />
                 <span className="font-medium">+{stats.vagasRecentes}</span>
               </div>
@@ -234,7 +234,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="text-3xl font-bold text-foreground">{stats.totalClientes}</div>
-              <div className="flex items-center text-blue-600 text-sm">
+              <div className="flex items-center text-blue-600 dark:text-blue-400 text-sm">
                 <Activity className="h-4 w-4 mr-1" />
                 <span className="font-medium">Ativo</span>
               </div>

@@ -327,7 +327,7 @@ export default function ComparativoClientes() {
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center">
                   Célula
-                  <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Principal</span>
+                  <span className="ml-2 px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">Principal</span>
                 </label>
                 <Select 
                   value={filters.celula || 'all'} 
@@ -361,7 +361,7 @@ export default function ComparativoClientes() {
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center">
                   Cargo
-                  <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Depende da Célula</span>
+                  <span className="ml-2 px-2 py-1 text-xs bg-green-500/10 text-green-600 dark:text-green-400 rounded-full">Depende da Célula</span>
                 </label>
                 <Select 
                   value={filters.cargo || 'all'} 
@@ -401,7 +401,7 @@ export default function ComparativoClientes() {
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center">
                   Site
-                  <span className="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">Depende da Célula + Cargo</span>
+                  <span className="ml-2 px-2 py-1 text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full">Depende da Célula + Cargo</span>
                 </label>
                 <Select 
                   value={filters.site || 'all'} 
@@ -529,7 +529,7 @@ export default function ComparativoClientes() {
             ))}
           </div>
           {selectedClientes.length === 0 && (
-            <p className="text-gray-500 text-sm mt-2">
+            <p className="text-muted-foreground text-sm mt-2">
               Selecione pelo menos um cliente para comparar
             </p>
           )}
@@ -552,11 +552,11 @@ export default function ComparativoClientes() {
                   <Card 
                     ref={selectedClientes.indexOf(cliente) === 0 ? clientHeadersRef : null} 
                     data-client-header={selectedClientes.indexOf(cliente) === 0 ? "true" : "false"}
-                    className="py-2 border-2 border-blue-200 bg-blue-50/30 shadow-sm"
+                    className="py-2 border-2 border-primary/20 bg-primary/5 shadow-sm"
                   >
                     <CardHeader className="py-3">
-                      <CardTitle className="text-center text-base font-semibold text-blue-900">{cliente}</CardTitle>
-                      <CardDescription className="text-center text-sm text-blue-700">
+                      <CardTitle className="text-center text-base font-semibold text-foreground">{cliente}</CardTitle>
+                      <CardDescription className="text-center text-sm text-muted-foreground">
                         {vagasCliente.length} vaga(s) encontrada(s)
                       </CardDescription>
                     </CardHeader>
@@ -566,7 +566,7 @@ export default function ComparativoClientes() {
                   {vagasCliente.length === 0 ? (
                     <Card>
                       <CardContent className="text-center py-8">
-                        <p className="text-gray-500">
+                        <p className="text-muted-foreground">
                           Nenhuma vaga encontrada para este cliente
                         </p>
                       </CardContent>
@@ -627,7 +627,7 @@ export default function ComparativoClientes() {
                                 {vagasCliente.map((vaga, index) => (
                                   <div key={vaga.id} className="mb-4 last:mb-0">
                                     {vagasCliente.length > 1 && (
-                                      <div className="text-xs text-gray-500 mb-2 font-medium">
+                                      <div className="text-xs text-muted-foreground mb-2 font-medium">
                                         Vaga {index + 1}: {vaga.cargo} - {vaga.celula}
                                       </div>
                                     )}
