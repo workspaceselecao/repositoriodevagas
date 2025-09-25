@@ -1,20 +1,20 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-
-type Theme = 'light' | 'dark' | 'blue' | 'purple' | 'orange' | 'green'
+import { ThemeVariant, themeVariants } from '../lib/theme.config'
 
 interface ThemeContextType {
-  theme: Theme
-  setTheme: (theme: Theme) => void
+  theme: ThemeVariant
+  setTheme: (theme: ThemeVariant) => void
+  availableThemes: typeof themeVariants
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light')
+  const [theme, setTheme] = useState<ThemeVariant>('light')
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme
-    if (savedTheme) {
+    const savedTheme = localStorage.getItem('theme') as ThemeVariant
+    if (savedTheme && themeVariants[savedTheme]) {
       setTheme(savedTheme)
     }
   }, [])
@@ -23,11 +23,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement
     root.className = theme
     
+    // Aplicar cores CSS customizadas baseadas no tema
+    const themeColors = themeVariants[theme].colors
+    Object.entries(themeColors).forEach(([key, value]) => {
+      root.style.setProperty(`--${key}`, value)
+    })
+    
     localStorage.setItem('theme', theme)
   }, [theme])
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, availableThemes: themeVariants }}>
       {children}
     </ThemeContext.Provider>
   )

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { CacheProvider } from './contexts/CacheContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { ToastProvider } from './components/ui/toast'
 import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
 import DebugInfo from './components/DebugInfo'
@@ -16,6 +17,7 @@ import GerenciarUsuarios from './components/GerenciarUsuarios'
 import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
 import Diagnostico from './components/Diagnostico'
+import { DemoPage } from './components/DemoPage'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
@@ -106,6 +108,11 @@ function AppRoutes() {
                   <Diagnostico />
                 </ProtectedRoute>
               } />
+              <Route path="/dashboard/demo" element={
+                <ProtectedRoute>
+                  <DemoPage />
+                </ProtectedRoute>
+              } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
@@ -118,12 +125,14 @@ function App() {
   
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <CacheProvider>
-          <AppRoutes />
-          <DebugInfo />
-        </CacheProvider>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <CacheProvider>
+            <AppRoutes />
+            <DebugInfo />
+          </CacheProvider>
+        </AuthProvider>
+      </ToastProvider>
     </ThemeProvider>
   )
 }
