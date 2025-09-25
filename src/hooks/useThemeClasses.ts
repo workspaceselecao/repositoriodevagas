@@ -1,7 +1,7 @@
 import { useTheme } from '../contexts/ThemeContext'
 
 export function useThemeClasses() {
-  const { theme } = useTheme()
+  const { mode, profile } = useTheme()
   
   const getCardVariant = (index: number) => {
     const variants = [
@@ -41,7 +41,8 @@ export function useThemeClasses() {
   }
   
   return {
-    theme,
+    mode,
+    profile,
     getCardVariant,
     getGradientVariant,
     textClasses,

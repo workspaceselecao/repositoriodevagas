@@ -319,10 +319,12 @@ export const darkThemeConfigs: Record<ColorProfile, Omit<ThemeConfig, 'mode'>> =
 
 export function getThemeConfig(mode: ThemeMode, profile: ColorProfile): ThemeConfig {
   const configs = mode === 'dark' ? darkThemeConfigs : themeConfigs
+  const baseConfig = configs[profile]
   return {
     mode,
-    profile,
-    ...configs[profile],
+    profile: baseConfig.profile,
+    colors: baseConfig.colors,
+    effects: baseConfig.effects,
   }
 }
 

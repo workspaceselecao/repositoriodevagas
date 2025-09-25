@@ -248,7 +248,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {isMobileMenuOpen && (
           <div className="md:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="fixed left-0 top-0 h-full w-64 bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <Sidebar isCollapsed={false}>
+              <Sidebar isCollapsed={false} onToggle={() => {}}>
                 {/* Logo Mobile */}
                 <div className="flex items-center space-x-3 p-4 border-b">
                   <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg">
