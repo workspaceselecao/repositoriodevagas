@@ -1,7 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
+import { LoadingGrid } from './ui/loading-card'
+import { EmptyState } from './ui/empty-state'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { useDashboardStats, useNoticias } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
 import { APP_VERSION, checkForUpdates, forceReload } from '../version'
@@ -20,11 +23,16 @@ import {
   XCircle,
   RefreshCw,
   Download,
-  AlertTriangle
+  AlertTriangle,
+  ArrowUpRight,
+  ArrowDownRight,
+  Activity,
+  Zap
 } from 'lucide-react'
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const { config } = useTheme()
   const { stats, loading } = useDashboardStats()
   const { noticias } = useNoticias()
   const { refreshAll } = useCache()
@@ -112,11 +120,62 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex items-center space-x-2">
-          <RefreshCw className="h-6 w-6 animate-spin" />
-          <span>Carregando dashboard...</span>
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-muted rounded animate-pulse"></div>
+            <div className="h-4 w-64 bg-muted rounded animate-pulse"></div>
+          </div>
+          <div className="flex space-x-2">
+            <div className="h-9 w-24 bg-muted rounded animate-pulse"></div>
+            <div className="h-9 w-32 bg-muted rounded animate-pulse"></div>
+            <div className="h-9 w-28 bg-muted rounded animate-pulse"></div>
+          </div>
         </div>
+
+        {/* Métricas Skeleton */}
+        <LoadingGrid count={4} />
+
+        {/* Notícias Skeleton */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center space-x-3">
+              <div className="h-8 w-8 bg-muted rounded animate-pulse"></div>
+              <div className="h-6 w-48 bg-muted rounded animate-pulse"></div>
+            </div>
+            <div className="h-4 w-96 bg-muted rounded animate-pulse"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <div className="h-6 w-6 bg-muted rounded"></div>
+                        <div className="h-5 w-16 bg-muted rounded"></div>
+                      </div>
+                      <div className="h-3 w-12 bg-muted rounded"></div>
+                    </div>
+                    <div className="h-5 w-full bg-muted rounded"></div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-2">
+                      <div className="h-3 w-full bg-muted rounded"></div>
+                      <div className="h-3 w-3/4 bg-muted rounded"></div>
+                      <div className="h-3 w-1/2 bg-muted rounded"></div>
+                    </div>
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t">
+                      <div className="h-3 w-20 bg-muted rounded"></div>
+                      <div className="h-3 w-16 bg-muted rounded"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -147,55 +206,111 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Métricas Principais */}
+      {/* Métricas Principais com Cards 3D */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className={`card-3d hover-lift-3d transition-all duration-300 ${
+          config.effects.glassmorphism ? 'bg-white/10 backdrop-blur-xl border-white/20' : ''
+        }`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Vagas</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-foreground">Total de Vagas</CardTitle>
+            <div className={`p-2 rounded-lg ${
+              config.effects.gradients 
+                ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
+                : 'bg-blue-500'
+            } shadow-lg`}>
+              <Building2 className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalVagas}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="flex items-center justify-between">
+              <div className="text-3xl font-bold text-foreground">{stats.totalVagas}</div>
+              <div className="flex items-center text-green-600 text-sm">
+                <ArrowUpRight className="h-4 w-4 mr-1" />
+                <span className="font-medium">+{stats.vagasRecentes}</span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
               {stats.vagasRecentes} novas esta semana
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`card-3d hover-lift-3d transition-all duration-300 ${
+          config.effects.glassmorphism ? 'bg-white/10 backdrop-blur-xl border-white/20' : ''
+        }`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clientes Únicos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-foreground">Clientes Únicos</CardTitle>
+            <div className={`p-2 rounded-lg ${
+              config.effects.gradients 
+                ? 'bg-gradient-to-br from-green-500 to-green-600' 
+                : 'bg-green-500'
+            } shadow-lg`}>
+              <Users className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalClientes}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="flex items-center justify-between">
+              <div className="text-3xl font-bold text-foreground">{stats.totalClientes}</div>
+              <div className="flex items-center text-blue-600 text-sm">
+                <Activity className="h-4 w-4 mr-1" />
+                <span className="font-medium">Ativo</span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
               Empresas parceiras
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`card-3d hover-lift-3d transition-all duration-300 ${
+          config.effects.glassmorphism ? 'bg-white/10 backdrop-blur-xl border-white/20' : ''
+        }`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sites Ativos</CardTitle>
-            <Globe className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-foreground">Sites Ativos</CardTitle>
+            <div className={`p-2 rounded-lg ${
+              config.effects.gradients 
+                ? 'bg-gradient-to-br from-purple-500 to-purple-600' 
+                : 'bg-purple-500'
+            } shadow-lg`}>
+              <Globe className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSites}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="flex items-center justify-between">
+              <div className="text-3xl font-bold text-foreground">{stats.totalSites}</div>
+              <div className="flex items-center text-purple-600 text-sm">
+                <Zap className="h-4 w-4 mr-1" />
+                <span className="font-medium">Online</span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
               Locais de trabalho
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={`card-3d hover-lift-3d transition-all duration-300 ${
+          config.effects.glassmorphism ? 'bg-white/10 backdrop-blur-xl border-white/20' : ''
+        }`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Usuários Ativos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-foreground">Usuários Ativos</CardTitle>
+            <div className={`p-2 rounded-lg ${
+              config.effects.gradients 
+                ? 'bg-gradient-to-br from-orange-500 to-orange-600' 
+                : 'bg-orange-500'
+            } shadow-lg`}>
+              <Users className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsuarios}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="flex items-center justify-between">
+              <div className="text-3xl font-bold text-foreground">{stats.totalUsuarios}</div>
+              <div className="flex items-center text-orange-600 text-sm">
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                <span className="font-medium">Logado</span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
               {user?.role === 'ADMIN' ? 'Admins + RH' : 'Usuários do sistema'}
             </p>
           </CardContent>
@@ -203,17 +318,25 @@ export default function Dashboard() {
       </div>
 
 
-      {/* Mural de Notícias */}
-      <Card>
+      {/* Mural de Notícias com Tabs Coloridas */}
+      <Card className={`transition-all duration-300 ${
+        config.effects.glassmorphism ? 'bg-white/10 backdrop-blur-xl border-white/20' : ''
+      }`}>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Eye className="h-5 w-5 mr-2" />
-            Mural de Notícias
+            <div className={`p-2 rounded-lg mr-3 ${
+              config.effects.gradients 
+                ? 'bg-gradient-to-br from-purple-500 to-purple-600' 
+                : 'bg-purple-500'
+            } shadow-lg`}>
+              <Eye className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-bold">Mural de Notícias</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-base">
             Avisos, anúncios e informações importantes do sistema
             {noticiasExibidas.length >= 9 && (
-              <span className="block mt-2 text-amber-600 text-sm font-medium">
+              <span className="block mt-2 text-amber-600 text-sm font-medium animate-pulse-glow">
                 ⚠️ Mural completo! Para adicionar nova notícia, faça backup e remova uma notícia ativa nas Configurações.
               </span>
             )}
@@ -221,47 +344,62 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           {noticiasExibidas.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Megaphone className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium">Nenhuma notícia ativa</p>
-              <p className="text-sm">Não há notícias ou avisos no momento</p>
-            </div>
+            <EmptyState
+              icon={Megaphone}
+              title="Nenhuma notícia ativa"
+              description="Não há notícias ou avisos no momento. As notícias aparecerão aqui quando forem adicionadas."
+              action={{
+                label: "Adicionar Notícia",
+                onClick: () => {
+                  // Navegar para configurações para adicionar notícia
+                  window.location.href = '/dashboard/configuracoes'
+                }
+              }}
+            />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {noticiasExibidas.map((noticia) => (
-                <Card key={noticia.id} className="hover:shadow-md transition-shadow">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {noticiasExibidas.map((noticia, index) => (
+                <Card 
+                  key={noticia.id} 
+                  className={`card-3d hover-lift-3d transition-all duration-300 animate-fade-in ${
+                    config.effects.glassmorphism ? 'bg-white/5 backdrop-blur-sm border-white/10' : ''
+                  }`}
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                   <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center space-x-2">
-                        <div className={`p-1 rounded-full ${getTipoColor(noticia.tipo)}`}>
+                        <div className={`p-2 rounded-lg ${getTipoColor(noticia.tipo)} shadow-md`}>
                           {getTipoIcon(noticia.tipo)}
                         </div>
                         <Badge 
                           variant="outline" 
-                          className={`text-xs ${getTipoColor(noticia.tipo)}`}
+                          className={`text-xs font-medium ${getTipoColor(noticia.tipo)}`}
                         >
                           {noticia.tipo}
                         </Badge>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <div className={`w-2 h-2 rounded-full ${getPrioridadeColor(noticia.prioridade)}`}></div>
-                        <span className="text-xs text-gray-500">{noticia.prioridade}</span>
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full ${getPrioridadeColor(noticia.prioridade)} animate-pulse`}></div>
+                        <span className="text-xs text-muted-foreground font-medium">{noticia.prioridade}</span>
                       </div>
                     </div>
-                    <CardTitle className="text-lg leading-tight">{noticia.titulo}</CardTitle>
+                    <CardTitle className="text-lg leading-tight text-foreground hover:text-primary transition-colors duration-200">
+                      {noticia.titulo}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="text-sm text-gray-600 mb-3 line-clamp-3">
+                    <div className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed">
                       {noticia.conteudo}
                     </div>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <div className="flex items-center space-x-1">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border/50">
+                      <div className="flex items-center space-x-2">
                         <Calendar className="h-3 w-3" />
-                        <span>{formatDate(noticia.created_at)}</span>
+                        <span className="font-medium">{formatDate(noticia.created_at)}</span>
                       </div>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-2">
                         <Clock className="h-3 w-3" />
-                        <span>{new Date(noticia.created_at).toLocaleTimeString('pt-BR', { 
+                        <span className="font-medium">{new Date(noticia.created_at).toLocaleTimeString('pt-BR', { 
                           hour: '2-digit', 
                           minute: '2-digit' 
                         })}</span>

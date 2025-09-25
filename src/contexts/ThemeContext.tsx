@@ -1,39 +1,53 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { ThemeVariant, themeVariants } from '../lib/theme.config'
+import { ThemeMode, ColorProfile, ThemeConfig, getThemeConfig, applyThemeToDocument } from '../lib/theme.config'
 
 interface ThemeContextType {
-  theme: ThemeVariant
-  setTheme: (theme: ThemeVariant) => void
-  availableThemes: typeof themeVariants
+  mode: ThemeMode
+  profile: ColorProfile
+  config: ThemeConfig
+  setMode: (mode: ThemeMode) => void
+  setProfile: (profile: ColorProfile) => void
+  setTheme: (mode: ThemeMode, profile: ColorProfile) => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<ThemeVariant>('light')
+  const [mode, setMode] = useState<ThemeMode>('light')
+  const [profile, setProfile] = useState<ColorProfile>('corporate')
+  const [config, setConfig] = useState<ThemeConfig>(getThemeConfig('light', 'corporate'))
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as ThemeVariant
-    if (savedTheme && themeVariants[savedTheme]) {
-      setTheme(savedTheme)
-    }
+    const savedMode = localStorage.getItem('theme-mode') as ThemeMode
+    const savedProfile = localStorage.getItem('theme-profile') as ColorProfile
+    
+    if (savedMode) setMode(savedMode)
+    if (savedProfile) setProfile(savedProfile)
   }, [])
 
   useEffect(() => {
-    const root = document.documentElement
-    root.className = theme
+    const newConfig = getThemeConfig(mode, profile)
+    setConfig(newConfig)
+    applyThemeToDocument(newConfig)
     
-    // Aplicar cores CSS customizadas baseadas no tema
-    const themeColors = themeVariants[theme].colors
-    Object.entries(themeColors).forEach(([key, value]) => {
-      root.style.setProperty(`--${key}`, value)
-    })
-    
-    localStorage.setItem('theme', theme)
-  }, [theme])
+    localStorage.setItem('theme-mode', mode)
+    localStorage.setItem('theme-profile', profile)
+  }, [mode, profile])
+
+  const setTheme = (newMode: ThemeMode, newProfile: ColorProfile) => {
+    setMode(newMode)
+    setProfile(newProfile)
+  }
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, availableThemes: themeVariants }}>
+    <ThemeContext.Provider value={{ 
+      mode, 
+      profile, 
+      config, 
+      setMode, 
+      setProfile, 
+      setTheme 
+    }}>
       {children}
     </ThemeContext.Provider>
   )

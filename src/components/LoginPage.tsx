@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { ThemeToggle } from './ThemeToggle'
 import { LoginFormData } from '../types/database'
-import { Building2, Lock, Mail } from 'lucide-react'
+import { Building2, Lock, Mail, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({
@@ -16,12 +17,17 @@ export default function LoginPage() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
+  const [shakeError, setShakeError] = useState(false)
   const { login } = useAuth()
+  const { config } = useTheme()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setShakeError(false)
     setLoading(true)
 
     try {
@@ -30,9 +36,13 @@ export default function LoginPage() {
         navigate('/dashboard')
       } else {
         setError('Email ou senha incorretos')
+        setShakeError(true)
+        setTimeout(() => setShakeError(false), 500)
       }
     } catch (error) {
       setError('Erro ao fazer login. Tente novamente.')
+      setShakeError(true)
+      setTimeout(() => setShakeError(false), 500)
     } finally {
       setLoading(false)
     }
@@ -46,75 +56,173 @@ export default function LoginPage() {
     }))
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
+  // Animação de entrada
+  useEffect(() => {
+    document.body.classList.add('animate-fade-in')
+    return () => document.body.classList.remove('animate-fade-in')
+  }, [])
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4 relative">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.05%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background dinâmico baseado no tema */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20"></div>
+      
+      {/* Padrão de fundo animado */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.05%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40 animate-pulse"></div>
+      
+      {/* Círculos flutuantes decorativos */}
+      <div className="absolute top-20 left-20 w-32 h-32 bg-primary/10 rounded-full blur-xl animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-24 h-24 bg-secondary/10 rounded-full blur-xl animate-pulse delay-1000"></div>
+      <div className="absolute top-1/2 left-10 w-16 h-16 bg-accent/10 rounded-full blur-xl animate-pulse delay-500"></div>
       
       {/* Theme Toggle */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-4 right-4 z-20">
         <ThemeToggle />
       </div>
 
-      <Card className="w-full max-w-md relative z-10">
-        <CardHeader className="text-center space-y-4">
+      {/* Card principal com glassmorphism */}
+      <Card className={`w-full max-w-md relative z-10 transition-all duration-300 hover:shadow-2xl ${
+        config.effects.glassmorphism 
+          ? 'bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl' 
+          : 'bg-card shadow-xl'
+      } ${shakeError ? 'animate-shake' : ''}`}>
+        <CardHeader className="text-center space-y-6 pb-8">
+          {/* Logo animado */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center shadow-lg">
-              <Building2 className="h-8 w-8 text-primary-foreground" />
+            <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 hover:rotate-6 ${
+              config.effects.gradients 
+                ? 'bg-gradient-to-br from-primary via-primary/80 to-primary/60' 
+                : 'bg-primary'
+            }`}>
+              <Building2 className="h-10 w-10 text-primary-foreground animate-bounce-in" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Repositório de Vagas
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Faça login para acessar o sistema
-          </CardDescription>
+          
+          {/* Título com gradiente */}
+          <div className="space-y-2">
+            <CardTitle className={`text-4xl font-bold transition-all duration-300 ${
+              config.effects.gradients 
+                ? 'bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent' 
+                : 'text-primary'
+            }`}>
+              Repositório de Vagas
+            </CardTitle>
+            <CardDescription className="text-muted-foreground text-lg">
+              Faça login para acessar o sistema
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2">
+        
+        <CardContent className="space-y-6 px-8 pb-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Campo Email */}
+            <div className="space-y-3">
+              <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
                 <Mail className="h-4 w-4" />
                 Email
               </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="seu@email.com"
-                required
-                className="w-full"
-              />
+              <div className="relative">
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="seu@email.com"
+                  required
+                  className={`w-full h-12 px-4 transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:border-primary ${
+                    config.effects.glassmorphism 
+                      ? 'bg-white/20 backdrop-blur-sm border-white/30' 
+                      : 'bg-background'
+                  }`}
+                />
+                {formData.email && (
+                  <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-success animate-bounce-in" />
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="flex items-center gap-2">
+            
+            {/* Campo Senha */}
+            <div className="space-y-3">
+              <Label htmlFor="password" className="flex items-center gap-2 text-sm font-medium">
                 <Lock className="h-4 w-4" />
                 Senha
               </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-                className="w-full"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  required
+                  className={`w-full h-12 px-4 pr-12 transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:border-primary ${
+                    config.effects.glassmorphism 
+                      ? 'bg-white/20 backdrop-blur-sm border-white/30' 
+                      : 'bg-background'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-200"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
             </div>
+            
+            {/* Lembrar sessão */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
+              />
+              <Label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer">
+                Lembrar sessão
+              </Label>
+            </div>
+            
+            {/* Mensagem de erro */}
             {error && (
-              <div className="text-destructive text-sm text-center bg-destructive/10 border border-destructive/20 p-3 rounded-xl">
-                {error}
+              <div className={`flex items-center gap-2 p-4 rounded-xl border transition-all duration-300 ${
+                shakeError ? 'animate-shake' : ''
+              } ${
+                config.effects.glassmorphism 
+                  ? 'bg-destructive/20 backdrop-blur-sm border-destructive/30' 
+                  : 'bg-destructive/10 border-destructive/20'
+              }`}>
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                <span className="text-destructive text-sm font-medium">{error}</span>
               </div>
             )}
+            
+            {/* Botão de login */}
             <Button
               type="submit"
-              className="w-full h-12 text-base font-semibold"
               disabled={loading}
+              className={`w-full h-14 text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                config.effects.gradients 
+                  ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70' 
+                  : 'bg-primary hover:bg-primary/90'
+              } ${loading ? 'animate-pulse' : ''}`}
             >
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
+                  Entrando...
+                </div>
+              ) : (
+                'Entrar'
+              )}
             </Button>
           </form>
         </CardContent>

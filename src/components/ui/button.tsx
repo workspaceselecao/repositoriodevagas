@@ -9,27 +9,22 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:from-primary/90 hover:to-primary/80 shadow-md hover:shadow-lg hover:scale-105",
+        default: "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:from-primary/90 hover:to-primary/80 shadow-md hover:shadow-lg",
         destructive:
-          "bg-gradient-to-r from-destructive to-destructive/90 text-destructive-foreground hover:from-destructive/90 hover:to-destructive/80 shadow-md hover:shadow-lg hover:scale-105",
+          "bg-gradient-to-r from-destructive to-destructive/90 text-destructive-foreground hover:from-destructive/90 hover:to-destructive/80 shadow-md hover:shadow-lg",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-sm hover:scale-105",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
         secondary:
-          "bg-gradient-to-r from-secondary to-secondary/90 text-secondary-foreground hover:from-secondary/80 hover:to-secondary/70 shadow-sm hover:shadow-md hover:scale-105",
-        ghost: "hover:bg-accent hover:text-accent-foreground hover:shadow-sm hover:scale-105",
+          "bg-gradient-to-r from-secondary to-secondary/90 text-secondary-foreground hover:from-secondary/80 hover:to-secondary/70 shadow-sm hover:shadow-md",
+        ghost: "hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
         link: "text-primary underline-offset-4 hover:underline",
-        success: "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg hover:scale-105",
-        warning: "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white hover:from-yellow-600 hover:to-yellow-700 shadow-md hover:shadow-lg hover:scale-105",
-        info: "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg hover:scale-105",
+        theme: "bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 shadow-md hover:shadow-lg",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-lg px-3",
         lg: "h-11 rounded-xl px-8",
-        xl: "h-12 rounded-xl px-10 text-base",
         icon: "h-10 w-10",
-        "icon-sm": "h-8 w-8",
-        "icon-lg": "h-12 w-12",
       },
     },
     defaultVariants: {

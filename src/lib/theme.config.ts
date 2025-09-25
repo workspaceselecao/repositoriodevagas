@@ -1,290 +1,358 @@
-/**
- * Sistema de Design - Repositório de Vagas
- * Configuração completa de temas e design tokens
- */
+export type ThemeMode = 'light' | 'dark'
+export type ColorProfile = 'corporate' | 'vibrant' | 'pastel' | 'glassmorphism' | 'minimal'
 
-export const themeConfig = {
-  // Paleta principal: Azul + Verde
+export interface ThemeConfig {
+  mode: ThemeMode
+  profile: ColorProfile
   colors: {
-    primary: {
-      blue: {
-        50: 'hsl(220, 100%, 97%)',
-        100: 'hsl(220, 100%, 94%)',
-        200: 'hsl(220, 100%, 88%)',
-        300: 'hsl(220, 100%, 80%)',
-        400: 'hsl(220, 100%, 70%)',
-        500: 'hsl(220, 100%, 60%)', // Cor principal
-        600: 'hsl(220, 100%, 50%)',
-        700: 'hsl(220, 100%, 40%)',
-        800: 'hsl(220, 100%, 30%)',
-        900: 'hsl(220, 100%, 20%)',
-        950: 'hsl(220, 100%, 10%)',
-      },
-      green: {
-        50: 'hsl(142, 100%, 97%)',
-        100: 'hsl(142, 100%, 94%)',
-        200: 'hsl(142, 100%, 88%)',
-        300: 'hsl(142, 100%, 80%)',
-        400: 'hsl(142, 100%, 70%)',
-        500: 'hsl(142, 76%, 36%)', // Cor secundária
-        600: 'hsl(142, 100%, 30%)',
-        700: 'hsl(142, 100%, 25%)',
-        800: 'hsl(142, 100%, 20%)',
-        900: 'hsl(142, 100%, 15%)',
-        950: 'hsl(142, 100%, 10%)',
-      }
-    },
-    // Estados universais
-    semantic: {
-      success: {
-        50: 'hsl(142, 100%, 97%)',
-        500: 'hsl(142, 76%, 36%)',
-        600: 'hsl(142, 100%, 30%)',
-        700: 'hsl(142, 100%, 25%)',
-      },
-      error: {
-        50: 'hsl(0, 100%, 97%)',
-        500: 'hsl(0, 84%, 60%)',
-        600: 'hsl(0, 100%, 50%)',
-        700: 'hsl(0, 100%, 40%)',
-      },
-      warning: {
-        50: 'hsl(48, 100%, 97%)',
-        500: 'hsl(48, 100%, 50%)',
-        600: 'hsl(48, 100%, 45%)',
-        700: 'hsl(48, 100%, 40%)',
-      },
-      info: {
-        50: 'hsl(220, 100%, 97%)',
-        500: 'hsl(220, 100%, 60%)',
-        600: 'hsl(220, 100%, 50%)',
-        700: 'hsl(220, 100%, 40%)',
-      }
-    },
-    // Cinzas e neutros
-    neutral: {
-      50: 'hsl(0, 0%, 98%)',
-      100: 'hsl(0, 0%, 96%)',
-      200: 'hsl(0, 0%, 90%)',
-      300: 'hsl(0, 0%, 83%)',
-      400: 'hsl(0, 0%, 64%)',
-      500: 'hsl(0, 0%, 45%)',
-      600: 'hsl(0, 0%, 32%)',
-      700: 'hsl(0, 0%, 25%)',
-      800: 'hsl(0, 0%, 15%)',
-      900: 'hsl(0, 0%, 9%)',
-      950: 'hsl(0, 0%, 4%)',
-    }
-  },
-
-  // Tipografia
-  typography: {
-    fontFamily: {
-      sans: ['Inter', 'system-ui', 'sans-serif'],
-      mono: ['JetBrains Mono', 'monospace'],
-    },
-    fontSize: {
-      xs: ['0.75rem', { lineHeight: '1rem' }],
-      sm: ['0.875rem', { lineHeight: '1.25rem' }],
-      base: ['1rem', { lineHeight: '1.5rem' }],
-      lg: ['1.125rem', { lineHeight: '1.75rem' }],
-      xl: ['1.25rem', { lineHeight: '1.75rem' }],
-      '2xl': ['1.5rem', { lineHeight: '2rem' }],
-      '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
-      '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
-      '5xl': ['3rem', { lineHeight: '1' }],
-      '6xl': ['3.75rem', { lineHeight: '1' }],
-    },
-    fontWeight: {
-      light: '300',
-      normal: '400',
-      medium: '500',
-      semibold: '600',
-      bold: '700',
-      extrabold: '800',
-    }
-  },
-
-  // Espaçamentos
-  spacing: {
-    0: '0px',
-    1: '0.25rem',
-    2: '0.5rem',
-    3: '0.75rem',
-    4: '1rem',
-    5: '1.25rem',
-    6: '1.5rem',
-    7: '1.75rem',
-    8: '2rem',
-    9: '2.25rem',
-    10: '2.5rem',
-    11: '2.75rem',
-    12: '3rem',
-    14: '3.5rem',
-    16: '4rem',
-    20: '5rem',
-    24: '6rem',
-    28: '7rem',
-    32: '8rem',
-    36: '9rem',
-    40: '10rem',
-    44: '11rem',
-    48: '12rem',
-    52: '13rem',
-    56: '14rem',
-    60: '15rem',
-    64: '16rem',
-    72: '18rem',
-    80: '20rem',
-    96: '24rem',
-  },
-
-  // Border radius
-  borderRadius: {
-    none: '0px',
-    sm: '0.125rem',
-    base: '0.25rem',
-    md: '0.375rem',
-    lg: '0.5rem',
-    xl: '0.75rem',
-    '2xl': '1rem',
-    '3xl': '1.5rem',
-    full: '9999px',
-  },
-
-  // Shadows
-  boxShadow: {
-    sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-    base: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-    md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-    lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-    xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-    '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-    inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
-    glow: '0 0 20px rgb(59 130 246 / 0.3)',
-  },
-
-  // Animações
-  animation: {
-    duration: {
-      fast: '150ms',
-      normal: '300ms',
-      slow: '500ms',
-    },
-    easing: {
-      linear: 'linear',
-      easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
-      easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
-      easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
-    }
-  },
-
-  // Breakpoints responsivos
-  breakpoints: {
-    sm: '640px',
-    md: '768px',
-    lg: '1024px',
-    xl: '1280px',
-    '2xl': '1536px',
-    '4k': '2560px',
+    primary: string
+    secondary: string
+    accent: string
+    background: string
+    foreground: string
+    muted: string
+    mutedForeground: string
+    border: string
+    input: string
+    ring: string
+    destructive: string
+    destructiveForeground: string
+    success: string
+    successForeground: string
+    warning: string
+    warningForeground: string
   }
-} as const
+  effects: {
+    glassmorphism: boolean
+    gradients: boolean
+    shadows: string
+    borderRadius: string
+    animation: string
+  }
+}
 
-// Temas disponíveis
-export type ThemeVariant = 
-  | 'light' 
-  | 'dark' 
-  | 'tech-blue' 
-  | 'fresh-green' 
-  | 'neutral-gray' 
-  | 'warm-pastel'
-
-// Configurações específicas de cada tema
-export const themeVariants = {
-  light: {
-    name: 'Claro',
-    description: 'Tema padrão claro e limpo',
+export const themeConfigs: Record<ColorProfile, Omit<ThemeConfig, 'mode'>> = {
+  corporate: {
+    profile: 'corporate',
     colors: {
-      background: themeConfig.colors.neutral[50],
-      foreground: themeConfig.colors.neutral[900],
-      primary: themeConfig.colors.primary.blue[500],
-      secondary: themeConfig.colors.primary.green[500],
-      muted: themeConfig.colors.neutral[100],
-      accent: themeConfig.colors.primary.blue[100],
-      border: themeConfig.colors.neutral[200],
-      card: themeConfig.colors.neutral[50],
-    }
+      primary: 'hsl(221, 83%, 53%)',
+      secondary: 'hsl(210, 40%, 98%)',
+      accent: 'hsl(210, 40%, 96%)',
+      background: 'hsl(0, 0%, 100%)',
+      foreground: 'hsl(222.2, 84%, 4.9%)',
+      muted: 'hsl(210, 40%, 96%)',
+      mutedForeground: 'hsl(215.4, 16.3%, 46.9%)',
+      border: 'hsl(214.3, 31.8%, 91.4%)',
+      input: 'hsl(214.3, 31.8%, 91.4%)',
+      ring: 'hsl(221, 83%, 53%)',
+      destructive: 'hsl(0, 84.2%, 60.2%)',
+      destructiveForeground: 'hsl(210, 40%, 98%)',
+      success: 'hsl(142, 76%, 36%)',
+      successForeground: 'hsl(210, 40%, 98%)',
+      warning: 'hsl(38, 92%, 50%)',
+      warningForeground: 'hsl(210, 40%, 98%)',
+    },
+    effects: {
+      glassmorphism: false,
+      gradients: false,
+      shadows: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+      borderRadius: '0.5rem',
+      animation: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
   },
-  dark: {
-    name: 'Escuro',
-    description: 'Tema escuro moderno',
+  vibrant: {
+    profile: 'vibrant',
     colors: {
-      background: themeConfig.colors.neutral[900],
-      foreground: themeConfig.colors.neutral[50],
-      primary: themeConfig.colors.primary.blue[400],
-      secondary: themeConfig.colors.primary.green[400],
-      muted: themeConfig.colors.neutral[800],
-      accent: themeConfig.colors.neutral[700],
-      border: themeConfig.colors.neutral[700],
-      card: themeConfig.colors.neutral[800],
-    }
-  },
-  'tech-blue': {
-    name: 'Tech Blue',
-    description: 'Foco corporativo com azul predominante',
-    colors: {
-      background: themeConfig.colors.primary.blue[50],
-      foreground: themeConfig.colors.primary.blue[900],
-      primary: themeConfig.colors.primary.blue[600],
-      secondary: themeConfig.colors.primary.blue[300],
-      muted: themeConfig.colors.primary.blue[100],
-      accent: themeConfig.colors.primary.blue[200],
-      border: themeConfig.colors.primary.blue[200],
-      card: themeConfig.colors.primary.blue[50],
-    }
-  },
-  'fresh-green': {
-    name: 'Fresh Green',
-    description: 'Foco ecológico e leve',
-    colors: {
-      background: themeConfig.colors.primary.green[50],
-      foreground: themeConfig.colors.primary.green[900],
-      primary: themeConfig.colors.primary.green[600],
-      secondary: themeConfig.colors.primary.green[300],
-      muted: themeConfig.colors.primary.green[100],
-      accent: themeConfig.colors.primary.green[200],
-      border: themeConfig.colors.primary.green[200],
-      card: themeConfig.colors.primary.green[50],
-    }
-  },
-  'neutral-gray': {
-    name: 'Neutral Gray',
-    description: 'Corporativo neutro e profissional',
-    colors: {
-      background: themeConfig.colors.neutral[50],
-      foreground: themeConfig.colors.neutral[900],
-      primary: themeConfig.colors.neutral[600],
-      secondary: themeConfig.colors.neutral[400],
-      muted: themeConfig.colors.neutral[100],
-      accent: themeConfig.colors.neutral[200],
-      border: themeConfig.colors.neutral[200],
-      card: themeConfig.colors.neutral[50],
-    }
-  },
-  'warm-pastel': {
-    name: 'Warm Pastel',
-    description: 'Acentos suaves para engajamento',
-    colors: {
-      background: 'hsl(30, 100%, 98%)',
-      foreground: 'hsl(30, 100%, 10%)',
-      primary: 'hsl(30, 100%, 60%)',
-      secondary: 'hsl(320, 100%, 60%)',
-      muted: 'hsl(30, 100%, 95%)',
+      primary: 'hsl(280, 100%, 70%)',
+      secondary: 'hsl(300, 100%, 95%)',
       accent: 'hsl(320, 100%, 90%)',
-      border: 'hsl(30, 100%, 90%)',
-      card: 'hsl(30, 100%, 98%)',
-    }
-  }
-} as const
+      background: 'hsl(0, 0%, 100%)',
+      foreground: 'hsl(280, 100%, 20%)',
+      muted: 'hsl(300, 100%, 95%)',
+      mutedForeground: 'hsl(280, 50%, 50%)',
+      border: 'hsl(280, 100%, 85%)',
+      input: 'hsl(280, 100%, 85%)',
+      ring: 'hsl(280, 100%, 70%)',
+      destructive: 'hsl(0, 100%, 60%)',
+      destructiveForeground: 'hsl(0, 0%, 100%)',
+      success: 'hsl(120, 100%, 40%)',
+      successForeground: 'hsl(0, 0%, 100%)',
+      warning: 'hsl(45, 100%, 50%)',
+      warningForeground: 'hsl(0, 0%, 100%)',
+    },
+    effects: {
+      glassmorphism: false,
+      gradients: true,
+      shadows: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05)',
+      borderRadius: '0.75rem',
+      animation: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+  pastel: {
+    profile: 'pastel',
+    colors: {
+      primary: 'hsl(200, 100%, 85%)',
+      secondary: 'hsl(180, 100%, 95%)',
+      accent: 'hsl(160, 100%, 90%)',
+      background: 'hsl(0, 0%, 100%)',
+      foreground: 'hsl(200, 50%, 30%)',
+      muted: 'hsl(180, 100%, 95%)',
+      mutedForeground: 'hsl(200, 30%, 60%)',
+      border: 'hsl(200, 100%, 90%)',
+      input: 'hsl(200, 100%, 90%)',
+      ring: 'hsl(200, 100%, 85%)',
+      destructive: 'hsl(0, 100%, 80%)',
+      destructiveForeground: 'hsl(0, 50%, 20%)',
+      success: 'hsl(120, 100%, 80%)',
+      successForeground: 'hsl(120, 50%, 20%)',
+      warning: 'hsl(60, 100%, 80%)',
+      warningForeground: 'hsl(60, 50%, 20%)',
+    },
+    effects: {
+      glassmorphism: false,
+      gradients: true,
+      shadows: '0 2px 8px -2px rgb(0 0 0 / 0.05), 0 1px 3px -1px rgb(0 0 0 / 0.1)',
+      borderRadius: '1rem',
+      animation: '250ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+  glassmorphism: {
+    profile: 'glassmorphism',
+    colors: {
+      primary: 'hsl(220, 100%, 60%)',
+      secondary: 'hsla(220, 100%, 95%, 0.8)',
+      accent: 'hsla(220, 100%, 90%, 0.6)',
+      background: 'hsla(220, 100%, 98%, 0.9)',
+      foreground: 'hsl(220, 50%, 20%)',
+      muted: 'hsla(220, 100%, 95%, 0.7)',
+      mutedForeground: 'hsla(220, 50%, 50%, 0.8)',
+      border: 'hsla(220, 100%, 90%, 0.5)',
+      input: 'hsla(220, 100%, 90%, 0.6)',
+      ring: 'hsl(220, 100%, 60%)',
+      destructive: 'hsl(0, 100%, 60%)',
+      destructiveForeground: 'hsl(0, 0%, 100%)',
+      success: 'hsl(120, 100%, 50%)',
+      successForeground: 'hsl(0, 0%, 100%)',
+      warning: 'hsl(45, 100%, 50%)',
+      warningForeground: 'hsl(0, 0%, 100%)',
+    },
+    effects: {
+      glassmorphism: true,
+      gradients: true,
+      shadows: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+      borderRadius: '1rem',
+      animation: '300ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+  minimal: {
+    profile: 'minimal',
+    colors: {
+      primary: 'hsl(0, 0%, 9%)',
+      secondary: 'hsl(0, 0%, 98%)',
+      accent: 'hsl(0, 0%, 96%)',
+      background: 'hsl(0, 0%, 100%)',
+      foreground: 'hsl(0, 0%, 9%)',
+      muted: 'hsl(0, 0%, 96%)',
+      mutedForeground: 'hsl(0, 0%, 45%)',
+      border: 'hsl(0, 0%, 90%)',
+      input: 'hsl(0, 0%, 90%)',
+      ring: 'hsl(0, 0%, 9%)',
+      destructive: 'hsl(0, 84%, 60%)',
+      destructiveForeground: 'hsl(0, 0%, 98%)',
+      success: 'hsl(142, 76%, 36%)',
+      successForeground: 'hsl(0, 0%, 98%)',
+      warning: 'hsl(38, 92%, 50%)',
+      warningForeground: 'hsl(0, 0%, 98%)',
+    },
+    effects: {
+      glassmorphism: false,
+      gradients: false,
+      shadows: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+      borderRadius: '0.25rem',
+      animation: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+}
 
-export default themeConfig
+export const darkThemeConfigs: Record<ColorProfile, Omit<ThemeConfig, 'mode'>> = {
+  corporate: {
+    profile: 'corporate',
+    colors: {
+      primary: 'hsl(221, 83%, 53%)',
+      secondary: 'hsl(222.2, 84%, 4.9%)',
+      accent: 'hsl(217.2, 32.6%, 17.5%)',
+      background: 'hsl(222.2, 84%, 4.9%)',
+      foreground: 'hsl(210, 40%, 98%)',
+      muted: 'hsl(217.2, 32.6%, 17.5%)',
+      mutedForeground: 'hsl(215, 20.2%, 65.1%)',
+      border: 'hsl(217.2, 32.6%, 17.5%)',
+      input: 'hsl(217.2, 32.6%, 17.5%)',
+      ring: 'hsl(221, 83%, 53%)',
+      destructive: 'hsl(0, 62.8%, 30.6%)',
+      destructiveForeground: 'hsl(210, 40%, 98%)',
+      success: 'hsl(142, 76%, 36%)',
+      successForeground: 'hsl(210, 40%, 98%)',
+      warning: 'hsl(38, 92%, 50%)',
+      warningForeground: 'hsl(210, 40%, 98%)',
+    },
+    effects: {
+      glassmorphism: false,
+      gradients: false,
+      shadows: '0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2)',
+      borderRadius: '0.5rem',
+      animation: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+  vibrant: {
+    profile: 'vibrant',
+    colors: {
+      primary: 'hsl(280, 100%, 70%)',
+      secondary: 'hsl(280, 100%, 10%)',
+      accent: 'hsl(280, 100%, 15%)',
+      background: 'hsl(280, 100%, 5%)',
+      foreground: 'hsl(280, 100%, 95%)',
+      muted: 'hsl(280, 100%, 15%)',
+      mutedForeground: 'hsl(280, 50%, 70%)',
+      border: 'hsl(280, 100%, 20%)',
+      input: 'hsl(280, 100%, 20%)',
+      ring: 'hsl(280, 100%, 70%)',
+      destructive: 'hsl(0, 100%, 60%)',
+      destructiveForeground: 'hsl(0, 0%, 100%)',
+      success: 'hsl(120, 100%, 40%)',
+      successForeground: 'hsl(0, 0%, 100%)',
+      warning: 'hsl(45, 100%, 50%)',
+      warningForeground: 'hsl(0, 0%, 100%)',
+    },
+    effects: {
+      glassmorphism: false,
+      gradients: true,
+      shadows: '0 10px 25px -5px rgb(0 0 0 / 0.4), 0 4px 6px -2px rgb(0 0 0 / 0.2)',
+      borderRadius: '0.75rem',
+      animation: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+  pastel: {
+    profile: 'pastel',
+    colors: {
+      primary: 'hsl(200, 100%, 70%)',
+      secondary: 'hsl(200, 50%, 15%)',
+      accent: 'hsl(200, 50%, 20%)',
+      background: 'hsl(200, 50%, 10%)',
+      foreground: 'hsl(200, 100%, 90%)',
+      muted: 'hsl(200, 50%, 20%)',
+      mutedForeground: 'hsl(200, 30%, 70%)',
+      border: 'hsl(200, 50%, 25%)',
+      input: 'hsl(200, 50%, 25%)',
+      ring: 'hsl(200, 100%, 70%)',
+      destructive: 'hsl(0, 100%, 60%)',
+      destructiveForeground: 'hsl(0, 0%, 100%)',
+      success: 'hsl(120, 100%, 50%)',
+      successForeground: 'hsl(0, 0%, 100%)',
+      warning: 'hsl(60, 100%, 50%)',
+      warningForeground: 'hsl(0, 0%, 100%)',
+    },
+    effects: {
+      glassmorphism: false,
+      gradients: true,
+      shadows: '0 2px 8px -2px rgb(0 0 0 / 0.3), 0 1px 3px -1px rgb(0 0 0 / 0.2)',
+      borderRadius: '1rem',
+      animation: '250ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+  glassmorphism: {
+    profile: 'glassmorphism',
+    colors: {
+      primary: 'hsl(220, 100%, 60%)',
+      secondary: 'hsla(220, 100%, 10%, 0.8)',
+      accent: 'hsla(220, 100%, 15%, 0.6)',
+      background: 'hsla(220, 100%, 5%, 0.9)',
+      foreground: 'hsl(220, 100%, 90%)',
+      muted: 'hsla(220, 100%, 15%, 0.7)',
+      mutedForeground: 'hsla(220, 50%, 70%, 0.8)',
+      border: 'hsla(220, 100%, 20%, 0.5)',
+      input: 'hsla(220, 100%, 20%, 0.6)',
+      ring: 'hsl(220, 100%, 60%)',
+      destructive: 'hsl(0, 100%, 60%)',
+      destructiveForeground: 'hsl(0, 0%, 100%)',
+      success: 'hsl(120, 100%, 50%)',
+      successForeground: 'hsl(0, 0%, 100%)',
+      warning: 'hsl(45, 100%, 50%)',
+      warningForeground: 'hsl(0, 0%, 100%)',
+    },
+    effects: {
+      glassmorphism: true,
+      gradients: true,
+      shadows: '0 8px 32px 0 rgba(31, 38, 135, 0.5)',
+      borderRadius: '1rem',
+      animation: '300ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+  minimal: {
+    profile: 'minimal',
+    colors: {
+      primary: 'hsl(0, 0%, 98%)',
+      secondary: 'hsl(0, 0%, 9%)',
+      accent: 'hsl(0, 0%, 14%)',
+      background: 'hsl(0, 0%, 9%)',
+      foreground: 'hsl(0, 0%, 98%)',
+      muted: 'hsl(0, 0%, 14%)',
+      mutedForeground: 'hsl(0, 0%, 63%)',
+      border: 'hsl(0, 0%, 14%)',
+      input: 'hsl(0, 0%, 14%)',
+      ring: 'hsl(0, 0%, 98%)',
+      destructive: 'hsl(0, 62.8%, 30.6%)',
+      destructiveForeground: 'hsl(0, 0%, 98%)',
+      success: 'hsl(142, 76%, 36%)',
+      successForeground: 'hsl(0, 0%, 98%)',
+      warning: 'hsl(38, 92%, 50%)',
+      warningForeground: 'hsl(0, 0%, 98%)',
+    },
+    effects: {
+      glassmorphism: false,
+      gradients: false,
+      shadows: '0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2)',
+      borderRadius: '0.25rem',
+      animation: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+}
+
+export function getThemeConfig(mode: ThemeMode, profile: ColorProfile): ThemeConfig {
+  const configs = mode === 'dark' ? darkThemeConfigs : themeConfigs
+  return {
+    mode,
+    profile,
+    ...configs[profile],
+  }
+}
+
+export function applyThemeToDocument(config: ThemeConfig) {
+  const root = document.documentElement
+  
+  // Apply colors
+  Object.entries(config.colors).forEach(([key, value]) => {
+    root.style.setProperty(`--${key}`, value)
+  })
+  
+  // Apply effects
+  root.style.setProperty('--shadow', config.effects.shadows)
+  root.style.setProperty('--radius', config.effects.borderRadius)
+  root.style.setProperty('--animation', config.effects.animation)
+  
+  // Apply glassmorphism effect
+  if (config.effects.glassmorphism) {
+    root.classList.add('glassmorphism')
+  } else {
+    root.classList.remove('glassmorphism')
+  }
+  
+  // Apply gradients
+  if (config.effects.gradients) {
+    root.classList.add('gradients')
+  } else {
+    root.classList.remove('gradients')
+  }
+  
+  // Set theme class
+  root.className = `${config.mode} ${config.profile}`
+}

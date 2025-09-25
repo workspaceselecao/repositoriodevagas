@@ -2,12 +2,11 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { CacheProvider } from './contexts/CacheContext'
 import { ThemeProvider } from './contexts/ThemeContext'
-import { ToastProvider } from './components/ui/toast'
 import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
 import DebugInfo from './components/DebugInfo'
-import LoginPageNew from './components/LoginPageNew'
-import { DashboardLayout } from './components/layouts/DashboardLayout'
+import LoginPage from './components/LoginPage'
+import DashboardLayout from './components/DashboardLayout'
 import Dashboard from './components/Dashboard'
 import ListaClientes from './components/ListaClientes'
 import ComparativoClientes from './components/ComparativoClientes'
@@ -17,7 +16,6 @@ import GerenciarUsuarios from './components/GerenciarUsuarios'
 import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
 import Diagnostico from './components/Diagnostico'
-import { DemoPage } from './components/DemoPage'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
@@ -50,124 +48,62 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={!user ? <LoginPageNew /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={
         <ProtectedRoute>
-          <DashboardLayout
-            title="Dashboard"
-            breadcrumbs={[{ label: 'Dashboard' }]}
-          >
+          <DashboardLayout>
             <Dashboard />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/clientes" element={
         <ProtectedRoute>
-          <DashboardLayout
-            title="Lista de Clientes"
-            breadcrumbs={[
-              { label: 'Dashboard', href: '/dashboard' },
-              { label: 'Clientes' }
-            ]}
-          >
+          <DashboardLayout>
             <ListaClientes />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/comparativo" element={
         <ProtectedRoute>
-          <DashboardLayout
-            title="Comparativo de Clientes"
-            breadcrumbs={[
-              { label: 'Dashboard', href: '/dashboard' },
-              { label: 'Comparativo' }
-            ]}
-          >
+          <DashboardLayout>
             <ComparativoClientes />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/nova-vaga" element={
         <ProtectedRoute>
-          <DashboardLayout
-            title="Nova Vaga"
-            breadcrumbs={[
-              { label: 'Dashboard', href: '/dashboard' },
-              { label: 'Nova Vaga' }
-            ]}
-          >
+          <DashboardLayout>
             <NovaVagaFormWithScraping />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/usuarios" element={
         <ProtectedRoute requireAdmin={true}>
-          <DashboardLayout
-            title="Gerenciar Usuários"
-            breadcrumbs={[
-              { label: 'Dashboard', href: '/dashboard' },
-              { label: 'Usuários' }
-            ]}
-          >
+          <DashboardLayout>
             <GerenciarUsuarios />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/dashboard/configuracoes" element={
         <ProtectedRoute requireAdmin={true}>
-          <DashboardLayout
-            title="Configurações"
-            breadcrumbs={[
-              { label: 'Dashboard', href: '/dashboard' },
-              { label: 'Configurações' }
-            ]}
-          >
+          <DashboardLayout>
             <Configuracoes />
           </DashboardLayout>
         </ProtectedRoute>
       } />
               <Route path="/dashboard/vaga/:id" element={
                 <ProtectedRoute>
-                  <DashboardLayout
-                    title="Visualizar Vaga"
-                    breadcrumbs={[
-                      { label: 'Dashboard', href: '/dashboard' },
-                      { label: 'Vaga' }
-                    ]}
-                  >
-                    <VagaView />
-                  </DashboardLayout>
+                  <VagaView />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/editar-vaga/:id" element={
                 <ProtectedRoute>
-                  <DashboardLayout
-                    title="Editar Vaga"
-                    breadcrumbs={[
-                      { label: 'Dashboard', href: '/dashboard' },
-                      { label: 'Editar Vaga' }
-                    ]}
-                  >
-                    <EditarVagaForm />
-                  </DashboardLayout>
+                  <EditarVagaForm />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard/diagnostico" element={
                 <ProtectedRoute>
-                  <DashboardLayout
-                    title="Diagnóstico"
-                    breadcrumbs={[
-                      { label: 'Dashboard', href: '/dashboard' },
-                      { label: 'Diagnóstico' }
-                    ]}
-                  >
-                    <Diagnostico />
-                  </DashboardLayout>
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/demo" element={
-                <ProtectedRoute>
-                  <DemoPage />
+                  <Diagnostico />
                 </ProtectedRoute>
               } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -182,14 +118,12 @@ function App() {
   
   return (
     <ThemeProvider>
-      <ToastProvider>
-        <AuthProvider>
-          <CacheProvider>
-            <AppRoutes />
-            <DebugInfo />
-          </CacheProvider>
-        </AuthProvider>
-      </ToastProvider>
+      <AuthProvider>
+        <CacheProvider>
+          <AppRoutes />
+          <DebugInfo />
+        </CacheProvider>
+      </AuthProvider>
     </ThemeProvider>
   )
 }
