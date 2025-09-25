@@ -498,15 +498,10 @@ export default function ComparativoClientes() {
             </div>
           )}
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={clearAllFilters}>
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Limpar Filtros
-          </Button>
-          <Button variant="outline" onClick={scrollToClientHeaders}>
-            📍 Ir para Clientes
-          </Button>
-        </div>
+        <Button variant="outline" onClick={clearAllFilters}>
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Limpar Filtros
+        </Button>
       </div>
 
       {/* Seleção de Clientes */}
