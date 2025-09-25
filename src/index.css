@@ -277,60 +277,60 @@
     color: hsl(var(--text-accent));
   }
 
-/* CORREÇÃO CRÍTICA - CONTRASTE DAS FONTES NO TEMA ESCURO */
+/* CORREÇÃO CRÍTICA - CONTRASTE MÁXIMO DAS FONTES EM TODOS OS TEMAS */
 .dark {
-  --muted-foreground: 210 20% 90%;
-  --secondary-foreground: 210 20% 95%;
-  --accent-foreground: 210 20% 95%;
-  --card-foreground: 210 20% 98%;
-  --popover-foreground: 210 20% 98%;
+  --muted-foreground: 0 0% 95%;
+  --secondary-foreground: 0 0% 98%;
+  --accent-foreground: 0 0% 98%;
+  --card-foreground: 0 0% 100%;
+  --popover-foreground: 0 0% 100%;
 }
 
-/* FORÇAR CONTRASTE EM TODOS OS ELEMENTOS DE TEXTO */
+/* FORÇAR CONTRASTE MÁXIMO EM TODOS OS ELEMENTOS DE TEXTO */
 .dark .text-muted-foreground {
-  color: hsl(210 20% 90%) !important;
+  color: hsl(0 0% 95%) !important;
 }
 
 .dark .text-secondary-foreground {
-  color: hsl(210 20% 95%) !important;
+  color: hsl(0 0% 98%) !important;
 }
 
 .dark .text-accent-foreground {
-  color: hsl(210 20% 95%) !important;
+  color: hsl(0 0% 98%) !important;
 }
 
 .dark .text-foreground {
-  color: hsl(210 20% 98%) !important;
+  color: hsl(0 0% 100%) !important;
 }
 
 .dark .card-foreground {
-  color: hsl(210 20% 98%) !important;
+  color: hsl(0 0% 100%) !important;
 }
 
 .dark .popover-foreground {
-  color: hsl(210 20% 98%) !important;
+  color: hsl(0 0% 100%) !important;
 }
 
-/* CONTRASTE ESPECÍFICO PARA CARTÕES */
+/* CONTRASTE MÁXIMO PARA CARTÕES */
 .dark .card {
   background: hsl(var(--card)) !important;
-  color: hsl(210 20% 98%) !important;
+  color: hsl(0 0% 100%) !important;
   border-color: hsl(var(--border)) !important;
 }
 
 .dark .card .text-muted-foreground {
-  color: hsl(210 20% 90%) !important;
+  color: hsl(0 0% 95%) !important;
 }
 
 .dark .card .text-secondary-foreground {
-  color: hsl(210 20% 95%) !important;
+  color: hsl(0 0% 98%) !important;
 }
 
 .dark .card .text-accent-foreground {
-  color: hsl(210 20% 95%) !important;
+  color: hsl(0 0% 98%) !important;
 }
 
-/* CONTRASTE PARA TODOS OS PERFIS DE COR */
+/* CONTRASTE MÁXIMO PARA TODOS OS PERFIS DE COR */
 .dark.blue .text-muted-foreground,
 .dark.purple .text-muted-foreground,
 .dark.green .text-muted-foreground,
@@ -340,7 +340,7 @@
 .dark.emerald .text-muted-foreground,
 .dark.amber .text-muted-foreground,
 .dark.cyan .text-muted-foreground {
-  color: hsl(210 20% 90%) !important;
+  color: hsl(0 0% 95%) !important;
 }
 
 .dark.blue .card,
@@ -353,7 +353,7 @@
 .dark.amber .card,
 .dark.cyan .card {
   background: hsl(var(--card)) !important;
-  color: hsl(210 20% 98%) !important;
+  color: hsl(0 0% 100%) !important;
   border-color: hsl(var(--border)) !important;
 }
 
@@ -366,7 +366,56 @@
 .dark.emerald .card .text-muted-foreground,
 .dark.amber .card .text-muted-foreground,
 .dark.cyan .card .text-muted-foreground {
-  color: hsl(210 20% 90%) !important;
+  color: hsl(0 0% 95%) !important;
+}
+
+/* CONTRASTE MÁXIMO PARA INPUTS E TEXTAREAS */
+.dark input,
+.dark textarea {
+  color: hsl(0 0% 100%) !important;
+  background-color: hsl(var(--background)) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: hsl(0 0% 70%) !important;
+}
+
+/* CONTRASTE MÁXIMO PARA LABELS */
+.dark label {
+  color: hsl(0 0% 100%) !important;
+}
+
+/* CONTRASTE MÁXIMO PARA TODOS OS TEXTOS */
+.dark * {
+  color: inherit;
+}
+
+.dark p,
+.dark span,
+.dark div,
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: hsl(0 0% 100%) !important;
+}
+
+/* CONTRASTE ESPECÍFICO PARA ELEMENTOS DE FORMULÁRIO */
+.dark .form-field,
+.dark .form-input,
+.dark .form-textarea {
+  color: hsl(0 0% 100%) !important;
+}
+
+.dark .form-label {
+  color: hsl(0 0% 100%) !important;
+}
+
+.dark .form-description {
+  color: hsl(0 0% 90%) !important;
 }
   
   /* Efeitos de hover melhorados */

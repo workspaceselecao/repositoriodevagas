@@ -271,7 +271,7 @@ export default function NovaVagaFormWithScraping() {
           onChange={handleInputChange}
           placeholder={placeholder}
           rows={rows || 4}
-          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground dark:text-white"
         />
       ) : (
         <Input
@@ -280,6 +280,7 @@ export default function NovaVagaFormWithScraping() {
           value={formData[name] || ''}
           onChange={handleInputChange}
           placeholder={placeholder}
+          className="text-foreground dark:text-white"
         />
       )}
     </div>
@@ -340,7 +341,7 @@ export default function NovaVagaFormWithScraping() {
                     value={scrapingUrl}
                     onChange={(e) => setScrapingUrl(e.target.value)}
                     placeholder="https://atento.gupy.io/jobs/XXXXXXXXXX?jobBoardSource=share_link"
-                    className="flex-1"
+                    className="flex-1 text-foreground dark:text-white"
                   />
                   <Button
                     onClick={handleScrapingFromURL}
