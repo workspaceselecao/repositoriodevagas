@@ -71,7 +71,10 @@ export class JobScrapingService {
       '//div[@class="sc-add46fb1-3 cOkxvQ"]//p[contains(strong, "Horário de Trabalho")]/following-sibling::ul/li',
       '//p[contains(strong, "Horário de Trabalho")]/following-sibling::ul/li',
       '//strong[contains(text(), "Horário de Trabalho")]/following-sibling::ul/li',
-      '//*[contains(text(), "Das ") and contains(text(), " às ")]'
+      '//li[contains(text(), "Das ") and contains(text(), " às ")]',
+      '//*[contains(text(), "Das ") and contains(text(), " às ")]',
+      '//*[contains(text(), "08:00") and contains(text(), "17:48")]',
+      '//*[matches(text(), "\\d{1,2}:\\d{2}") and contains(text(), "às")]'
     ],
     jornada_trabalho: [
       '//div[@data-testid="text-section" and .//h2[@data-testid="section-Informações adicionais-title"]]//p[contains(strong, "Jornada de Trabalho")]/following-sibling::p',
@@ -92,6 +95,10 @@ export class JobScrapingService {
       '//div[@class="sc-add46fb1-3 cOkxvQ"]//p[contains(strong, "Local de trabalho")]',
       '//p[contains(strong, "Local de trabalho")]',
       '//strong[contains(text(), "Local de trabalho")]/parent::p',
+      '//p[contains(text(), "Local de trabalho:")]',
+      '//*[contains(text(), "Av ") and contains(text(), " - ")]',
+      '//*[contains(text(), "Rua ") and contains(text(), " - ")]',
+      '//*[contains(text(), "Praça ") and contains(text(), " - ")]',
       '//*[contains(text(), "Av ") or contains(text(), "Rua ") or contains(text(), "Praça ")]'
     ],
     etapas_processo: [
@@ -114,40 +121,17 @@ export class JobScrapingService {
       const extractedFields: any = {}
       const result: Partial<ScrapingResult> = {}
       
-      // Função auxiliar para extrair texto usando XPath com pontuação de confiança
-      const extractTextWithConfidence = (xpaths: string[], field: keyof ScrapingResult): { text: string; confidence: number } => {
-        for (let i = 0; i < xpaths.length; i++) {
-          try {
-            const element = this.evaluateXPath(doc, xpaths[i])
-            if (element) {
-              const text = this.cleanText(element.textContent || (element as HTMLElement).innerText || '')
-              if (text.trim()) {
-                // Calcular confiança baseada na posição do XPath e qualidade do conteúdo
-                const baseConfidence = Math.max(0, 100 - (i * 10)) // Primeiros XPaths têm maior confiança
-                const contentConfidence = this.calculateContentConfidence(text, field)
-                const confidence = Math.min(100, baseConfidence + contentConfidence)
-                
-                return { text, confidence }
-              }
-            }
-          } catch (error) {
-            console.warn(`Erro ao extrair ${field} com XPath: ${xpaths[i]}`, error)
-          }
-        }
-        return { text: '', confidence: 0 }
-      }
-
-      // Extrair cada campo com confiança
-      const tituloResult = extractTextWithConfidence(this.XPATH_PATTERNS.titulo, 'titulo')
-      const descricaoResult = extractTextWithConfidence(this.XPATH_PATTERNS.descricao_vaga, 'descricao_vaga')
-      const responsabilidadesResult = extractTextWithConfidence(this.XPATH_PATTERNS.responsabilidades_atribuicoes, 'responsabilidades_atribuicoes')
-      const requisitosResult = extractTextWithConfidence(this.XPATH_PATTERNS.requisitos_qualificacoes, 'requisitos_qualificacoes')
-      const salarioResult = extractTextWithConfidence(this.XPATH_PATTERNS.salario, 'salario')
-      const horarioResult = extractTextWithConfidence(this.XPATH_PATTERNS.horario_trabalho, 'horario_trabalho')
-      const jornadaResult = extractTextWithConfidence(this.XPATH_PATTERNS.jornada_trabalho, 'jornada_trabalho')
-      const beneficiosResult = extractTextWithConfidence(this.XPATH_PATTERNS.beneficios, 'beneficios')
-      const localResult = extractTextWithConfidence(this.XPATH_PATTERNS.local_trabalho, 'local_trabalho')
-      const etapasResult = extractTextWithConfidence(this.XPATH_PATTERNS.etapas_processo, 'etapas_processo')
+      // Extrair cada campo com confiança usando a nova função com fallback
+      const tituloResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.titulo, 'titulo')
+      const descricaoResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.descricao_vaga, 'descricao_vaga')
+      const responsabilidadesResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.responsabilidades_atribuicoes, 'responsabilidades_atribuicoes')
+      const requisitosResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.requisitos_qualificacoes, 'requisitos_qualificacoes')
+      const salarioResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.salario, 'salario')
+      const horarioResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.horario_trabalho, 'horario_trabalho')
+      const jornadaResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.jornada_trabalho, 'jornada_trabalho')
+      const beneficiosResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.beneficios, 'beneficios')
+      const localResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.local_trabalho, 'local_trabalho')
+      const etapasResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.etapas_processo, 'etapas_processo')
 
       // Construir resultado
       result.titulo = tituloResult.text
@@ -192,6 +176,75 @@ export class JobScrapingService {
         message: `Erro ao processar HTML: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
       }
     }
+  }
+
+  /**
+   * Função auxiliar para extrair texto com múltiplos padrões de fallback
+   */
+  private static extractWithFallback(doc: Document, xpaths: string[], field: keyof ScrapingResult): { text: string; confidence: number } {
+    // Tentar XPath primeiro
+    for (let i = 0; i < xpaths.length; i++) {
+      try {
+        const element = this.evaluateXPath(doc, xpaths[i])
+        if (element) {
+          const text = this.cleanText(element.textContent || (element as HTMLElement).innerText || '')
+          if (text.trim()) {
+            const baseConfidence = Math.max(0, 100 - (i * 10))
+            const contentConfidence = this.calculateContentConfidence(text, field)
+            const confidence = Math.min(100, baseConfidence + contentConfidence)
+            
+            return { text, confidence }
+          }
+        }
+      } catch (error) {
+        console.warn(`Erro ao extrair ${field} com XPath: ${xpaths[i]}`, error)
+      }
+    }
+
+    // Fallback: buscar por texto específico no documento inteiro
+    const fallbackText = this.extractByTextPattern(doc, field)
+    if (fallbackText.text) {
+      return fallbackText
+    }
+
+    return { text: '', confidence: 0 }
+  }
+
+  /**
+   * Extrai dados por padrões de texto específicos (fallback)
+   */
+  private static extractByTextPattern(doc: Document, field: keyof ScrapingResult): { text: string; confidence: number } {
+    const allText = doc.body.textContent || ''
+    
+    switch (field) {
+      case 'horario_trabalho':
+        const horarioMatch = allText.match(/Horário de Trabalho[^<]*?(Das \d{1,2}:\d{2} às \d{1,2}:\d{2})/i)
+        if (horarioMatch) {
+          return { text: horarioMatch[1].trim(), confidence: 70 }
+        }
+        break
+        
+      case 'local_trabalho':
+        const localMatch = allText.match(/Local de trabalho[:\s]*([^<]+?)(?=\s*$|$)/i)
+        if (localMatch) {
+          return { text: localMatch[1].trim(), confidence: 70 }
+        }
+        // Fallback adicional para endereços
+        const enderecoMatch = allText.match(/(Av|Rua|Praça|Avenida)[^<]+/i)
+        if (enderecoMatch) {
+          return { text: enderecoMatch[0].trim(), confidence: 60 }
+        }
+        break
+        
+      case 'salario':
+        const salarioMatch = allText.match(/Salário[:\s]*([^<]*)/i)
+        if (salarioMatch && salarioMatch[1].includes('R$')) {
+          return { text: salarioMatch[1].trim(), confidence: 70 }
+        }
+        break
+    }
+    
+    return { text: '', confidence: 0 }
   }
 
   /**
@@ -271,6 +324,16 @@ export class JobScrapingService {
       .trim()
       .replace(/^\s*Salário:\s*/, '') // Remove prefixo "Salário:"
       .replace(/^\s*Local de trabalho:\s*/, '') // Remove prefixo "Local de trabalho:"
+      .replace(/^\s*Horário de Trabalho:\s*/, '') // Remove prefixo "Horário de Trabalho:"
+      .replace(/^\s*Jornada de Trabalho:\s*/, '') // Remove prefixo "Jornada de Trabalho:"
+      .replace(/^\s*Benefícios:\s*/, '') // Remove prefixo "Benefícios:"
+      .replace(/^\s*<strong>.*?<\/strong>\s*/, '') // Remove tags strong no início
+      .replace(/<[^>]*>/g, '') // Remove outras tags HTML
+      .replace(/&nbsp;/g, ' ') // Remove &nbsp;
+      .replace(/&amp;/g, '&') // Decodifica &amp;
+      .replace(/&lt;/g, '<') // Decodifica &lt;
+      .replace(/&gt;/g, '>') // Decodifica &gt;
+      .replace(/&quot;/g, '"') // Decodifica &quot;
   }
 
   /**
@@ -358,7 +421,7 @@ export class JobScrapingService {
         horario_trabalho: this.extractHorarioFromText(jobData.relevantExperiences || ''),
         jornada_trabalho: this.extractJornadaFromText(jobData.relevantExperiences || ''),
         beneficios: this.extractBeneficiosFromText(jobData.relevantExperiences || ''),
-        local_trabalho: jobData.addressLine || '',
+        local_trabalho: jobData.addressLine || this.extractLocalFromText(jobData.relevantExperiences || ''),
         etapas_processo: this.formatEtapasProcesso(jobData.jobSteps || []),
         confidence: 85, // JSON é mais confiável que HTML
         extractedFields: {
@@ -370,7 +433,7 @@ export class JobScrapingService {
           horario_trabalho: { found: !!(jobData.relevantExperiences && jobData.relevantExperiences.includes('Horário')), confidence: 80, source: 'json', rawValue: jobData.relevantExperiences || '', cleanedValue: this.extractHorarioFromText(jobData.relevantExperiences || '') },
           jornada_trabalho: { found: !!(jobData.relevantExperiences && jobData.relevantExperiences.includes('Jornada')), confidence: 80, source: 'json', rawValue: jobData.relevantExperiences || '', cleanedValue: this.extractJornadaFromText(jobData.relevantExperiences || '') },
           beneficios: { found: !!(jobData.relevantExperiences && jobData.relevantExperiences.includes('Benefícios')), confidence: 80, source: 'json', rawValue: jobData.relevantExperiences || '', cleanedValue: this.extractBeneficiosFromText(jobData.relevantExperiences || '') },
-          local_trabalho: { found: !!jobData.addressLine, confidence: 90, source: 'json', rawValue: jobData.addressLine || '', cleanedValue: jobData.addressLine || '' },
+          local_trabalho: { found: !!(jobData.addressLine || (jobData.relevantExperiences && jobData.relevantExperiences.includes('Local de trabalho'))), confidence: 90, source: 'json', rawValue: jobData.addressLine || jobData.relevantExperiences || '', cleanedValue: jobData.addressLine || this.extractLocalFromText(jobData.relevantExperiences || '') },
           etapas_processo: { found: !!(jobData.jobSteps && jobData.jobSteps.length > 0), confidence: 85, source: 'json', rawValue: JSON.stringify(jobData.jobSteps || []), cleanedValue: this.formatEtapasProcesso(jobData.jobSteps || []) }
         },
         source: 'json'
@@ -408,8 +471,15 @@ export class JobScrapingService {
    * Extrai horário de trabalho do texto
    */
   private static extractHorarioFromText(text: string): string {
-    const horarioMatch = text.match(/Horário de Trabalho[^<]*?([0-9]{1,2}[hH][0-9]{2}[^<]*)/i)
-    return horarioMatch ? horarioMatch[1].trim() : ''
+    // Padrão mais específico para capturar "Das 08:00 às 17:48"
+    const horarioMatch = text.match(/Horário de Trabalho[^<]*?(Das \d{1,2}:\d{2} às \d{1,2}:\d{2})/i)
+    if (horarioMatch) {
+      return horarioMatch[1].trim()
+    }
+    
+    // Fallback para outros formatos
+    const fallbackMatch = text.match(/Horário de Trabalho[^<]*?([0-9]{1,2}[hH:][0-9]{2}[^<]*)/i)
+    return fallbackMatch ? fallbackMatch[1].trim() : ''
   }
 
   /**
@@ -426,6 +496,21 @@ export class JobScrapingService {
   private static extractBeneficiosFromText(text: string): string {
     const beneficiosMatch = text.match(/Benefícios[^<]*?(.*?)(?=Local de trabalho|$)/is)
     return beneficiosMatch ? this.cleanHTML(beneficiosMatch[1]).trim() : ''
+  }
+
+  /**
+   * Extrai local de trabalho do texto
+   */
+  private static extractLocalFromText(text: string): string {
+    // Padrão para capturar "Local de trabalho: Av Barão Homem de Melo, 432 - Estoril Belo Horizonte."
+    const localMatch = text.match(/Local de trabalho[:\s]*([^<]+?)(?=\s*$|$)/i)
+    if (localMatch) {
+      return localMatch[1].trim()
+    }
+    
+    // Fallback para endereços que começam com Av, Rua, etc.
+    const enderecoMatch = text.match(/(Av|Rua|Praça|Avenida)[^<]+/i)
+    return enderecoMatch ? enderecoMatch[0].trim() : ''
   }
 
   /**
