@@ -18,7 +18,8 @@
     "setup-database": "tsx scripts/setup-database.ts",
     "populate-vagas": "tsx scripts/populate-vagas.ts",
     "reset-vagas": "tsx scripts/reset-and-populate-vagas.ts",
-    "check-vagas": "tsx scripts/check-vagas.ts"
+    "check-vagas": "tsx scripts/check-vagas.ts",
+    "commit": "tsx scripts/auto-commit.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.1.2",

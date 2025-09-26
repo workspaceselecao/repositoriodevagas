@@ -1,0 +1,110 @@
+{
+  "types": {
+    "feat": {
+      "emoji": "✨",
+      "description": "Nova funcionalidade",
+      "patterns": ["src/components/", "src/hooks/", "src/contexts/", "app/"]
+    },
+    "fix": {
+      "emoji": "🐛",
+      "description": "Correção de bug",
+      "patterns": ["src/", "app/", "scripts/"]
+    },
+    "docs": {
+      "emoji": "📚",
+      "description": "Documentação",
+      "patterns": ["*.md", "README.md", "docs/"]
+    },
+    "style": {
+      "emoji": "💄",
+      "description": "Formatação, espaços em branco, etc.",
+      "patterns": ["src/", "*.css", "*.scss", "tailwind.config.ts"]
+    },
+    "refactor": {
+      "emoji": "♻️",
+      "description": "Refatoração de código",
+      "patterns": ["src/", "scripts/"]
+    },
+    "perf": {
+      "emoji": "⚡",
+      "description": "Melhoria de performance",
+      "patterns": ["src/", "scripts/"]
+    },
+    "test": {
+      "emoji": "🧪",
+      "description": "Testes",
+      "patterns": ["test/", "*.test.ts", "*.test.tsx", "*.spec.ts"]
+    },
+    "build": {
+      "emoji": "🏗️",
+      "description": "Sistema de build",
+      "patterns": ["package.json", "vite.config.ts", "tsconfig.json", "tailwind.config.ts"]
+    },
+    "ci": {
+      "emoji": "👷",
+      "description": "Integração contínua",
+      "patterns": [".github/", "vercel.json", "*.yml", "*.yaml"]
+    },
+    "chore": {
+      "emoji": "🔧",
+      "description": "Tarefas de manutenção",
+      "patterns": ["scripts/", "*.sql", "database/"]
+    },
+    "database": {
+      "emoji": "🗄️",
+      "description": "Mudanças no banco de dados",
+      "patterns": ["database/", "scripts/*.sql"]
+    },
+    "ui": {
+      "emoji": "🎨",
+      "description": "Interface do usuário",
+      "patterns": ["src/components/", "src/index.css", "public/"]
+    },
+    "config": {
+      "emoji": "⚙️",
+      "description": "Configurações",
+      "patterns": ["*.config.*", ".env*", "components.json"]
+    }
+  },
+  "scopes": {
+    "auth": ["AuthContext", "login", "authentication"],
+    "dashboard": ["dashboard", "comparativo", "configuracoes"],
+    "vagas": ["vagas", "jobs", "emprego"],
+    "database": ["database", "supabase", "schema"],
+    "ui": ["components", "ui", "interface"],
+    "api": ["api", "endpoints", "proxy"],
+    "scripts": ["scripts", "automation"],
+    "build": ["build", "vite", "typescript"],
+    "docs": ["documentation", "readme", "md"]
+  },
+  "hooks": {
+    "preCommit": [
+      "npm run lint"
+    ],
+    "postCommit": []
+  },
+  "validation": {
+    "maxMessageLength": 100,
+    "minMessageLength": 10,
+    "requireScope": false,
+    "allowedTypes": [
+      "feat",
+      "fix",
+      "docs",
+      "style",
+      "refactor",
+      "perf",
+      "test",
+      "build",
+      "ci",
+      "chore",
+      "database",
+      "ui",
+      "config"
+    ]
+  },
+  "conventional": {
+    "enabled": true,
+    "breakingChangePrefix": "BREAKING CHANGE:"
+  }
+}
