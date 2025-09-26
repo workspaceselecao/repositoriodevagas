@@ -311,23 +311,23 @@
   color: hsl(0 0% 100%) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA CARTÕES - TEXTO PRETO */
+/* CONTRASTE MÁXIMO PARA CARTÕES - FUNDO ESCURO COM TEXTO BRANCO */
 .dark .card {
-  background: hsl(var(--card)) !important;
-  color: hsl(0 0% 0%) !important;
+  background: hsl(240 10% 3.9%) !important;
+  color: hsl(0 0% 100%) !important;
   border-color: hsl(var(--border)) !important;
 }
 
 .dark .card .text-muted-foreground {
-  color: hsl(0 0% 20%) !important;
+  color: hsl(0 0% 85%) !important;
 }
 
 .dark .card .text-secondary-foreground {
-  color: hsl(0 0% 10%) !important;
+  color: hsl(0 0% 95%) !important;
 }
 
 .dark .card .text-accent-foreground {
-  color: hsl(0 0% 10%) !important;
+  color: hsl(0 0% 95%) !important;
 }
 
 /* CONTRASTE MÁXIMO PARA TODOS OS PERFIS DE COR */
@@ -352,8 +352,8 @@
 .dark.emerald .card,
 .dark.amber .card,
 .dark.cyan .card {
-  background: hsl(var(--card)) !important;
-  color: hsl(0 0% 0%) !important;
+  background: hsl(240 10% 3.9%) !important;
+  color: hsl(0 0% 100%) !important;
   border-color: hsl(var(--border)) !important;
 }
 
@@ -366,7 +366,7 @@
 .dark.emerald .card .text-muted-foreground,
 .dark.amber .card .text-muted-foreground,
 .dark.cyan .card .text-muted-foreground {
-  color: hsl(0 0% 20%) !important;
+  color: hsl(0 0% 85%) !important;
 }
 
 /* CONTRASTE MÁXIMO PARA INPUTS E TEXTAREAS - TEXTO PRETO */
@@ -391,7 +391,7 @@
   color: inherit;
 }
 
-/* CONTRASTE MÁXIMO PARA TODOS OS TEXTOS EM CARDS - TEXTO PRETO */
+/* CONTRASTE MÁXIMO PARA TODOS OS TEXTOS EM CARDS - TEXTO BRANCO */
 .dark .card p,
 .dark .card span,
 .dark .card div,
@@ -401,7 +401,7 @@
 .dark .card h4,
 .dark .card h5,
 .dark .card h6 {
-  color: hsl(0 0% 0%) !important;
+  color: hsl(0 0% 100%) !important;
 }
 
 /* CONTRASTE ESPECÍFICO PARA ELEMENTOS DE FORMULÁRIO - TEXTO PRETO */
