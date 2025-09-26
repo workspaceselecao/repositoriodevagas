@@ -16,7 +16,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
       <div
         ref={ref}
         className={cn(
-          "relative flex h-screen flex-col border-r bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out shadow-lg",
+          "relative flex h-screen flex-col border-r bg-card transition-all duration-300 ease-in-out shadow-lg",
           isCollapsed ? "w-16" : "w-64",
           className
         )}
@@ -27,16 +27,16 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
         }`}>
           {!isCollapsed ? (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">RV</span>
               </div>
-              <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <h2 className="text-lg font-semibold text-primary">
                 Repositório
               </h2>
             </div>
           ) : (
             <div className="flex items-center justify-center">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">RV</span>
               </div>
             </div>
