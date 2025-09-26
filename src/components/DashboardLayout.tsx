@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import SobreModal from './SobreModal'
 import UpdateModal from './UpdateModal'
 import ChangePasswordModal from './ChangePasswordModal'
+import PWANotification from './PWANotification'
 import { 
   Home, 
   Users, 
@@ -391,6 +392,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           console.log('Senha alterada com sucesso!')
         }}
       />
+
+      {/* PWA Notifications */}
+      <PWANotification />
     </TooltipProvider>
   )
 }
