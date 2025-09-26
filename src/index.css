@@ -311,23 +311,23 @@
   color: hsl(0 0% 100%) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA CARTÕES */
+/* CONTRASTE MÁXIMO PARA CARTÕES - TEXTO PRETO */
 .dark .card {
   background: hsl(var(--card)) !important;
-  color: hsl(0 0% 100%) !important;
+  color: hsl(0 0% 0%) !important;
   border-color: hsl(var(--border)) !important;
 }
 
 .dark .card .text-muted-foreground {
-  color: hsl(0 0% 95%) !important;
+  color: hsl(0 0% 20%) !important;
 }
 
 .dark .card .text-secondary-foreground {
-  color: hsl(0 0% 98%) !important;
+  color: hsl(0 0% 10%) !important;
 }
 
 .dark .card .text-accent-foreground {
-  color: hsl(0 0% 98%) !important;
+  color: hsl(0 0% 10%) !important;
 }
 
 /* CONTRASTE MÁXIMO PARA TODOS OS PERFIS DE COR */
@@ -353,7 +353,7 @@
 .dark.amber .card,
 .dark.cyan .card {
   background: hsl(var(--card)) !important;
-  color: hsl(0 0% 100%) !important;
+  color: hsl(0 0% 0%) !important;
   border-color: hsl(var(--border)) !important;
 }
 
@@ -366,24 +366,24 @@
 .dark.emerald .card .text-muted-foreground,
 .dark.amber .card .text-muted-foreground,
 .dark.cyan .card .text-muted-foreground {
-  color: hsl(0 0% 95%) !important;
+  color: hsl(0 0% 20%) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA INPUTS E TEXTAREAS */
+/* CONTRASTE MÁXIMO PARA INPUTS E TEXTAREAS - TEXTO PRETO */
 .dark input,
 .dark textarea {
-  color: hsl(0 0% 100%) !important;
+  color: hsl(0 0% 0%) !important;
   background-color: hsl(var(--background)) !important;
 }
 
 .dark input::placeholder,
 .dark textarea::placeholder {
-  color: hsl(0 0% 70%) !important;
+  color: hsl(0 0% 30%) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA LABELS */
+/* CONTRASTE MÁXIMO PARA LABELS - TEXTO PRETO */
 .dark label {
-  color: hsl(0 0% 100%) !important;
+  color: hsl(0 0% 0%) !important;
 }
 
 /* CONTRASTE MÁXIMO PARA TODOS OS TEXTOS */
@@ -391,31 +391,32 @@
   color: inherit;
 }
 
-.dark p,
-.dark span,
-.dark div,
-.dark h1,
-.dark h2,
-.dark h3,
-.dark h4,
-.dark h5,
-.dark h6 {
-  color: hsl(0 0% 100%) !important;
+/* CONTRASTE MÁXIMO PARA TODOS OS TEXTOS EM CARDS - TEXTO PRETO */
+.dark .card p,
+.dark .card span,
+.dark .card div,
+.dark .card h1,
+.dark .card h2,
+.dark .card h3,
+.dark .card h4,
+.dark .card h5,
+.dark .card h6 {
+  color: hsl(0 0% 0%) !important;
 }
 
-/* CONTRASTE ESPECÍFICO PARA ELEMENTOS DE FORMULÁRIO */
+/* CONTRASTE ESPECÍFICO PARA ELEMENTOS DE FORMULÁRIO - TEXTO PRETO */
 .dark .form-field,
 .dark .form-input,
 .dark .form-textarea {
-  color: hsl(0 0% 100%) !important;
+  color: hsl(0 0% 0%) !important;
 }
 
 .dark .form-label {
-  color: hsl(0 0% 100%) !important;
+  color: hsl(0 0% 0%) !important;
 }
 
 .dark .form-description {
-  color: hsl(0 0% 90%) !important;
+  color: hsl(0 0% 20%) !important;
 }
   
   /* Efeitos de hover melhorados */
