@@ -1,5 +1,6 @@
 import { supabase, supabaseAdmin } from './supabase'
 import { User, AuthUser, LoginFormData, UserFormData } from '../types/database'
+import { validatePasswordStrength, isValidPassword } from './password-utils'
 
 // Função para fazer login usando Supabase Auth
 export async function signIn({ email, password }: LoginFormData): Promise<AuthUser | null> {
@@ -407,5 +408,243 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   } catch (error) {
     console.error('Erro ao buscar usuário atual:', error)
     return null
+  }
+}
+
+// ===== NOVAS FUNCIONALIDADES DE RECUPERAÇÃO E ALTERAÇÃO DE SENHA =====
+
+/**
+ * Envia email de recuperação de senha
+ */
+export async function resetPasswordForEmail(email: string): Promise<{ success: boolean; message: string }> {
+  try {
+    // Validar formato do email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return {
+        success: false,
+        message: 'Por favor, insira um email válido'
+      }
+    }
+
+    // Enviar email de recuperação usando Supabase Auth
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${import.meta.env.VITE_SUPABASE_REDIRECT_URL || 'http://localhost:5173'}/reset-password`
+    })
+
+    if (error) {
+      console.error('Erro ao enviar email de recuperação:', error)
+      
+      // Tratar erros específicos
+      if (error.message.includes('rate limit')) {
+        return {
+          success: false,
+          message: 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.'
+        }
+      }
+      
+      if (error.message.includes('not found')) {
+        // Por segurança, não revelar se o email existe ou não
+        return {
+          success: true,
+          message: 'Se o email estiver cadastrado, você receberá um link de recuperação em alguns minutos.'
+        }
+      }
+      
+      return {
+        success: false,
+        message: 'Erro ao enviar email de recuperação. Tente novamente.'
+      }
+    }
+
+    // Sempre retornar sucesso para não revelar se o email existe
+    return {
+      success: true,
+      message: 'Se o email estiver cadastrado, você receberá um link de recuperação em alguns minutos.'
+    }
+  } catch (error) {
+    console.error('Erro inesperado ao enviar email de recuperação:', error)
+    return {
+      success: false,
+      message: 'Erro inesperado. Tente novamente mais tarde.'
+    }
+  }
+}
+
+/**
+ * Atualiza a senha do usuário logado
+ */
+export async function updateUserPassword(newPassword: string): Promise<{ success: boolean; message: string }> {
+  try {
+    // Validar força da senha
+    if (!isValidPassword(newPassword)) {
+      const validation = validatePasswordStrength(newPassword)
+      return {
+        success: false,
+        message: `Senha muito fraca. ${validation.errors.join(', ')}`
+      }
+    }
+
+    // Atualizar senha usando Supabase Auth
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    })
+
+    if (error) {
+      console.error('Erro ao atualizar senha:', error)
+      
+      if (error.message.includes('same')) {
+        return {
+          success: false,
+          message: 'A nova senha deve ser diferente da senha atual.'
+        }
+      }
+      
+      return {
+        success: false,
+        message: 'Erro ao atualizar senha. Tente novamente.'
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Senha atualizada com sucesso!'
+    }
+  } catch (error) {
+    console.error('Erro inesperado ao atualizar senha:', error)
+    return {
+      success: false,
+      message: 'Erro inesperado. Tente novamente mais tarde.'
+    }
+  }
+}
+
+/**
+ * Redefine a senha usando o token de recuperação
+ */
+export async function resetPasswordWithToken(newPassword: string): Promise<{ success: boolean; message: string }> {
+  try {
+    // Validar força da senha
+    if (!isValidPassword(newPassword)) {
+      const validation = validatePasswordStrength(newPassword)
+      return {
+        success: false,
+        message: `Senha muito fraca. ${validation.errors.join(', ')}`
+      }
+    }
+
+    // Atualizar senha usando Supabase Auth (funciona com token de recuperação)
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    })
+
+    if (error) {
+      console.error('Erro ao redefinir senha:', error)
+      
+      if (error.message.includes('session')) {
+        return {
+          success: false,
+          message: 'Link de recuperação expirado ou inválido. Solicite um novo link.'
+        }
+      }
+      
+      return {
+        success: false,
+        message: 'Erro ao redefinir senha. Tente novamente.'
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Senha redefinida com sucesso! Você será redirecionado para o login.'
+    }
+  } catch (error) {
+    console.error('Erro inesperado ao redefinir senha:', error)
+    return {
+      success: false,
+      message: 'Erro inesperado. Tente novamente mais tarde.'
+    }
+  }
+}
+
+/**
+ * Verifica se há uma sessão de recuperação de senha ativa
+ */
+export async function hasPasswordRecoverySession(): Promise<boolean> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    // Verificar se é uma sessão de recuperação (geralmente tem refresh_token mas não é uma sessão completa)
+    return !!(session?.user && session.access_token)
+  } catch (error) {
+    console.error('Erro ao verificar sessão de recuperação:', error)
+    return false
+  }
+}
+
+/**
+ * Valida se o usuário pode alterar a senha (verifica senha atual)
+ */
+export async function validateCurrentPassword(currentPassword: string): Promise<{ success: boolean; message: string }> {
+  try {
+    // Obter usuário atual
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user?.email) {
+      return {
+        success: false,
+        message: 'Usuário não encontrado.'
+      }
+    }
+
+    // Tentar fazer login com a senha atual para validar
+    const { error } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword
+    })
+
+    if (error) {
+      if (error.message.includes('Invalid login credentials')) {
+        return {
+          success: false,
+          message: 'Senha atual incorreta.'
+        }
+      }
+      
+      return {
+        success: false,
+        message: 'Erro ao validar senha atual. Tente novamente.'
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Senha atual válida.'
+    }
+  } catch (error) {
+    console.error('Erro ao validar senha atual:', error)
+    return {
+      success: false,
+      message: 'Erro inesperado. Tente novamente mais tarde.'
+    }
+  }
+}
+
+/**
+ * Logout e redirecionamento após alteração de senha
+ */
+export async function logoutAndRedirect(): Promise<void> {
+  try {
+    // Fazer logout
+    await signOut()
+    
+    // Redirecionar para login após um pequeno delay
+    setTimeout(() => {
+      window.location.href = '/login'
+    }, 1000)
+  } catch (error) {
+    console.error('Erro durante logout:', error)
+    // Mesmo com erro, tentar redirecionar
+    window.location.href = '/login'
   }
 }

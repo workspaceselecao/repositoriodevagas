@@ -8,7 +8,7 @@ import { Label } from './ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { ThemeToggle } from './ThemeToggle'
 import { LoginFormData } from '../types/database'
-import { Building2, Lock, Mail, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react'
+import { Building2, Lock, Mail, Eye, EyeOff, CheckCircle, AlertCircle, KeyRound } from 'lucide-react'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({
@@ -177,18 +177,29 @@ export default function LoginPage() {
               </div>
             </div>
             
-            {/* Lembrar sessão */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
-              />
-              <Label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer">
-                Lembrar sessão
-              </Label>
+            {/* Lembrar sessão e Esqueci senha */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="remember"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
+                />
+                <Label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer">
+                  Lembrar sessão
+                </Label>
+              </div>
+              
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors duration-200"
+              >
+                <KeyRound className="h-3 w-3" />
+                Esqueci minha senha
+              </button>
             </div>
             
             {/* Mensagem de erro */}

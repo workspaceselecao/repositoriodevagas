@@ -11,6 +11,7 @@ import { Badge } from './ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import SobreModal from './SobreModal'
 import UpdateModal from './UpdateModal'
+import ChangePasswordModal from './ChangePasswordModal'
 import { 
   Home, 
   Users, 
@@ -21,7 +22,8 @@ import {
   BarChart3,
   Building2,
   Menu,
-  Info
+  Info,
+  Key
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -32,6 +34,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSobreModalOpen, setIsSobreModalOpen] = useState(false)
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false)
   const { user, logout } = useAuth()
   const { config } = useTheme()
   const navigate = useNavigate()
@@ -312,6 +315,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   
                   <Button
                     variant="ghost"
+                    className="w-full justify-start px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200 rounded-xl mb-2"
+                    onClick={() => setIsChangePasswordModalOpen(true)}
+                  >
+                    <Key className="h-4 w-4" />
+                    <span className="ml-3 text-sm font-medium">Alterar Senha</span>
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
                     className="w-full justify-start px-3 py-2 text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 rounded-xl"
                     onClick={handleLogout}
                   >
@@ -366,6 +378,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         isOpen={showUpdateModal}
         onClose={handleCloseUpdateModal}
         onUpdate={handleAppUpdate}
+      />
+      
+      {/* Change Password Modal */}
+      <ChangePasswordModal 
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+        onSuccess={() => {
+          // Opcional: mostrar mensagem de sucesso ou fazer logout
+          console.log('Senha alterada com sucesso!')
+        }}
       />
     </TooltipProvider>
   )

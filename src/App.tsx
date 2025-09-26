@@ -6,6 +6,8 @@ import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
 import DebugInfo from './components/DebugInfo'
 import LoginPage from './components/LoginPage'
+import ForgotPasswordPage from './components/ForgotPasswordPage'
+import ResetPasswordPage from './components/ResetPasswordPage'
 import DashboardLayout from './components/DashboardLayout'
 import Dashboard from './components/Dashboard'
 import ListaClientes from './components/ListaClientes'
@@ -48,6 +50,8 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/forgot-password" element={!user ? <ForgotPasswordPage /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/reset-password" element={!user ? <ResetPasswordPage /> : <Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <DashboardLayout>
