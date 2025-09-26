@@ -53,8 +53,8 @@ Adicione ao seu `.env`:
 
 ```env
 # URLs para redirecionamento (necessário para recuperação de senha)
-VITE_SUPABASE_REDIRECT_URL=http://localhost:5173
-VITE_SUPABASE_SITE_URL=http://localhost:5173
+VITE_SUPABASE_REDIRECT_URL=http://localhost:3000
+VITE_SUPABASE_SITE_URL=http://localhost:3000
 ```
 
 Para produção (Vercel):
@@ -70,7 +70,7 @@ VITE_SUPABASE_SITE_URL=https://repositoriodevagas.vercel.app
 Site URL: https://repositoriodevagas.vercel.app
 Redirect URLs:
 - https://repositoriodevagas.vercel.app/reset-password
-- http://localhost:5173/reset-password
+- http://localhost:3000/reset-password
 ```
 
 #### **Authentication → Email Templates:**

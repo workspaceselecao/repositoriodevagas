@@ -429,7 +429,7 @@ export async function resetPasswordForEmail(email: string): Promise<{ success: b
 
     // Enviar email de recuperação usando Supabase Auth
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${import.meta.env.VITE_SUPABASE_REDIRECT_URL || 'http://localhost:5173'}/reset-password`
+      redirectTo: `${import.meta.env.VITE_SUPABASE_REDIRECT_URL || 'http://localhost:3000'}/reset-password`
     })
 
     if (error) {
