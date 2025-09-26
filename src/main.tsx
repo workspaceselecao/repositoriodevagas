@@ -4,18 +4,8 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
 
-// Registrar Service Worker para PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('SW registrado com sucesso:', registration);
-      })
-      .catch((registrationError) => {
-        console.log('Falha no registro do SW:', registrationError);
-      });
-  });
-}
+// Registrar Service Worker para PWA (removido - agora é feito pelo vite-plugin-pwa)
+// O vite-plugin-pwa já registra automaticamente o service worker
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
