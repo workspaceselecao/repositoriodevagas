@@ -1,5 +1,5 @@
-export const APP_VERSION = "1.0.1"
-export const BUILD_DATE = "2024-01-15T10:00:00Z"
+export const APP_VERSION = "1.0.3"
+export const BUILD_DATE = "2024-01-25T15:45:00Z"
 
 // Chave para armazenar a versão atual no localStorage
 const VERSION_STORAGE_KEY = 'repositoriodevagas_current_version'
@@ -87,13 +87,6 @@ export const checkForUpdates = async (): Promise<boolean> => {
     
     if (!serverVersion) {
       console.log('⚠️ Não foi possível obter versão do servidor')
-      
-      // Em desenvolvimento, simular nova versão para teste
-      if (import.meta.env.DEV) {
-        console.log('🔧 Modo desenvolvimento: simulando nova versão disponível')
-        return true
-      }
-      
       return false
     }
     
@@ -107,33 +100,21 @@ export const checkForUpdates = async (): Promise<boolean> => {
       return false
     }
     
-    // Comparar versões
-    const hasUpdate = serverVersion.version !== storedVersion
+    // Comparar versões - CORREÇÃO: comparar com APP_VERSION atual, não com storedVersion
+    const hasUpdate = serverVersion.version !== APP_VERSION
     
     console.log('🔄 Comparação de versões:')
-    console.log(`   Local (armazenada): ${storedVersion}`)
+    console.log(`   APP_VERSION atual: ${APP_VERSION}`)
     console.log(`   Servidor: ${serverVersion.version}`)
+    console.log(`   Armazenada: ${storedVersion}`)
     console.log(`   Nova versão disponível: ${hasUpdate ? '✅ SIM' : '❌ NÃO'}`)
     
     // Atualizar timestamp da última verificação
     localStorage.setItem(LAST_CHECK_KEY, new Date().toISOString())
     
-    // Em desenvolvimento, sempre retornar true para teste
-    if (import.meta.env.DEV && serverVersion.version === APP_VERSION) {
-      console.log('🔧 Modo desenvolvimento: forçando nova versão para teste')
-      return true
-    }
-    
     return hasUpdate
   } catch (error) {
     console.error('❌ Erro ao verificar atualizações:', error)
-    
-    // Em desenvolvimento, simular nova versão para teste
-    if (import.meta.env.DEV) {
-      console.log('🔧 Modo desenvolvimento: simulando nova versão disponível (erro na verificação)')
-      return true
-    }
-    
     return false
   }
 }
@@ -145,8 +126,9 @@ export const forceReload = () => {
   // Buscar a versão atual do servidor e atualizar o localStorage antes do reload
   fetchServerVersion().then(serverVersion => {
     if (serverVersion) {
+      // CORREÇÃO: Atualizar para a versão do servidor, não manter a atual
       setCurrentStoredVersion(serverVersion.version)
-      console.log('✅ Versão atualizada no localStorage:', serverVersion.version)
+      console.log('✅ Versão atualizada no localStorage para:', serverVersion.version)
       
       // Limpar cache do navegador para garantir que a nova versão seja carregada
       if ('caches' in window) {
