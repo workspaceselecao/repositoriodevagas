@@ -130,8 +130,16 @@ export class JobScrapingService {
       const horarioResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.horario_trabalho, 'horario_trabalho')
       const jornadaResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.jornada_trabalho, 'jornada_trabalho')
       const beneficiosResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.beneficios, 'beneficios')
+      // Formatar benefícios como lista se encontrado
+      if (beneficiosResult.text) {
+        beneficiosResult.text = this.formatBeneficiosAsList(beneficiosResult.text)
+      }
       const localResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.local_trabalho, 'local_trabalho')
       const etapasResult = this.extractWithFallback(doc, this.XPATH_PATTERNS.etapas_processo, 'etapas_processo')
+      // Formatar etapas removendo prefixo "Etapa x:" se encontrado
+      if (etapasResult.text) {
+        etapasResult.text = this.formatEtapasAsList(etapasResult.text)
+      }
 
       // Construir resultado
       result.titulo = tituloResult.text
@@ -494,8 +502,54 @@ export class JobScrapingService {
    * Extrai benefícios do texto
    */
   private static extractBeneficiosFromText(text: string): string {
-    const beneficiosMatch = text.match(/Benefícios[^<]*?(.*?)(?=Local de trabalho|$)/is)
-    return beneficiosMatch ? this.cleanHTML(beneficiosMatch[1]).trim() : ''
+    // Padrão mais específico para capturar apenas a lista de benefícios
+    const beneficiosMatch = text.match(/Benefícios[^<]*?<ul[^>]*>(.*?)<\/ul>/is)
+    if (beneficiosMatch) {
+      const beneficiosText = this.cleanHTML(beneficiosMatch[1]).trim()
+      return this.formatBeneficiosAsList(beneficiosText)
+    }
+    
+    // Fallback para o padrão anterior
+    const fallbackMatch = text.match(/Benefícios[^<]*?(.*?)(?=Local de trabalho|$)/is)
+    if (fallbackMatch) {
+      const beneficiosText = this.cleanHTML(fallbackMatch[1]).trim()
+      return this.formatBeneficiosAsList(beneficiosText)
+    }
+    return ''
+  }
+
+  /**
+   * Formata benefícios como lista de tópicos
+   */
+  private static formatBeneficiosAsList(text: string): string {
+    if (!text.trim()) return ''
+    
+    // Remover tags HTML e normalizar
+    const cleanText = text
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .trim()
+    
+    // Dividir por ponto e vírgula ou quebras de linha
+    const items = cleanText
+      .split(/[;]\s*/)
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+    
+    // Se não encontrou separadores, tentar dividir por quebras de linha
+    if (items.length === 1) {
+      const lines = cleanText.split(/\n+/).map(line => line.trim()).filter(line => line.length > 0)
+      if (lines.length > 1) {
+        return lines.map(line => `• ${line}`).join('\n')
+      }
+    }
+    
+    // Formatar como lista de tópicos
+    return items.map(item => `• ${item}`).join('\n')
   }
 
   /**
@@ -514,6 +568,45 @@ export class JobScrapingService {
   }
 
   /**
+   * Formata etapas do processo extraídas via HTML
+   */
+  private static formatEtapasAsList(text: string): string {
+    if (!text.trim()) return ''
+    
+    // Limpar HTML e normalizar
+    const cleanText = text
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .trim()
+    
+    // Dividir por quebras de linha
+    const lines = cleanText.split(/\n+/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+    
+    // Processar cada linha removendo prefixo "Etapa x:" e números extras
+    return lines.map(line => {
+      // Remover prefixo "Etapa X:" se existir
+      let withoutPrefix = line.replace(/^Etapa\s+\d+:\s*/i, '').trim()
+      
+      // Remover números extras que podem aparecer no final (ex: "Cadastro1Cadastro")
+      withoutPrefix = withoutPrefix.replace(/\d+$/, '').trim()
+      
+      // Remover duplicações (ex: "Cadastro1Cadastro" -> "Cadastro")
+      const words = withoutPrefix.split(/(?=\d)/)
+      if (words.length > 1 && words[1].match(/^\d/)) {
+        withoutPrefix = words[0].trim()
+      }
+      
+      return `• ${withoutPrefix}`
+    }).join('\n')
+  }
+
+  /**
    * Formata etapas do processo
    */
   private static formatEtapasProcesso(etapas: any[]): string {
@@ -521,7 +614,7 @@ export class JobScrapingService {
     
     return etapas
       .sort((a, b) => (a.order || 0) - (b.order || 0))
-      .map((etapa, index) => `Etapa ${index + 1}: ${etapa.name || ''}`)
+      .map((etapa, index) => `• ${etapa.name || ''}`)
       .join('\n')
   }
 
