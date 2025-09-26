@@ -37,7 +37,10 @@ export default function PWANotification() {
   // Mostrar banner de atualização
   useEffect(() => {
     if (needRefresh) {
+      console.log('🔄 Mostrando banner de atualização')
       setShowUpdateBanner(true)
+    } else {
+      setShowUpdateBanner(false)
     }
   }, [needRefresh])
 
@@ -104,8 +107,11 @@ export default function PWANotification() {
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={updateSW}
-                className="h-8 px-3 text-xs"
+                onClick={() => {
+                  console.log('🔄 Botão de atualização clicado')
+                  updateSW()
+                }}
+                className="h-8 px-3 text-xs hover:bg-white/20 transition-colors duration-200"
               >
                 <RefreshCw className="h-3 w-3 mr-1" />
                 Atualizar
