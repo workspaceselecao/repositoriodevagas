@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
@@ -25,7 +26,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Activity,
-  Zap
+  Zap,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 
 export default function Dashboard() {
@@ -35,8 +38,22 @@ export default function Dashboard() {
   const { noticias } = useNoticias()
   const { refreshAll } = useCache()
 
+  // Estado para controlar expansão dos cards
+  const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
+
   // Limitar notícias exibidas
   const noticiasExibidas = noticias.slice(0, 9)
+
+  // Função para alternar expansão do card
+  const toggleCardExpansion = (index: number) => {
+    const newExpanded = new Set(expandedCards)
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index)
+    } else {
+      newExpanded.add(index)
+    }
+    setExpandedCards(newExpanded)
+  }
 
 
   // Emergency refresh
@@ -341,56 +358,88 @@ export default function Dashboard() {
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {noticiasExibidas.map((noticia, index) => (
-                <Card 
-                  key={noticia.id} 
-                  className={`card-3d hover-lift-3d transition-all duration-300 animate-fade-in ${
-                    config.effects.glassmorphism ? 'bg-white/5 backdrop-blur-sm border-white/10' : ''
-                  }`}
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <div className={`p-2 rounded-lg ${getTipoColor(noticia.tipo)} shadow-md`}>
-                          {getTipoIcon(noticia.tipo)}
+              {noticiasExibidas.map((noticia, index) => {
+                const isExpanded = expandedCards.has(index)
+                const shouldShowExpandButton = noticia.conteudo.length > 150
+                
+                return (
+                  <Card 
+                    key={noticia.id} 
+                    className={`card-3d hover-lift-3d transition-all duration-300 animate-fade-in ${
+                      config.effects.glassmorphism ? 'bg-white/5 backdrop-blur-sm border-white/10' : ''
+                    } ${isExpanded ? 'ring-2 ring-primary/20' : ''}`}
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <div className={`p-2 rounded-lg ${getTipoColor(noticia.tipo)} shadow-md`}>
+                            {getTipoIcon(noticia.tipo)}
+                          </div>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs font-medium ${getTipoColor(noticia.tipo)}`}
+                          >
+                            {noticia.tipo}
+                          </Badge>
                         </div>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs font-medium ${getTipoColor(noticia.tipo)}`}
-                        >
-                          {noticia.tipo}
-                        </Badge>
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-3 h-3 rounded-full ${getPrioridadeColor(noticia.prioridade)} animate-pulse`}></div>
+                          <span className="text-xs text-muted-foreground font-medium">{noticia.prioridade}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <div className={`w-3 h-3 rounded-full ${getPrioridadeColor(noticia.prioridade)} animate-pulse`}></div>
-                        <span className="text-xs text-muted-foreground font-medium">{noticia.prioridade}</span>
+                      <CardTitle className="text-lg leading-tight text-foreground hover:text-primary transition-colors duration-200">
+                        {noticia.titulo}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className={`text-sm text-muted-foreground mb-4 leading-relaxed transition-all duration-300 ${
+                        isExpanded ? '' : 'line-clamp-3'
+                      }`}>
+                        {noticia.conteudo}
                       </div>
-                    </div>
-                    <CardTitle className="text-lg leading-tight text-foreground hover:text-primary transition-colors duration-200">
-                      {noticia.titulo}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed">
-                      {noticia.conteudo}
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border/50">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="h-3 w-3" />
-                        <span className="font-medium">{formatDate(noticia.created_at)}</span>
+                      
+                      {/* Botão de expandir/contrair */}
+                      {shouldShowExpandButton && (
+                        <div className="mb-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleCardExpansion(index)}
+                            className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors duration-200"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="h-3 w-3 mr-1" />
+                                Ver menos
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="h-3 w-3 mr-1" />
+                                Ver mais
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border/50">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-3 w-3" />
+                          <span className="font-medium">{formatDate(noticia.created_at)}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-3 w-3" />
+                          <span className="font-medium">{new Date(noticia.created_at).toLocaleTimeString('pt-BR', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="h-3 w-3" />
-                        <span className="font-medium">{new Date(noticia.created_at).toLocaleTimeString('pt-BR', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        })}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           )}
         </CardContent>
