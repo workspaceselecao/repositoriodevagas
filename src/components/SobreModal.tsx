@@ -13,9 +13,11 @@ import {
   User,
   Shield,
   Download,
-  RefreshCw
+  RefreshCw,
+  Smartphone
 } from 'lucide-react'
 import { APP_VERSION, checkForUpdates, forceReload, fetchServerVersion, getCurrentStoredVersion } from '../version'
+import { usePWA } from '../hooks/usePWA'
 
 interface SobreModalProps {
   isOpen: boolean
@@ -31,6 +33,9 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
   const [serverVersionInfo, setServerVersionInfo] = useState<{version: string, buildDate: string, description?: string} | null>(null)
   const [currentStoredVersion, setCurrentStoredVersion] = useState<string>(APP_VERSION)
   const [isLoadingInfo, setIsLoadingInfo] = useState(false)
+  
+  // Hook PWA para instalação
+  const { isInstallable, installPWA, isOnline } = usePWA()
   
   // Informações locais (fallback)
   const buildDate = new Date().toLocaleDateString('pt-BR')
@@ -206,6 +211,24 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
                     Verificar Atualizações
                   </Button>
                 </div>
+                
+                {/* Botão de Instalação PWA */}
+                {isInstallable && isOnline && (
+                  <div className="pt-2">
+                    <Button
+                      onClick={installPWA}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      size="sm"
+                    >
+                      <Smartphone className="h-3 w-3 mr-2" />
+                      Instalar App no Dispositivo
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center mt-1">
+                      Instale o app para acesso mais rápido e funcionalidades offline
+                    </p>
+                  </div>
+                )}
+                
                 <p className="text-xs text-muted-foreground text-center">
                   As informações são atualizadas automaticamente ao abrir este modal
                 </p>
@@ -362,6 +385,46 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-sm">Row Level Security (RLS) Habilitado</span>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Informações PWA */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Smartphone className="h-4 w-4 text-primary" />
+                Aplicativo PWA
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                <span className="text-sm">
+                  Status: {isOnline ? 'Online' : 'Offline'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isInstallable ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                <span className="text-sm">
+                  Instalação: {isInstallable ? 'Disponível' : 'Não disponível'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm">Service Worker Ativo</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm">Cache Offline Habilitado</span>
+              </div>
+              {!isInstallable && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    Para instalar o app, navegue por algumas páginas do sistema primeiro. 
+                    O ícone de instalação aparecerá na barra de endereços quando estiver disponível.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
