@@ -164,8 +164,10 @@ export function usePWA() {
         console.log('✅ PWA instalado com sucesso via prompt nativo')
         setDeferredPrompt(null)
         setIsInstallable(false)
+        return { success: true, reason: 'Instalado via prompt nativo' }
       } else {
         console.log('❌ Instalação do PWA rejeitada via prompt nativo')
+        return { success: false, reason: 'Instalação rejeitada' }
       }
     } else {
       console.log('🔧 Tentando instalação alternativa...')
@@ -186,14 +188,15 @@ export function usePWA() {
         
         if (result.success) {
           console.log('✅ Instalação iniciada com sucesso')
+          return { success: true, reason: 'Instalação iniciada' }
         } else {
           console.log('⚠️ Instalação não disponível:', result.reason)
-          showInstallInstructions()
+          return { success: false, reason: result.reason }
         }
         
       } catch (error) {
         console.error('❌ Erro na instalação:', error)
-        showInstallInstructions()
+        return { success: false, reason: 'Erro na instalação' }
       }
     }
   }
@@ -206,38 +209,47 @@ export function usePWA() {
         return { success: false, reason: 'Já instalado' }
       }
 
+      // Aguardar um pouco para garantir que o service worker está ativo
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
       // Tentar diferentes métodos de instalação
       const installMethods = [
-        // Método 1: Verificar se o navegador suporta instalação
-        () => {
-          if ('serviceWorker' in navigator && 'PushManager' in window) {
-            // Forçar reload para tentar mostrar o prompt
-            setTimeout(() => {
-              window.location.reload()
-            }, 100)
-            return { success: true }
+        // Método 1: Tentar usar o prompt nativo se disponível
+        async () => {
+          if (deferredPrompt) {
+            console.log('🚀 Usando prompt nativo do navegador')
+            deferredPrompt.prompt()
+            const { outcome } = await deferredPrompt.userChoice
+            return { success: outcome === 'accepted', reason: outcome }
           }
-          return { success: false, reason: 'Navegador não suporta PWA' }
+          return { success: false, reason: 'Prompt nativo não disponível' }
         },
         
         // Método 2: Tentar abrir em nova janela para forçar prompt
         () => {
+          console.log('🚀 Tentando abrir nova janela para forçar prompt')
           const newWindow = window.open(window.location.href, '_blank')
           if (newWindow) {
             newWindow.focus()
             setTimeout(() => {
               newWindow.close()
-            }, 2000)
-            return { success: true }
+            }, 3000)
+            return { success: true, reason: 'Nova janela aberta' }
           }
           return { success: false, reason: 'Não foi possível abrir nova janela' }
+        },
+        
+        // Método 3: Tentar instalar via menu do navegador
+        () => {
+          console.log('🚀 Instruindo usuário a usar menu do navegador')
+          return { success: false, reason: 'Usar menu do navegador' }
         }
       ]
 
       // Tentar cada método
       for (const method of installMethods) {
         try {
-          const result = method()
+          const result = await method()
           if (result.success) {
             return result
           }
@@ -264,34 +276,57 @@ export function usePWA() {
     let instructions = ''
     
     if (isChrome || isEdge) {
-      instructions = `Para instalar este app no Chrome/Edge:
+      instructions = `🚀 INSTALAR APLICATIVO NO SEU COMPUTADOR
 
+Para instalar este app no Chrome/Edge:
+
+MÉTODO 1 - Menu do Navegador:
 1. Clique nos 3 pontos (⋮) no canto superior direito
-2. Selecione "Instalar Repositório de Vagas"
-3. Ou procure o ícone de instalação na barra de endereços
+2. Procure por "Instalar Repositório de Vagas" ou "Instalar aplicativo"
+3. Clique em "Instalar"
 
-O app será instalado como um aplicativo nativo!`
+MÉTODO 2 - Barra de Endereços:
+1. Procure pelo ícone de instalação na barra de endereços
+2. Clique no ícone (parece um download ou +)
+3. Confirme a instalação
+
+MÉTODO 3 - DevTools:
+1. Pressione F12 ou Ctrl+Shift+I
+2. Vá na aba "Application"
+3. Clique em "Manifest"
+4. Clique em "Install"
+
+O app será instalado como um aplicativo nativo no seu computador!`
     } else if (isSafari) {
-      instructions = `Para instalar no Safari:
+      instructions = `🚀 INSTALAR APLICATIVO NO SEU COMPUTADOR
 
-1. Toque no botão de compartilhar (📤)
-2. Role para baixo e toque em "Adicionar à Tela de Início"
-3. Toque em "Adicionar"
+Para instalar no Safari:
+
+1. Clique no botão de compartilhar (📤) na barra de ferramentas
+2. Role para baixo e clique em "Adicionar à Tela de Início"
+3. Clique em "Adicionar"
 
 O app será instalado como um ícone na tela inicial!`
     } else if (isFirefox) {
-      instructions = `Para instalar no Firefox:
+      instructions = `🚀 INSTALAR APLICATIVO NO SEU COMPUTADOR
+
+Para instalar no Firefox:
 
 1. Clique no ícone de instalação na barra de endereços
 2. Ou vá ao menu > "Instalar"
 3. Confirme a instalação
 
-O app será instalado como um aplicativo!`
+O app será instalado como um aplicativo nativo!`
     } else {
-      instructions = `Para instalar este app:
+      instructions = `🚀 INSTALAR APLICATIVO NO SEU COMPUTADOR
 
-Procure pelo ícone de instalação na barra de endereços ou no menu do navegador.
-O app pode ser instalado como um aplicativo nativo no seu dispositivo.`
+Para instalar este app:
+
+1. Procure pelo ícone de instalação na barra de endereços
+2. Ou vá ao menu do navegador e procure por "Instalar"
+3. Confirme a instalação
+
+O app será instalado como um aplicativo nativo no seu computador!`
     }
 
     alert(instructions)
@@ -311,6 +346,7 @@ O app pode ser instalado como um aplicativo nativo no seu dispositivo.`
     installPWA,
     updateSW,
     setNeedRefresh,
-    isStandalone
+    isStandalone,
+    showInstallInstructions
   }
 }

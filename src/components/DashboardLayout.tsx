@@ -14,6 +14,7 @@ import SobreModal from './SobreModal'
 import UpdateModal from './UpdateModal'
 import ChangePasswordModal from './ChangePasswordModal'
 import PWANotification from './PWANotification'
+import InstallInstructionsModal from './InstallInstructionsModal'
 import { 
   Home, 
   Users, 
@@ -39,6 +40,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSobreModalOpen, setIsSobreModalOpen] = useState(false)
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false)
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false)
   const { user, logout } = useAuth()
   const { config } = useTheme()
   const navigate = useNavigate()
@@ -185,7 +187,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <TooltipTrigger asChild>
                       <Button
                         variant="default"
-                        onClick={installPWA}
+                        onClick={async () => {
+                          const result = await installPWA()
+                          if (!result || !result.success) {
+                            setIsInstallModalOpen(true)
+                          }
+                        }}
                         className={`w-full transition-all duration-200 rounded-xl hover-modern bg-green-600 hover:bg-green-700 text-white font-bold ${
                           isCollapsed 
                             ? "justify-center p-3 h-12 w-12" 
@@ -426,6 +433,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           // Opcional: mostrar mensagem de sucesso ou fazer logout
           console.log('Senha alterada com sucesso!')
         }}
+      />
+
+      {/* Install Instructions Modal */}
+      <InstallInstructionsModal 
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
       />
 
       {/* PWA Notifications */}

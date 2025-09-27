@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { usePWA } from '../hooks/usePWA'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
+import InstallInstructionsModal from './InstallInstructionsModal'
 import { 
   Download, 
   RefreshCw, 
@@ -19,11 +20,13 @@ export default function PWANotification() {
     installPWA, 
     updateSW, 
     setNeedRefresh,
-    isStandalone
+    isStandalone,
+    showInstallInstructions
   } = usePWA()
   
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [showUpdateBanner, setShowUpdateBanner] = useState(false)
+  const [showInstallModal, setShowInstallModal] = useState(false)
 
   // Mostrar banner de instalação imediatamente se instalável e não standalone
   useEffect(() => {
@@ -50,6 +53,7 @@ export default function PWANotification() {
   }
 
   return (
+    <>
     <div className="fixed bottom-4 right-4 z-50 space-y-2 max-w-sm">
       {/* Status de conexão */}
       {!isOnline && (
@@ -74,7 +78,12 @@ export default function PWANotification() {
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={installPWA}
+                onClick={async () => {
+                  const result = await installPWA()
+                  if (!result || !result.success) {
+                    setShowInstallModal(true)
+                  }
+                }}
                 className="h-8 px-3 text-xs bg-white text-green-600 hover:bg-gray-100 font-bold"
               >
                 <Download className="h-3 w-3 mr-1" />
@@ -133,5 +142,12 @@ export default function PWANotification() {
         </div>
       )}
     </div>
+
+    {/* Modal de Instruções de Instalação */}
+    <InstallInstructionsModal 
+      isOpen={showInstallModal}
+      onClose={() => setShowInstallModal(false)}
+    />
+  </>
   )
 }
