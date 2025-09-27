@@ -1,40 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
-      devOptions: {
-        enabled: true
-      },
-      // Usar manifest.json estático
-      manifest: false,
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\./,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
-        ]
-      }
-    })
+    react()
   ],
   resolve: {
     alias: {

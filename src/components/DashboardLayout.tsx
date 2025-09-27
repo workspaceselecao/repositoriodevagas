@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useUpdateCheck } from '../hooks/useUpdateCheck'
-import { usePWA } from '../hooks/usePWA'
 import { Sidebar, SidebarItem } from './ui/sidebar'
 import { Button } from './ui/button'
 import { ThemeToggle } from './ThemeToggle'
@@ -13,8 +12,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import SobreModal from './SobreModal'
 import UpdateModal from './UpdateModal'
 import ChangePasswordModal from './ChangePasswordModal'
-import PWANotification from './PWANotification'
-import InstallInstructionsModal from './InstallInstructionsModal'
 import { 
   Home, 
   Users, 
@@ -27,8 +24,6 @@ import {
   Menu,
   Info,
   Key,
-  Download,
-  Smartphone
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -40,14 +35,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSobreModalOpen, setIsSobreModalOpen] = useState(false)
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false)
-  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false)
   const { user, logout } = useAuth()
   const { config } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
   
-  // Hook PWA para instalação
-  const { isInstallable, installPWA, isStandalone } = usePWA()
 
   // Hook para verificar atualizações automaticamente
   const {
@@ -178,39 +170,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               })}
               </div>
               
-              {/* Botão de Instalação PWA */}
-              {!isStandalone && isInstallable && (
-                <div className={`${
-                  isCollapsed ? "p-2 flex flex-col items-center" : "p-4"
-                }`}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="default"
-                        onClick={async () => {
-                          const result = await installPWA()
-                          if (!result || !result.success) {
-                            setIsInstallModalOpen(true)
-                          }
-                        }}
-                        className={`w-full transition-all duration-200 rounded-xl hover-modern bg-green-600 hover:bg-green-700 text-white font-bold ${
-                          isCollapsed 
-                            ? "justify-center p-3 h-12 w-12" 
-                            : "justify-start px-3 py-2"
-                        }`}
-                      >
-                        <Download className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
-                        {!isCollapsed && <span className="ml-3 text-sm font-bold">🚀 INSTALAR</span>}
-                      </Button>
-                    </TooltipTrigger>
-                    {isCollapsed && (
-                      <TooltipContent side="right" className="ml-2">
-                        <p>Instalar App</p>
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                </div>
-              )}
 
               {/* Botão Sobre */}
               <div className={`border-t ${
@@ -435,14 +394,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }}
       />
 
-      {/* Install Instructions Modal */}
-      <InstallInstructionsModal 
-        isOpen={isInstallModalOpen}
-        onClose={() => setIsInstallModalOpen(false)}
-      />
-
-      {/* PWA Notifications */}
-      <PWANotification />
     </TooltipProvider>
   )
 }
