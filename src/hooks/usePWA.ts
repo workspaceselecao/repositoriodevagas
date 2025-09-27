@@ -250,7 +250,7 @@ export function usePWA() {
       
     } catch (error) {
       console.error('Erro ao forçar prompt:', error)
-      return { success: false, reason: error.message }
+      return { success: false, reason: error instanceof Error ? error.message : 'Erro desconhecido' }
     }
   }
 
