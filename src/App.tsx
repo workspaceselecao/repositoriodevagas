@@ -21,6 +21,7 @@ import { PWAInstallPrompt } from './components/PWAInstallPrompt'
 import { OfflineIndicator } from './components/OfflineIndicator'
 import { PWAUpdatePrompt } from './components/PWAUpdatePrompt'
 import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate'
+import { PWADebug } from './components/PWADebug'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
@@ -130,6 +131,7 @@ function App() {
           <PWAInstallPrompt />
           <PWAUpdatePrompt onUpdate={updateServiceWorker} />
           <OfflineIndicator />
+          <PWADebug />
         </CacheProvider>
       </AuthProvider>
     </ThemeProvider>
