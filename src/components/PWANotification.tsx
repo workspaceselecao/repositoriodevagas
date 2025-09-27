@@ -61,13 +61,13 @@ export default function PWANotification() {
 
       {/* Banner de instalação */}
       {showInstallBanner && isInstallable && !isStandalone && (
-        <div className="bg-blue-600 text-white p-4 rounded-lg shadow-lg">
+        <div className="bg-green-600 text-white p-4 rounded-lg shadow-lg">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2">
               <Smartphone className="h-5 w-5" />
               <div>
-                <p className="font-medium text-sm">Instalar App</p>
-                <p className="text-xs opacity-90">Instalação instantânea disponível!</p>
+                <p className="font-medium text-sm">🚀 INSTALAR APP AGORA</p>
+                <p className="text-xs opacity-90">Clique para instalar instantaneamente!</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -75,10 +75,10 @@ export default function PWANotification() {
                 size="sm"
                 variant="secondary"
                 onClick={installPWA}
-                className="h-8 px-3 text-xs"
+                className="h-8 px-3 text-xs bg-white text-green-600 hover:bg-gray-100 font-bold"
               >
                 <Download className="h-3 w-3 mr-1" />
-                Instalar Agora
+                INSTALAR
               </Button>
               <Button
                 size="sm"

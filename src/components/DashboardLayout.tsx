@@ -186,14 +186,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Button
                         variant="default"
                         onClick={installPWA}
-                        className={`w-full transition-all duration-200 rounded-xl hover-modern bg-blue-600 hover:bg-blue-700 text-white ${
+                        className={`w-full transition-all duration-200 rounded-xl hover-modern bg-green-600 hover:bg-green-700 text-white font-bold ${
                           isCollapsed 
                             ? "justify-center p-3 h-12 w-12" 
                             : "justify-start px-3 py-2"
                         }`}
                       >
                         <Download className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
-                        {!isCollapsed && <span className="ml-3 text-sm font-medium">Instalar App</span>}
+                        {!isCollapsed && <span className="ml-3 text-sm font-bold">🚀 INSTALAR</span>}
                       </Button>
                     </TooltipTrigger>
                     {isCollapsed && (

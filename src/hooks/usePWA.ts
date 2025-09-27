@@ -153,76 +153,148 @@ export function usePWA() {
 
   // Instalar PWA
   const installPWA = async () => {
+    console.log('🚀 Iniciando instalação forçada do PWA...')
+    
     if (deferredPrompt) {
-      // Usar o prompt nativo se disponível
+      console.log('📱 Usando prompt nativo do navegador')
       deferredPrompt.prompt()
       const { outcome } = await deferredPrompt.userChoice
       
       if (outcome === 'accepted') {
-        console.log('PWA instalado com sucesso')
+        console.log('✅ PWA instalado com sucesso via prompt nativo')
+        setDeferredPrompt(null)
+        setIsInstallable(false)
       } else {
-        console.log('Instalação do PWA rejeitada')
+        console.log('❌ Instalação do PWA rejeitada via prompt nativo')
       }
-      
-      setDeferredPrompt(null)
-      setIsInstallable(false)
     } else {
-      // Instalação alternativa para browsers que suportam
+      console.log('🔧 Tentando instalação alternativa...')
+      
       try {
-        // Para Chrome/Edge - mostrar instruções de instalação manual
-        if (navigator.userAgent.includes('Chrome') || navigator.userAgent.includes('Edg')) {
-          const installInstructions = `
-Para instalar este app:
-
-1. Clique no ícone de instalação na barra de endereços
-2. Ou vá ao menu do navegador (⋮) > "Instalar aplicativo"
-3. Ou pressione Ctrl+Shift+I > Application > Manifest > "Install"
-
-O app será instalado como um aplicativo nativo!
-          `
-          alert(installInstructions)
+        // Registrar service worker personalizado se não estiver registrado
+        if ('serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.register('/sw.js')
+          console.log('✅ Service Worker registrado:', registration)
+          
+          // Aguardar o service worker estar ativo
+          await navigator.serviceWorker.ready
+          console.log('✅ Service Worker ativo')
         }
-        // Para Safari
-        else if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
-          const safariInstructions = `
-Para instalar no Safari:
+
+        // Tentar forçar o prompt de instalação
+        const result = await forceInstallPrompt()
+        
+        if (result.success) {
+          console.log('✅ Instalação iniciada com sucesso')
+        } else {
+          console.log('⚠️ Instalação não disponível:', result.reason)
+          showInstallInstructions()
+        }
+        
+      } catch (error) {
+        console.error('❌ Erro na instalação:', error)
+        showInstallInstructions()
+      }
+    }
+  }
+
+  // Função para forçar prompt de instalação
+  const forceInstallPrompt = async () => {
+    try {
+      // Verificar se já está instalado
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        return { success: false, reason: 'Já instalado' }
+      }
+
+      // Tentar diferentes métodos de instalação
+      const installMethods = [
+        // Método 1: Verificar se o navegador suporta instalação
+        () => {
+          if ('serviceWorker' in navigator && 'PushManager' in window) {
+            // Forçar reload para tentar mostrar o prompt
+            setTimeout(() => {
+              window.location.reload()
+            }, 100)
+            return { success: true }
+          }
+          return { success: false, reason: 'Navegador não suporta PWA' }
+        },
+        
+        // Método 2: Tentar abrir em nova janela para forçar prompt
+        () => {
+          const newWindow = window.open(window.location.href, '_blank')
+          if (newWindow) {
+            newWindow.focus()
+            setTimeout(() => {
+              newWindow.close()
+            }, 2000)
+            return { success: true }
+          }
+          return { success: false, reason: 'Não foi possível abrir nova janela' }
+        }
+      ]
+
+      // Tentar cada método
+      for (const method of installMethods) {
+        try {
+          const result = method()
+          if (result.success) {
+            return result
+          }
+        } catch (error) {
+          console.warn('Método de instalação falhou:', error)
+        }
+      }
+
+      return { success: false, reason: 'Nenhum método funcionou' }
+      
+    } catch (error) {
+      console.error('Erro ao forçar prompt:', error)
+      return { success: false, reason: error.message }
+    }
+  }
+
+  // Função para mostrar instruções de instalação
+  const showInstallInstructions = () => {
+    const isChrome = navigator.userAgent.includes('Chrome')
+    const isEdge = navigator.userAgent.includes('Edg')
+    const isSafari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')
+    const isFirefox = navigator.userAgent.includes('Firefox')
+
+    let instructions = ''
+    
+    if (isChrome || isEdge) {
+      instructions = `Para instalar este app no Chrome/Edge:
+
+1. Clique nos 3 pontos (⋮) no canto superior direito
+2. Selecione "Instalar Repositório de Vagas"
+3. Ou procure o ícone de instalação na barra de endereços
+
+O app será instalado como um aplicativo nativo!`
+    } else if (isSafari) {
+      instructions = `Para instalar no Safari:
 
 1. Toque no botão de compartilhar (📤)
 2. Role para baixo e toque em "Adicionar à Tela de Início"
 3. Toque em "Adicionar"
 
-O app será instalado como um ícone na tela inicial!
-          `
-          alert(safariInstructions)
-        }
-        // Para Firefox
-        else if (navigator.userAgent.includes('Firefox')) {
-          const firefoxInstructions = `
-Para instalar no Firefox:
+O app será instalado como um ícone na tela inicial!`
+    } else if (isFirefox) {
+      instructions = `Para instalar no Firefox:
 
 1. Clique no ícone de instalação na barra de endereços
 2. Ou vá ao menu > "Instalar"
 3. Confirme a instalação
 
-O app será instalado como um aplicativo!
-          `
-          alert(firefoxInstructions)
-        }
-        // Instruções genéricas
-        else {
-          const genericInstructions = `
-Para instalar este app:
+O app será instalado como um aplicativo!`
+    } else {
+      instructions = `Para instalar este app:
 
-Procure pelo ícone de instalação na barra de endereços do seu navegador ou no menu do navegador. 
-O app pode ser instalado como um aplicativo nativo no seu dispositivo.
-          `
-          alert(genericInstructions)
-        }
-      } catch (error) {
-        console.error('Erro ao tentar instalar PWA:', error)
-        alert('Erro ao tentar instalar. Tente usar o menu do navegador para instalar o app.')
-      }
+Procure pelo ícone de instalação na barra de endereços ou no menu do navegador.
+O app pode ser instalado como um aplicativo nativo no seu dispositivo.`
     }
+
+    alert(instructions)
   }
 
   // Atualizar service worker
