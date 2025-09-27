@@ -17,6 +17,10 @@ import Configuracoes from './components/Configuracoes'
 import GerenciarUsuarios from './components/GerenciarUsuarios'
 import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
+import { PWAInstallPrompt } from './components/PWAInstallPrompt'
+import { OfflineIndicator } from './components/OfflineIndicator'
+import { PWAUpdatePrompt } from './components/PWAUpdatePrompt'
+import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
@@ -114,12 +118,18 @@ function App() {
   // Hook para limpeza de cache
   useCleanup()
   
+  // Hook para atualizações do service worker
+  const { updateServiceWorker } = useServiceWorkerUpdate()
+  
   return (
     <ThemeProvider>
       <AuthProvider>
         <CacheProvider>
           <AppRoutes />
           <DebugInfo />
+          <PWAInstallPrompt />
+          <PWAUpdatePrompt onUpdate={updateServiceWorker} />
+          <OfflineIndicator />
         </CacheProvider>
       </AuthProvider>
     </ThemeProvider>
