@@ -18,21 +18,22 @@ export default function PWANotification() {
     needRefresh, 
     installPWA, 
     updateSW, 
-    setNeedRefresh 
+    setNeedRefresh,
+    isStandalone
   } = usePWA()
   
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [showUpdateBanner, setShowUpdateBanner] = useState(false)
 
-  // Mostrar banner de instalação após 3 segundos
+  // Mostrar banner de instalação imediatamente se instalável e não standalone
   useEffect(() => {
-    if (isInstallable) {
-      const timer = setTimeout(() => {
-        setShowInstallBanner(true)
-      }, 3000)
-      return () => clearTimeout(timer)
+    if (isInstallable && !isStandalone) {
+      // Mostrar imediatamente ao invés de aguardar 3 segundos
+      setShowInstallBanner(true)
+    } else {
+      setShowInstallBanner(false)
     }
-  }, [isInstallable])
+  }, [isInstallable, isStandalone])
 
   // Mostrar banner de atualização
   useEffect(() => {
@@ -59,14 +60,14 @@ export default function PWANotification() {
       )}
 
       {/* Banner de instalação */}
-      {showInstallBanner && isInstallable && (
+      {showInstallBanner && isInstallable && !isStandalone && (
         <div className="bg-blue-600 text-white p-4 rounded-lg shadow-lg">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2">
               <Smartphone className="h-5 w-5" />
               <div>
                 <p className="font-medium text-sm">Instalar App</p>
-                <p className="text-xs opacity-90">Acesse mais rápido</p>
+                <p className="text-xs opacity-90">Instalação instantânea disponível!</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -77,7 +78,7 @@ export default function PWANotification() {
                 className="h-8 px-3 text-xs"
               >
                 <Download className="h-3 w-3 mr-1" />
-                Instalar
+                Instalar Agora
               </Button>
               <Button
                 size="sm"

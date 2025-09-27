@@ -11,6 +11,7 @@ export function usePWA() {
   const [isInstallable, setIsInstallable] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [needRefresh, setNeedRefresh] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
 
   // Função para atualizar service worker
   const updateServiceWorker = (reloadPage = true) => {
@@ -75,16 +76,52 @@ export function usePWA() {
 
   // Detectar se o app pode ser instalado
   useEffect(() => {
+    // Verificar se já está instalado (standalone mode)
+    const checkStandalone = () => {
+      const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                        (window.navigator as any).standalone === true ||
+                        document.referrer.includes('android-app://')
+      setIsStandalone(standalone)
+    }
+
+    // Verificar se é instalável imediatamente
+    const checkInstallability = () => {
+      // Para PWAs, sempre considerar instalável se não estiver standalone
+      const isNotStandalone = !window.matchMedia('(display-mode: standalone)').matches &&
+                             (window.navigator as any).standalone !== true &&
+                             !document.referrer.includes('android-app://')
+      
+      // Verificar se tem service worker ativo
+      const hasServiceWorker = 'serviceWorker' in navigator
+      
+      // Verificar se está em HTTPS ou localhost
+      const isSecure = location.protocol === 'https:' || location.hostname === 'localhost'
+      
+      if (isNotStandalone && hasServiceWorker && isSecure) {
+        setIsInstallable(true)
+      }
+    }
+
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setIsInstallable(true)
     }
 
+    // Verificações iniciais
+    checkStandalone()
+    checkInstallability()
+
+    // Listener para o evento padrão
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    
+    // Listener para mudanças no display mode
+    const mediaQuery = window.matchMedia('(display-mode: standalone)')
+    mediaQuery.addEventListener('change', checkStandalone)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      mediaQuery.removeEventListener('change', checkStandalone)
     }
   }, [])
 
@@ -117,6 +154,7 @@ export function usePWA() {
   // Instalar PWA
   const installPWA = async () => {
     if (deferredPrompt) {
+      // Usar o prompt nativo se disponível
       deferredPrompt.prompt()
       const { outcome } = await deferredPrompt.userChoice
       
@@ -128,6 +166,62 @@ export function usePWA() {
       
       setDeferredPrompt(null)
       setIsInstallable(false)
+    } else {
+      // Instalação alternativa para browsers que suportam
+      try {
+        // Para Chrome/Edge - mostrar instruções de instalação manual
+        if (navigator.userAgent.includes('Chrome') || navigator.userAgent.includes('Edg')) {
+          const installInstructions = `
+Para instalar este app:
+
+1. Clique no ícone de instalação na barra de endereços
+2. Ou vá ao menu do navegador (⋮) > "Instalar aplicativo"
+3. Ou pressione Ctrl+Shift+I > Application > Manifest > "Install"
+
+O app será instalado como um aplicativo nativo!
+          `
+          alert(installInstructions)
+        }
+        // Para Safari
+        else if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+          const safariInstructions = `
+Para instalar no Safari:
+
+1. Toque no botão de compartilhar (📤)
+2. Role para baixo e toque em "Adicionar à Tela de Início"
+3. Toque em "Adicionar"
+
+O app será instalado como um ícone na tela inicial!
+          `
+          alert(safariInstructions)
+        }
+        // Para Firefox
+        else if (navigator.userAgent.includes('Firefox')) {
+          const firefoxInstructions = `
+Para instalar no Firefox:
+
+1. Clique no ícone de instalação na barra de endereços
+2. Ou vá ao menu > "Instalar"
+3. Confirme a instalação
+
+O app será instalado como um aplicativo!
+          `
+          alert(firefoxInstructions)
+        }
+        // Instruções genéricas
+        else {
+          const genericInstructions = `
+Para instalar este app:
+
+Procure pelo ícone de instalação na barra de endereços do seu navegador ou no menu do navegador. 
+O app pode ser instalado como um aplicativo nativo no seu dispositivo.
+          `
+          alert(genericInstructions)
+        }
+      } catch (error) {
+        console.error('Erro ao tentar instalar PWA:', error)
+        alert('Erro ao tentar instalar. Tente usar o menu do navegador para instalar o app.')
+      }
     }
   }
 
@@ -144,6 +238,7 @@ export function usePWA() {
     needRefresh,
     installPWA,
     updateSW,
-    setNeedRefresh
+    setNeedRefresh,
+    isStandalone
   }
 }

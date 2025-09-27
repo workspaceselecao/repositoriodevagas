@@ -35,7 +35,7 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
   const [isLoadingInfo, setIsLoadingInfo] = useState(false)
   
   // Hook PWA para instalação
-  const { isInstallable, installPWA, isOnline } = usePWA()
+  const { isInstallable, installPWA, isOnline, isStandalone } = usePWA()
   
   // Informações locais (fallback)
   const buildDate = new Date().toLocaleDateString('pt-BR')
@@ -213,7 +213,7 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
                 </div>
                 
                 {/* Botão de Instalação PWA */}
-                {isInstallable && isOnline && (
+                {!isStandalone && isInstallable && isOnline && (
                   <div className="pt-2">
                     <Button
                       onClick={installPWA}
@@ -226,6 +226,19 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
                     <p className="text-xs text-muted-foreground text-center mt-1">
                       Instale o app para acesso mais rápido e funcionalidades offline
                     </p>
+                  </div>
+                )}
+                
+                {/* Mensagem para app já instalado */}
+                {isStandalone && (
+                  <div className="pt-2">
+                    <div className="w-full bg-green-100 text-green-800 p-3 rounded-lg text-center">
+                      <Smartphone className="h-4 w-4 mx-auto mb-1" />
+                      <p className="text-sm font-medium">App já instalado!</p>
+                      <p className="text-xs">
+                        Você está usando a versão instalada do aplicativo
+                      </p>
+                    </div>
                   </div>
                 )}
                 
@@ -404,9 +417,9 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${isInstallable ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                <div className={`w-2 h-2 rounded-full ${isStandalone ? 'bg-blue-500' : isInstallable ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                 <span className="text-sm">
-                  Instalação: {isInstallable ? 'Disponível' : 'Não disponível'}
+                  Instalação: {isStandalone ? 'Já Instalado' : isInstallable ? 'Disponível' : 'Não disponível'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -417,11 +430,11 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-sm">Cache Offline Habilitado</span>
               </div>
-              {!isInstallable && (
+              {!isInstallable && !isStandalone && (
                 <div className="p-3 bg-muted rounded-lg">
                   <p className="text-xs text-muted-foreground">
-                    Para instalar o app, navegue por algumas páginas do sistema primeiro. 
-                    O ícone de instalação aparecerá na barra de endereços quando estiver disponível.
+                    A instalação está disponível instantaneamente! 
+                    Use o botão "Instalar App no Dispositivo" acima ou procure pelo ícone de instalação na barra de endereços.
                   </p>
                 </div>
               )}
