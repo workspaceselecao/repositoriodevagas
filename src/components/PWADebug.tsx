@@ -19,8 +19,12 @@ export const PWADebug: React.FC = () => {
       hasServiceWorker: 'serviceWorker' in navigator,
       serviceWorkerController: navigator.serviceWorker?.controller,
       
-      // Manifest
-      manifest: null as any,
+        // Manifest
+        manifest: null as any,
+        
+        // Installability
+        canInstall: false,
+        installPromptEvent: null as any,
       
       // Display mode
       displayMode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
@@ -49,6 +53,17 @@ export const PWADebug: React.FC = () => {
         setDebugInfo(info)
       })
 
+    // Verificar se pode instalar
+    const checkInstallability = () => {
+      // Verificar se o evento beforeinstallprompt foi disparado
+      window.addEventListener('beforeinstallprompt', (e) => {
+        info.canInstall = true
+        info.installPromptEvent = e
+        setDebugInfo({...info})
+      })
+    }
+
+    checkInstallability()
     setDebugInfo(info)
   }, [pwaState])
 

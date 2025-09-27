@@ -1,5 +1,5 @@
-export const APP_VERSION = "1.0.3"
-export const BUILD_DATE = "2024-01-25T15:45:00Z"
+export const APP_VERSION = "1.0.4"
+export const BUILD_DATE = new Date().toISOString()
 
 // Chave para armazenar a versão atual no localStorage
 const VERSION_STORAGE_KEY = 'repositoriodevagas_current_version'

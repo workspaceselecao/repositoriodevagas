@@ -37,12 +37,10 @@ export const PWAInstallPrompt: React.FC = () => {
       e.preventDefault()
       setDeferredPrompt(e)
       
-      // Mostrar o prompt após um pequeno delay para melhor UX
-      setTimeout(() => {
-        if (!isInstalled && !localStorage.getItem('pwa-install-dismissed')) {
-          setShowInstallPrompt(true)
-        }
-      }, 3000)
+      // Mostrar o prompt imediatamente se não foi rejeitado
+      if (!isInstalled && !localStorage.getItem('pwa-install-dismissed')) {
+        setShowInstallPrompt(true)
+      }
     }
 
     // Escutar quando o app é instalado
@@ -83,7 +81,90 @@ export const PWAInstallPrompt: React.FC = () => {
     localStorage.setItem('pwa-install-dismissed', 'true')
   }
 
-  if (!showInstallPrompt || isInstalled) {
+  const handleManualInstall = () => {
+    // Instruções para instalação manual
+    const instructions = `
+Para instalar este aplicativo:
+
+Chrome/Edge:
+1. Clique no ícone de instalação na barra de endereços
+2. Ou vá em Menu ⋮ → "Instalar Repositório de Vagas"
+
+Firefox:
+1. Menu ⋮ → "Instalar"
+
+Mobile:
+- Android: Use o menu do navegador
+- iOS: Safari → Compartilhar → "Adicionar à Tela Inicial"
+
+Se não aparecer o ícone, tente:
+- Atualizar a página (Ctrl+F5)
+- Limpar cache do navegador
+- Interagir mais com o site
+    `
+    
+    alert(instructions)
+  }
+
+  // Mostrar sempre se não estiver instalado (mesmo sem prompt automático)
+  if (isInstalled) {
+    return null
+  }
+
+  // Se não há prompt automático, mostrar botão manual
+  if (!showInstallPrompt && !deferredPrompt) {
+    return (
+      <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm">
+        <div className="bg-blue-600 text-white rounded-lg shadow-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                <Smartphone className="w-5 h-5" />
+              </div>
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-medium">
+                Instalar App
+              </h3>
+              <p className="text-sm text-blue-100 mt-1">
+                Instale o Repositório de Vagas para acesso rápido.
+              </p>
+              
+              <div className="flex gap-2 mt-3">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={handleManualInstall}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Como Instalar
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleDismiss}
+                  className="text-white border-white hover:bg-white hover:text-blue-600"
+                >
+                  Agora não
+                </Button>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleDismiss}
+              className="flex-shrink-0 text-blue-200 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!showInstallPrompt) {
     return null
   }
 
