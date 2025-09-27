@@ -119,19 +119,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('Auth state change:', event)
         
         if (event === 'SIGNED_IN' && session) {
-          // Usar dados do Auth diretamente para ser mais rápido
-          const authUser = session.user
-          const currentUser = {
-            id: authUser.id,
-            email: authUser.email || '',
-            name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
-            role: authUser.user_metadata?.role || 'RH'
-          }
+          // Verificar se é uma sessão de recuperação de senha
+          const isPasswordRecovery = window.location.pathname === '/reset-password'
           
-          if (isMounted) {
-            setUser(currentUser)
-            setLoading(false)
-            setInitialized(true)
+          if (isPasswordRecovery) {
+            // Para sessões de recuperação, não definir user para evitar redirecionamento
+            console.log('Sessão de recuperação de senha detectada - não redirecionando')
+            if (isMounted) {
+              setUser(null)
+              setLoading(false)
+              setInitialized(true)
+            }
+          } else {
+            // Sessão normal de login
+            const authUser = session.user
+            const currentUser = {
+              id: authUser.id,
+              email: authUser.email || '',
+              name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
+              role: authUser.user_metadata?.role || 'RH'
+            }
+            
+            if (isMounted) {
+              setUser(currentUser)
+              setLoading(false)
+              setInitialized(true)
+            }
           }
         } else if (event === 'SIGNED_OUT') {
           if (isMounted) {
