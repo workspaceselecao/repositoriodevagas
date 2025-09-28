@@ -67,7 +67,7 @@ export const colorSchemes = {
       warningForeground: '210 20% 98%',
     },
     dark: {
-      background: '213 51% 11%',
+      background: '240 41% 3%',
       foreground: '0 0% 98%',
       card: '213 33% 17%',
       cardForeground: '0 0% 98%',
