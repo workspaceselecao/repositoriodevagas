@@ -195,7 +195,7 @@ export class JobScrapingService {
       try {
         const element = this.evaluateXPath(doc, xpaths[i])
         if (element) {
-          const text = this.cleanText(element.textContent || (element as HTMLElement).innerText || '')
+          const text = this.cleanText(element.textContent || (element as HTMLElement).innerText || '', field)
           if (text.trim()) {
             const baseConfidence = Math.max(0, 100 - (i * 10))
             const contentConfidence = this.calculateContentConfidence(text, field)
@@ -325,16 +325,10 @@ export class JobScrapingService {
   /**
    * Limpa e formata o texto extraído
    */
-  private static cleanText(text: string): string {
-    return text
-      .replace(/\s+/g, ' ')
+  private static cleanText(text: string, field?: string): string {
+    let cleaned = text
       .replace(/\n\s*\n/g, '\n')
       .trim()
-      .replace(/^\s*Salário:\s*/, '') // Remove prefixo "Salário:"
-      .replace(/^\s*Local de trabalho:\s*/, '') // Remove prefixo "Local de trabalho:"
-      .replace(/^\s*Horário de Trabalho:\s*/, '') // Remove prefixo "Horário de Trabalho:"
-      .replace(/^\s*Jornada de Trabalho:\s*/, '') // Remove prefixo "Jornada de Trabalho:"
-      .replace(/^\s*Benefícios:\s*/, '') // Remove prefixo "Benefícios:"
       .replace(/^\s*<strong>.*?<\/strong>\s*/, '') // Remove tags strong no início
       .replace(/<[^>]*>/g, '') // Remove outras tags HTML
       .replace(/&nbsp;/g, ' ') // Remove &nbsp;
@@ -342,6 +336,40 @@ export class JobScrapingService {
       .replace(/&lt;/g, '<') // Decodifica &lt;
       .replace(/&gt;/g, '>') // Decodifica &gt;
       .replace(/&quot;/g, '"') // Decodifica &quot;
+    
+    // Para etapas_processo, preservar quebras de linha e processar cada etapa
+    if (field === 'etapas_processo') {
+      cleaned = cleaned
+        .split('\n')
+        .map(line => {
+          // Remover prefixo "Etapa X:" se existir
+          let withoutPrefix = line.replace(/^Etapa\s+\d+:\s*/i, '').trim()
+          
+          // Remover números extras que podem aparecer no final (ex: "Cadastro1Cadastro")
+          withoutPrefix = withoutPrefix.replace(/\d+$/, '').trim()
+          
+          // Remover duplicações (ex: "Cadastro1Cadastro" -> "Cadastro")
+          const words = withoutPrefix.split(/(?=\d)/)
+          if (words.length > 1 && words[1].match(/^\d/)) {
+            withoutPrefix = words[0].trim()
+          }
+          
+          return withoutPrefix
+        })
+        .filter(etapa => etapa.trim() !== '') // Remove etapas vazias
+        .join('\n')
+    } else {
+      // Para outros campos, usar limpeza normal
+      cleaned = cleaned
+        .replace(/\s+/g, ' ')
+        .replace(/^\s*Salário:\s*/, '') // Remove prefixo "Salário:"
+        .replace(/^\s*Local de trabalho:\s*/, '') // Remove prefixo "Local de trabalho:"
+        .replace(/^\s*Horário de Trabalho:\s*/, '') // Remove prefixo "Horário de Trabalho:"
+        .replace(/^\s*Jornada de Trabalho:\s*/, '') // Remove prefixo "Jornada de Trabalho:"
+        .replace(/^\s*Benefícios:\s*/, '') // Remove prefixo "Benefícios:"
+    }
+    
+    return cleaned
   }
 
   /**

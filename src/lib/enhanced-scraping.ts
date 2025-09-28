@@ -268,7 +268,7 @@ export class EnhancedJobScrapingService {
         const element = this.evaluateXPath(doc, xpaths[i])
         if (element) {
           const rawValue = element.textContent || (element as HTMLElement).innerText || ''
-          const cleanedValue = this.cleanText(rawValue)
+          const cleanedValue = this.cleanText(rawValue, field)
           
           if (cleanedValue.trim()) {
             const baseConfidence = Math.max(0, 100 - (i * 15)) // Primeiros XPaths têm maior confiança
@@ -302,7 +302,7 @@ export class EnhancedJobScrapingService {
    * Processa campo do JSON com análise de confiança
    */
   private static processJSONField(value: string, field: keyof FieldConfidence): FieldStatus {
-    const cleanedValue = this.cleanText(value)
+    const cleanedValue = this.cleanText(value, field)
     const confidence = this.calculateContentConfidence(cleanedValue, field)
     
     return {
@@ -558,25 +558,61 @@ export class EnhancedJobScrapingService {
   /**
    * Limpa texto extraído
    */
-  private static cleanText(text: string): string {
-    return text
+  private static cleanText(text: string, field?: keyof FieldConfidence): string {
+    let cleaned = text
       // Preservar quebras de linha duplas (parágrafos)
       .replace(/\n\s*\n/g, '\n\n')
-      // Normalizar espaços múltiplos, mas preservar quebras de linha
-      .replace(/[ \t]+/g, ' ')
-      // Limpar espaços no início e fim de linhas
-      .replace(/[ \t]+$/gm, '')
-      .replace(/^[ \t]+/gm, '')
-      .trim()
-      // Remover labels específicos apenas no início
-      .replace(/^\s*Salário[:\s]*/i, '')
-      .replace(/^\s*Local de trabalho[:\s]*/i, '')
-      .replace(/^\s*Horário de Trabalho[:\s]*/i, '')
-      .replace(/^\s*Jornada de Trabalho[:\s]*/i, '')
-      .replace(/^\s*Benefícios[:\s]*/i, '')
-      .replace(/^\s*Responsabilidades[:\s]*/i, '')
-      .replace(/^\s*Requisitos[:\s]*/i, '')
-      .replace(/^\s*Etapas do processo[:\s]*/i, '')
+    
+    // Para etapas_processo, preservar quebras de linha
+    if (field === 'etapas_processo') {
+      cleaned = cleaned
+        // Normalizar espaços múltiplos, mas preservar quebras de linha
+        .replace(/[ \t]+/g, ' ')
+        // Limpar espaços no início e fim de linhas, mas manter quebras de linha
+        .replace(/[ \t]+$/gm, '')
+        .replace(/^[ \t]+/gm, '')
+        .trim()
+        // Remover labels específicos apenas no início
+        .replace(/^\s*Etapas do processo[:\s]*/i, '')
+        // Processar cada linha das etapas
+        .split('\n')
+        .map(line => {
+          // Remover prefixo "Etapa X:" se existir
+          let withoutPrefix = line.replace(/^Etapa\s+\d+:\s*/i, '').trim()
+          
+          // Remover números extras que podem aparecer no final (ex: "Cadastro1Cadastro")
+          withoutPrefix = withoutPrefix.replace(/\d+$/, '').trim()
+          
+          // Remover duplicações (ex: "Cadastro1Cadastro" -> "Cadastro")
+          const words = withoutPrefix.split(/(?=\d)/)
+          if (words.length > 1 && words[1].match(/^\d/)) {
+            withoutPrefix = words[0].trim()
+          }
+          
+          return withoutPrefix
+        })
+        .filter(etapa => etapa.trim() !== '') // Remove etapas vazias
+        .join('\n')
+    } else {
+      // Para outros campos, usar limpeza normal
+      cleaned = cleaned
+        // Normalizar espaços múltiplos, mas preservar quebras de linha
+        .replace(/[ \t]+/g, ' ')
+        // Limpar espaços no início e fim de linhas
+        .replace(/[ \t]+$/gm, '')
+        .replace(/^[ \t]+/gm, '')
+        .trim()
+        // Remover labels específicos apenas no início
+        .replace(/^\s*Salário[:\s]*/i, '')
+        .replace(/^\s*Local de trabalho[:\s]*/i, '')
+        .replace(/^\s*Horário de Trabalho[:\s]*/i, '')
+        .replace(/^\s*Jornada de Trabalho[:\s]*/i, '')
+        .replace(/^\s*Benefícios[:\s]*/i, '')
+        .replace(/^\s*Responsabilidades[:\s]*/i, '')
+        .replace(/^\s*Requisitos[:\s]*/i, '')
+    }
+    
+    return cleaned
   }
 
   /**
