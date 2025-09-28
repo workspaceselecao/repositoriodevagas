@@ -19,6 +19,7 @@
     "populate-vagas": "tsx scripts/populate-vagas.ts",
     "reset-vagas": "tsx scripts/reset-and-populate-vagas.ts",
     "check-vagas": "tsx scripts/check-vagas.ts",
+    "test-password-reset": "tsx scripts/test-password-reset.ts",
     "commit": "tsx scripts/auto-commit.ts"
   },
   "dependencies": {

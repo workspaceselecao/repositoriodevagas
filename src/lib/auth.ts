@@ -428,8 +428,11 @@ export async function resetPasswordForEmail(email: string): Promise<{ success: b
     }
 
     // Enviar email de recuperação usando Supabase Auth
+    const redirectUrl = import.meta.env.VITE_SUPABASE_REDIRECT_URL || 
+                       (window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://repositoriodevagas.vercel.app')
+    
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${import.meta.env.VITE_SUPABASE_REDIRECT_URL || 'http://localhost:3000'}/reset-password`
+      redirectTo: `${redirectUrl}/reset-password`
     })
 
     if (error) {
@@ -574,8 +577,19 @@ export async function hasPasswordRecoverySession(): Promise<boolean> {
   try {
     const { data: { session } } = await supabase.auth.getSession()
     
-    // Verificar se é uma sessão de recuperação (geralmente tem refresh_token mas não é uma sessão completa)
-    return !!(session?.user && session.access_token)
+    // Verificar se é uma sessão de recuperação válida
+    // Uma sessão de recuperação tem user e access_token, mas pode não ter refresh_token completo
+    if (session?.user && session.access_token) {
+      // Verificar se estamos na página de reset
+      const isOnResetPage = window.location.pathname === '/reset-password'
+      
+      if (isOnResetPage) {
+        console.log('Sessão de recuperação válida detectada')
+        return true
+      }
+    }
+    
+    return false
   } catch (error) {
     console.error('Erro ao verificar sessão de recuperação:', error)
     return false

@@ -60,23 +60,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         if (session?.user && isMounted) {
-          // Usar dados do Auth diretamente para ser mais rápido
-          const authUser = session.user
-          const currentUser = {
-            id: authUser.id,
-            email: authUser.email || '',
-            name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
-            role: authUser.user_metadata?.role || 'RH'
-          }
+          // Verificar se estamos na página de reset de senha
+          const isPasswordRecovery = window.location.pathname === '/reset-password'
           
-          if (isMounted) {
-            setUser(currentUser)
-            hasInitialized = true
-            setLoading(false)
-            setInitialized(true)
-            setIsInitializing(false)
-            clearTimeout(safetyTimeout)
-            return
+          if (isPasswordRecovery) {
+            // Para sessões de recuperação, manter user como null mas permitir acesso à página
+            console.log('Sessão de recuperação detectada na inicialização - permitindo acesso à página de reset')
+            if (isMounted) {
+              setUser(null)
+              hasInitialized = true
+              setLoading(false)
+              setInitialized(true)
+              setIsInitializing(false)
+              clearTimeout(safetyTimeout)
+              return
+            }
+          } else {
+            // Usar dados do Auth diretamente para ser mais rápido
+            const authUser = session.user
+            const currentUser = {
+              id: authUser.id,
+              email: authUser.email || '',
+              name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
+              role: authUser.user_metadata?.role || 'RH'
+            }
+            
+            if (isMounted) {
+              setUser(currentUser)
+              hasInitialized = true
+              setLoading(false)
+              setInitialized(true)
+              setIsInitializing(false)
+              clearTimeout(safetyTimeout)
+              return
+            }
           }
         }
         
@@ -123,8 +140,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const isPasswordRecovery = window.location.pathname === '/reset-password'
           
           if (isPasswordRecovery) {
-            // Para sessões de recuperação, não definir user para evitar redirecionamento
-            console.log('Sessão de recuperação de senha detectada - não redirecionando')
+            // Para sessões de recuperação, manter user como null mas não redirecionar
+            console.log('Sessão de recuperação de senha detectada - permitindo acesso à página de reset')
             if (isMounted) {
               setUser(null)
               setLoading(false)
