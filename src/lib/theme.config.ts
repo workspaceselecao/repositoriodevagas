@@ -67,7 +67,7 @@ export const colorSchemes = {
       warningForeground: '210 20% 98%',
     },
     dark: {
-      background: '224 71.4% 4.1%',
+      background: '213 51% 11%',
       foreground: '210 20% 98%',
       card: '213 33% 17%',
       cardForeground: '210 20% 98%',
@@ -119,7 +119,7 @@ export const colorSchemes = {
       warningForeground: '210 20% 98%',
     },
     dark: {
-      background: '240 10% 3.9%',
+      background: '213 51% 11%',
       foreground: '0 0% 100%',
       card: '213 33% 17%',
       cardForeground: '0 0% 100%',
@@ -171,7 +171,7 @@ export const colorSchemes = {
       warningForeground: '210 20% 98%',
     },
     dark: {
-      background: '240 10% 3.9%',
+      background: '213 51% 11%',
       foreground: '0 0% 100%',
       card: '213 33% 17%',
       cardForeground: '0 0% 100%',
@@ -221,7 +221,7 @@ export const colorSchemes = {
       warningForeground: '210 20% 98%',
     },
     dark: {
-      background: '240 10% 3.9%',
+      background: '213 51% 11%',
       foreground: '0 0% 100%',
       card: '213 33% 17%',
       cardForeground: '0 0% 100%',
@@ -273,7 +273,7 @@ export const colorSchemes = {
       warningForeground: '210 20% 98%',
     },
     dark: {
-      background: '240 10% 3.9%',
+      background: '213 51% 11%',
       foreground: '0 0% 100%',
       card: '213 33% 17%',
       cardForeground: '0 0% 100%',
@@ -325,7 +325,7 @@ export const colorSchemes = {
       warningForeground: '210 20% 98%',
     },
     dark: {
-      background: '240 10% 3.9%',
+      background: '213 51% 11%',
       foreground: '0 0% 100%',
       card: '213 33% 17%',
       cardForeground: '0 0% 100%',
