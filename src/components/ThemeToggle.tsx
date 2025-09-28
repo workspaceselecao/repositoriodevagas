@@ -27,30 +27,6 @@ const profileConfigs: Record<ColorProfile, {
     emoji: '⚪',
     description: 'Tema padrão do sistema'
   },
-  blue: {
-    name: 'Azul',
-    icon: Building2,
-    emoji: '🔵',
-    description: 'Azul profissional e confiável'
-  },
-  purple: {
-    name: 'Roxo',
-    icon: Gem,
-    emoji: '🟣',
-    description: 'Roxo criativo e inovador'
-  },
-  green: {
-    name: 'Verde',
-    icon: Heart,
-    emoji: '🟢',
-    description: 'Verde natural e equilibrado'
-  },
-  orange: {
-    name: 'Laranja',
-    icon: Sparkles,
-    emoji: '🟠',
-    description: 'Laranja energético e vibrante'
-  },
   rose: {
     name: 'Rosa',
     icon: Heart,

@@ -89,96 +89,119 @@
     --chart-5: 340 75% 55%;
   }
 
-  /* Tema Azul Suave */
-  .blue {
-    --background: 240 10% 98%;
-    --foreground: 240 10% 3.9%;
-    --card: 240 10% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 240 10% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 221 83% 53%;
+  /* Tema Rosa Suave */
+  .rose {
+    --background: 340 10% 98%;
+    --foreground: 340 10% 3.9%;
+    --card: 340 10% 100%;
+    --card-foreground: 340 10% 3.9%;
+    --popover: 340 10% 100%;
+    --popover-foreground: 340 10% 3.9%;
+    --primary: 340 83% 53%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --secondary: 340 4.8% 95.9%;
+    --secondary-foreground: 340 5.9% 10%;
+    --muted: 340 4.8% 95.9%;
+    --muted-foreground: 340 3.8% 46.1%;
+    --accent: 340 4.8% 95.9%;
+    --accent-foreground: 340 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 221 83% 53%;
+    --border: 340 5.9% 90%;
+    --input: 340 5.9% 90%;
+    --ring: 340 83% 53%;
   }
 
-  /* Tema Roxo Suave */
-  .purple {
-    --background: 280 10% 98%;
-    --foreground: 280 10% 3.9%;
-    --card: 280 10% 100%;
-    --card-foreground: 280 10% 3.9%;
-    --popover: 280 10% 100%;
-    --popover-foreground: 280 10% 3.9%;
-    --primary: 262 83% 58%;
+  /* Tema Violeta Suave */
+  .violet {
+    --background: 270 10% 98%;
+    --foreground: 270 10% 3.9%;
+    --card: 270 10% 100%;
+    --card-foreground: 270 10% 3.9%;
+    --popover: 270 10% 100%;
+    --popover-foreground: 270 10% 3.9%;
+    --primary: 270 83% 58%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 280 4.8% 95.9%;
-    --secondary-foreground: 280 5.9% 10%;
-    --muted: 280 4.8% 95.9%;
-    --muted-foreground: 280 3.8% 46.1%;
-    --accent: 280 4.8% 95.9%;
-    --accent-foreground: 280 5.9% 10%;
+    --secondary: 270 4.8% 95.9%;
+    --secondary-foreground: 270 5.9% 10%;
+    --muted: 270 4.8% 95.9%;
+    --muted-foreground: 270 3.8% 46.1%;
+    --accent: 270 4.8% 95.9%;
+    --accent-foreground: 270 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 280 5.9% 90%;
-    --input: 280 5.9% 90%;
-    --ring: 262 83% 58%;
+    --border: 270 5.9% 90%;
+    --input: 270 5.9% 90%;
+    --ring: 270 83% 58%;
   }
 
-  /* Tema Laranja Suave */
-  .orange {
-    --background: 30 10% 98%;
-    --foreground: 30 10% 3.9%;
-    --card: 30 10% 100%;
-    --card-foreground: 30 10% 3.9%;
-    --popover: 30 10% 100%;
-    --popover-foreground: 30 10% 3.9%;
-    --primary: 25 95% 53%;
-    --primary-foreground: 60 9% 98%;
-    --secondary: 30 4.8% 95.9%;
-    --secondary-foreground: 30 5.9% 10%;
-    --muted: 30 4.8% 95.9%;
-    --muted-foreground: 30 3.8% 46.1%;
-    --accent: 30 4.8% 95.9%;
-    --accent-foreground: 30 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 30 5.9% 90%;
-    --input: 30 5.9% 90%;
-    --ring: 25 95% 53%;
-  }
-
-  /* Tema Verde Suave */
-  .green {
-    --background: 120 10% 98%;
-    --foreground: 120 10% 3.9%;
-    --card: 120 10% 100%;
-    --card-foreground: 120 10% 3.9%;
-    --popover: 120 10% 100%;
-    --popover-foreground: 120 10% 3.9%;
-    --primary: 142 76% 36%;
+  /* Tema Esmeralda Suave */
+  .emerald {
+    --background: 160 10% 98%;
+    --foreground: 160 10% 3.9%;
+    --card: 160 10% 100%;
+    --card-foreground: 160 10% 3.9%;
+    --popover: 160 10% 100%;
+    --popover-foreground: 160 10% 3.9%;
+    --primary: 160 76% 36%;
     --primary-foreground: 355 7% 97%;
-    --secondary: 120 4.8% 95.9%;
-    --secondary-foreground: 120 5.9% 10%;
-    --muted: 120 4.8% 95.9%;
-    --muted-foreground: 120 3.8% 46.1%;
-    --accent: 120 4.8% 95.9%;
-    --accent-foreground: 120 5.9% 10%;
+    --secondary: 160 4.8% 95.9%;
+    --secondary-foreground: 160 5.9% 10%;
+    --muted: 160 4.8% 95.9%;
+    --muted-foreground: 160 3.8% 46.1%;
+    --accent: 160 4.8% 95.9%;
+    --accent-foreground: 160 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 120 5.9% 90%;
-    --input: 120 5.9% 90%;
-    --ring: 142 76% 36%;
+    --border: 160 5.9% 90%;
+    --input: 160 5.9% 90%;
+    --ring: 160 76% 36%;
+  }
+
+  /* Tema Âmbar Suave */
+  .amber {
+    --background: 45 10% 98%;
+    --foreground: 45 10% 3.9%;
+    --card: 45 10% 100%;
+    --card-foreground: 45 10% 3.9%;
+    --popover: 45 10% 100%;
+    --popover-foreground: 45 10% 3.9%;
+    --primary: 45 95% 53%;
+    --primary-foreground: 60 9% 98%;
+    --secondary: 45 4.8% 95.9%;
+    --secondary-foreground: 45 5.9% 10%;
+    --muted: 45 4.8% 95.9%;
+    --muted-foreground: 45 3.8% 46.1%;
+    --accent: 45 4.8% 95.9%;
+    --accent-foreground: 45 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 45 5.9% 90%;
+    --input: 45 5.9% 90%;
+    --ring: 45 95% 53%;
+  }
+
+  /* Tema Ciano Suave */
+  .cyan {
+    --background: 180 10% 98%;
+    --foreground: 180 10% 3.9%;
+    --card: 180 10% 100%;
+    --card-foreground: 180 10% 3.9%;
+    --popover: 180 10% 100%;
+    --popover-foreground: 180 10% 3.9%;
+    --primary: 180 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 180 4.8% 95.9%;
+    --secondary-foreground: 180 5.9% 10%;
+    --muted: 180 4.8% 95.9%;
+    --muted-foreground: 180 3.8% 46.1%;
+    --accent: 180 4.8% 95.9%;
+    --accent-foreground: 180 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 180 5.9% 90%;
+    --input: 180 5.9% 90%;
+    --ring: 180 83% 53%;
   }
 }
 
@@ -419,55 +442,68 @@
 
 /* ===== APLICAÇÃO ESPECÍFICA PARA TODOS OS PERFIS DE COR ===== */
 
-/* Tema Azul */
-.dark.blue .app-title,
-.dark.blue .page-title,
-.dark.blue .btn-active,
-.dark.blue .icon-primary {
+/* Tema Rosa */
+.dark.rose .app-title,
+.dark.rose .page-title,
+.dark.rose .btn-active,
+.dark.rose .icon-primary {
   color: hsl(var(--secondary)) !important;
 }
 
-.blue:not(.dark) .btn-active,
-.blue:not(.dark) .icon-primary {
+.rose:not(.dark) .btn-active,
+.rose:not(.dark) .icon-primary {
   color: hsl(var(--secondary)) !important;
 }
 
-/* Tema Roxo */
-.dark.purple .app-title,
-.dark.purple .page-title,
-.dark.purple .btn-active,
-.dark.purple .icon-primary {
+/* Tema Violeta */
+.dark.violet .app-title,
+.dark.violet .page-title,
+.dark.violet .btn-active,
+.dark.violet .icon-primary {
   color: hsl(var(--secondary)) !important;
 }
 
-.purple:not(.dark) .btn-active,
-.purple:not(.dark) .icon-primary {
+.violet:not(.dark) .btn-active,
+.violet:not(.dark) .icon-primary {
   color: hsl(var(--secondary)) !important;
 }
 
-/* Tema Verde */
-.dark.green .app-title,
-.dark.green .page-title,
-.dark.green .btn-active,
-.dark.green .icon-primary {
+/* Tema Esmeralda */
+.dark.emerald .app-title,
+.dark.emerald .page-title,
+.dark.emerald .btn-active,
+.dark.emerald .icon-primary {
   color: hsl(var(--secondary)) !important;
 }
 
-.green:not(.dark) .btn-active,
-.green:not(.dark) .icon-primary {
+.emerald:not(.dark) .btn-active,
+.emerald:not(.dark) .icon-primary {
   color: hsl(var(--secondary)) !important;
 }
 
-/* Tema Laranja */
-.dark.orange .app-title,
-.dark.orange .page-title,
-.dark.orange .btn-active,
-.dark.orange .icon-primary {
+/* Tema Âmbar */
+.dark.amber .app-title,
+.dark.amber .page-title,
+.dark.amber .btn-active,
+.dark.amber .icon-primary {
   color: hsl(var(--secondary)) !important;
 }
 
-.orange:not(.dark) .btn-active,
-.orange:not(.dark) .icon-primary {
+.amber:not(.dark) .btn-active,
+.amber:not(.dark) .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Tema Ciano */
+.dark.cyan .app-title,
+.dark.cyan .page-title,
+.dark.cyan .btn-active,
+.dark.cyan .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+.cyan:not(.dark) .btn-active,
+.cyan:not(.dark) .icon-primary {
   color: hsl(var(--secondary)) !important;
 }
 
