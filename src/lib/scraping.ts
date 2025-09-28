@@ -187,9 +187,49 @@ export class JobScrapingService {
   }
 
   /**
+   * Extrai etapas do processo - função especial para listas (fallback)
+   */
+  private static extractEtapasProcessoFallback(doc: Document, xpaths: string[]): { text: string; confidence: number } {
+    for (let i = 0; i < xpaths.length; i++) {
+      try {
+        // Primeiro encontrar o container da lista
+        const container = this.evaluateXPath(doc, xpaths[i])
+        if (container) {
+          // Extrair todos os elementos li dentro do container
+          const liElements = container.querySelectorAll('li')
+          if (liElements.length > 0) {
+            const etapas = Array.from(liElements).map(li => {
+              return li.textContent || li.innerText || ''
+            }).join('\n')
+            
+            const text = this.cleanText(etapas, 'etapas_processo')
+            
+            if (text.trim()) {
+              const baseConfidence = Math.max(0, 100 - (i * 10))
+              const contentConfidence = this.calculateContentConfidence(text, 'etapas_processo')
+              const confidence = Math.min(100, baseConfidence + contentConfidence)
+              
+              return { text, confidence }
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(`Erro ao extrair etapas_processo com XPath: ${xpaths[i]}`, error)
+      }
+    }
+
+    return { text: '', confidence: 0 }
+  }
+
+  /**
    * Função auxiliar para extrair texto com múltiplos padrões de fallback
    */
   private static extractWithFallback(doc: Document, xpaths: string[], field: keyof ScrapingResult): { text: string; confidence: number } {
+    // Tratamento especial para etapas_processo - extrair todos os elementos li
+    if (field === 'etapas_processo') {
+      return this.extractEtapasProcessoFallback(doc, xpaths)
+    }
+    
     // Tentar XPath primeiro
     for (let i = 0; i < xpaths.length; i++) {
       try {

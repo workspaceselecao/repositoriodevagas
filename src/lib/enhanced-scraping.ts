@@ -263,6 +263,11 @@ export class EnhancedJobScrapingService {
   private static extractFieldWithConfidence(doc: Document, field: keyof FieldConfidence): FieldStatus {
     const xpaths = this.XPATH_PATTERNS[field]
     
+    // Tratamento especial para etapas_processo - extrair todos os elementos li
+    if (field === 'etapas_processo') {
+      return this.extractEtapasProcesso(doc, xpaths)
+    }
+    
     for (let i = 0; i < xpaths.length; i++) {
       try {
         const element = this.evaluateXPath(doc, xpaths[i])
@@ -286,6 +291,53 @@ export class EnhancedJobScrapingService {
         }
       } catch (error) {
         console.warn(`Erro ao extrair ${field} com XPath: ${xpaths[i]}`, error)
+      }
+    }
+
+    return {
+      found: false,
+      confidence: 0,
+      source: 'xpath',
+      rawValue: '',
+      cleanedValue: ''
+    }
+  }
+
+  /**
+   * Extrai etapas do processo - função especial para listas
+   */
+  private static extractEtapasProcesso(doc: Document, xpaths: string[]): FieldStatus {
+    for (let i = 0; i < xpaths.length; i++) {
+      try {
+        // Primeiro encontrar o container da lista
+        const container = this.evaluateXPath(doc, xpaths[i])
+        if (container) {
+          // Extrair todos os elementos li dentro do container
+          const liElements = container.querySelectorAll('li')
+          if (liElements.length > 0) {
+            const etapas = Array.from(liElements).map(li => {
+              return li.textContent || li.innerText || ''
+            }).join('\n')
+            
+            const cleanedValue = this.cleanText(etapas, 'etapas_processo')
+            
+            if (cleanedValue.trim()) {
+              const baseConfidence = Math.max(0, 100 - (i * 15))
+              const contentConfidence = this.calculateContentConfidence(cleanedValue, 'etapas_processo')
+              const confidence = Math.min(100, baseConfidence + contentConfidence)
+              
+              return {
+                found: true,
+                confidence,
+                source: 'xpath',
+                rawValue: etapas,
+                cleanedValue
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(`Erro ao extrair etapas_processo com XPath: ${xpaths[i]}`, error)
       }
     }
 
