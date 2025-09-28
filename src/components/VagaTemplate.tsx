@@ -30,7 +30,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
   }
 
   return (
-    <Card className={`${cardClasses.base} ${getCardVariant(variantIndex)} dark:${getCardVariant(variantIndex)}`}>
+    <Card className={`${cardClasses.base} ${getCardVariant(variantIndex)} dark:${getCardVariant(variantIndex)} group`}>
       {/* Header do Card */}
       <CardHeader 
         className={cardClasses.header}
@@ -56,7 +56,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                       e.stopPropagation()
                       onFocus()
                     }}
-                    className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border-primary/20"
+                    className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 transition-all duration-200 hover:scale-105"
                   >
                     <Eye className="h-4 w-4" />
                     Focar
@@ -70,7 +70,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                       e.stopPropagation()
                       onEdit()
                     }}
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 transition-all duration-200 hover:scale-105"
                   >
                     <Edit className="h-4 w-4" />
                     Editar
@@ -84,7 +84,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                       e.stopPropagation()
                       onDelete()
                     }}
-                    className="text-red-600 hover:text-red-700 flex items-center gap-1"
+                    className="text-red-600 hover:text-red-700 flex items-center gap-1 transition-all duration-200 hover:scale-105"
                   >
                     <Trash2 className="h-4 w-4" />
                     Excluir
@@ -92,14 +92,16 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                 )}
               </>
             )}
-            {isExpanded ? <ChevronUp className="h-6 w-6" /> : <ChevronDown className="h-6 w-6" />}
+            <div className="transition-transform duration-200 group-hover:scale-110">
+              {isExpanded ? <ChevronUp className="h-6 w-6" /> : <ChevronDown className="h-6 w-6" />}
+            </div>
           </div>
         </div>
       </CardHeader>
 
       {/* Conteúdo Expansível - Layout com todos os 9 campos obrigatórios */}
       {isExpanded && (
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-8 animate-in slide-in-from-top-2 duration-300">
         {/* Descrição da vaga */}
         <VagaSection title="Descrição da vaga" content={vaga.descricao_vaga} />
 
