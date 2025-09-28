@@ -1,51 +1,113 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[]
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed'
+    platform: string
+  }>
+  prompt(): Promise<void>
+}
+
+declare global {
+  interface WindowEventMap {
+    beforeinstallprompt: BeforeInstallPromptEvent
+  }
+}
 
 interface PWAState {
   isInstallable: boolean
   isInstalled: boolean
   isOffline: boolean
   hasUpdate: boolean
+  installPrompt: BeforeInstallPromptEvent | null
 }
 
 export const usePWA = () => {
   const [pwaState, setPwaState] = useState<PWAState>({
     isInstallable: false,
     isInstalled: false,
-    isOffline: false,
-    hasUpdate: false
+    isOffline: !navigator.onLine,
+    hasUpdate: false,
+    installPrompt: null
   })
 
+  // Verificar se está instalado
+  const checkInstalled = useCallback(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    const isInApp = (window.navigator as any).standalone === true
+    return isStandalone || isInApp
+  }, [])
+
+  // Instalar PWA
+  const installPWA = useCallback(async () => {
+    if (!pwaState.installPrompt) {
+      console.warn('[PWA] Nenhum prompt de instalação disponível')
+      return false
+    }
+
+    try {
+      await pwaState.installPrompt.prompt()
+      const { outcome } = await pwaState.installPrompt.userChoice
+      
+      if (outcome === 'accepted') {
+        console.log('[PWA] Instalação aceita pelo usuário')
+        setPwaState(prev => ({ ...prev, isInstalled: true, isInstallable: false, installPrompt: null }))
+        return true
+      } else {
+        console.log('[PWA] Instalação rejeitada pelo usuário')
+        return false
+      }
+    } catch (error) {
+      console.error('[PWA] Erro durante instalação:', error)
+      return false
+    }
+  }, [pwaState.installPrompt])
+
+  // Verificar atualizações do service worker
+  const checkForUpdates = useCallback(async () => {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.getRegistration()
+        if (registration) {
+          await registration.update()
+        }
+      } catch (error) {
+        console.error('[PWA] Erro ao verificar atualizações:', error)
+      }
+    }
+  }, [])
+
   useEffect(() => {
-    // Verificar se está instalado
-    const checkInstalled = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-      const isInApp = (window.navigator as any).standalone === true
-      return isStandalone || isInApp
-    }
-
-    // Verificar status offline
-    const checkOffline = () => {
-      return !navigator.onLine
-    }
-
-    // Atualizar estado inicial
+    // Verificar estado inicial
     setPwaState(prev => ({
       ...prev,
-      isInstalled: checkInstalled(),
-      isOffline: checkOffline()
+      isInstalled: checkInstalled()
     }))
 
-    // Escutar eventos de instalação
-    const handleBeforeInstallPrompt = (e: Event) => {
+    // Event listener para beforeinstallprompt
+    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      console.log('[PWA] Evento beforeinstallprompt disparado')
       e.preventDefault()
-      setPwaState(prev => ({ ...prev, isInstallable: true }))
+      setPwaState(prev => ({
+        ...prev,
+        isInstallable: true,
+        installPrompt: e
+      }))
     }
 
+    // Event listener para appinstalled
     const handleAppInstalled = () => {
-      setPwaState(prev => ({ ...prev, isInstalled: true, isInstallable: false }))
+      console.log('[PWA] App instalado com sucesso')
+      setPwaState(prev => ({
+        ...prev,
+        isInstalled: true,
+        isInstallable: false,
+        installPrompt: null
+      }))
     }
 
-    // Escutar mudanças de conectividade
+    // Event listeners para conectividade
     const handleOnline = () => {
       setPwaState(prev => ({ ...prev, isOffline: false }))
     }
@@ -54,8 +116,9 @@ export const usePWA = () => {
       setPwaState(prev => ({ ...prev, isOffline: true }))
     }
 
-    // Escutar atualizações do service worker
-    const handleUpdateFound = () => {
+    // Event listener para atualizações do service worker
+    const handleControllerChange = () => {
+      console.log('[PWA] Nova versão do service worker disponível')
       setPwaState(prev => ({ ...prev, hasUpdate: true }))
     }
 
@@ -65,9 +128,8 @@ export const usePWA = () => {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    // Escutar atualizações do service worker se disponível
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('controllerchange', handleUpdateFound)
+      navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange)
     }
 
     return () => {
@@ -77,10 +139,14 @@ export const usePWA = () => {
       window.removeEventListener('offline', handleOffline)
       
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.removeEventListener('controllerchange', handleUpdateFound)
+        navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
       }
     }
-  }, [])
+  }, [checkInstalled])
 
-  return pwaState
+  return {
+    ...pwaState,
+    installPWA,
+    checkForUpdates
+  }
 }

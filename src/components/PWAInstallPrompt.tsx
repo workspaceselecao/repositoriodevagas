@@ -1,98 +1,58 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { X, Download } from 'lucide-react'
-
-interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: string[]
-  readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed'
-    platform: string
-  }>
-  prompt(): Promise<void>
-}
-
-declare global {
-  interface WindowEventMap {
-    beforeinstallprompt: BeforeInstallPromptEvent
-  }
-}
+import { X, Download, Smartphone } from 'lucide-react'
+import { usePWA } from '@/hooks/usePWA'
 
 export const PWAInstallPrompt: React.FC = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [showInstallPrompt, setShowInstallPrompt] = useState(false)
-  const [isInstalled, setIsInstalled] = useState(false)
+  const { isInstallable, isInstalled, installPWA } = usePWA()
+  const [showPrompt, setShowPrompt] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
-    // Verificar se o app já está instalado
-    const checkInstalled = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-      const isInApp = (window.navigator as any).standalone === true
-      setIsInstalled(isStandalone || isInApp)
+    // Verificar se o prompt foi dispensado anteriormente
+    const dismissed = localStorage.getItem('pwa-install-dismissed')
+    if (dismissed) {
+      setIsDismissed(true)
     }
+  }, [])
 
-    checkInstalled()
+  useEffect(() => {
+    // Mostrar prompt se for instalável, não estiver instalado e não foi dispensado
+    if (isInstallable && !isInstalled && !isDismissed) {
+      // Delay para melhor UX
+      const timer = setTimeout(() => {
+        setShowPrompt(true)
+      }, 3000)
 
-    // Escutar o evento beforeinstallprompt
-    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-      e.preventDefault()
-      setDeferredPrompt(e)
-      
-      // Mostrar o prompt imediatamente se não foi rejeitado
-      if (!isInstalled && !localStorage.getItem('pwa-install-dismissed')) {
-        setShowInstallPrompt(true)
-      }
+      return () => clearTimeout(timer)
     }
+  }, [isInstallable, isInstalled, isDismissed])
 
-    // Escutar quando o app é instalado
-    const handleAppInstalled = () => {
-      setIsInstalled(true)
-      setShowInstallPrompt(false)
-      setDeferredPrompt(null)
-      localStorage.removeItem('pwa-install-dismissed')
+  const handleInstall = async () => {
+    const success = await installPWA()
+    if (success) {
+      setShowPrompt(false)
     }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    window.addEventListener('appinstalled', handleAppInstalled)
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-      window.removeEventListener('appinstalled', handleAppInstalled)
-    }
-  }, [isInstalled])
-
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return
-
-    deferredPrompt.prompt()
-    const { outcome } = await deferredPrompt.userChoice
-    
-    if (outcome === 'accepted') {
-      console.log('PWA instalado com sucesso')
-    } else {
-      console.log('PWA não foi instalado')
-    }
-
-    setDeferredPrompt(null)
-    setShowInstallPrompt(false)
   }
 
   const handleDismiss = () => {
-    setShowInstallPrompt(false)
+    setShowPrompt(false)
+    setIsDismissed(true)
     localStorage.setItem('pwa-install-dismissed', 'true')
   }
 
-  // Não mostrar nada se não estiver instalado e não houver prompt automático
-  if (isInstalled || !showInstallPrompt) {
+  // Não mostrar se não deve ser exibido
+  if (!showPrompt || isInstalled) {
     return null
   }
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm">
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 animate-in slide-in-from-bottom-2 duration-300">
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0">
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-              <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <Smartphone className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
           
@@ -107,7 +67,7 @@ export const PWAInstallPrompt: React.FC = () => {
             <div className="flex gap-2 mt-3">
               <Button
                 size="sm"
-                onClick={handleInstallClick}
+                onClick={handleInstall}
                 className="flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
@@ -125,7 +85,7 @@ export const PWAInstallPrompt: React.FC = () => {
           
           <button
             onClick={handleDismiss}
-            className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

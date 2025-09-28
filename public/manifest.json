@@ -1,0 +1,75 @@
+{
+  "name": "Repositório de Vagas",
+  "short_name": "RepoVagas",
+  "description": "Sistema de gerenciamento de vagas e clientes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-wide.svg",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Dashboard principal do Repositório de Vagas"
+    },
+    {
+      "src": "/screenshots/mobile-narrow.svg", 
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Interface móvel do Repositório de Vagas"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nova Vaga",
+      "short_name": "Nova Vaga",
+      "description": "Criar uma nova vaga",
+      "url": "/dashboard/nova-vaga",
+      "icons": [
+        {
+          "src": "/icons/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "short_name": "Clientes",
+      "description": "Visualizar lista de clientes",
+      "url": "/dashboard/clientes",
+      "icons": [
+        {
+          "src": "/icons/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}

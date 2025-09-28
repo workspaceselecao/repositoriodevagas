@@ -9,22 +9,24 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js', { scope: '/' })
       .then((registration) => {
-        console.log('SW registrado com sucesso:', registration)
+        console.log('[SW] Service worker registrado com sucesso:', registration.scope)
         
-        // Verificar se há atualizações
+        // Verificar atualizações periodicamente
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('Nova versão disponível!')
+                console.log('[SW] Nova versão disponível!')
+                // Notificar sobre atualização disponível
+                window.dispatchEvent(new CustomEvent('sw-update-available'))
               }
             })
           }
         })
       })
-      .catch((registrationError) => {
-        console.error('SW falhou ao registrar:', registrationError)
+      .catch((error) => {
+        console.error('[SW] Falha ao registrar service worker:', error)
       })
   })
 }
