@@ -32,6 +32,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     localStorage.setItem('theme-mode', mode)
     localStorage.setItem('theme-profile', profile)
+    
+    // Debug: verificar se as cores foram aplicadas
+    setTimeout(() => {
+      const root = document.documentElement
+      const primaryColor = getComputedStyle(root).getPropertyValue('--primary')
+      console.log('🔍 Debug ThemeContext:', {
+        mode,
+        profile,
+        primaryColor,
+        classes: root.className,
+        expectedPrimary: newConfig.colors.primary
+      })
+    }, 100)
   }, [mode, profile])
 
   const setTheme = (newMode: ThemeMode, newProfile: ColorProfile) => {

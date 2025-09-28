@@ -407,6 +407,34 @@ export function applyThemeToDocument(config: ThemeConfig) {
   // Set theme classes - ORDEM CORRETA: profile primeiro, depois mode
   root.className = `${config.profile} ${config.mode}`
   
+  // FORÇAR APLICAÇÃO DAS CORES VIA JAVASCRIPT (FALLBACK)
+  const colors = config.colors
+  
+  // Aplicar todas as cores principais
+  root.style.setProperty('--background', colors.background)
+  root.style.setProperty('--foreground', colors.foreground)
+  root.style.setProperty('--card', colors.card)
+  root.style.setProperty('--card-foreground', colors.cardForeground)
+  root.style.setProperty('--popover', colors.popover)
+  root.style.setProperty('--popover-foreground', colors.popoverForeground)
+  root.style.setProperty('--primary', colors.primary)
+  root.style.setProperty('--primary-foreground', colors.primaryForeground)
+  root.style.setProperty('--secondary', colors.secondary)
+  root.style.setProperty('--secondary-foreground', colors.secondaryForeground)
+  root.style.setProperty('--muted', colors.muted)
+  root.style.setProperty('--muted-foreground', colors.mutedForeground)
+  root.style.setProperty('--accent', colors.accent)
+  root.style.setProperty('--accent-foreground', colors.accentForeground)
+  root.style.setProperty('--destructive', colors.destructive)
+  root.style.setProperty('--destructive-foreground', colors.destructiveForeground)
+  root.style.setProperty('--border', colors.border)
+  root.style.setProperty('--input', colors.input)
+  root.style.setProperty('--ring', colors.ring)
+  root.style.setProperty('--success', colors.success)
+  root.style.setProperty('--success-foreground', colors.successForeground)
+  root.style.setProperty('--warning', colors.warning)
+  root.style.setProperty('--warning-foreground', colors.warningForeground)
+  
   // Apply special effects
   if (config.effects.glassmorphism) {
     root.classList.add('glassmorphism')
@@ -419,6 +447,14 @@ export function applyThemeToDocument(config: ThemeConfig) {
   } else {
     root.classList.remove('gradients')
   }
+  
+  // Debug log
+  console.log('🎨 Tema aplicado:', {
+    mode: config.mode,
+    profile: config.profile,
+    primary: colors.primary,
+    classes: root.className
+  })
 }
 
 // Função para obter todos os perfis de cor disponíveis
