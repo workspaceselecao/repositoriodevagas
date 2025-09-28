@@ -703,11 +703,8 @@ export class EnhancedJobScrapingService {
         // Remover labels específicos apenas no início
         .replace(/^\s*Descrição[:\s]*/i, '')
         .replace(/^\s*Vaga[:\s]*/i, '')
-        // Processar descrição - dividir por ponto e vírgula
-        .split(/[;]\s*/)
-        .map(descricao => descricao.trim())
-        .filter(descricao => descricao.trim() !== '') // Remove descrições vazias
-        .join('\n')
+        // Preservar quebras de linha naturais - não dividir por ponto e vírgula
+        // Apenas normalizar espaços e manter a estrutura original
     } else {
       // Para outros campos, usar limpeza normal
       cleaned = cleaned
