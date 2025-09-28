@@ -3,7 +3,6 @@ import { cn } from "../../lib/utils"
 import { Button } from "./button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useTheme } from "../../contexts/ThemeContext"
-import { getAppTitleColor } from "../../lib/theme.config"
 
 interface SidebarProps {
   children: React.ReactNode
@@ -15,7 +14,6 @@ interface SidebarProps {
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   ({ children, isCollapsed, onToggle, className }, ref) => {
     const { mode, profile } = useTheme()
-    const titleColor = getAppTitleColor(mode, profile)
     
     return (
       <div
@@ -35,10 +33,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">RV</span>
               </div>
-              <h2 
-                className="text-lg font-semibold app-title transition-colors duration-200"
-                style={{ color: titleColor }}
-              >
+              <h2 className="text-lg font-semibold app-title">
                 Repositório
               </h2>
             </div>

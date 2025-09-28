@@ -399,17 +399,12 @@ export function getThemeConfig(mode: ThemeMode, profile: ColorProfile): ThemeCon
 export function applyThemeToDocument(config: ThemeConfig) {
   const root = document.documentElement
   
-  // Apply colors as CSS custom properties
-  Object.entries(config.colors).forEach(([key, value]) => {
-    root.style.setProperty(`--${key}`, value)
-  })
-  
-  // Apply effects
+  // Apply effects (mantém apenas os efeitos, não as cores)
   root.style.setProperty('--radius', config.effects.borderRadius)
   root.style.setProperty('--shadow', config.effects.shadow)
   root.style.setProperty('--animation', config.effects.animation)
   
-  // Set theme classes
+  // Set theme classes - agora o CSS cuida das cores
   root.className = `${config.mode} ${config.profile}`
   
   // Apply special effects
@@ -448,11 +443,3 @@ export function getColorProfileInfo(profile: ColorProfile) {
   }
 }
 
-// Função para obter a cor do título da aplicação baseada no tema
-export function getAppTitleColor(mode: ThemeMode, profile: ColorProfile): string {
-  const colorScheme = colorSchemes[profile] || colorSchemes.default
-  const colors = mode === 'dark' ? colorScheme.dark : colorScheme.light
-  
-  // Usar a cor primary do tema aplicado (mesma cor dos botões)
-  return `hsl(${colors.primary})`
-}

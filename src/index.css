@@ -91,117 +91,278 @@
 
   /* Tema Rosa Suave */
   .rose {
-    --background: 340 10% 98%;
-    --foreground: 340 10% 3.9%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
     --card: 180 8% 97%;
-    --card-foreground: 340 10% 3.9%;
-    --popover: 340 10% 100%;
-    --popover-foreground: 340 10% 3.9%;
-    --primary: 340 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 340 4.8% 95.9%;
-    --secondary-foreground: 340 5.9% 10%;
-    --muted: 340 4.8% 95.9%;
-    --muted-foreground: 340 3.8% 46.1%;
-    --accent: 340 4.8% 95.9%;
-    --accent-foreground: 340 5.9% 10%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 346.8 77.2% 49.8%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 340 5.9% 90%;
-    --input: 340 5.9% 90%;
-    --ring: 340 83% 53%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 346.8 77.2% 49.8%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
+  }
+
+  /* Tema Rosa Escuro */
+  .rose.dark {
+    --background: 213 51% 11%;
+    --foreground: 0 0% 100%;
+    --card: 213 33% 17%;
+    --card-foreground: 0 0% 100%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 346.8 77.2% 49.8%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 0 0% 95%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 346.8 77.2% 49.8%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
   }
 
   /* Tema Violeta Suave */
   .violet {
-    --background: 270 10% 98%;
-    --foreground: 270 10% 3.9%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
     --card: 180 8% 97%;
-    --card-foreground: 270 10% 3.9%;
-    --popover: 270 10% 100%;
-    --popover-foreground: 270 10% 3.9%;
-    --primary: 270 83% 58%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 270 4.8% 95.9%;
-    --secondary-foreground: 270 5.9% 10%;
-    --muted: 270 4.8% 95.9%;
-    --muted-foreground: 270 3.8% 46.1%;
-    --accent: 270 4.8% 95.9%;
-    --accent-foreground: 270 5.9% 10%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 270 5.9% 90%;
-    --input: 270 5.9% 90%;
-    --ring: 270 83% 58%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 262.1 83.3% 57.8%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
+  }
+
+  /* Tema Violeta Escuro */
+  .violet.dark {
+    --background: 213 51% 11%;
+    --foreground: 0 0% 100%;
+    --card: 213 33% 17%;
+    --card-foreground: 0 0% 100%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 0 0% 95%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263.4 70% 50.4%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
   }
 
   /* Tema Esmeralda Suave */
   .emerald {
-    --background: 160 10% 98%;
-    --foreground: 160 10% 3.9%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
     --card: 180 8% 97%;
-    --card-foreground: 160 10% 3.9%;
-    --popover: 160 10% 100%;
-    --popover-foreground: 160 10% 3.9%;
-    --primary: 160 76% 36%;
-    --primary-foreground: 355 7% 97%;
-    --secondary: 160 4.8% 95.9%;
-    --secondary-foreground: 160 5.9% 10%;
-    --muted: 160 4.8% 95.9%;
-    --muted-foreground: 160 3.8% 46.1%;
-    --accent: 160 4.8% 95.9%;
-    --accent-foreground: 160 5.9% 10%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 158.1 64.4% 51.6%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 160 5.9% 90%;
-    --input: 160 5.9% 90%;
-    --ring: 160 76% 36%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 158.1 64.4% 51.6%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
+  }
+
+  /* Tema Esmeralda Escuro */
+  .emerald.dark {
+    --background: 213 51% 11%;
+    --foreground: 0 0% 100%;
+    --card: 213 33% 17%;
+    --card-foreground: 0 0% 100%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 158.1 64.4% 51.6%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 0 0% 95%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 158.1 64.4% 51.6%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
   }
 
   /* Tema Âmbar Suave */
   .amber {
-    --background: 45 10% 98%;
-    --foreground: 45 10% 3.9%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
     --card: 180 8% 97%;
-    --card-foreground: 45 10% 3.9%;
-    --popover: 45 10% 100%;
-    --popover-foreground: 45 10% 3.9%;
-    --primary: 45 95% 53%;
-    --primary-foreground: 60 9% 98%;
-    --secondary: 45 4.8% 95.9%;
-    --secondary-foreground: 45 5.9% 10%;
-    --muted: 45 4.8% 95.9%;
-    --muted-foreground: 45 3.8% 46.1%;
-    --accent: 45 4.8% 95.9%;
-    --accent-foreground: 45 5.9% 10%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 25 95% 53%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 45 5.9% 90%;
-    --input: 45 5.9% 90%;
-    --ring: 45 95% 53%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 25 95% 53%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
+  }
+
+  /* Tema Âmbar Escuro */
+  .amber.dark {
+    --background: 213 51% 11%;
+    --foreground: 0 0% 100%;
+    --card: 213 33% 17%;
+    --card-foreground: 0 0% 100%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 20.5 90.2% 48.2%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 0 0% 95%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 20.5 90.2% 48.2%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
   }
 
   /* Tema Ciano Suave */
   .cyan {
-    --background: 180 10% 98%;
-    --foreground: 180 10% 3.9%;
-    --card: 180 10% 100%;
-    --card-foreground: 180 10% 3.9%;
-    --popover: 180 10% 100%;
-    --popover-foreground: 180 10% 3.9%;
-    --primary: 180 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 180 4.8% 95.9%;
-    --secondary-foreground: 180 5.9% 10%;
-    --muted: 180 4.8% 95.9%;
-    --muted-foreground: 180 3.8% 46.1%;
-    --accent: 180 4.8% 95.9%;
-    --accent-foreground: 180 5.9% 10%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 180 8% 97%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 188.7 94.5% 42.7%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 180 5.9% 90%;
-    --input: 180 5.9% 90%;
-    --ring: 180 83% 53%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 188.7 94.5% 42.7%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
+  }
+
+  /* Tema Ciano Escuro */
+  .cyan.dark {
+    --background: 213 51% 11%;
+    --foreground: 0 0% 100%;
+    --card: 213 33% 17%;
+    --card-foreground: 0 0% 100%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 188.7 94.5% 42.7%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 0 0% 95%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 188.7 94.5% 42.7%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 20% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 20% 98%;
+  }
+
+  /* Classe para título da aplicação */
+  .app-title {
+    color: hsl(var(--primary));
+    transition: color 200ms ease-in-out;
   }
 }
 
