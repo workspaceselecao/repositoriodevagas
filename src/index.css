@@ -116,8 +116,8 @@
     --warning-foreground: 210 20% 98%;
   }
 
-  /* Tema Rosa Escuro */
-  .rose.dark {
+  /* Tema Rosa Escuro - Maior especificidade */
+  html.rose.dark {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;
@@ -170,8 +170,8 @@
     --warning-foreground: 210 20% 98%;
   }
 
-  /* Tema Violeta Escuro */
-  .violet.dark {
+  /* Tema Violeta Escuro - Maior especificidade */
+  html.violet.dark {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;
@@ -224,8 +224,8 @@
     --warning-foreground: 210 20% 98%;
   }
 
-  /* Tema Esmeralda Escuro */
-  .emerald.dark {
+  /* Tema Esmeralda Escuro - Maior especificidade */
+  html.emerald.dark {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;
@@ -278,8 +278,8 @@
     --warning-foreground: 210 20% 98%;
   }
 
-  /* Tema Âmbar Escuro */
-  .amber.dark {
+  /* Tema Âmbar Escuro - Maior especificidade */
+  html.amber.dark {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;
@@ -332,8 +332,8 @@
     --warning-foreground: 210 20% 98%;
   }
 
-  /* Tema Ciano Escuro */
-  .cyan.dark {
+  /* Tema Ciano Escuro - Maior especificidade */
+  html.cyan.dark {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;
