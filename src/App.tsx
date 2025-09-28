@@ -88,6 +88,13 @@ function AppRoutes() {
           </DashboardLayout>
         </ProtectedRoute>
       } />
+      <Route path="/dashboard/nova-vaga/:id" element={
+        <ProtectedRoute>
+          <DashboardLayout>
+            <NovaVagaFormWithScraping />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
       <Route path="/dashboard/usuarios" element={
         <ProtectedRoute requireAdmin={true}>
           <DashboardLayout>

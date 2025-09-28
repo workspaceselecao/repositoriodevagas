@@ -38,7 +38,7 @@ export default function ListaClientes() {
   }, [vagas, searchTerm])
 
   const handleEdit = (vaga: Vaga) => {
-    navigate(`/dashboard/editar-vaga/${vaga.id}`)
+    navigate(`/dashboard/nova-vaga/${vaga.id}`)
   }
 
   const handleViewVaga = (vaga: Vaga) => {

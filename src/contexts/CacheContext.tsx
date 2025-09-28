@@ -4,6 +4,9 @@ import { getVagas, getClientes, getSites, getCategorias, getCargos, getCelulas }
 import { getAllUsers } from '../lib/auth'
 import { getNoticias } from '../lib/noticias'
 import { useAuth } from './AuthContext'
+import { compressCacheData, decompressCacheData, shouldCompress, getDataSize } from '../lib/cache-compression'
+import { useCacheDistributor } from '../lib/cache-distributor'
+import { useCacheMetrics } from '../lib/cache-metrics'
 
 // Tipos para o cache
 interface CacheData {
@@ -59,8 +62,12 @@ interface CacheContextType {
 
 const CacheContext = createContext<CacheContextType | undefined>(undefined)
 
-// Chave para armazenamento local
-const CACHE_KEY = 'repositoriodevagas_cache'
+// Função para gerar chave de cache por usuário
+const getCacheKey = (userId?: string) => {
+  const baseKey = 'repositoriodevagas_cache'
+  return userId ? `${baseKey}_user_${userId}` : baseKey
+}
+
 const CACHE_EXPIRY = 5 * 60 * 1000 // 5 minutos
 
 // Estado inicial do cache
@@ -91,14 +98,90 @@ export function CacheProvider({ children }: { children: ReactNode }) {
   })
   
   const { user } = useAuth()
+  const cacheDistributor = useCacheDistributor()
+  const cacheMetrics = useCacheMetrics()
+
+  // Configurar distribuidor de cache quando usuário mudar
+  useEffect(() => {
+    if (user?.id) {
+      cacheDistributor.setUserId(user.id)
+    }
+  }, [user?.id, cacheDistributor])
+
+  // Configurar listeners para sincronização entre abas
+  useEffect(() => {
+    const unsubscribeUpdate = cacheDistributor.onCacheUpdate((data) => {
+      console.log('🔄 Cache atualizado de outra aba')
+      setCache(data)
+      setCacheStatus({
+        vagas: data.vagas.length > 0,
+        clientes: data.clientes.length > 0,
+        sites: data.sites.length > 0,
+        categorias: data.categorias.length > 0,
+        cargos: data.cargos.length > 0,
+        celulas: data.celulas.length > 0,
+        usuarios: data.usuarios.length > 0,
+        noticias: data.noticias.length > 0
+      })
+      
+      // Atualizar métricas de sincronização
+      const syncStats = cacheDistributor.getStats()
+      cacheMetrics.updateSyncStats(syncStats.messagesSent, syncStats.messagesReceived, syncStats.activeTabs)
+    })
+
+    const unsubscribeRequest = cacheDistributor.onCacheRequest(() => {
+      console.log('📡 Solicitação de sincronização recebida de outra aba')
+      cacheDistributor.respondToCacheRequest(cache)
+    })
+
+    const unsubscribeClear = cacheDistributor.onCacheClear(() => {
+      console.log('🗑️ Cache limpo de outra aba')
+      setCache(initialCache)
+      setCacheStatus({
+        vagas: false,
+        clientes: false,
+        sites: false,
+        categorias: false,
+        cargos: false,
+        celulas: false,
+        usuarios: false,
+        noticias: false
+      })
+    })
+
+    return () => {
+      unsubscribeUpdate()
+      unsubscribeRequest()
+      unsubscribeClear()
+    }
+  }, [cacheDistributor, cache])
 
   // Carregar cache do localStorage na inicialização
   useEffect(() => {
     const loadCacheFromStorage = () => {
+      if (!user?.id) return
+      
       try {
-        const storedCache = localStorage.getItem(CACHE_KEY)
+        const cacheKey = getCacheKey(user.id)
+        const storedCache = localStorage.getItem(cacheKey)
         if (storedCache) {
-          const parsedCache = JSON.parse(storedCache)
+          let parsedCache
+          
+          // Tentar descomprimir se necessário
+          try {
+            const decompressTimerId = cacheMetrics.startTimer('decompress')
+            const decompressed = decompressCacheData(storedCache)
+            cacheMetrics.endTimer(decompressTimerId)
+            
+            parsedCache = decompressed.data
+            if (decompressed.stats.compressionTime > 0) {
+              console.log(`🔓 Cache descomprimido em ${decompressed.stats.compressionTime.toFixed(2)}ms`)
+            }
+          } catch {
+            // Se falhar, tentar como JSON normal
+            parsedCache = JSON.parse(storedCache)
+          }
+          
           const now = Date.now()
           
           // Verificar se o cache não expirou
@@ -114,7 +197,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
               usuarios: parsedCache.usuarios.length > 0,
               noticias: parsedCache.noticias.length > 0
             })
-            console.log('📦 Cache carregado do localStorage')
+            console.log(`📦 Cache carregado do localStorage para usuário ${user.id}`)
             return
           } else {
             console.log('⏰ Cache expirado, será recarregado')
@@ -126,19 +209,37 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     }
 
     loadCacheFromStorage()
-  }, [])
+  }, [user?.id])
 
   // Salvar cache no localStorage sempre que ele for atualizado
   useEffect(() => {
-    if (cache.lastUpdated > 0) {
+    if (cache.lastUpdated > 0 && user?.id) {
+      const timerId = cacheMetrics.startTimer('save')
       try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(cache))
-        console.log('💾 Cache salvo no localStorage')
+        const cacheKey = getCacheKey(user.id)
+        
+        // Verificar se deve comprimir
+        if (shouldCompress(cache)) {
+          const compressTimerId = cacheMetrics.startTimer('compress')
+          const { compressed, stats } = compressCacheData(cache)
+          cacheMetrics.endTimer(compressTimerId)
+          
+          localStorage.setItem(cacheKey, compressed)
+          cacheMetrics.updateDataSize(stats.originalSize, stats.compressedSize)
+          console.log(`💾 Cache comprimido salvo para usuário ${user.id} - ${stats.compressionRatio.toFixed(1)}% de redução`)
+        } else {
+          localStorage.setItem(cacheKey, JSON.stringify(cache))
+          const dataSize = getDataSize(cache)
+          cacheMetrics.updateDataSize(dataSize.size)
+          console.log(`💾 Cache salvo no localStorage para usuário ${user.id}`)
+        }
       } catch (error) {
         console.error('Erro ao salvar cache no localStorage:', error)
+      } finally {
+        cacheMetrics.endTimer(timerId)
       }
     }
-  }, [cache])
+  }, [cache, user?.id, cacheMetrics])
 
   // Função para atualizar status do cache
   const updateCacheStatus = useCallback((section: keyof typeof cacheStatus, hasData: boolean) => {
@@ -150,6 +251,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
 
   // Função para buscar vagas
   const refreshVagas = useCallback(async () => {
+    const timerId = cacheMetrics.startTimer('load', 'vagas')
     try {
       console.log('🔄 Carregando vagas...')
       const vagas = await getVagas()
@@ -159,11 +261,19 @@ export function CacheProvider({ children }: { children: ReactNode }) {
         lastUpdated: Date.now()
       }))
       updateCacheStatus('vagas', vagas.length > 0)
+      
+      // Registrar métricas
+      cacheMetrics.recordHit('vagas')
+      cacheMetrics.recordSet('vagas', getDataSize(vagas).size)
+      
       console.log(`✅ ${vagas.length} vagas carregadas`)
     } catch (error) {
       console.error('❌ Erro ao carregar vagas:', error)
+      cacheMetrics.recordMiss('vagas')
+    } finally {
+      cacheMetrics.endTimer(timerId)
     }
-  }, [updateCacheStatus])
+  }, [updateCacheStatus, cacheMetrics])
 
   // Função para buscar clientes
   const refreshClientes = useCallback(async () => {
@@ -314,33 +424,48 @@ export function CacheProvider({ children }: { children: ReactNode }) {
 
   // Função para adicionar vaga ao cache
   const addVaga = useCallback((vaga: Vaga) => {
-    setCache(prev => ({
-      ...prev,
-      vagas: [vaga, ...prev.vagas],
-      lastUpdated: Date.now()
-    }))
+    setCache(prev => {
+      const newCache = {
+        ...prev,
+        vagas: [vaga, ...prev.vagas],
+        lastUpdated: Date.now()
+      }
+      // Sincronizar com outras abas
+      cacheDistributor.broadcastCacheUpdate(newCache)
+      return newCache
+    })
     console.log('➕ Vaga adicionada ao cache')
-  }, [])
+  }, [cacheDistributor])
 
   // Função para atualizar vaga no cache
   const updateVaga = useCallback((vaga: Vaga) => {
-    setCache(prev => ({
-      ...prev,
-      vagas: prev.vagas.map(v => v.id === vaga.id ? vaga : v),
-      lastUpdated: Date.now()
-    }))
+    setCache(prev => {
+      const newCache = {
+        ...prev,
+        vagas: prev.vagas.map(v => v.id === vaga.id ? vaga : v),
+        lastUpdated: Date.now()
+      }
+      // Sincronizar com outras abas
+      cacheDistributor.broadcastCacheUpdate(newCache)
+      return newCache
+    })
     console.log('🔄 Vaga atualizada no cache')
-  }, [])
+  }, [cacheDistributor])
 
   // Função para remover vaga do cache
   const removeVaga = useCallback((vagaId: string) => {
-    setCache(prev => ({
-      ...prev,
-      vagas: prev.vagas.filter(v => v.id !== vagaId),
-      lastUpdated: Date.now()
-    }))
+    setCache(prev => {
+      const newCache = {
+        ...prev,
+        vagas: prev.vagas.filter(v => v.id !== vagaId),
+        lastUpdated: Date.now()
+      }
+      // Sincronizar com outras abas
+      cacheDistributor.broadcastCacheUpdate(newCache)
+      return newCache
+    })
     console.log('➖ Vaga removida do cache')
-  }, [])
+  }, [cacheDistributor])
 
   // Função para limpar cache
   const clearCache = useCallback(() => {
@@ -355,9 +480,17 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       usuarios: false,
       noticias: false
     })
-    localStorage.removeItem(CACHE_KEY)
-    console.log('🗑️ Cache limpo')
-  }, [])
+    
+    // Limpar cache do usuário atual se existir
+    if (user?.id) {
+      const cacheKey = getCacheKey(user.id)
+      localStorage.removeItem(cacheKey)
+      console.log(`🗑️ Cache limpo para usuário ${user.id}`)
+    }
+    
+    // Sincronizar limpeza com outras abas
+    cacheDistributor.broadcastCacheClear()
+  }, [user?.id, cacheDistributor])
 
   // Carregar dados quando o usuário fizer login
   useEffect(() => {

@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useCache } from '../contexts/CacheContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
@@ -7,13 +7,14 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import { VagaFormData } from '../types/database'
-import { createVaga } from '../lib/vagas'
+import { VagaFormData, Vaga } from '../types/database'
+import { createVaga, getVagaById, updateVaga } from '../lib/vagas'
 import { EnhancedJobScrapingService, ScrapingResult, ScrapingError } from '../lib/enhanced-scraping'
 import { ConfidenceIndicator, FieldConfidenceIndicator, ConfidenceBar } from './ConfidenceIndicator'
-import { Plus, Download, Edit, Trash2, Save, RefreshCw } from 'lucide-react'
+import { Plus, Download, Edit, Trash2, Save, RefreshCw, Loader2 } from 'lucide-react'
 
 export default function NovaVagaFormWithScraping() {
+  const { id } = useParams<{ id?: string }>()
   const [formData, setFormData] = useState<VagaFormData>({
     site: '',
     categoria: '',
@@ -33,6 +34,7 @@ export default function NovaVagaFormWithScraping() {
   })
 
   const [loading, setLoading] = useState(false)
+  const [loadingData, setLoadingData] = useState(false)
   const [scrapingLoading, setScrapingLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [scrapingUrl, setScrapingUrl] = useState('')
@@ -40,8 +42,53 @@ export default function NovaVagaFormWithScraping() {
   const [scrapingError, setScrapingError] = useState<string>('')
   const [activeTab, setActiveTab] = useState('manual')
   const { user } = useAuth()
-  const { addVaga } = useCache()
+  const { addVaga, updateVaga: updateVagaInCache } = useCache()
   const navigate = useNavigate()
+
+  const isEditing = !!id
+
+  // Carregar dados da vaga se estivermos editando
+  useEffect(() => {
+    if (isEditing && id) {
+      loadVagaData()
+    }
+  }, [id, isEditing])
+
+  const loadVagaData = async () => {
+    if (!id) return
+
+    setLoadingData(true)
+    try {
+      const vaga = await getVagaById(id)
+      if (vaga) {
+        setFormData({
+          site: vaga.site || '',
+          categoria: vaga.categoria || '',
+          cargo: vaga.cargo || '',
+          cliente: vaga.cliente || '',
+          titulo: vaga.titulo || '',
+          celula: vaga.celula || '',
+          descricao_vaga: vaga.descricao_vaga || '',
+          responsabilidades_atribuicoes: vaga.responsabilidades_atribuicoes || '',
+          requisitos_qualificacoes: vaga.requisitos_qualificacoes || '',
+          salario: vaga.salario || '',
+          horario_trabalho: vaga.horario_trabalho || '',
+          jornada_trabalho: vaga.jornada_trabalho || '',
+          beneficios: vaga.beneficios || '',
+          local_trabalho: vaga.local_trabalho || '',
+          etapas_processo: vaga.etapas_processo || ''
+        })
+        setMessage('✅ Dados da vaga carregados com sucesso!')
+      } else {
+        setMessage('❌ Vaga não encontrada')
+      }
+    } catch (error) {
+      console.error('Erro ao carregar vaga:', error)
+      setMessage('❌ Erro ao carregar dados da vaga')
+    } finally {
+      setLoadingData(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,42 +117,72 @@ export default function NovaVagaFormWithScraping() {
       console.log('🚀 Iniciando envio do formulário...')
       console.log('Dados do formulário:', formData)
       
-      setMessage('⏳ Salvando vaga no banco de dados...')
-      
-      // Timeout para evitar loops infinitos (aumentado para 60 segundos)
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout: Operação demorou muito para responder')), 60000)
-      })
-      
-      const createPromise = createVaga(formData, user.id)
-      
-      const novaVaga = await Promise.race([createPromise, timeoutPromise])
-      
-      if (novaVaga) {
-        setMessage('✅ Vaga criada com sucesso!')
-        console.log('Vaga criada:', novaVaga)
+      if (isEditing) {
+        setMessage('⏳ Atualizando vaga no banco de dados...')
         
-        // Adicionar vaga ao cache
-        if (novaVaga && typeof novaVaga === 'object' && 'id' in novaVaga) {
-          addVaga(novaVaga as any)
+        // Timeout para evitar loops infinitos (aumentado para 60 segundos)
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout: Operação demorou muito para responder')), 60000)
+        })
+        
+        const updatePromise = updateVaga(id!, formData, user.id)
+        
+        const vagaAtualizada = await Promise.race([updatePromise, timeoutPromise])
+        
+        if (vagaAtualizada) {
+          setMessage('✅ Vaga atualizada com sucesso!')
+          console.log('Vaga atualizada:', vagaAtualizada)
+          
+          // Atualizar vaga no cache
+          if (vagaAtualizada && typeof vagaAtualizada === 'object' && 'id' in vagaAtualizada) {
+            updateVagaInCache(vagaAtualizada as any)
+          }
+          
+          // Navegar após um delay para mostrar a mensagem
+          setTimeout(() => {
+            navigate('/dashboard/clientes')
+          }, 1500)
+        } else {
+          setMessage('❌ Erro: Vaga não foi atualizada (retorno nulo)')
         }
-        
-        // Limpar formulário após sucesso
-        clearForm()
-        
-        // Navegar após um delay para mostrar a mensagem
-        setTimeout(() => {
-          navigate('/dashboard')
-        }, 1500)
       } else {
-        setMessage('❌ Erro: Vaga não foi criada (retorno nulo)')
+        setMessage('⏳ Salvando vaga no banco de dados...')
+        
+        // Timeout para evitar loops infinitos (aumentado para 60 segundos)
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout: Operação demorou muito para responder')), 60000)
+        })
+        
+        const createPromise = createVaga(formData, user.id)
+        
+        const novaVaga = await Promise.race([createPromise, timeoutPromise])
+        
+        if (novaVaga) {
+          setMessage('✅ Vaga criada com sucesso!')
+          console.log('Vaga criada:', novaVaga)
+          
+          // Adicionar vaga ao cache
+          if (novaVaga && typeof novaVaga === 'object' && 'id' in novaVaga) {
+            addVaga(novaVaga as any)
+          }
+          
+          // Limpar formulário após sucesso
+          clearForm()
+          
+          // Navegar após um delay para mostrar a mensagem
+          setTimeout(() => {
+            navigate('/dashboard')
+          }, 1500)
+        } else {
+          setMessage('❌ Erro: Vaga não foi criada (retorno nulo)')
+        }
       }
     } catch (error: any) {
-      console.error('💥 [handleSubmit] Erro detalhado ao criar vaga:', error)
+      console.error('💥 [handleSubmit] Erro detalhado:', error)
       console.error('💥 [handleSubmit] Tipo do erro:', typeof error)
       console.error('💥 [handleSubmit] Stack trace:', error.stack)
       
-      let errorMessage = 'Erro desconhecido ao criar vaga'
+      let errorMessage = isEditing ? 'Erro desconhecido ao atualizar vaga' : 'Erro desconhecido ao criar vaga'
       
       if (error?.message) {
         console.log('📝 [handleSubmit] Mensagem do erro:', error.message)
@@ -121,7 +198,7 @@ export default function NovaVagaFormWithScraping() {
         } else if (error.message.includes('JWT') || error.message.includes('auth')) {
           errorMessage = '🔐 Erro de autenticação: Faça login novamente.'
         } else if (error.message.includes('permission') || error.message.includes('policy')) {
-          errorMessage = '🚫 Erro de permissão: Você não tem permissão para criar vagas.'
+          errorMessage = '🚫 Erro de permissão: Você não tem permissão para criar/editar vagas.'
         } else if (error.message.includes('network') || error.message.includes('fetch')) {
           errorMessage = '🌐 Erro de rede: Verifique sua conexão com a internet.'
         } else if (error.message.includes('Campos obrigatórios não preenchidos')) {
@@ -286,14 +363,29 @@ export default function NovaVagaFormWithScraping() {
     </div>
   )
 
+  // Mostrar loading se estivermos carregando dados de uma vaga existente
+  if (loadingData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Carregando dados da vaga...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
-          Nova Vaga
+          {isEditing ? 'Editar Vaga' : 'Nova Vaga'}
         </h1>
         <p className="page-subtitle text-lg">
-          Adicione uma nova vaga ao sistema com extração automática ou manual
+          {isEditing 
+            ? 'Edite as informações da vaga com extração automática ou manual'
+            : 'Adicione uma nova vaga ao sistema com extração automática ou manual'
+          }
         </p>
       </div>
 
@@ -307,7 +399,10 @@ export default function NovaVagaFormWithScraping() {
           ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border-blue-400 dark:border-blue-600 border-l-blue-500 dark:border-l-blue-400'
           : 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-400 dark:border-gray-600 border-l-gray-500 dark:border-l-gray-400'
       }`}>
-        {message || '💡 Preencha os campos obrigatórios e clique em "Salvar Vaga" para criar uma nova vaga.'}
+        {message || (isEditing 
+          ? '💡 Edite os campos necessários e clique em "Atualizar Vaga" para salvar as alterações.'
+          : '💡 Preencha os campos obrigatórios e clique em "Salvar Vaga" para criar uma nova vaga.'
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -569,12 +664,12 @@ export default function NovaVagaFormWithScraping() {
                       {loading ? (
                         <>
                           <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                          Salvando...
+                          {isEditing ? 'Atualizando...' : 'Salvando...'}
                         </>
                       ) : (
                         <>
                           <Save className="h-4 w-4 mr-2" />
-                          Salvar Vaga
+                          {isEditing ? 'Atualizar Vaga' : 'Salvar Vaga'}
                         </>
                       )}
                     </Button>
