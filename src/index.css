@@ -117,7 +117,7 @@
   }
 
   /* Tema Rosa Escuro - Maior especificidade */
-  html.rose.dark {
+  .rose.dark, .dark.rose {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;
@@ -171,7 +171,7 @@
   }
 
   /* Tema Violeta Escuro - Maior especificidade */
-  html.violet.dark {
+  .violet.dark, .dark.violet {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;
@@ -225,7 +225,7 @@
   }
 
   /* Tema Esmeralda Escuro - Maior especificidade */
-  html.emerald.dark {
+  .emerald.dark, .dark.emerald {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;
@@ -279,7 +279,7 @@
   }
 
   /* Tema Âmbar Escuro - Maior especificidade */
-  html.amber.dark {
+  .amber.dark, .dark.amber {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;
@@ -333,7 +333,7 @@
   }
 
   /* Tema Ciano Escuro - Maior especificidade */
-  html.cyan.dark {
+  .cyan.dark, .dark.cyan {
     --background: 213 51% 11%;
     --foreground: 0 0% 100%;
     --card: 213 33% 17%;

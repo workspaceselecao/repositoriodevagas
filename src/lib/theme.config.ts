@@ -399,13 +399,13 @@ export function getThemeConfig(mode: ThemeMode, profile: ColorProfile): ThemeCon
 export function applyThemeToDocument(config: ThemeConfig) {
   const root = document.documentElement
   
-  // Apply effects (mantém apenas os efeitos, não as cores)
+  // Apply effects
   root.style.setProperty('--radius', config.effects.borderRadius)
   root.style.setProperty('--shadow', config.effects.shadow)
   root.style.setProperty('--animation', config.effects.animation)
   
-  // Set theme classes - agora o CSS cuida das cores
-  root.className = `${config.mode} ${config.profile}`
+  // Set theme classes - ORDEM CORRETA: profile primeiro, depois mode
+  root.className = `${config.profile} ${config.mode}`
   
   // Apply special effects
   if (config.effects.glassmorphism) {
