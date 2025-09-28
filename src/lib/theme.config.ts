@@ -453,13 +453,6 @@ export function getAppTitleColor(mode: ThemeMode, profile: ColorProfile): string
   const colorScheme = colorSchemes[profile] || colorSchemes.default
   const colors = mode === 'dark' ? colorScheme.dark : colorScheme.light
   
-  // Para o tema padrão, usar contraste reverso
-  if (profile === 'default') {
-    return mode === 'dark' 
-      ? `hsl(${colors.foreground})` // Tema escuro: usar foreground (claro)
-      : `hsl(${colors.primary})`    // Tema claro: usar primary (escuro)
-  }
-  
-  // Para outros temas, usar a cor secundária
+  // Sempre usar a cor secundária do tema aplicado
   return `hsl(${colors.secondary})`
 }
