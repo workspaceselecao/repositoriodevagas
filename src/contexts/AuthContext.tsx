@@ -3,12 +3,15 @@ import { AuthUser, LoginFormData } from '../types/database'
 import { signIn, signOut, getCurrentUser } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { initializeVersionSystem } from '../version'
+import ErrorFallback from '../components/ErrorFallback'
 
 interface AuthContextType {
   user: AuthUser | null
   login: (credentials: LoginFormData) => Promise<boolean>
   logout: () => Promise<void>
   loading: boolean
+  error: Error | null
+  retry: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -18,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
   const [isInitializing, setIsInitializing] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -37,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsInitializing(false)
         hasInitialized = true
       }
-    }, 5000) // 5 segundos máximo
+    }, 15000) // Aumentado para 15 segundos
 
     // Verificar sessão atual do Supabase de forma rápida
     const checkUser = async () => {
@@ -46,10 +50,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsInitializing(true)
       
       try {
-        // Verificar sessão com timeout curto
+        // Verificar sessão com timeout mais generoso
         const sessionPromise = supabase.auth.getSession()
         const timeoutPromise = new Promise((_, reject) => {
-          timeoutId = setTimeout(() => reject(new Error('Session timeout')), 2000)
+          timeoutId = setTimeout(() => reject(new Error('Session timeout')), 10000) // Aumentado para 10 segundos
         })
 
         const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any
@@ -134,8 +138,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           timeoutId = null
         }
         
-        // Em caso de erro, limpar estado imediatamente
+        // Em caso de erro, definir erro mas não travar a aplicação
         if (isMounted) {
+          console.warn('⚠️ Erro na verificação de sessão - permitindo acesso sem autenticação')
+          setError(error as Error)
           setUser(null)
           hasInitialized = true
           setLoading(false)
@@ -291,11 +297,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const retry = () => {
+    setError(null)
+    setLoading(true)
+    setInitialized(false)
+    setIsInitializing(false)
+    // Recarregar a página para reinicializar
+    window.location.reload()
+  }
+
   const value = {
     user,
     login,
     logout,
-    loading
+    loading,
+    error,
+    retry
   }
 
   return (

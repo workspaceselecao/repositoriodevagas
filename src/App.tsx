@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
 import DebugInfo from './components/DebugInfo'
+import ErrorFallback from './components/ErrorFallback'
 import LoginPage from './components/LoginPage'
 import ForgotPasswordPage from './components/ForgotPasswordPage'
 import ResetPasswordPage from './components/ResetPasswordPage'
@@ -39,7 +40,12 @@ function ProtectedRoute({ children, requireAdmin = false }: { children: React.Re
 }
 
 function AppRoutes() {
-  const { user, loading } = useAuth()
+  const { user, loading, error, retry } = useAuth()
+
+  // Se há erro, mostrar ErrorFallback
+  if (error) {
+    return <ErrorFallback error={error} onRetry={retry} />
+  }
 
   if (loading) {
     return (

@@ -67,7 +67,7 @@ export const colorSchemes = {
       warningForeground: '210 20% 98%',
     },
     dark: {
-      background: '240 41% 3%',
+      background: '216 51% 11%', // #0e192b (HSL: 0.60, 0.51, 0.11)
       foreground: '0 0% 98%',
       card: '213 33% 17%',
       cardForeground: '0 0% 98%',
@@ -75,16 +75,16 @@ export const colorSchemes = {
       popoverForeground: '0 0% 98%',
       primary: '210 20% 98%',
       primaryForeground: '220.9 39.3% 11%',
-      secondary: '215 27.9% 16.9%',
+      secondary: '216 41% 3%', // #05060C (0.64, 0.41, 0.03)
       secondaryForeground: '0 0% 98%',
-      muted: '215 27.9% 16.9%',
+      muted: '216 41% 3%', // #05060C (0.64, 0.41, 0.03)
       mutedForeground: '0 0% 98%',
-      accent: '215 27.9% 16.9%',
+      accent: '216 41% 3%', // #05060C (0.64, 0.41, 0.03)
       accentForeground: '0 0% 98%',
       destructive: '0 62.8% 30.6%',
       destructiveForeground: '0 0% 98%',
-      border: '215 27.9% 16.9%',
-      input: '215 27.9% 16.9%',
+      border: '216 41% 3%', // #05060C (0.64, 0.41, 0.03)
+      input: '216 41% 3%', // #05060C (0.64, 0.41, 0.03)
       ring: '216 12.2% 83.9%',
       success: '142 76% 36%',
       successForeground: '0 0% 98%',
