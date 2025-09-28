@@ -453,6 +453,6 @@ export function getAppTitleColor(mode: ThemeMode, profile: ColorProfile): string
   const colorScheme = colorSchemes[profile] || colorSchemes.default
   const colors = mode === 'dark' ? colorScheme.dark : colorScheme.light
   
-  // Sempre usar a cor secundária do tema aplicado
-  return `hsl(${colors.secondary})`
+  // Usar a cor primary do tema aplicado (mesma cor dos botões)
+  return `hsl(${colors.primary})`
 }
