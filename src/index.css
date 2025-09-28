@@ -7,7 +7,7 @@
     /* Variáveis CSS dinâmicas serão aplicadas via JavaScript */
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
+    --card: 180 8% 97%;
     --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71.4% 4.1%;
@@ -93,7 +93,7 @@
   .rose {
     --background: 340 10% 98%;
     --foreground: 340 10% 3.9%;
-    --card: 340 10% 100%;
+    --card: 180 8% 97%;
     --card-foreground: 340 10% 3.9%;
     --popover: 340 10% 100%;
     --popover-foreground: 340 10% 3.9%;
@@ -116,7 +116,7 @@
   .violet {
     --background: 270 10% 98%;
     --foreground: 270 10% 3.9%;
-    --card: 270 10% 100%;
+    --card: 180 8% 97%;
     --card-foreground: 270 10% 3.9%;
     --popover: 270 10% 100%;
     --popover-foreground: 270 10% 3.9%;
@@ -139,7 +139,7 @@
   .emerald {
     --background: 160 10% 98%;
     --foreground: 160 10% 3.9%;
-    --card: 160 10% 100%;
+    --card: 180 8% 97%;
     --card-foreground: 160 10% 3.9%;
     --popover: 160 10% 100%;
     --popover-foreground: 160 10% 3.9%;
@@ -162,7 +162,7 @@
   .amber {
     --background: 45 10% 98%;
     --foreground: 45 10% 3.9%;
-    --card: 45 10% 100%;
+    --card: 180 8% 97%;
     --card-foreground: 45 10% 3.9%;
     --popover: 45 10% 100%;
     --popover-foreground: 45 10% 3.9%;
