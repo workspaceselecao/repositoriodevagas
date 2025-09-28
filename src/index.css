@@ -304,6 +304,11 @@
 
 /* ===== TEMA ESCURO (Exceção do tema padrão) ===== */
 
+/* BACKGROUND PRINCIPAL - FORÇADO */
+html.dark body {
+  background-color: #0e192b !important;
+}
+
 /* 1. COR DE TÍTULO DA APLICAÇÃO, COR DE TÍTULO DA PÁGINA, COR DE BOTÃO ATIVO, ÍCONES */
 /* Aplicar cor do tema secundário (com exceção do tema padrão que tem contraste reverso) */
 
@@ -378,66 +383,12 @@
   color: hsl(var(--primary)) !important;
 }
 
-/* ===== TEMA CLARO (Exceção do tema padrão) ===== */
+/* ===== TEMA CLARO ===== */
 
-/* 1. COR DE BOTÃO ATIVO, ÍCONES */
-/* Aplicar cor do tema secundário (com exceção do tema padrão que tem contraste reverso) */
-
-:not(.dark):not(.default) .btn-active {
-  background-color: hsl(var(--secondary)) !important;
-  color: hsl(var(--secondary-foreground)) !important;
-}
-
-:not(.dark):not(.default) .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-:not(.dark):not(.default) .btn-active .icon-primary,
-:not(.dark):not(.default) .btn-active svg {
-  color: hsl(var(--secondary-foreground)) !important;
-}
-
-/* Tema padrão claro - contraste reverso */
-.default:not(.dark) .btn-active {
-  background-color: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
-}
-
-.default:not(.dark) .icon-primary {
-  color: hsl(var(--primary)) !important;
-}
-
-.default:not(.dark) .btn-active .icon-primary,
-.default:not(.dark) .btn-active svg {
-  color: hsl(var(--primary-foreground)) !important;
-}
-
-/* 2. COR DE TÍTULO DA APLICAÇÃO, COR DE TÍTULO DA PÁGINA, COR DE SUBTÍTULO DA PÁGINA, COR DE TÍTULO DE CAMPO, COR DE SUBTÍTULO DE CAMPO, COR DE FONTES DE INFORMAÇÃO, COR DE FONTES DE BOTÃO, COR DE FONTES DE MODAL */
-:not(.dark) .app-title,
-:not(.dark) .page-title,
-:not(.dark) .page-subtitle,
-:not(.dark) .field-title,
-:not(.dark) .field-subtitle,
-:not(.dark) .info-text,
-:not(.dark) .btn-text,
-:not(.dark) .modal-text {
-  color: #3d3c4f !important;
-}
-
-/* 3. COR DE CARD */
+/* COR DE CARD */
 :not(.dark) .card {
   background-color: #f7f8f8 !important;
   color: #3d3c4f !important;
-}
-
-:not(.dark) .card .app-title,
-:not(.dark) .card .page-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-.default:not(.dark) .card .app-title,
-.default:not(.dark) .card .page-title {
-  color: hsl(var(--primary)) !important;
 }
 
 /* ===== APLICAÇÃO ESPECÍFICA PARA TODOS OS PERFIS DE COR ===== */
@@ -507,124 +458,32 @@
   color: hsl(var(--secondary)) !important;
 }
 
-/* ===== APLICAÇÃO EM COMPONENTES ESPECÍFICOS ===== */
+/* ===== CORREÇÃO ESPECÍFICA PARA TÍTULOS DAS PÁGINAS ===== */
 
-/* Cards */
-.card .page-title,
-.card .app-title {
+/* Forçar aplicação dos títulos das páginas específicas */
+html.dark.rose body h1.page-title,
+html.dark.violet body h1.page-title,
+html.dark.emerald body h1.page-title,
+html.dark.amber body h1.page-title,
+html.dark.cyan body h1.page-title {
   color: hsl(var(--secondary)) !important;
 }
 
-.card .page-subtitle,
-.card .field-title,
-.card .info-text {
-  color: hsl(var(--foreground)) !important;
-}
-
-.card .field-subtitle {
-  color: hsl(var(--muted-foreground)) !important;
-}
-
-/* Tema escuro em cards */
-.dark .card .page-subtitle,
-.dark .card .field-title,
-.dark .card .info-text {
-  color: hsl(210 40% 98%) !important;
-}
-
-.dark .card .field-subtitle {
-  color: hsl(210 40% 95%) !important;
-}
-
-/* Modais */
-.modal .page-title,
-.modal .app-title {
+/* Títulos dentro de cards */
+html.dark.rose body .card h1.page-title,
+html.dark.violet body .card h1.page-title,
+html.dark.emerald body .card h1.page-title,
+html.dark.amber body .card h1.page-title,
+html.dark.cyan body .card h1.page-title {
   color: hsl(var(--secondary)) !important;
 }
 
-.modal .page-subtitle,
-.modal .field-title,
-.modal .info-text {
-  color: hsl(var(--foreground)) !important;
-}
-
-.modal .field-subtitle {
-  color: hsl(var(--muted-foreground)) !important;
-}
-
-/* Tema escuro em modais */
-.dark .modal .page-subtitle,
-.dark .modal .field-title,
-.dark .modal .info-text {
-  color: hsl(210 40% 98%) !important;
-}
-
-.dark .modal .field-subtitle {
-  color: hsl(210 40% 95%) !important;
-}
-
-/* ===== CORES PARA INPUTS E TEXTAREAS ===== */
-
-/* Inputs e textareas - sempre texto escuro para legibilidade */
-input,
-textarea {
-  color: hsl(0 0% 10%) !important;
-}
-
-.dark input,
-.dark textarea {
-  color: hsl(0 0% 10%) !important;
-}
-
-/* Labels - seguem o padrão adaptativo */
-label {
-  color: hsl(var(--foreground)) !important;
-}
-
-.dark label {
-  color: hsl(210 40% 98%) !important;
-}
-
-/* ===== CORES PARA BOTÕES ===== */
-
-/* Botões normais */
-button:not(.btn-active) {
-  color: hsl(var(--foreground)) !important;
-}
-
-.dark button:not(.btn-active) {
-  color: hsl(210 40% 98%) !important;
-}
-
-/* ===== APLICAÇÃO EM TODAS AS PÁGINAS ===== */
-
-/* Dashboard */
-.dashboard .page-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Login */
-.login .page-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Nova Vaga */
-.nova-vaga .page-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Comparativo */
-.comparativo .page-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Configurações */
-.configuracoes .page-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Usuários */
-.usuarios .page-title {
+/* Títulos em qualquer elemento */
+html.dark.rose body *[class*="page-title"],
+html.dark.violet body *[class*="page-title"],
+html.dark.emerald body *[class*="page-title"],
+html.dark.amber body *[class*="page-title"],
+html.dark.cyan body *[class*="page-title"] {
   color: hsl(var(--secondary)) !important;
 }
   
@@ -906,178 +765,3 @@ button:not(.btn-active) {
   }
 }
 
-/* ===== FORÇA APLICAÇÃO DO ESQUEMA DE CORES - REGRAS ULTRA ESPECÍFICAS ===== */
-
-/* TEMA ESCURO - FORÇAR APLICAÇÃO DAS CORES */
-
-/* Títulos da aplicação e páginas - FORÇADO */
-html.dark.rose body .app-title,
-html.dark.rose body .page-title,
-html.dark.violet body .app-title,
-html.dark.violet body .page-title,
-html.dark.emerald body .app-title,
-html.dark.emerald body .page-title,
-html.dark.amber body .app-title,
-html.dark.amber body .page-title,
-html.dark.cyan body .app-title,
-html.dark.cyan body .page-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Botões ativos - FORÇADO */
-html.dark.rose body .btn-active,
-html.dark.violet body .btn-active,
-html.dark.emerald body .btn-active,
-html.dark.amber body .btn-active,
-html.dark.cyan body .btn-active {
-  background-color: hsl(var(--secondary)) !important;
-  color: hsl(var(--secondary-foreground)) !important;
-}
-
-/* Ícones primários - FORÇADO */
-html.dark.rose body .icon-primary,
-html.dark.violet body .icon-primary,
-html.dark.emerald body .icon-primary,
-html.dark.amber body .icon-primary,
-html.dark.cyan body .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Ícones dentro de botões ativos - FORÇADO */
-html.dark.rose body .btn-active .icon-primary,
-html.dark.rose body .btn-active svg,
-html.dark.violet body .btn-active .icon-primary,
-html.dark.violet body .btn-active svg,
-html.dark.emerald body .btn-active .icon-primary,
-html.dark.emerald body .btn-active svg,
-html.dark.amber body .btn-active .icon-primary,
-html.dark.amber body .btn-active svg,
-html.dark.cyan body .btn-active .icon-primary,
-html.dark.cyan body .btn-active svg {
-  color: hsl(var(--secondary-foreground)) !important;
-}
-
-/* Cards - FORÇADO */
-html.dark body .card {
-  background-color: #1e293b !important;
-  color: #d1d5db !important;
-}
-
-/* Textos dentro de cards - FORÇADO */
-html.dark body .card .page-subtitle,
-html.dark body .card .field-title,
-html.dark body .card .field-subtitle,
-html.dark body .card .info-text,
-html.dark body .card .btn-text,
-html.dark body .card .modal-text {
-  color: #d1d5db !important;
-}
-
-/* Títulos dentro de cards - FORÇADO */
-html.dark.rose body .card .page-title,
-html.dark.rose body .card .app-title,
-html.dark.violet body .card .page-title,
-html.dark.violet body .card .app-title,
-html.dark.emerald body .card .page-title,
-html.dark.emerald body .card .app-title,
-html.dark.amber body .card .page-title,
-html.dark.amber body .card .app-title,
-html.dark.cyan body .card .page-title,
-html.dark.cyan body .card .app-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* TEMA CLARO - FORÇAR APLICAÇÃO DAS CORES */
-
-/* Botões ativos - FORÇADO */
-html.rose:not(.dark) body .btn-active,
-html.violet:not(.dark) body .btn-active,
-html.emerald:not(.dark) body .btn-active,
-html.amber:not(.dark) body .btn-active,
-html.cyan:not(.dark) body .btn-active {
-  background-color: hsl(var(--secondary)) !important;
-  color: hsl(var(--secondary-foreground)) !important;
-}
-
-/* Ícones primários - FORÇADO */
-html.rose:not(.dark) body .icon-primary,
-html.violet:not(.dark) body .icon-primary,
-html.emerald:not(.dark) body .icon-primary,
-html.amber:not(.dark) body .icon-primary,
-html.cyan:not(.dark) body .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Cards - FORÇADO */
-html:not(.dark) body .card {
-  background-color: #f7f8f8 !important;
-  color: #3d3c4f !important;
-}
-
-/* Textos dentro de cards - FORÇADO */
-html:not(.dark) body .card .page-subtitle,
-html:not(.dark) body .card .field-title,
-html:not(.dark) body .card .field-subtitle,
-html:not(.dark) body .card .info-text,
-html:not(.dark) body .card .btn-text,
-html:not(.dark) body .card .modal-text {
-  color: #3d3c4f !important;
-}
-
-/* Títulos dentro de cards - FORÇADO */
-html.rose:not(.dark) body .card .page-title,
-html.rose:not(.dark) body .card .app-title,
-html.violet:not(.dark) body .card .page-title,
-html.violet:not(.dark) body .card .app-title,
-html.emerald:not(.dark) body .card .page-title,
-html.emerald:not(.dark) body .card .app-title,
-html.amber:not(.dark) body .card .page-title,
-html.amber:not(.dark) body .card .app-title,
-html.cyan:not(.dark) body .card .page-title,
-html.cyan:not(.dark) body .card .app-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* MODAIS - FORÇAR APLICAÇÃO DAS CORES */
-
-/* Modais tema escuro */
-html.dark body .modal-text {
-  color: #d1d5db !important;
-}
-
-/* Modais tema claro */
-html:not(.dark) body .modal-text {
-  color: #3d3c4f !important;
-}
-
-/* TÍTULOS DAS PÁGINAS - FORÇAR APLICAÇÃO ESPECÍFICA */
-
-/* Todos os títulos das páginas */
-html.dark.rose body h1.page-title,
-html.dark.violet body h1.page-title,
-html.dark.emerald body h1.page-title,
-html.dark.amber body h1.page-title,
-html.dark.cyan body h1.page-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* ===== CORREÇÃO FLUIDA - APENAS BACKGROUND E TÍTULOS ===== */
-
-/* BACKGROUND PRINCIPAL - FORÇADO */
-html.dark body {
-  background-color: #0e192b !important;
-}
-
-/* TÍTULOS OBRIGATORIAMENTE COM COR DO TEMA SECUNDÁRIO - FLUIDO */
-html.dark.rose .app-title,
-html.dark.rose .page-title,
-html.dark.violet .app-title,
-html.dark.violet .page-title,
-html.dark.emerald .app-title,
-html.dark.emerald .page-title,
-html.dark.amber .app-title,
-html.dark.amber .page-title,
-html.dark.cyan .app-title,
-html.dark.cyan .page-title {
-  color: hsl(var(--secondary)) !important;
-}
