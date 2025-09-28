@@ -391,81 +391,19 @@ html.dark body {
   color: #3d3c4f !important;
 }
 
-/* ===== APLICAÇÃO ESPECÍFICA PARA TODOS OS PERFIS DE COR ===== */
+/* ===== CORREÇÃO FORÇADA PARA TÍTULOS DAS PÁGINAS ===== */
 
-/* Tema Rosa */
-.dark.rose .app-title,
-.dark.rose .page-title,
-.dark.rose .btn-active,
-.dark.rose .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-.rose:not(.dark) .btn-active,
-.rose:not(.dark) .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Tema Violeta */
-.dark.violet .app-title,
-.dark.violet .page-title,
-.dark.violet .btn-active,
-.dark.violet .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-.violet:not(.dark) .btn-active,
-.violet:not(.dark) .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Tema Esmeralda */
-.dark.emerald .app-title,
-.dark.emerald .page-title,
-.dark.emerald .btn-active,
-.dark.emerald .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-.emerald:not(.dark) .btn-active,
-.emerald:not(.dark) .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Tema Âmbar */
-.dark.amber .app-title,
-.dark.amber .page-title,
-.dark.amber .btn-active,
-.dark.amber .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-.amber:not(.dark) .btn-active,
-.amber:not(.dark) .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* Tema Ciano */
-.dark.cyan .app-title,
-.dark.cyan .page-title,
-.dark.cyan .btn-active,
-.dark.cyan .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-.cyan:not(.dark) .btn-active,
-.cyan:not(.dark) .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* ===== CORREÇÃO ESPECÍFICA PARA TÍTULOS DAS PÁGINAS ===== */
-
-/* Forçar aplicação dos títulos das páginas específicas */
+/* Forçar aplicação dos títulos das páginas específicas - MÁXIMA ESPECIFICIDADE */
 html.dark.rose body h1.page-title,
 html.dark.violet body h1.page-title,
 html.dark.emerald body h1.page-title,
 html.dark.amber body h1.page-title,
-html.dark.cyan body h1.page-title {
+html.dark.cyan body h1.page-title,
+html.dark.rose body .page-title,
+html.dark.violet body .page-title,
+html.dark.emerald body .page-title,
+html.dark.amber body .page-title,
+html.dark.cyan body .page-title {
   color: hsl(var(--secondary)) !important;
 }
 
@@ -474,7 +412,12 @@ html.dark.rose body .card h1.page-title,
 html.dark.violet body .card h1.page-title,
 html.dark.emerald body .card h1.page-title,
 html.dark.amber body .card h1.page-title,
-html.dark.cyan body .card h1.page-title {
+html.dark.cyan body .card h1.page-title,
+html.dark.rose body .card .page-title,
+html.dark.violet body .card .page-title,
+html.dark.emerald body .card .page-title,
+html.dark.amber body .card .page-title,
+html.dark.cyan body .card .page-title {
   color: hsl(var(--secondary)) !important;
 }
 
@@ -486,6 +429,46 @@ html.dark.amber body *[class*="page-title"],
 html.dark.cyan body *[class*="page-title"] {
   color: hsl(var(--secondary)) !important;
 }
+
+/* ===== CORREÇÃO FORÇADA PARA ÍCONES ===== */
+
+/* Forçar aplicação dos ícones - MÁXIMA ESPECIFICIDADE */
+html.dark.rose body .icon-primary,
+html.dark.violet body .icon-primary,
+html.dark.emerald body .icon-primary,
+html.dark.amber body .icon-primary,
+html.dark.cyan body .icon-primary,
+html.dark.rose body svg,
+html.dark.violet body svg,
+html.dark.emerald body svg,
+html.dark.amber body svg,
+html.dark.cyan body svg {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* ===== CORREÇÃO FORÇADA PARA BOTÕES ATIVOS ===== */
+
+/* Forçar aplicação dos botões ativos - MÁXIMA ESPECIFICIDADE */
+html.dark.rose body .btn-active,
+html.dark.violet body .btn-active,
+html.dark.emerald body .btn-active,
+html.dark.amber body .btn-active,
+html.dark.cyan body .btn-active {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+/* ===== CORREÇÃO FORÇADA PARA TÍTULOS DA APLICAÇÃO ===== */
+
+/* Forçar aplicação dos títulos da aplicação - MÁXIMA ESPECIFICIDADE */
+html.dark.rose body .app-title,
+html.dark.violet body .app-title,
+html.dark.emerald body .app-title,
+html.dark.amber body .app-title,
+html.dark.cyan body .app-title {
+  color: hsl(var(--secondary)) !important;
+}
+
   
   /* Efeitos de hover melhorados */
   .hover-lift {
