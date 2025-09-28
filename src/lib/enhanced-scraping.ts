@@ -676,6 +676,38 @@ export class EnhancedJobScrapingService {
         .map(requisito => requisito.trim())
         .filter(requisito => requisito.trim() !== '') // Remove requisitos vazios
         .join('\n')
+    } else if (field === 'responsabilidades_atribuicoes') {
+      cleaned = cleaned
+        // Normalizar espaços múltiplos, mas preservar quebras de linha
+        .replace(/[ \t]+/g, ' ')
+        // Limpar espaços no início e fim de linhas, mas manter quebras de linha
+        .replace(/[ \t]+$/gm, '')
+        .replace(/^[ \t]+/gm, '')
+        .trim()
+        // Remover labels específicos apenas no início
+        .replace(/^\s*Responsabilidades[:\s]*/i, '')
+        .replace(/^\s*Atribuições[:\s]*/i, '')
+        // Processar responsabilidades - dividir por ponto e vírgula
+        .split(/[;]\s*/)
+        .map(responsabilidade => responsabilidade.trim())
+        .filter(responsabilidade => responsabilidade.trim() !== '') // Remove responsabilidades vazias
+        .join('\n')
+    } else if (field === 'descricao_vaga') {
+      cleaned = cleaned
+        // Normalizar espaços múltiplos, mas preservar quebras de linha
+        .replace(/[ \t]+/g, ' ')
+        // Limpar espaços no início e fim de linhas, mas manter quebras de linha
+        .replace(/[ \t]+$/gm, '')
+        .replace(/^[ \t]+/gm, '')
+        .trim()
+        // Remover labels específicos apenas no início
+        .replace(/^\s*Descrição[:\s]*/i, '')
+        .replace(/^\s*Vaga[:\s]*/i, '')
+        // Processar descrição - dividir por ponto e vírgula
+        .split(/[;]\s*/)
+        .map(descricao => descricao.trim())
+        .filter(descricao => descricao.trim() !== '') // Remove descrições vazias
+        .join('\n')
     } else {
       // Para outros campos, usar limpeza normal
       cleaned = cleaned

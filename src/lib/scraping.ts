@@ -412,6 +412,20 @@ export class JobScrapingService {
         .map(requisito => requisito.trim())
         .filter(requisito => requisito.trim() !== '') // Remove requisitos vazios
         .join('\n')
+    } else if (field === 'responsabilidades_atribuicoes') {
+      cleaned = cleaned
+        // Processar responsabilidades - dividir por ponto e vírgula
+        .split(/[;]\s*/)
+        .map(responsabilidade => responsabilidade.trim())
+        .filter(responsabilidade => responsabilidade.trim() !== '') // Remove responsabilidades vazias
+        .join('\n')
+    } else if (field === 'descricao_vaga') {
+      cleaned = cleaned
+        // Processar descrição - dividir por ponto e vírgula
+        .split(/[;]\s*/)
+        .map(descricao => descricao.trim())
+        .filter(descricao => descricao.trim() !== '') // Remove descrições vazias
+        .join('\n')
     } else {
       // Para outros campos, usar limpeza normal
       cleaned = cleaned
