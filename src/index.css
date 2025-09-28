@@ -1162,6 +1162,178 @@ html:not(.dark) body *[class*="modal"] *[class*="modal-text"] {
   color: #3d3c4f !important;
 }
 
+/* ===== CORREÇÃO ULTRA AGRESSIVA - REGRAS QUE SOBRESCREVEM TUDO ===== */
+
+/* BACKGROUND PRINCIPAL - FORÇADO COM MÁXIMA ESPECIFICIDADE */
+html.dark body,
+html.dark,
+body.dark,
+.dark body,
+html.dark body * {
+  background-color: #0e192b !important;
+}
+
+/* TÍTULOS DA APLICAÇÃO E PÁGINAS - FORÇA BRUTAL */
+html.dark.rose body .app-title,
+html.dark.rose body .page-title,
+html.dark.rose body h1.page-title,
+html.dark.rose body h2.app-title,
+html.dark.rose body h3.page-title,
+html.dark.rose body h4.page-title,
+html.dark.rose body h5.page-title,
+html.dark.rose body h6.page-title,
+html.dark.rose body *[class*="app-title"],
+html.dark.rose body *[class*="page-title"],
+html.dark.rose body div[class*="app-title"],
+html.dark.rose body div[class*="page-title"],
+html.dark.rose body span[class*="app-title"],
+html.dark.rose body span[class*="page-title"],
+html.dark.rose body p[class*="app-title"],
+html.dark.rose body p[class*="page-title"],
+html.dark.violet body .app-title,
+html.dark.violet body .page-title,
+html.dark.violet body h1.page-title,
+html.dark.violet body h2.app-title,
+html.dark.violet body h3.page-title,
+html.dark.violet body h4.page-title,
+html.dark.violet body h5.page-title,
+html.dark.violet body h6.page-title,
+html.dark.violet body *[class*="app-title"],
+html.dark.violet body *[class*="page-title"],
+html.dark.violet body div[class*="app-title"],
+html.dark.violet body div[class*="page-title"],
+html.dark.violet body span[class*="app-title"],
+html.dark.violet body span[class*="page-title"],
+html.dark.violet body p[class*="app-title"],
+html.dark.violet body p[class*="page-title"],
+html.dark.emerald body .app-title,
+html.dark.emerald body .page-title,
+html.dark.emerald body h1.page-title,
+html.dark.emerald body h2.app-title,
+html.dark.emerald body h3.page-title,
+html.dark.emerald body h4.page-title,
+html.dark.emerald body h5.page-title,
+html.dark.emerald body h6.page-title,
+html.dark.emerald body *[class*="app-title"],
+html.dark.emerald body *[class*="page-title"],
+html.dark.emerald body div[class*="app-title"],
+html.dark.emerald body div[class*="page-title"],
+html.dark.emerald body span[class*="app-title"],
+html.dark.emerald body span[class*="page-title"],
+html.dark.emerald body p[class*="app-title"],
+html.dark.emerald body p[class*="page-title"],
+html.dark.amber body .app-title,
+html.dark.amber body .page-title,
+html.dark.amber body h1.page-title,
+html.dark.amber body h2.app-title,
+html.dark.amber body h3.page-title,
+html.dark.amber body h4.page-title,
+html.dark.amber body h5.page-title,
+html.dark.amber body h6.page-title,
+html.dark.amber body *[class*="app-title"],
+html.dark.amber body *[class*="page-title"],
+html.dark.amber body div[class*="app-title"],
+html.dark.amber body div[class*="page-title"],
+html.dark.amber body span[class*="app-title"],
+html.dark.amber body span[class*="page-title"],
+html.dark.amber body p[class*="app-title"],
+html.dark.amber body p[class*="page-title"],
+html.dark.cyan body .app-title,
+html.dark.cyan body .page-title,
+html.dark.cyan body h1.page-title,
+html.dark.cyan body h2.app-title,
+html.dark.cyan body h3.page-title,
+html.dark.cyan body h4.page-title,
+html.dark.cyan body h5.page-title,
+html.dark.cyan body h6.page-title,
+html.dark.cyan body *[class*="app-title"],
+html.dark.cyan body *[class*="page-title"],
+html.dark.cyan body div[class*="app-title"],
+html.dark.cyan body div[class*="page-title"],
+html.dark.cyan body span[class*="app-title"],
+html.dark.cyan body span[class*="page-title"],
+html.dark.cyan body p[class*="app-title"],
+html.dark.cyan body p[class*="page-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* REGRAS EXTREMAS PARA SOBRESCREVER QUALQUER CSS EXISTENTE */
+html.dark.rose body *,
+html.dark.violet body *,
+html.dark.emerald body *,
+html.dark.amber body *,
+html.dark.cyan body * {
+  --app-title-color: hsl(var(--secondary)) !important;
+  --page-title-color: hsl(var(--secondary)) !important;
+}
+
+html.dark.rose body .app-title,
+html.dark.violet body .app-title,
+html.dark.emerald body .app-title,
+html.dark.amber body .app-title,
+html.dark.cyan body .app-title {
+  color: var(--app-title-color) !important;
+}
+
+html.dark.rose body .page-title,
+html.dark.violet body .page-title,
+html.dark.emerald body .page-title,
+html.dark.amber body .page-title,
+html.dark.cyan body .page-title {
+  color: var(--page-title-color) !important;
+}
+
+/* REGRAS ULTRA ESPECÍFICAS PARA SOBRESCREVER TAILWIND CSS */
+html.dark.rose body .text-3xl.font-bold.page-title,
+html.dark.violet body .text-3xl.font-bold.page-title,
+html.dark.emerald body .text-3xl.font-bold.page-title,
+html.dark.amber body .text-3xl.font-bold.page-title,
+html.dark.cyan body .text-3xl.font-bold.page-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+html.dark.rose body .text-lg.font-semibold.app-title,
+html.dark.violet body .text-lg.font-semibold.app-title,
+html.dark.emerald body .text-lg.font-semibold.app-title,
+html.dark.amber body .text-lg.font-semibold.app-title,
+html.dark.cyan body .text-lg.font-semibold.app-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* REGRAS PARA SOBRESCREVER QUALQUER CLASSE TAILWIND */
+html.dark.rose body [class*="text-"][class*="page-title"],
+html.dark.violet body [class*="text-"][class*="page-title"],
+html.dark.emerald body [class*="text-"][class*="page-title"],
+html.dark.amber body [class*="text-"][class*="page-title"],
+html.dark.cyan body [class*="text-"][class*="page-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+html.dark.rose body [class*="text-"][class*="app-title"],
+html.dark.violet body [class*="text-"][class*="app-title"],
+html.dark.emerald body [class*="text-"][class*="app-title"],
+html.dark.amber body [class*="text-"][class*="app-title"],
+html.dark.cyan body [class*="text-"][class*="app-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* REGRAS PARA SOBRESCREVER QUALQUER CLASSE FONT */
+html.dark.rose body [class*="font-"][class*="page-title"],
+html.dark.violet body [class*="font-"][class*="page-title"],
+html.dark.emerald body [class*="font-"][class*="page-title"],
+html.dark.amber body [class*="font-"][class*="page-title"],
+html.dark.cyan body [class*="font-"][class*="page-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+html.dark.rose body [class*="font-"][class*="app-title"],
+html.dark.violet body [class*="font-"][class*="app-title"],
+html.dark.emerald body [class*="font-"][class*="app-title"],
+html.dark.amber body [class*="font-"][class*="app-title"],
+html.dark.cyan body [class*="font-"][class*="app-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
 /* ===== CORREÇÃO FINAL - BACKGROUND E TÍTULOS OBRIGATÓRIOS ===== */
 
 /* BACKGROUND PRINCIPAL - FORÇADO */
