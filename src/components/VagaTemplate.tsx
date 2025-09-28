@@ -142,16 +142,13 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
         {/* Etapas do processo */}
         <VagaSection title="Etapas do processo">
           {vaga.etapas_processo ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {vaga.etapas_processo.split('\n').filter(etapa => etapa.trim()).map((etapa, index) => {
                 // Remove "Etapa X:" do texto, mantendo apenas o conteúdo da etapa
                 const cleanEtapa = etapa.trim().replace(/^Etapa\s+\d+:\s*/i, '')
                 return (
-                  <div key={index} className="flex items-center">
-                    <div className="flex-shrink-0 w-8 h-8 bg-gray-800 dark:bg-gray-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                      {index + 1}
-                    </div>
-                    <span>{cleanEtapa}</span>
+                  <div key={index} className="text-sm">
+                    {cleanEtapa}
                   </div>
                 )
               })}

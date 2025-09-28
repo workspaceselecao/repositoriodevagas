@@ -267,6 +267,22 @@ export default function ComparativoClientes() {
     const content = sections[section as keyof typeof sections]
     if (!content) return 'Não informado'
 
+    // Processamento especial para etapas do processo
+    if (section === 'etapas' && content) {
+      const etapas = content.split('\n').filter(etapa => etapa.trim()).map(etapa => {
+        // Remove "Etapa X:" do texto, mantendo apenas o conteúdo da etapa
+        return etapa.trim().replace(/^Etapa\s+\d+:\s*/i, '')
+      })
+
+      return (
+        <div className="text-sm text-gray-700 space-y-1">
+          {etapas.map((etapa, index) => (
+            <div key={index}>{etapa}</div>
+          ))}
+        </div>
+      )
+    }
+
     return (
       <div className="text-sm text-gray-700 whitespace-pre-wrap">
         {content}
