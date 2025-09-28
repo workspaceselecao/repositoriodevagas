@@ -113,7 +113,7 @@ export default function ListaClientes() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
-            Lista de Clientes
+            Lista de Vagas
           </h1>
           <p className="page-subtitle text-lg">
             Gerencie todas as vagas de emprego disponíveis

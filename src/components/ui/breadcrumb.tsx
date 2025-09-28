@@ -24,7 +24,7 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
     
     if (pathSegments.length > 1) {
       const pageMap: Record<string, string> = {
-        'clientes': 'Lista de Clientes',
+        'clientes': 'Lista de Vagas',
         'comparativo': 'Comparativo',
         'nova-vaga': 'Nova Vaga',
         'usuarios': 'Usuários',

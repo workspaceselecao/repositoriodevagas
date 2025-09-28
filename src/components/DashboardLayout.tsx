@@ -87,7 +87,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     },
     {
       icon: Building2,
-      label: 'Lista de Clientes',
+      label: 'Lista de Vagas',
       href: '/dashboard/clientes',
       show: true
     },
