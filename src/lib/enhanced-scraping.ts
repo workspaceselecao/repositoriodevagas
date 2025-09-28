@@ -615,7 +615,7 @@ export class EnhancedJobScrapingService {
       // Preservar quebras de linha duplas (parágrafos)
       .replace(/\n\s*\n/g, '\n\n')
     
-    // Para etapas_processo, preservar quebras de linha
+    // Para etapas_processo e beneficios, preservar quebras de linha
     if (field === 'etapas_processo') {
       cleaned = cleaned
         // Normalizar espaços múltiplos, mas preservar quebras de linha
@@ -644,6 +644,21 @@ export class EnhancedJobScrapingService {
           return withoutPrefix
         })
         .filter(etapa => etapa.trim() !== '') // Remove etapas vazias
+        .join('\n')
+    } else if (field === 'beneficios') {
+      cleaned = cleaned
+        // Normalizar espaços múltiplos, mas preservar quebras de linha
+        .replace(/[ \t]+/g, ' ')
+        // Limpar espaços no início e fim de linhas, mas manter quebras de linha
+        .replace(/[ \t]+$/gm, '')
+        .replace(/^[ \t]+/gm, '')
+        .trim()
+        // Remover labels específicos apenas no início
+        .replace(/^\s*Benefícios[:\s]*/i, '')
+        // Processar benefícios - dividir por ponto e vírgula
+        .split(/[;]\s*/)
+        .map(beneficio => beneficio.trim())
+        .filter(beneficio => beneficio.trim() !== '') // Remove benefícios vazios
         .join('\n')
     } else {
       // Para outros campos, usar limpeza normal

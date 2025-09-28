@@ -377,7 +377,7 @@ export class JobScrapingService {
       .replace(/&gt;/g, '>') // Decodifica &gt;
       .replace(/&quot;/g, '"') // Decodifica &quot;
     
-    // Para etapas_processo, preservar quebras de linha e processar cada etapa
+    // Para etapas_processo e beneficios, preservar quebras de linha e processar cada item
     if (field === 'etapas_processo') {
       cleaned = cleaned
         .split('\n')
@@ -397,6 +397,13 @@ export class JobScrapingService {
           return withoutPrefix
         })
         .filter(etapa => etapa.trim() !== '') // Remove etapas vazias
+        .join('\n')
+    } else if (field === 'beneficios') {
+      cleaned = cleaned
+        // Processar benefícios - dividir por ponto e vírgula
+        .split(/[;]\s*/)
+        .map(beneficio => beneficio.trim())
+        .filter(beneficio => beneficio.trim() !== '') // Remove benefícios vazios
         .join('\n')
     } else {
       // Para outros campos, usar limpeza normal
