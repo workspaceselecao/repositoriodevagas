@@ -905,3 +905,259 @@ button:not(.btn-active) {
     }
   }
 }
+
+/* ===== FORÇA APLICAÇÃO DO ESQUEMA DE CORES - REGRAS ULTRA ESPECÍFICAS ===== */
+
+/* TEMA ESCURO - FORÇAR APLICAÇÃO DAS CORES */
+
+/* Títulos da aplicação e páginas - FORÇADO */
+html.dark.rose body .app-title,
+html.dark.rose body .page-title,
+html.dark.violet body .app-title,
+html.dark.violet body .page-title,
+html.dark.emerald body .app-title,
+html.dark.emerald body .page-title,
+html.dark.amber body .app-title,
+html.dark.amber body .page-title,
+html.dark.cyan body .app-title,
+html.dark.cyan body .page-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Botões ativos - FORÇADO */
+html.dark.rose body .btn-active,
+html.dark.violet body .btn-active,
+html.dark.emerald body .btn-active,
+html.dark.amber body .btn-active,
+html.dark.cyan body .btn-active {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+/* Ícones primários - FORÇADO */
+html.dark.rose body .icon-primary,
+html.dark.violet body .icon-primary,
+html.dark.emerald body .icon-primary,
+html.dark.amber body .icon-primary,
+html.dark.cyan body .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Ícones dentro de botões ativos - FORÇADO */
+html.dark.rose body .btn-active .icon-primary,
+html.dark.rose body .btn-active svg,
+html.dark.violet body .btn-active .icon-primary,
+html.dark.violet body .btn-active svg,
+html.dark.emerald body .btn-active .icon-primary,
+html.dark.emerald body .btn-active svg,
+html.dark.amber body .btn-active .icon-primary,
+html.dark.amber body .btn-active svg,
+html.dark.cyan body .btn-active .icon-primary,
+html.dark.cyan body .btn-active svg {
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+/* Cards - FORÇADO */
+html.dark body .card {
+  background-color: #1e293b !important;
+  color: #d1d5db !important;
+}
+
+/* Textos dentro de cards - FORÇADO */
+html.dark body .card .page-subtitle,
+html.dark body .card .field-title,
+html.dark body .card .field-subtitle,
+html.dark body .card .info-text,
+html.dark body .card .btn-text,
+html.dark body .card .modal-text {
+  color: #d1d5db !important;
+}
+
+/* Títulos dentro de cards - FORÇADO */
+html.dark.rose body .card .page-title,
+html.dark.rose body .card .app-title,
+html.dark.violet body .card .page-title,
+html.dark.violet body .card .app-title,
+html.dark.emerald body .card .page-title,
+html.dark.emerald body .card .app-title,
+html.dark.amber body .card .page-title,
+html.dark.amber body .card .app-title,
+html.dark.cyan body .card .page-title,
+html.dark.cyan body .card .app-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* TEMA CLARO - FORÇAR APLICAÇÃO DAS CORES */
+
+/* Botões ativos - FORÇADO */
+html.rose:not(.dark) body .btn-active,
+html.violet:not(.dark) body .btn-active,
+html.emerald:not(.dark) body .btn-active,
+html.amber:not(.dark) body .btn-active,
+html.cyan:not(.dark) body .btn-active {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+/* Ícones primários - FORÇADO */
+html.rose:not(.dark) body .icon-primary,
+html.violet:not(.dark) body .icon-primary,
+html.emerald:not(.dark) body .icon-primary,
+html.amber:not(.dark) body .icon-primary,
+html.cyan:not(.dark) body .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Cards - FORÇADO */
+html:not(.dark) body .card {
+  background-color: #f7f8f8 !important;
+  color: #3d3c4f !important;
+}
+
+/* Textos dentro de cards - FORÇADO */
+html:not(.dark) body .card .page-subtitle,
+html:not(.dark) body .card .field-title,
+html:not(.dark) body .card .field-subtitle,
+html:not(.dark) body .card .info-text,
+html:not(.dark) body .card .btn-text,
+html:not(.dark) body .card .modal-text {
+  color: #3d3c4f !important;
+}
+
+/* Títulos dentro de cards - FORÇADO */
+html.rose:not(.dark) body .card .page-title,
+html.rose:not(.dark) body .card .app-title,
+html.violet:not(.dark) body .card .page-title,
+html.violet:not(.dark) body .card .app-title,
+html.emerald:not(.dark) body .card .page-title,
+html.emerald:not(.dark) body .card .app-title,
+html.amber:not(.dark) body .card .page-title,
+html.amber:not(.dark) body .card .app-title,
+html.cyan:not(.dark) body .card .page-title,
+html.cyan:not(.dark) body .card .app-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* MODAIS - FORÇAR APLICAÇÃO DAS CORES */
+
+/* Modais tema escuro */
+html.dark body .modal-text {
+  color: #d1d5db !important;
+}
+
+/* Modais tema claro */
+html:not(.dark) body .modal-text {
+  color: #3d3c4f !important;
+}
+
+/* TÍTULOS DAS PÁGINAS - FORÇAR APLICAÇÃO ESPECÍFICA */
+
+/* Todos os títulos das páginas */
+html.dark.rose body h1.page-title,
+html.dark.violet body h1.page-title,
+html.dark.emerald body h1.page-title,
+html.dark.amber body h1.page-title,
+html.dark.cyan body h1.page-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* REGRAS ULTRA ESPECÍFICAS PARA GARANTIR APLICAÇÃO */
+
+/* Forçar aplicação em todos os elementos com as classes */
+html.dark.rose body *[class*="page-title"],
+html.dark.violet body *[class*="page-title"],
+html.dark.emerald body *[class*="page-title"],
+html.dark.amber body *[class*="page-title"],
+html.dark.cyan body *[class*="page-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+html.dark.rose body *[class*="app-title"],
+html.dark.violet body *[class*="app-title"],
+html.dark.emerald body *[class*="app-title"],
+html.dark.amber body *[class*="app-title"],
+html.dark.cyan body *[class*="app-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+html.dark.rose body *[class*="btn-active"],
+html.dark.violet body *[class*="btn-active"],
+html.dark.emerald body *[class*="btn-active"],
+html.dark.amber body *[class*="btn-active"],
+html.dark.cyan body *[class*="btn-active"] {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+html.dark.rose body *[class*="icon-primary"],
+html.dark.violet body *[class*="icon-primary"],
+html.dark.emerald body *[class*="icon-primary"],
+html.dark.amber body *[class*="icon-primary"],
+html.dark.cyan body *[class*="icon-primary"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Cards com máxima especificidade */
+html.dark body *[class*="card"] {
+  background-color: #1e293b !important;
+  color: #d1d5db !important;
+}
+
+html.dark body *[class*="card"] *[class*="page-subtitle"],
+html.dark body *[class*="card"] *[class*="field-title"],
+html.dark body *[class*="card"] *[class*="field-subtitle"],
+html.dark body *[class*="card"] *[class*="info-text"],
+html.dark body *[class*="card"] *[class*="btn-text"],
+html.dark body *[class*="card"] *[class*="modal-text"] {
+  color: #d1d5db !important;
+}
+
+html.dark.rose body *[class*="card"] *[class*="page-title"],
+html.dark.rose body *[class*="card"] *[class*="app-title"],
+html.dark.violet body *[class*="card"] *[class*="page-title"],
+html.dark.violet body *[class*="card"] *[class*="app-title"],
+html.dark.emerald body *[class*="card"] *[class*="page-title"],
+html.dark.emerald body *[class*="card"] *[class*="app-title"],
+html.dark.amber body *[class*="card"] *[class*="page-title"],
+html.dark.amber body *[class*="card"] *[class*="app-title"],
+html.dark.cyan body *[class*="card"] *[class*="page-title"],
+html.dark.cyan body *[class*="card"] *[class*="app-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Tema claro com máxima especificidade */
+html:not(.dark) body *[class*="card"] {
+  background-color: #f7f8f8 !important;
+  color: #3d3c4f !important;
+}
+
+html:not(.dark) body *[class*="card"] *[class*="page-subtitle"],
+html:not(.dark) body *[class*="card"] *[class*="field-title"],
+html:not(.dark) body *[class*="card"] *[class*="field-subtitle"],
+html:not(.dark) body *[class*="card"] *[class*="info-text"],
+html:not(.dark) body *[class*="card"] *[class*="btn-text"],
+html:not(.dark) body *[class*="card"] *[class*="modal-text"] {
+  color: #3d3c4f !important;
+}
+
+html.rose:not(.dark) body *[class*="card"] *[class*="page-title"],
+html.rose:not(.dark) body *[class*="card"] *[class*="app-title"],
+html.violet:not(.dark) body *[class*="card"] *[class*="page-title"],
+html.violet:not(.dark) body *[class*="card"] *[class*="app-title"],
+html.emerald:not(.dark) body *[class*="card"] *[class*="page-title"],
+html.emerald:not(.dark) body *[class*="card"] *[class*="app-title"],
+html.amber:not(.dark) body *[class*="card"] *[class*="page-title"],
+html.amber:not(.dark) body *[class*="card"] *[class*="app-title"],
+html.cyan:not(.dark) body *[class*="card"] *[class*="page-title"],
+html.cyan:not(.dark) body *[class*="card"] *[class*="app-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Modais com máxima especificidade */
+html.dark body *[class*="modal"] *[class*="modal-text"] {
+  color: #d1d5db !important;
+}
+
+html:not(.dark) body *[class*="modal"] *[class*="modal-text"] {
+  color: #3d3c4f !important;
+}
