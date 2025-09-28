@@ -1161,3 +1161,110 @@ html.dark body *[class*="modal"] *[class*="modal-text"] {
 html:not(.dark) body *[class*="modal"] *[class*="modal-text"] {
   color: #3d3c4f !important;
 }
+
+/* ===== CORREÇÃO FINAL - BACKGROUND E TÍTULOS OBRIGATÓRIOS ===== */
+
+/* BACKGROUND PRINCIPAL - FORÇADO */
+html.dark body {
+  background-color: #0e192b !important;
+}
+
+/* TÍTULOS DA APLICAÇÃO E PÁGINAS - OBRIGATORIAMENTE COR DO TEMA SECUNDÁRIO */
+html.dark.rose body .app-title,
+html.dark.rose body .page-title,
+html.dark.rose body h1.page-title,
+html.dark.rose body *[class*="app-title"],
+html.dark.rose body *[class*="page-title"],
+html.dark.violet body .app-title,
+html.dark.violet body .page-title,
+html.dark.violet body h1.page-title,
+html.dark.violet body *[class*="app-title"],
+html.dark.violet body *[class*="page-title"],
+html.dark.emerald body .app-title,
+html.dark.emerald body .page-title,
+html.dark.emerald body h1.page-title,
+html.dark.emerald body *[class*="app-title"],
+html.dark.emerald body *[class*="page-title"],
+html.dark.amber body .app-title,
+html.dark.amber body .page-title,
+html.dark.amber body h1.page-title,
+html.dark.amber body *[class*="app-title"],
+html.dark.amber body *[class*="page-title"],
+html.dark.cyan body .app-title,
+html.dark.cyan body .page-title,
+html.dark.cyan body h1.page-title,
+html.dark.cyan body *[class*="app-title"],
+html.dark.cyan body *[class*="page-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* REGRAS ULTRA ESPECÍFICAS PARA GARANTIR APLICAÇÃO DOS TÍTULOS */
+html.dark.rose body div[class*="page-title"],
+html.dark.rose body span[class*="page-title"],
+html.dark.rose body p[class*="page-title"],
+html.dark.violet body div[class*="page-title"],
+html.dark.violet body span[class*="page-title"],
+html.dark.violet body p[class*="page-title"],
+html.dark.emerald body div[class*="page-title"],
+html.dark.emerald body span[class*="page-title"],
+html.dark.emerald body p[class*="page-title"],
+html.dark.amber body div[class*="page-title"],
+html.dark.amber body span[class*="page-title"],
+html.dark.amber body p[class*="page-title"],
+html.dark.cyan body div[class*="page-title"],
+html.dark.cyan body span[class*="page-title"],
+html.dark.cyan body p[class*="page-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+html.dark.rose body div[class*="app-title"],
+html.dark.rose body span[class*="app-title"],
+html.dark.rose body p[class*="app-title"],
+html.dark.violet body div[class*="app-title"],
+html.dark.violet body span[class*="app-title"],
+html.dark.violet body p[class*="app-title"],
+html.dark.emerald body div[class*="app-title"],
+html.dark.emerald body span[class*="app-title"],
+html.dark.emerald body p[class*="app-title"],
+html.dark.amber body div[class*="app-title"],
+html.dark.amber body span[class*="app-title"],
+html.dark.amber body p[class*="app-title"],
+html.dark.cyan body div[class*="app-title"],
+html.dark.cyan body span[class*="app-title"],
+html.dark.cyan body p[class*="app-title"] {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* REGRAS EXTREMAS PARA GARANTIR APLICAÇÃO DOS TÍTULOS */
+html.dark.rose body h2.app-title,
+html.dark.violet body h2.app-title,
+html.dark.emerald body h2.app-title,
+html.dark.amber body h2.app-title,
+html.dark.cyan body h2.app-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+html.dark.rose body h1.page-title,
+html.dark.violet body h1.page-title,
+html.dark.emerald body h1.page-title,
+html.dark.amber body h1.page-title,
+html.dark.cyan body h1.page-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* FORÇA MÁXIMA - SELETORES POR ID E CLASSE COMBINADOS */
+html.dark.rose body .app-title,
+html.dark.violet body .app-title,
+html.dark.emerald body .app-title,
+html.dark.amber body .app-title,
+html.dark.cyan body .app-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+html.dark.rose body .page-title,
+html.dark.violet body .page-title,
+html.dark.emerald body .page-title,
+html.dark.amber body .page-title,
+html.dark.cyan body .page-title {
+  color: hsl(var(--secondary)) !important;
+}
