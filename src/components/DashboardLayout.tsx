@@ -12,7 +12,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import SobreModal from './SobreModal'
 import UpdateModal from './UpdateModal'
 import ChangePasswordModal from './ChangePasswordModal'
-import { ThemeDebug } from './ThemeDebug'
 import { 
   Home, 
   Users, 
@@ -394,8 +393,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           console.log('Senha alterada com sucesso!')
         }}
       />
-
-      <ThemeDebug />
 
     </TooltipProvider>
   )
