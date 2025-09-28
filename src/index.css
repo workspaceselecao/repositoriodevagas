@@ -277,146 +277,276 @@
     color: hsl(var(--text-accent));
   }
 
-/* CORREÇÃO CRÍTICA - CONTRASTE MÁXIMO DAS FONTES EM TODOS OS TEMAS */
-.dark {
-  --muted-foreground: 0 0% 95%;
-  --secondary-foreground: 0 0% 98%;
-  --accent-foreground: 0 0% 98%;
-  --card-foreground: 0 0% 100%;
-  --popover-foreground: 0 0% 100%;
+/* ===== SISTEMA DE CORES CENTRALIZADO E PADRONIZADO ===== */
+
+/* 1. CORES OBRIGATÓRIAS - SEMPRE A MESMA COR DO TEMA SECUNDÁRIO */
+/* Aplicadas independente do tema principal (claro/escuro) */
+
+/* TÍTULO DE APLICAÇÃO */
+.app-title {
+  color: hsl(var(--secondary)) !important;
 }
 
-/* FORÇAR CONTRASTE MÁXIMO EM TODOS OS ELEMENTOS DE TEXTO */
-.dark .text-muted-foreground {
-  color: hsl(0 0% 95%) !important;
+/* TÍTULO DE PÁGINA */
+.page-title {
+  color: hsl(var(--secondary)) !important;
 }
 
-.dark .text-secondary-foreground {
-  color: hsl(0 0% 98%) !important;
+/* BOTÃO ATIVO */
+.btn-active {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
 }
 
-.dark .text-accent-foreground {
-  color: hsl(0 0% 98%) !important;
+/* ÍCONES */
+.icon-primary {
+  color: hsl(var(--secondary)) !important;
 }
 
-.dark .text-foreground {
-  color: hsl(0 0% 100%) !important;
+/* Ícones de botões ativos */
+.btn-active .icon-primary,
+.btn-active svg {
+  color: hsl(var(--secondary-foreground)) !important;
 }
 
-.dark .card-foreground {
-  color: hsl(0 0% 100%) !important;
+/* ===== CORES ADAPTATIVAS AO TEMA ===== */
+
+/* 2. CORES QUE MUDAM CONFORME O TEMA PRINCIPAL */
+/* Tema Claro = Cor Escura | Tema Escuro = Cor Branco-Gelo */
+
+/* SUBTÍTULO DE PÁGINA */
+.page-subtitle {
+  color: hsl(var(--foreground)) !important;
 }
 
-.dark .popover-foreground {
-  color: hsl(0 0% 100%) !important;
+/* TÍTULO DE CAMPO */
+.field-title {
+  color: hsl(var(--foreground)) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA CARTÕES - FUNDO ESCURO COM TEXTO BRANCO */
-.dark .card {
-  background: hsl(240 10% 3.9%) !important;
-  color: hsl(0 0% 100%) !important;
-  border-color: hsl(var(--border)) !important;
+/* SUBTÍTULO DE CAMPO */
+.field-subtitle {
+  color: hsl(var(--muted-foreground)) !important;
 }
 
-.dark .card .text-muted-foreground {
-  color: hsl(0 0% 85%) !important;
+/* FONTES DE INFORMAÇÃO */
+.info-text {
+  color: hsl(var(--foreground)) !important;
 }
 
-.dark .card .text-secondary-foreground {
-  color: hsl(0 0% 95%) !important;
+/* FONTES DE BOTÃO (quando não ativo) */
+.btn-text {
+  color: hsl(var(--foreground)) !important;
 }
 
-.dark .card .text-accent-foreground {
-  color: hsl(0 0% 95%) !important;
+/* ===== APLICAÇÃO GLOBAL EM TODOS OS TEMAS ===== */
+
+/* Aplicar cores padronizadas em TODOS os temas (padrão, azul, roxo, verde, laranja) */
+.app-title,
+.blue .app-title,
+.purple .app-title,
+.green .app-title,
+.orange .app-title {
+  color: hsl(var(--secondary)) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA TODOS OS PERFIS DE COR */
-.dark.blue .text-muted-foreground,
-.dark.purple .text-muted-foreground,
-.dark.green .text-muted-foreground,
-.dark.orange .text-muted-foreground,
-.dark.rose .text-muted-foreground,
-.dark.violet .text-muted-foreground,
-.dark.emerald .text-muted-foreground,
-.dark.amber .text-muted-foreground,
-.dark.cyan .text-muted-foreground {
-  color: hsl(0 0% 95%) !important;
+.page-title,
+.blue .page-title,
+.purple .page-title,
+.green .page-title,
+.orange .page-title {
+  color: hsl(var(--secondary)) !important;
 }
 
-.dark.blue .card,
-.dark.purple .card,
-.dark.green .card,
-.dark.orange .card,
-.dark.rose .card,
-.dark.violet .card,
-.dark.emerald .card,
-.dark.amber .card,
-.dark.cyan .card {
-  background: hsl(240 10% 3.9%) !important;
-  color: hsl(0 0% 100%) !important;
-  border-color: hsl(var(--border)) !important;
+.btn-active,
+.blue .btn-active,
+.purple .btn-active,
+.green .btn-active,
+.orange .btn-active {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
 }
 
-.dark.blue .card .text-muted-foreground,
-.dark.purple .card .text-muted-foreground,
-.dark.green .card .text-muted-foreground,
-.dark.orange .card .text-muted-foreground,
-.dark.rose .card .text-muted-foreground,
-.dark.violet .card .text-muted-foreground,
-.dark.emerald .card .text-muted-foreground,
-.dark.amber .card .text-muted-foreground,
-.dark.cyan .card .text-muted-foreground {
-  color: hsl(0 0% 85%) !important;
+.icon-primary,
+.blue .icon-primary,
+.purple .icon-primary,
+.green .icon-primary,
+.orange .icon-primary {
+  color: hsl(var(--secondary)) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA INPUTS E TEXTAREAS - TEXTO PRETO */
+/* ===== CORES ADAPTATIVAS PARA TODOS OS TEMAS ===== */
+
+/* Tema Claro - Cores Escuras */
+.page-subtitle,
+.field-title,
+.info-text,
+.btn-text {
+  color: hsl(var(--foreground)) !important;
+}
+
+.field-subtitle {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Tema Escuro - Cores Branco-Gelo */
+.dark .page-subtitle,
+.dark .field-title,
+.dark .info-text,
+.dark .btn-text {
+  color: hsl(210 40% 98%) !important; /* Branco-gelo */
+}
+
+.dark .field-subtitle {
+  color: hsl(210 40% 95%) !important; /* Branco-gelo mais suave */
+}
+
+/* Aplicar para todos os perfis de cor no tema escuro */
+.dark.blue .page-subtitle,
+.dark.blue .field-title,
+.dark.blue .info-text,
+.dark.blue .btn-text,
+.dark.purple .page-subtitle,
+.dark.purple .field-title,
+.dark.purple .info-text,
+.dark.purple .btn-text,
+.dark.green .page-subtitle,
+.dark.green .field-title,
+.dark.green .info-text,
+.dark.green .btn-text,
+.dark.orange .page-subtitle,
+.dark.orange .field-title,
+.dark.orange .info-text,
+.dark.orange .btn-text {
+  color: hsl(210 40% 98%) !important; /* Branco-gelo */
+}
+
+.dark.blue .field-subtitle,
+.dark.purple .field-subtitle,
+.dark.green .field-subtitle,
+.dark.orange .field-subtitle {
+  color: hsl(210 40% 95%) !important; /* Branco-gelo mais suave */
+}
+
+/* ===== APLICAÇÃO EM COMPONENTES ESPECÍFICOS ===== */
+
+/* Cards */
+.card .page-title,
+.card .app-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+.card .page-subtitle,
+.card .field-title,
+.card .info-text {
+  color: hsl(var(--foreground)) !important;
+}
+
+.card .field-subtitle {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Tema escuro em cards */
+.dark .card .page-subtitle,
+.dark .card .field-title,
+.dark .card .info-text {
+  color: hsl(210 40% 98%) !important;
+}
+
+.dark .card .field-subtitle {
+  color: hsl(210 40% 95%) !important;
+}
+
+/* Modais */
+.modal .page-title,
+.modal .app-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+.modal .page-subtitle,
+.modal .field-title,
+.modal .info-text {
+  color: hsl(var(--foreground)) !important;
+}
+
+.modal .field-subtitle {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Tema escuro em modais */
+.dark .modal .page-subtitle,
+.dark .modal .field-title,
+.dark .modal .info-text {
+  color: hsl(210 40% 98%) !important;
+}
+
+.dark .modal .field-subtitle {
+  color: hsl(210 40% 95%) !important;
+}
+
+/* ===== CORES PARA INPUTS E TEXTAREAS ===== */
+
+/* Inputs e textareas - sempre texto escuro para legibilidade */
+input,
+textarea {
+  color: hsl(0 0% 10%) !important;
+}
+
 .dark input,
 .dark textarea {
-  color: hsl(0 0% 0%) !important;
-  background-color: hsl(var(--background)) !important;
+  color: hsl(0 0% 10%) !important;
 }
 
-.dark input::placeholder,
-.dark textarea::placeholder {
-  color: hsl(0 0% 30%) !important;
+/* Labels - seguem o padrão adaptativo */
+label {
+  color: hsl(var(--foreground)) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA LABELS - TEXTO PRETO */
 .dark label {
-  color: hsl(0 0% 0%) !important;
+  color: hsl(210 40% 98%) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA TODOS OS TEXTOS */
-.dark * {
-  color: inherit;
+/* ===== CORES PARA BOTÕES ===== */
+
+/* Botões normais */
+button:not(.btn-active) {
+  color: hsl(var(--foreground)) !important;
 }
 
-/* CONTRASTE MÁXIMO PARA TODOS OS TEXTOS EM CARDS - TEXTO BRANCO */
-.dark .card p,
-.dark .card span,
-.dark .card div,
-.dark .card h1,
-.dark .card h2,
-.dark .card h3,
-.dark .card h4,
-.dark .card h5,
-.dark .card h6 {
-  color: hsl(0 0% 100%) !important;
+.dark button:not(.btn-active) {
+  color: hsl(210 40% 98%) !important;
 }
 
-/* CONTRASTE ESPECÍFICO PARA ELEMENTOS DE FORMULÁRIO - TEXTO PRETO */
-.dark .form-field,
-.dark .form-input,
-.dark .form-textarea {
-  color: hsl(0 0% 0%) !important;
+/* ===== APLICAÇÃO EM TODAS AS PÁGINAS ===== */
+
+/* Dashboard */
+.dashboard .page-title {
+  color: hsl(var(--secondary)) !important;
 }
 
-.dark .form-label {
-  color: hsl(0 0% 0%) !important;
+/* Login */
+.login .page-title {
+  color: hsl(var(--secondary)) !important;
 }
 
-.dark .form-description {
-  color: hsl(0 0% 20%) !important;
+/* Nova Vaga */
+.nova-vaga .page-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Comparativo */
+.comparativo .page-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Configurações */
+.configuracoes .page-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Usuários */
+.usuarios .page-title {
+  color: hsl(var(--secondary)) !important;
 }
   
   /* Efeitos de hover melhorados */

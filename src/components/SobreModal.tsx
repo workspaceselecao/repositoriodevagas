@@ -109,8 +109,8 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Info className="h-5 w-5 text-primary" />
+          <DialogTitle className="flex items-center gap-2 text-xl page-title">
+            <Info className="h-5 w-5 icon-primary" />
             Sobre o Repositório de Vagas
           </DialogTitle>
         </DialogHeader>
@@ -119,15 +119,15 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
           {/* Informações da Aplicação */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Package className="h-4 w-4 text-primary" />
+              <CardTitle className="text-lg flex items-center gap-2 page-title">
+                <Package className="h-4 w-4 icon-primary" />
                 Informações da Aplicação
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Versão Atual</p>
+                  <p className="text-sm field-subtitle">Versão Atual</p>
                   <Badge variant="secondary" className="mt-1">
                     {isLoadingInfo ? (
                       <RefreshCw className="h-3 w-3 animate-spin mr-1" />

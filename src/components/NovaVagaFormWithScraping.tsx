@@ -262,7 +262,7 @@ export default function NovaVagaFormWithScraping() {
     rows?: number
   ) => (
     <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={name} className="field-title">{label}</Label>
       {type === 'textarea' ? (
         <textarea
           id={name}
@@ -289,8 +289,8 @@ export default function NovaVagaFormWithScraping() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Nova Vaga</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <h1 className="text-3xl font-bold page-title">Nova Vaga</h1>
+        <p className="page-subtitle mt-2">
           Adicione uma nova vaga ao sistema com extração automática ou manual
         </p>
       </div>
@@ -323,18 +323,18 @@ export default function NovaVagaFormWithScraping() {
         <TabsContent value="auto" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Download className="h-5 w-5 mr-2" />
+              <CardTitle className="flex items-center page-title">
+                <Download className="h-5 w-5 mr-2 icon-primary" />
                 Extração Automática de Dados
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="page-subtitle">
                 Extraia informações automaticamente de URLs ou arquivos HTML
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Extração por URL */}
               <div className="space-y-2">
-                <Label htmlFor="scraping-url">URL da Vaga</Label>
+                <Label htmlFor="scraping-url" className="field-title">URL da Vaga</Label>
                 <div className="flex space-x-2">
                   <Input
                     id="scraping-url"
@@ -346,6 +346,7 @@ export default function NovaVagaFormWithScraping() {
                   <Button
                     onClick={handleScrapingFromURL}
                     disabled={scrapingLoading || !scrapingUrl.trim()}
+                    className={scrapingLoading ? "btn-active" : "btn-text"}
                   >
                     {scrapingLoading ? (
                       <>
@@ -508,11 +509,11 @@ export default function NovaVagaFormWithScraping() {
         <TabsContent value="manual" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Plus className="h-5 w-5 mr-2" />
+              <CardTitle className="flex items-center page-title">
+                <Plus className="h-5 w-5 mr-2 icon-primary" />
                 Informações da Vaga
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="page-subtitle">
                 Preencha todas as informações necessárias sobre a vaga
               </CardDescription>
             </CardHeader>

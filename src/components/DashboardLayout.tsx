@@ -151,12 +151,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                             : "justify-start px-3 py-2 w-full"
                         } ${
                           isActiveItem 
-                            ? "bg-primary text-primary-foreground shadow-md hover-gradient" 
-                            : "hover:bg-primary/10 hover:shadow-sm"
+                            ? "btn-active shadow-md hover-gradient" 
+                            : "btn-text hover:bg-primary/10 hover:shadow-sm"
                         }`}
                         onClick={() => navigate(item.href)}
                       >
-                        <Icon className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
+                        <Icon className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} ${isActiveItem ? "icon-primary" : ""}`} />
                         {!isCollapsed && <span className="ml-3 text-sm font-medium">{item.label}</span>}
                       </Button>
                     </TooltipTrigger>

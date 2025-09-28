@@ -112,16 +112,16 @@ export default function ListaClientes() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
             Lista de Clientes
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="page-subtitle text-lg">
             Gerencie todas as vagas de emprego disponíveis
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button onClick={() => navigate('/dashboard/nova-vaga')} size="lg" className="h-12">
-            <Plus className="h-5 w-5 mr-2" />
+          <Button onClick={() => navigate('/dashboard/nova-vaga')} size="lg" className="h-12 btn-text">
+            <Plus className="h-5 w-5 mr-2 icon-primary" />
             Nova Vaga
           </Button>
           <Button variant="outline" onClick={handleExport} size="lg" className="h-12">
@@ -151,12 +151,12 @@ export default function ListaClientes() {
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
                 <Users className="h-5 w-5 text-primary-foreground" />
               </div>
-              <CardTitle className="text-sm font-semibold text-muted-foreground">Total de Vagas</CardTitle>
+              <CardTitle className="text-sm font-semibold field-subtitle">Total de Vagas</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-primary">{vagas.length}</div>
-            <p className="text-sm text-muted-foreground mt-1">vagas cadastradas</p>
+            <p className="text-sm info-text mt-1">vagas cadastradas</p>
           </CardContent>
         </Card>
         <Card className="relative overflow-hidden">

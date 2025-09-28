@@ -30,7 +30,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">RV</span>
               </div>
-              <h2 className="text-lg font-semibold text-primary">
+              <h2 className="text-lg font-semibold app-title">
                 Repositório
               </h2>
             </div>

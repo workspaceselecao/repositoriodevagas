@@ -104,14 +104,14 @@ export default function LoginPage() {
           
           {/* Título com gradiente */}
           <div className="space-y-2">
-            <CardTitle className={`text-4xl font-bold transition-all duration-300 ${
+            <CardTitle className={`text-4xl font-bold transition-all duration-300 page-title ${
               config.effects.gradients 
                 ? 'bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent' 
-                : 'text-primary'
+                : ''
             }`}>
               Repositório de Vagas
             </CardTitle>
-            <CardDescription className="text-muted-foreground text-lg">
+            <CardDescription className="page-subtitle text-lg">
               Faça login para acessar o sistema
             </CardDescription>
           </div>
@@ -121,10 +121,10 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Campo Email */}
             <div className="space-y-3">
-              <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
-                <Mail className="h-4 w-4" />
-                Email
-              </Label>
+                <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium field-title">
+                  <Mail className="h-4 w-4 icon-primary" />
+                  Email
+                </Label>
               <div className="relative">
                 <Input
                   id="email"
@@ -148,10 +148,10 @@ export default function LoginPage() {
             
             {/* Campo Senha */}
             <div className="space-y-3">
-              <Label htmlFor="password" className="flex items-center gap-2 text-sm font-medium">
-                <Lock className="h-4 w-4" />
-                Senha
-              </Label>
+                <Label htmlFor="password" className="flex items-center gap-2 text-sm font-medium field-title">
+                  <Lock className="h-4 w-4 icon-primary" />
+                  Senha
+                </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -221,6 +221,8 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
               className={`w-full h-14 text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                loading ? "btn-active" : "btn-text"
+              } ${
                 config.effects.gradients 
                   ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70' 
                   : 'bg-primary hover:bg-primary/90'
