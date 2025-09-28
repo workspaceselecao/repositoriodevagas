@@ -602,8 +602,8 @@ export class JobScrapingService {
         withoutPrefix = words[0].trim()
       }
       
-      return `• ${withoutPrefix}`
-    }).join('\n')
+      return withoutPrefix
+    }).filter(etapa => etapa.trim() !== '').join('\n')
   }
 
   /**
@@ -614,7 +614,8 @@ export class JobScrapingService {
     
     return etapas
       .sort((a, b) => (a.order || 0) - (b.order || 0))
-      .map((etapa, index) => `• ${etapa.name || ''}`)
+      .map((etapa) => etapa.name || '')
+      .filter(name => name.trim() !== '') // Remove etapas vazias
       .join('\n')
   }
 

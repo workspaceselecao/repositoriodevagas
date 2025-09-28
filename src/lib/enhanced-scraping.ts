@@ -635,7 +635,8 @@ export class EnhancedJobScrapingService {
     
     return etapas
       .sort((a, b) => (a.order || 0) - (b.order || 0))
-      .map((etapa, index) => `Etapa ${index + 1}: ${etapa.name || ''}`)
+      .map((etapa) => etapa.name || '')
+      .filter(name => name.trim() !== '') // Remove etapas vazias
       .join('\n')
   }
 
