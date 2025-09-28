@@ -17,25 +17,42 @@ export const PWAInstallPrompt: React.FC = () => {
   }, [])
 
   useEffect(() => {
+    console.log('[PWA Install Prompt] Estado atual:', {
+      isInstallable,
+      isInstalled,
+      isDismissed,
+      shouldShow: isInstallable && !isInstalled && !isDismissed
+    })
+
     // Mostrar prompt se for instalável, não estiver instalado e não foi dispensado
     if (isInstallable && !isInstalled && !isDismissed) {
       // Delay para melhor UX
       const timer = setTimeout(() => {
         setShowPrompt(true)
+        console.log('[PWA Install Prompt] Exibindo prompt de instalação')
       }, 3000)
 
       return () => clearTimeout(timer)
+    } else {
+      // Se já estiver instalado, ocultar imediatamente
+      if (isInstalled) {
+        console.log('[PWA Install Prompt] App já instalado - ocultando prompt')
+        setShowPrompt(false)
+      }
     }
   }, [isInstallable, isInstalled, isDismissed])
 
   const handleInstall = async () => {
+    console.log('[PWA Install Prompt] Usuário clicou em instalar')
     const success = await installPWA()
     if (success) {
       setShowPrompt(false)
+      console.log('[PWA Install Prompt] Instalação bem-sucedida - ocultando prompt')
     }
   }
 
   const handleDismiss = () => {
+    console.log('[PWA Install Prompt] Usuário dispensou o prompt')
     setShowPrompt(false)
     setIsDismissed(true)
     localStorage.setItem('pwa-install-dismissed', 'true')
@@ -43,6 +60,9 @@ export const PWAInstallPrompt: React.FC = () => {
 
   // Não mostrar se não deve ser exibido
   if (!showPrompt || isInstalled) {
+    if (isInstalled) {
+      console.log('[PWA Install Prompt] Não renderizando - app já instalado')
+    }
     return null
   }
 

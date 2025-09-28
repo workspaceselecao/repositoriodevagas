@@ -34,9 +34,31 @@ export const usePWA = () => {
 
   // Verificar se está instalado
   const checkInstalled = useCallback(() => {
+    // Verificar display-mode standalone (padrão para PWAs)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    
+    // Verificar iOS Safari standalone
     const isInApp = (window.navigator as any).standalone === true
-    return isStandalone || isInApp
+    
+    // Verificar se está sendo executado como PWA através de outras formas
+    const isPWA = window.matchMedia('(display-mode: minimal-ui)').matches ||
+                  window.matchMedia('(display-mode: fullscreen)').matches ||
+                  (window.navigator as any).standalone === true ||
+                  window.location.search.includes('source=pwa') ||
+                  document.referrer.includes('android-app://')
+    
+    const installed = isStandalone || isInApp || isPWA
+    
+    console.log('[PWA] Verificação de instalação:', {
+      isStandalone,
+      isInApp,
+      isPWA,
+      installed,
+      userAgent: navigator.userAgent,
+      displayMode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser'
+    })
+    
+    return installed
   }, [])
 
   // Instalar PWA
