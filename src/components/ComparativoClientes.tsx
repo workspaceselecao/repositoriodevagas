@@ -475,8 +475,8 @@ export default function ComparativoClientes() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Comparativo de Clientes</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold page-title">Comparativo de Clientes</h1>
+          <p className="page-subtitle mt-2">
             Compare vagas entre diferentes clientes
           </p>
           {activeSection && (

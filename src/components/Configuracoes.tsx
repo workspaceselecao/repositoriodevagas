@@ -321,8 +321,8 @@ export default function Configuracoes() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold page-title">Configurações</h1>
+        <p className="page-subtitle mt-2">
           Gerencie backups do sistema, notícias e configurações gerais
         </p>
       </div>

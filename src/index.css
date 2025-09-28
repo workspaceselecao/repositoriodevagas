@@ -277,155 +277,198 @@
     color: hsl(var(--text-accent));
   }
 
-/* ===== SISTEMA DE CORES CENTRALIZADO E PADRONIZADO ===== */
+/* ===== SISTEMA DE CORES CENTRALIZADO E REFINADO ===== */
 
-/* 1. CORES OBRIGATÓRIAS - SEMPRE A MESMA COR DO TEMA SECUNDÁRIO */
-/* Aplicadas independente do tema principal (claro/escuro) */
+/* ===== TEMA ESCURO (Exceção do tema padrão) ===== */
 
-/* TÍTULO DE APLICAÇÃO */
-.app-title {
+/* 1. COR DE TÍTULO DA APLICAÇÃO, COR DE TÍTULO DA PÁGINA, COR DE BOTÃO ATIVO, ÍCONES */
+/* Aplicar cor do tema secundário (com exceção do tema padrão que tem contraste reverso) */
+
+.dark:not(.default) .app-title {
   color: hsl(var(--secondary)) !important;
 }
 
-/* TÍTULO DE PÁGINA */
-.page-title {
+.dark:not(.default) .page-title {
   color: hsl(var(--secondary)) !important;
 }
 
-/* BOTÃO ATIVO */
-.btn-active {
+.dark:not(.default) .btn-active {
   background-color: hsl(var(--secondary)) !important;
   color: hsl(var(--secondary-foreground)) !important;
 }
 
-/* ÍCONES */
-.icon-primary {
+.dark:not(.default) .icon-primary {
   color: hsl(var(--secondary)) !important;
 }
 
-/* Ícones de botões ativos */
-.btn-active .icon-primary,
-.btn-active svg {
+.dark:not(.default) .btn-active .icon-primary,
+.dark:not(.default) .btn-active svg {
   color: hsl(var(--secondary-foreground)) !important;
 }
 
-/* ===== CORES ADAPTATIVAS AO TEMA ===== */
-
-/* 2. CORES QUE MUDAM CONFORME O TEMA PRINCIPAL */
-/* Tema Claro = Cor Escura | Tema Escuro = Cor Branco-Gelo */
-
-/* SUBTÍTULO DE PÁGINA */
-.page-subtitle {
-  color: hsl(var(--foreground)) !important;
+/* Tema padrão escuro - contraste reverso */
+.dark.default .app-title {
+  color: hsl(var(--primary)) !important;
 }
 
-/* TÍTULO DE CAMPO */
-.field-title {
-  color: hsl(var(--foreground)) !important;
+.dark.default .page-title {
+  color: hsl(var(--primary)) !important;
 }
 
-/* SUBTÍTULO DE CAMPO */
-.field-subtitle {
-  color: hsl(var(--muted-foreground)) !important;
+.dark.default .btn-active {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
 }
 
-/* FONTES DE INFORMAÇÃO */
-.info-text {
-  color: hsl(var(--foreground)) !important;
+.dark.default .icon-primary {
+  color: hsl(var(--primary)) !important;
 }
 
-/* FONTES DE BOTÃO (quando não ativo) */
-.btn-text {
-  color: hsl(var(--foreground)) !important;
+.dark.default .btn-active .icon-primary,
+.dark.default .btn-active svg {
+  color: hsl(var(--primary-foreground)) !important;
 }
 
-/* ===== APLICAÇÃO GLOBAL EM TODOS OS TEMAS ===== */
-
-/* Aplicar cores padronizadas em TODOS os temas (padrão, azul, roxo, verde, laranja) */
-.app-title,
-.blue .app-title,
-.purple .app-title,
-.green .app-title,
-.orange .app-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-.page-title,
-.blue .page-title,
-.purple .page-title,
-.green .page-title,
-.orange .page-title {
-  color: hsl(var(--secondary)) !important;
-}
-
-.btn-active,
-.blue .btn-active,
-.purple .btn-active,
-.green .btn-active,
-.orange .btn-active {
-  background-color: hsl(var(--secondary)) !important;
-  color: hsl(var(--secondary-foreground)) !important;
-}
-
-.icon-primary,
-.blue .icon-primary,
-.purple .icon-primary,
-.green .icon-primary,
-.orange .icon-primary {
-  color: hsl(var(--secondary)) !important;
-}
-
-/* ===== CORES ADAPTATIVAS PARA TODOS OS TEMAS ===== */
-
-/* Tema Claro - Cores Escuras */
-.page-subtitle,
-.field-title,
-.info-text,
-.btn-text {
-  color: hsl(var(--foreground)) !important;
-}
-
-.field-subtitle {
-  color: hsl(var(--muted-foreground)) !important;
-}
-
-/* Tema Escuro - Cores Branco-Gelo */
+/* 2. COR DE SUBTÍTULO DA PÁGINA, COR DE TÍTULO DE CAMPO, COR DE SUBTÍTULO DE CAMPO, COR DE FONTES DE INFORMAÇÃO, COR DE FONTES DE BOTÃO, COR DE FONTES DE MODAL */
 .dark .page-subtitle,
 .dark .field-title,
+.dark .field-subtitle,
 .dark .info-text,
-.dark .btn-text {
-  color: hsl(210 40% 98%) !important; /* Branco-gelo */
+.dark .btn-text,
+.dark .modal-text {
+  color: #d1d5db !important;
 }
 
-.dark .field-subtitle {
-  color: hsl(210 40% 95%) !important; /* Branco-gelo mais suave */
+/* 3. COR DE CARD */
+.dark .card {
+  background-color: #1e293b !important;
+  color: #d1d5db !important;
 }
 
-/* Aplicar para todos os perfis de cor no tema escuro */
-.dark.blue .page-subtitle,
-.dark.blue .field-title,
-.dark.blue .info-text,
-.dark.blue .btn-text,
-.dark.purple .page-subtitle,
-.dark.purple .field-title,
-.dark.purple .info-text,
-.dark.purple .btn-text,
-.dark.green .page-subtitle,
-.dark.green .field-title,
-.dark.green .info-text,
-.dark.green .btn-text,
-.dark.orange .page-subtitle,
-.dark.orange .field-title,
-.dark.orange .info-text,
-.dark.orange .btn-text {
-  color: hsl(210 40% 98%) !important; /* Branco-gelo */
+.dark .card .page-title,
+.dark .card .app-title {
+  color: hsl(var(--secondary)) !important;
 }
 
-.dark.blue .field-subtitle,
-.dark.purple .field-subtitle,
-.dark.green .field-subtitle,
-.dark.orange .field-subtitle {
-  color: hsl(210 40% 95%) !important; /* Branco-gelo mais suave */
+.dark.default .card .page-title,
+.dark.default .card .app-title {
+  color: hsl(var(--primary)) !important;
+}
+
+/* ===== TEMA CLARO (Exceção do tema padrão) ===== */
+
+/* 1. COR DE BOTÃO ATIVO, ÍCONES */
+/* Aplicar cor do tema secundário (com exceção do tema padrão que tem contraste reverso) */
+
+:not(.dark):not(.default) .btn-active {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+:not(.dark):not(.default) .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+:not(.dark):not(.default) .btn-active .icon-primary,
+:not(.dark):not(.default) .btn-active svg {
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+/* Tema padrão claro - contraste reverso */
+.default:not(.dark) .btn-active {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.default:not(.dark) .icon-primary {
+  color: hsl(var(--primary)) !important;
+}
+
+.default:not(.dark) .btn-active .icon-primary,
+.default:not(.dark) .btn-active svg {
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* 2. COR DE TÍTULO DA APLICAÇÃO, COR DE TÍTULO DA PÁGINA, COR DE SUBTÍTULO DA PÁGINA, COR DE TÍTULO DE CAMPO, COR DE SUBTÍTULO DE CAMPO, COR DE FONTES DE INFORMAÇÃO, COR DE FONTES DE BOTÃO, COR DE FONTES DE MODAL */
+:not(.dark) .app-title,
+:not(.dark) .page-title,
+:not(.dark) .page-subtitle,
+:not(.dark) .field-title,
+:not(.dark) .field-subtitle,
+:not(.dark) .info-text,
+:not(.dark) .btn-text,
+:not(.dark) .modal-text {
+  color: #3d3c4f !important;
+}
+
+/* 3. COR DE CARD */
+:not(.dark) .card {
+  background-color: #f7f8f8 !important;
+  color: #3d3c4f !important;
+}
+
+:not(.dark) .card .app-title,
+:not(.dark) .card .page-title {
+  color: hsl(var(--secondary)) !important;
+}
+
+.default:not(.dark) .card .app-title,
+.default:not(.dark) .card .page-title {
+  color: hsl(var(--primary)) !important;
+}
+
+/* ===== APLICAÇÃO ESPECÍFICA PARA TODOS OS PERFIS DE COR ===== */
+
+/* Tema Azul */
+.dark.blue .app-title,
+.dark.blue .page-title,
+.dark.blue .btn-active,
+.dark.blue .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+.blue:not(.dark) .btn-active,
+.blue:not(.dark) .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Tema Roxo */
+.dark.purple .app-title,
+.dark.purple .page-title,
+.dark.purple .btn-active,
+.dark.purple .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+.purple:not(.dark) .btn-active,
+.purple:not(.dark) .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Tema Verde */
+.dark.green .app-title,
+.dark.green .page-title,
+.dark.green .btn-active,
+.dark.green .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+.green:not(.dark) .btn-active,
+.green:not(.dark) .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+/* Tema Laranja */
+.dark.orange .app-title,
+.dark.orange .page-title,
+.dark.orange .btn-active,
+.dark.orange .icon-primary {
+  color: hsl(var(--secondary)) !important;
+}
+
+.orange:not(.dark) .btn-active,
+.orange:not(.dark) .icon-primary {
+  color: hsl(var(--secondary)) !important;
 }
 
 /* ===== APLICAÇÃO EM COMPONENTES ESPECÍFICOS ===== */

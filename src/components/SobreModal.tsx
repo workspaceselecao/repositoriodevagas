@@ -127,7 +127,7 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm field-subtitle">Versão Atual</p>
+                  <p className="text-sm field-subtitle modal-text">Versão Atual</p>
                   <Badge variant="secondary" className="mt-1">
                     {isLoadingInfo ? (
                       <RefreshCw className="h-3 w-3 animate-spin mr-1" />
