@@ -237,8 +237,10 @@ export default function GerenciarUsuarios() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold page-title">Gerenciar Usuários</h1>
-          <p className="page-subtitle mt-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
+            Gerenciar Usuários
+          </h1>
+          <p className="page-subtitle text-lg">
             Gerencie usuários do sistema, suas permissões e configurações
           </p>
         </div>

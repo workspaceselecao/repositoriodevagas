@@ -289,8 +289,10 @@ export default function NovaVagaFormWithScraping() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold page-title">Nova Vaga</h1>
-        <p className="page-subtitle mt-2">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
+          Nova Vaga
+        </h1>
+        <p className="page-subtitle text-lg">
           Adicione uma nova vaga ao sistema com extração automática ou manual
         </p>
       </div>
