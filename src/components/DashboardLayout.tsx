@@ -171,69 +171,36 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
               
 
-              {/* Botão Sobre */}
-              <div className={`border-t ${
-                isCollapsed ? "p-2 flex flex-col items-center" : "p-4"
-              }`}>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className={`w-full transition-all duration-200 rounded-xl hover-modern ${
-                        isCollapsed 
-                          ? "justify-center p-3 h-12 w-12" 
-                          : "justify-start px-3 py-2"
-                      }`}
-                    >
-                      <Info className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
-                      {!isCollapsed && <span className="ml-3 text-sm font-medium">Sobre</span>}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem onClick={() => setIsSobreModalOpen(true)}>
-                      <Info className="mr-2 h-4 w-4" />
-                      Informações da Aplicação
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              {/* Botão Sobre - Removido, agora o card do usuário abre o modal */}
 
               {/* Rodapé - Informações do Usuário */}
               <div className={`border-t mt-auto ${
                 isCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-4 space-y-3"
               }`}>
-              {/* Informações do Usuário */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className={`w-full flex items-center space-x-3 rounded-lg p-3 hover:bg-accent/50 transition-all duration-200 ${
-                    isCollapsed ? "justify-center" : "justify-start"
-                  }`}>
-                    <div className={`${isCollapsed ? "w-10 h-10" : "w-8 h-8"} bg-primary rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
-                      <span className="text-primary-foreground font-bold text-sm">
-                        {user?.name?.charAt(0).toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                    {!isCollapsed && (
-                      <div className="flex flex-col min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
-                          {user?.name || 'Usuário'}
-                        </p>
-                        <Badge variant="outline" className="text-xs w-fit">
-                          {user?.role}
-                        </Badge>
-                      </div>
-                    )}
+              {/* Informações do Usuário - Clicável para abrir modal Sobre */}
+              <div 
+                className={`w-full flex items-center space-x-3 rounded-lg p-3 hover:bg-accent/50 transition-all duration-200 cursor-pointer ${
+                  isCollapsed ? "justify-center" : "justify-start"
+                }`}
+                onClick={() => setIsSobreModalOpen(true)}
+                title={isCollapsed ? `${user?.name || 'Usuário'} - ${user?.role}` : undefined}
+              >
+                <div className={`${isCollapsed ? "w-10 h-10" : "w-8 h-8"} bg-primary rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
+                  <span className="text-primary-foreground font-bold text-sm">
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+                {!isCollapsed && (
+                  <div className="flex flex-col min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {user?.name || 'Usuário'}
+                    </p>
+                    <Badge variant="outline" className="text-xs w-fit">
+                      {user?.role}
+                    </Badge>
                   </div>
-                </TooltipTrigger>
-                {isCollapsed && (
-                  <TooltipContent side="right" className="ml-2">
-                    <div className="text-center">
-                      <p className="font-medium">{user?.name || 'Usuário'}</p>
-                      <p className="text-xs text-muted-foreground">{user?.role}</p>
-                    </div>
-                  </TooltipContent>
                 )}
-              </Tooltip>
+              </div>
               
               {/* Botão de Logout */}
               <Tooltip>
