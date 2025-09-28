@@ -69,7 +69,7 @@ export const colorSchemes = {
     dark: {
       background: '224 71.4% 4.1%',
       foreground: '210 20% 98%',
-      card: '224 71.4% 4.1%',
+      card: '213 33% 17%',
       cardForeground: '210 20% 98%',
       popover: '224 71.4% 4.1%',
       popoverForeground: '210 20% 98%',
@@ -121,7 +121,7 @@ export const colorSchemes = {
     dark: {
       background: '240 10% 3.9%',
       foreground: '0 0% 100%',
-      card: '240 10% 3.9%',
+      card: '213 33% 17%',
       cardForeground: '0 0% 100%',
       popover: '240 10% 3.9%',
       popoverForeground: '0 0% 100%',
@@ -173,7 +173,7 @@ export const colorSchemes = {
     dark: {
       background: '240 10% 3.9%',
       foreground: '0 0% 100%',
-      card: '240 10% 3.9%',
+      card: '213 33% 17%',
       cardForeground: '0 0% 100%',
       popover: '240 10% 3.9%',
       popoverForeground: '0 0% 100%',
@@ -223,7 +223,7 @@ export const colorSchemes = {
     dark: {
       background: '240 10% 3.9%',
       foreground: '0 0% 100%',
-      card: '240 10% 3.9%',
+      card: '213 33% 17%',
       cardForeground: '0 0% 100%',
       popover: '240 10% 3.9%',
       popoverForeground: '0 0% 100%',
@@ -275,7 +275,7 @@ export const colorSchemes = {
     dark: {
       background: '240 10% 3.9%',
       foreground: '0 0% 100%',
-      card: '240 10% 3.9%',
+      card: '213 33% 17%',
       cardForeground: '0 0% 100%',
       popover: '240 10% 3.9%',
       popoverForeground: '0 0% 100%',
@@ -327,7 +327,7 @@ export const colorSchemes = {
     dark: {
       background: '240 10% 3.9%',
       foreground: '0 0% 100%',
-      card: '240 10% 3.9%',
+      card: '213 33% 17%',
       cardForeground: '0 0% 100%',
       popover: '240 10% 3.9%',
       popoverForeground: '0 0% 100%',
