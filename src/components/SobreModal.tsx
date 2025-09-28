@@ -246,67 +246,71 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
             </CardContent>
           </Card>
 
-          {/* Stack Tecnológico */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Code className="h-4 w-4 text-primary" />
-                Stack Tecnológico
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                {techStack.map((tech, index) => (
-                  <div key={index} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
-                    <span className="text-lg">{tech.icon}</span>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{tech.name}</p>
-                      <p className="text-xs text-muted-foreground">{tech.version}</p>
+          {/* Stack Tecnológico - Oculto para usuários RH */}
+          {user?.role !== 'RH' && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Code className="h-4 w-4 text-primary" />
+                  Stack Tecnológico
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  {techStack.map((tech, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                      <span className="text-lg">{tech.icon}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{tech.name}</p>
+                        <p className="text-xs text-muted-foreground">{tech.version}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Informações de Deploy */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Globe className="h-4 w-4 text-primary" />
-                Informações de Deploy
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Última Atualização</p>
-                  <p className="text-sm font-medium">
-                    {serverVersionInfo?.buildDate 
-                      ? new Date(serverVersionInfo.buildDate).toLocaleString('pt-BR')
-                      : 'Não disponível'
-                    }
-                  </p>
+          {/* Informações de Deploy - Oculto para usuários RH */}
+          {user?.role !== 'RH' && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-primary" />
+                  Informações de Deploy
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Última Atualização</p>
+                    <p className="text-sm font-medium">
+                      {serverVersionInfo?.buildDate 
+                        ? new Date(serverVersionInfo.buildDate).toLocaleString('pt-BR')
+                        : 'Não disponível'
+                      }
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Status da Versão</p>
+                    <Badge variant={
+                      serverVersionInfo?.version === currentStoredVersion ? "default" : "destructive"
+                    }>
+                      {serverVersionInfo?.version === currentStoredVersion ? "Atualizado" : "Desatualizado"}
+                    </Badge>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Status da Versão</p>
-                  <Badge variant={
-                    serverVersionInfo?.version === currentStoredVersion ? "default" : "destructive"
-                  }>
-                    {serverVersionInfo?.version === currentStoredVersion ? "Atualizado" : "Desatualizado"}
-                  </Badge>
-                </div>
-              </div>
-              {serverVersionInfo?.description && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Descrição</p>
-                  <p className="text-sm font-medium bg-muted p-2 rounded">
-                    {serverVersionInfo.description}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                {serverVersionInfo?.description && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Descrição</p>
+                    <p className="text-sm font-medium bg-muted p-2 rounded">
+                      {serverVersionInfo.description}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Informações do Sistema */}
           <Card>
