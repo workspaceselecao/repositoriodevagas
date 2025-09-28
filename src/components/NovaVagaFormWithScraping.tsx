@@ -271,7 +271,7 @@ export default function NovaVagaFormWithScraping() {
           onChange={handleInputChange}
           placeholder={placeholder}
           rows={rows || 4}
-          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground dark:text-black"
+          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground dark:text-gray-100"
         />
       ) : (
         <Input
@@ -280,7 +280,7 @@ export default function NovaVagaFormWithScraping() {
           value={formData[name] || ''}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className="text-foreground dark:text-black"
+          className="text-foreground dark:text-gray-100"
         />
       )}
     </div>
@@ -341,7 +341,7 @@ export default function NovaVagaFormWithScraping() {
                     value={scrapingUrl}
                     onChange={(e) => setScrapingUrl(e.target.value)}
                     placeholder="https://atento.gupy.io/jobs/XXXXXXXXXX?jobBoardSource=share_link"
-                    className="flex-1 text-foreground dark:text-black"
+                    className="flex-1 text-foreground dark:text-gray-100"
                   />
                   <Button
                     onClick={handleScrapingFromURL}
@@ -379,11 +379,11 @@ export default function NovaVagaFormWithScraping() {
               )}
 
               {scrapedData && (
-                <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-lg shadow-sm">
+                <div className="mt-6 p-4 bg-green-50 dark:bg-gray-800 border-2 border-green-200 dark:border-gray-600 rounded-lg shadow-sm">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 flex items-center">
+                        <h3 className="text-lg font-semibold text-green-800 dark:text-gray-100 flex items-center">
                           <svg className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
@@ -391,7 +391,7 @@ export default function NovaVagaFormWithScraping() {
                         </h3>
                         <div className="flex items-center space-x-3 mt-2">
                           <ConfidenceIndicator confidence={scrapedData.confidence} size="sm" />
-                          <span className="text-xs text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                          <span className="text-xs text-green-600 dark:text-gray-300 bg-green-100 dark:bg-gray-700 px-2 py-1 rounded-full">
                             Fonte: {scrapedData.source === 'json' ? 'JSON' : scrapedData.source === 'html' ? 'HTML' : 'Mista'}
                           </span>
                         </div>
@@ -433,18 +433,22 @@ export default function NovaVagaFormWithScraping() {
                               {fieldStatus && (
                                 <div className="flex items-center space-x-1">
                                   <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                    fieldStatus.found ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                    fieldStatus.found 
+                                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
+                                      : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
                                   }`}>
                                     {fieldStatus.confidence}%
                                   </span>
-                                  <span className="text-xs text-gray-400">
+                                  <span className="text-xs text-gray-400 dark:text-gray-500">
                                     {fieldStatus.source}
                                   </span>
                                 </div>
                               )}
                             </div>
                             <div className={`p-3 rounded border text-sm max-h-40 overflow-y-auto ${
-                              fieldStatus?.found ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                              fieldStatus?.found 
+                                ? 'bg-green-50 dark:bg-gray-700 border-green-200 dark:border-gray-600 text-gray-900 dark:text-gray-100' 
+                                : 'bg-red-50 dark:bg-gray-700 border-red-200 dark:border-gray-600 text-gray-900 dark:text-gray-100'
                             }`}>
                               {value ? (
                                 <div className="whitespace-pre-wrap space-y-1">
@@ -459,7 +463,7 @@ export default function NovaVagaFormWithScraping() {
                                     if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-') || trimmedLine.startsWith('*')) {
                                       return (
                                         <div key={index} className="flex items-start">
-                                          <span className="text-green-600 mr-2 mt-0.5 flex-shrink-0">•</span>
+                                          <span className="text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0">•</span>
                                           <span className="flex-1">{trimmedLine.substring(1).trim()}</span>
                                         </div>
                                       )
@@ -469,7 +473,7 @@ export default function NovaVagaFormWithScraping() {
                                     if (/^\d+\.\s/.test(trimmedLine)) {
                                       return (
                                         <div key={index} className="flex items-start">
-                                          <span className="text-green-600 mr-2 mt-0.5 flex-shrink-0 font-semibold">
+                                          <span className="text-green-600 dark:text-green-400 mr-2 mt-0.5 flex-shrink-0 font-semibold">
                                             {trimmedLine.match(/^\d+/)?.[0]}.
                                           </span>
                                           <span className="flex-1">{trimmedLine.replace(/^\d+\.\s/, '').trim()}</span>
@@ -486,7 +490,7 @@ export default function NovaVagaFormWithScraping() {
                                   })}
                                 </div>
                               ) : (
-                                'Não encontrado'
+                                <span className="text-gray-500 dark:text-gray-400 italic">Não encontrado</span>
                               )}
                             </div>
                             <ConfidenceBar confidence={fieldStatus?.confidence || 0} className="h-1" />
