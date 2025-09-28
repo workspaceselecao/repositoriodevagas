@@ -76,13 +76,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               return
             }
           } else {
-            // Usar dados do Auth diretamente para ser mais rápido
+            // Buscar dados completos do usuário na tabela users
             const authUser = session.user
-            const currentUser = {
+            let currentUser = {
               id: authUser.id,
               email: authUser.email || '',
               name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
               role: authUser.user_metadata?.role || 'RH'
+            }
+
+            // Tentar buscar dados completos da tabela users
+            try {
+              const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('name, role')
+                .eq('id', authUser.id)
+                .single()
+
+              if (!userError && userData) {
+                currentUser = {
+                  id: authUser.id,
+                  email: authUser.email || '',
+                  name: userData.name || currentUser.name,
+                  role: userData.role || currentUser.role
+                }
+              }
+            } catch (error) {
+              console.log('Erro ao buscar dados do usuário na tabela:', error)
             }
             
             if (isMounted) {
@@ -150,11 +170,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } else {
             // Sessão normal de login
             const authUser = session.user
-            const currentUser = {
+            let currentUser = {
               id: authUser.id,
               email: authUser.email || '',
               name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
               role: authUser.user_metadata?.role || 'RH'
+            }
+
+            // Tentar buscar dados completos da tabela users
+            try {
+              const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('name, role')
+                .eq('id', authUser.id)
+                .single()
+
+              if (!userError && userData) {
+                currentUser = {
+                  id: authUser.id,
+                  email: authUser.email || '',
+                  name: userData.name || currentUser.name,
+                  role: userData.role || currentUser.role
+                }
+              }
+            } catch (error) {
+              console.log('Erro ao buscar dados do usuário na tabela:', error)
             }
             
             if (isMounted) {

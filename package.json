@@ -1,6 +1,6 @@
 {
   "name": "repositorio-de-vagas",
-  "version": "0.1.0",
+  "version": "1.0.4",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,7 +20,18 @@
     "reset-vagas": "tsx scripts/reset-and-populate-vagas.ts",
     "check-vagas": "tsx scripts/check-vagas.ts",
     "test-password-reset": "tsx scripts/test-password-reset.ts",
-    "commit": "tsx scripts/auto-commit.ts"
+    "commit": "tsx scripts/auto-commit.ts",
+    "version": "tsx scripts/version-manager.ts",
+    "version:patch": "tsx scripts/version-manager.ts patch",
+    "version:minor": "tsx scripts/version-manager.ts minor",
+    "version:major": "tsx scripts/version-manager.ts major",
+    "version:info": "tsx scripts/version-manager.ts info",
+    "version:check": "tsx scripts/version-manager.ts check",
+    "release": "tsx scripts/release-manager.ts",
+    "release:patch": "tsx scripts/release-manager.ts patch",
+    "release:minor": "tsx scripts/release-manager.ts minor",
+    "release:major": "tsx scripts/release-manager.ts major",
+    "release:last": "tsx scripts/release-manager.ts --last"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.1.2",

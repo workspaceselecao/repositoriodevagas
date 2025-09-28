@@ -40,6 +40,9 @@ export default function Dashboard() {
 
   // Estado para controlar expansão dos cards
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
+  
+  // Estado para controlar animação do botão de atualizar
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Limitar notícias exibidas
   const noticiasExibidas = noticias.slice(0, 9)
@@ -53,6 +56,39 @@ export default function Dashboard() {
       newExpanded.add(index)
     }
     setExpandedCards(newExpanded)
+  }
+
+  // Função para atualizar com animação e feedback tátil
+  const handleRefresh = async () => {
+    // Feedback tátil (vibração) se suportado
+    if ('vibrate' in navigator) {
+      navigator.vibrate([50, 30, 50]) // Vibração suave
+    }
+    
+    // Iniciar animação
+    setIsRefreshing(true)
+    
+    try {
+      // Executar atualização
+      await refreshAll()
+      
+      // Feedback tátil de sucesso
+      if ('vibrate' in navigator) {
+        navigator.vibrate([100]) // Vibração de confirmação
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar:', error)
+      
+      // Feedback tátil de erro
+      if ('vibrate' in navigator) {
+        navigator.vibrate([200, 100, 200]) // Vibração de erro
+      }
+    } finally {
+      // Parar animação após um delay mínimo para melhor UX
+      setTimeout(() => {
+        setIsRefreshing(false)
+      }, 1000)
+    }
   }
 
 
@@ -197,13 +233,21 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button onClick={refreshAll} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Atualizar
+          <Button 
+            onClick={handleRefresh} 
+            variant="outline" 
+            size="sm"
+            disabled={isRefreshing}
+            className="transition-all duration-200 hover:scale-105 active:scale-95"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-500 ${
+              isRefreshing ? 'animate-spin' : ''
+            }`} />
+            {isRefreshing ? 'Atualizando...' : 'Atualizar'}
           </Button>
           <Button onClick={handleEmergencyRefresh} variant="destructive" size="sm">
             <AlertTriangle className="h-4 w-4 mr-2" />
-            Emergency Refresh
+            Recarregar Aplicação
           </Button>
         </div>
       </div>
