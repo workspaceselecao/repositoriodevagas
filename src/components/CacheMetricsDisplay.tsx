@@ -2,9 +2,18 @@ import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
-import { Progress } from './ui/progress'
 import { useCacheMetrics } from '../lib/cache-metrics'
 import { BarChart3, RefreshCw, Trash2, TrendingUp, Clock, HardDrive, Network } from 'lucide-react'
+
+// Componente Progress simples
+const Progress = ({ value, className = '' }: { value: number; className?: string }) => (
+  <div className={`w-full bg-gray-200 rounded-full h-2 ${className}`}>
+    <div 
+      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+      style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
+    />
+  </div>
+)
 
 interface CacheMetricsDisplayProps {
   className?: string

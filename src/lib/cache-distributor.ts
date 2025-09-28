@@ -2,7 +2,7 @@
 // Usa BroadcastChannel para sincronizar cache entre diferentes abas do navegador
 
 interface CacheMessage {
-  type: 'CACHE_UPDATE' | 'CACHE_REQUEST' | 'CACHE_RESPONSE' | 'CACHE_CLEAR'
+  type: 'CACHE_UPDATE' | 'CACHE_REQUEST' | 'CACHE_RESPONSE' | 'CACHE_CLEAR' | 'TAB_ACTIVITY' | 'TAB_CLOSE'
   userId: string
   data?: any
   timestamp: number
@@ -123,11 +123,11 @@ class CacheDistributor {
   }
 
   private broadcastTabActivity(): void {
-    this.broadcastMessage('TAB_ACTIVITY' as any)
+    this.broadcastMessage('TAB_ACTIVITY')
   }
 
   private broadcastTabClose(): void {
-    this.broadcastMessage('TAB_CLOSE' as any)
+    this.broadcastMessage('TAB_CLOSE')
   }
 
   private checkActiveTabs(): void {
