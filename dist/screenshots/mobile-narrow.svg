@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="390" height="844" fill="url(#bg)"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="390" height="60" fill="#3b82f6"/>
+  <text x="195" y="35" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#ffffff">RepoVagas</text>
+  
+  <!-- Stats cards -->
+  <rect x="20" y="80" width="350" height="80" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2" rx="8"/>
+  <text x="195" y="105" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#0c4a6e">Total de Vagas</text>
+  <text x="195" y="135" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#0ea5e9">21</text>
+  
+  <rect x="20" y="180" width="170" height="80" fill="#f0fdf4" stroke="#22c55e" stroke-width="2" rx="8"/>
+  <text x="105" y="205" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#166534">Clientes</text>
+  <text x="105" y="230" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#22c55e">10</text>
+  
+  <rect x="200" y="180" width="170" height="80" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
+  <text x="285" y="205" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#92400e">Sites</text>
+  <text x="285" y="230" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#f59e0b">7</text>
+  
+  <!-- Menu -->
+  <rect x="20" y="280" width="350" height="200" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" rx="8"/>
+  <text x="195" y="305" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1e293b">Menu Principal</text>
+  
+  <rect x="40" y="330" width="310" height="40" fill="#f1f5f9" rx="8"/>
+  <text x="50" y="355" font-family="Arial, sans-serif" font-size="14" fill="#1e293b">📊 Dashboard</text>
+  
+  <rect x="40" y="380" width="310" height="40" fill="#ffffff" rx="8"/>
+  <text x="50" y="405" font-family="Arial, sans-serif" font-size="14" fill="#64748b">👥 Clientes</text>
+  
+  <rect x="40" y="430" width="310" height="40" fill="#ffffff" rx="8"/>
+  <text x="50" y="455" font-family="Arial, sans-serif" font-size="14" fill="#64748b">📝 Nova Vaga</text>
+  
+  <!-- Recent activity -->
+  <rect x="20" y="500" width="350" height="200" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" rx="8"/>
+  <text x="195" y="525" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#1e293b">Atividade Recente</text>
+  
+  <rect x="40" y="550" width="310" height="30" fill="#f8fafc" rx="4"/>
+  <text x="50" y="570" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Nova vaga adicionada - Empresa XYZ</text>
+  
+  <rect x="40" y="590" width="310" height="30" fill="#f8fafc" rx="4"/>
+  <text x="50" y="610" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Cliente atualizado - João Silva</text>
+  
+  <rect x="40" y="630" width="310" height="30" fill="#f8fafc" rx="4"/>
+  <text x="50" y="650" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Relatório gerado - Setembro 2024</text>
+  
+  <!-- Bottom navigation -->
+  <rect x="0" y="780" width="390" height="64" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+  
+  <rect x="20" y="800" width="70" height="24" fill="#3b82f6" rx="12"/>
+  <text x="55" y="815" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#ffffff">Home</text>
+  
+  <text x="120" y="815" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#64748b">Clientes</text>
+  <text x="200" y="815" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#64748b">Vagas</text>
+  <text x="280" y="815" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#64748b">Perfil</text>
+</svg>

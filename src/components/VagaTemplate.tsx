@@ -7,10 +7,12 @@ import {
   ChevronUp,
   Edit,
   Trash2,
-  Eye
+  Eye,
+  Download
 } from 'lucide-react'
 import { useThemeClasses } from '../hooks/useThemeClasses'
 import VagaSection from './VagaSection'
+import { downloadVagaAsText } from '../lib/vaga-download'
 
 interface VagaTemplateProps {
   vaga: Vaga
@@ -27,6 +29,11 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
 
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded)
+  }
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    downloadVagaAsText(vaga)
   }
 
   return (
@@ -76,6 +83,15 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                     Editar
                   </Button>
                 )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleDownload}
+                  className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200 transition-all duration-200 hover:scale-105"
+                >
+                  <Download className="h-4 w-4" />
+                  Download
+                </Button>
                 {onDelete && (
                   <Button
                     size="sm"
