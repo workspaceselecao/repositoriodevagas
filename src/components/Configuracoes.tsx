@@ -15,6 +15,7 @@ import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticia
 import { useAuth } from '../contexts/AuthContext'
 import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette } from 'lucide-react'
 import { ThemeSelector } from './ThemeSelector'
+import CacheMetricsDisplay from './CacheMetricsDisplay'
 
 export default function Configuracoes() {
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
@@ -799,6 +800,11 @@ export default function Configuracoes() {
             </div>
             
             <ThemeSelector />
+            
+            {/* Métricas do Cache - apenas para administradores */}
+            {user?.role === 'ADMIN' && (
+              <CacheMetricsDisplay className="mt-6" />
+            )}
           </div>
         </TabsContent>
       </Tabs>

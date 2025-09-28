@@ -8,7 +8,6 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useDashboardStats, useNoticias } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
-import CacheMetricsDisplay from './CacheMetricsDisplay'
 import { 
   Users, 
   Building2, 
@@ -491,11 +490,6 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
-
-      {/* Métricas do Cache - apenas para administradores */}
-      {user?.role === 'ADMIN' && (
-        <CacheMetricsDisplay className="mt-6" />
-      )}
 
     </div>
   )
