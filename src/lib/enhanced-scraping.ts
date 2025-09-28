@@ -715,7 +715,35 @@ export class EnhancedJobScrapingService {
 
   private static extractBeneficiosFromText(text: string): string {
     const beneficiosMatch = text.match(/Benefícios[^<]*?(.*?)(?=Local de trabalho|$)/is)
-    return beneficiosMatch ? this.cleanHTML(beneficiosMatch[1]).trim() : ''
+    if (beneficiosMatch) {
+      const beneficiosText = this.cleanHTML(beneficiosMatch[1]).trim()
+      return this.formatBeneficiosAsList(beneficiosText)
+    }
+    return ''
+  }
+
+  /**
+   * Formata benefícios como lista vertical simples
+   */
+  private static formatBeneficiosAsList(text: string): string {
+    if (!text.trim()) return ''
+    
+    // Dividir por ponto e vírgula ou quebras de linha
+    const items = text
+      .split(/[;]\s*/)
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+    
+    // Se não encontrou separadores, tentar dividir por quebras de linha
+    if (items.length === 1) {
+      const lines = text.split(/\n+/).map(line => line.trim()).filter(line => line.length > 0)
+      if (lines.length > 1) {
+        return lines.join('\n')
+      }
+    }
+    
+    // Formatar como lista vertical simples (sem marcadores)
+    return items.join('\n')
   }
 
   private static formatEtapasProcesso(etapas: any[]): string {

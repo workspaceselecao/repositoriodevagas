@@ -612,12 +612,12 @@ export class JobScrapingService {
     if (items.length === 1) {
       const lines = cleanText.split(/\n+/).map(line => line.trim()).filter(line => line.length > 0)
       if (lines.length > 1) {
-        return lines.map(line => `• ${line}`).join('\n')
+        return lines.join('\n')
       }
     }
     
-    // Formatar como lista de tópicos
-    return items.map(item => `• ${item}`).join('\n')
+    // Formatar como lista vertical simples (sem marcadores)
+    return items.join('\n')
   }
 
   /**
