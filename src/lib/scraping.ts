@@ -405,6 +405,13 @@ export class JobScrapingService {
         .map(beneficio => beneficio.trim())
         .filter(beneficio => beneficio.trim() !== '') // Remove benefícios vazios
         .join('\n')
+    } else if (field === 'requisitos_qualificacoes') {
+      cleaned = cleaned
+        // Processar requisitos - dividir por ponto e vírgula
+        .split(/[;]\s*/)
+        .map(requisito => requisito.trim())
+        .filter(requisito => requisito.trim() !== '') // Remove requisitos vazios
+        .join('\n')
     } else {
       // Para outros campos, usar limpeza normal
       cleaned = cleaned
