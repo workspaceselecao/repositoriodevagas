@@ -8,14 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
 import { Switch } from './ui/switch'
 import { Textarea } from './ui/textarea'
-import { BackupOptions, BackupLog, Noticia, NoticiaFormData } from '../types/database'
+import { BackupOptions, BackupLog, Noticia, NoticiaFormData, ContactEmailConfig, ContactEmailFormData } from '../types/database'
 import { createManualBackup, getBackupLogs } from '../lib/backup'
 import * as XLSX from 'xlsx'
 import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticiaStatus } from '../lib/noticias'
-import { getContactEmailConfig, setContactEmailConfig, removeContactEmailConfig } from '../lib/contactEmail'
+import { getAllContactEmailConfigs, createContactEmailConfig, updateContactEmailConfig, deleteContactEmailConfig, toggleContactEmailConfigStatus } from '../lib/contactEmail'
 import { useAuth } from '../contexts/AuthContext'
 import { ThemeSelector } from './ThemeSelector'
 import CacheMetricsDisplay from './CacheMetricsDisplay'
+import { Badge } from './ui/badge'
 import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash } from 'lucide-react'
 
 export default function Configuracoes() {
@@ -43,23 +44,31 @@ export default function Configuracoes() {
     ativa: true,
     prioridade: 'media'
   })
-  const [contactEmail, setContactEmail] = useState('')
+  const [contactEmails, setContactEmails] = useState<ContactEmailConfig[]>([])
   const [contactEmailLoading, setContactEmailLoading] = useState(false)
+  const [showCreateEmailDialog, setShowCreateEmailDialog] = useState(false)
+  const [showEditEmailDialog, setShowEditEmailDialog] = useState(false)
+  const [editingEmail, setEditingEmail] = useState<ContactEmailConfig | null>(null)
+  const [emailForm, setEmailForm] = useState<ContactEmailFormData>({
+    email: '',
+    nome: '',
+    ativo: true
+  })
   const { user } = useAuth()
 
   useEffect(() => {
     let isMounted = true
     const load = async () => {
       try {
-        const [logs, noticiasData, contactEmailData] = await Promise.all([
+        const [logs, noticiasData, contactEmailsData] = await Promise.all([
           getBackupLogs(),
           getNoticias(),
-          getContactEmailConfig()
+          getAllContactEmailConfigs()
         ])
         if (isMounted) {
           setBackupLogs(logs)
           setNoticias(noticiasData)
-          setContactEmail(contactEmailData?.email || '')
+          setContactEmails(contactEmailsData)
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
@@ -87,8 +96,18 @@ export default function Configuracoes() {
     }
   }
 
-  const handleSaveContactEmail = async () => {
-    if (!contactEmail.trim()) {
+  const loadContactEmails = async () => {
+    try {
+      const emailsData = await getAllContactEmailConfigs()
+      setContactEmails(emailsData)
+    } catch (error) {
+      console.error('Erro ao carregar emails de contato:', error)
+    }
+  }
+
+  const handleCreateEmail = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!emailForm.email.trim()) {
       setMessage('Por favor, insira um email válido')
       return
     }
@@ -97,33 +116,65 @@ export default function Configuracoes() {
     setMessage('')
 
     try {
-      const result = await setContactEmailConfig(contactEmail.trim())
+      const result = await createContactEmailConfig(emailForm)
       if (result) {
-        setMessage('Email de contato configurado com sucesso!')
+        setMessage('Email de contato adicionado com sucesso!')
+        setEmailForm({
+          email: '',
+          nome: '',
+          ativo: true
+        })
+        setShowCreateEmailDialog(false)
+        loadContactEmails()
       } else {
-        setMessage('Erro ao configurar email de contato')
+        setMessage('Erro ao adicionar email de contato')
       }
     } catch (error: any) {
-      console.error('Erro ao salvar email de contato:', error)
-      setMessage(`Erro ao salvar email de contato: ${error.message}`)
+      console.error('Erro ao criar email de contato:', error)
+      setMessage(`Erro ao criar email de contato: ${error.message}`)
     } finally {
       setContactEmailLoading(false)
     }
   }
 
-  const handleRemoveContactEmail = async () => {
-    if (!confirm('Tem certeza que deseja remover a configuração de email de contato?')) return
+  const handleEditEmail = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingEmail) return
 
     setContactEmailLoading(true)
     setMessage('')
 
     try {
-      const result = await removeContactEmailConfig()
+      const result = await updateContactEmailConfig(editingEmail.id, emailForm)
       if (result) {
-        setContactEmail('')
-        setMessage('Configuração de email de contato removida com sucesso!')
+        setMessage('Email de contato atualizado com sucesso!')
+        setShowEditEmailDialog(false)
+        setEditingEmail(null)
+        loadContactEmails()
       } else {
-        setMessage('Erro ao remover configuração de email de contato')
+        setMessage('Erro ao atualizar email de contato')
+      }
+    } catch (error: any) {
+      console.error('Erro ao atualizar email de contato:', error)
+      setMessage(`Erro ao atualizar email de contato: ${error.message}`)
+    } finally {
+      setContactEmailLoading(false)
+    }
+  }
+
+  const handleDeleteEmail = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir este email de contato?')) return
+
+    setContactEmailLoading(true)
+    setMessage('')
+
+    try {
+      const result = await deleteContactEmailConfig(id)
+      if (result) {
+        setMessage('Email de contato removido com sucesso!')
+        loadContactEmails()
+      } else {
+        setMessage('Erro ao remover email de contato')
       }
     } catch (error: any) {
       console.error('Erro ao remover email de contato:', error)
@@ -131,6 +182,36 @@ export default function Configuracoes() {
     } finally {
       setContactEmailLoading(false)
     }
+  }
+
+  const handleToggleEmailStatus = async (id: string) => {
+    setContactEmailLoading(true)
+    setMessage('')
+
+    try {
+      const result = await toggleContactEmailConfigStatus(id)
+      if (result) {
+        setMessage(`Email ${result.ativo ? 'ativado' : 'desativado'} com sucesso!`)
+        loadContactEmails()
+      } else {
+        setMessage('Erro ao alterar status do email')
+      }
+    } catch (error: any) {
+      console.error('Erro ao alterar status do email:', error)
+      setMessage(`Erro ao alterar status do email: ${error.message}`)
+    } finally {
+      setContactEmailLoading(false)
+    }
+  }
+
+  const openEditEmailDialog = (email: ContactEmailConfig) => {
+    setEditingEmail(email)
+    setEmailForm({
+      email: email.email,
+      nome: email.nome || '',
+      ativo: email.ativo
+    })
+    setShowEditEmailDialog(true)
   }
 
   const generateExcelFromBackup = async (backupData: any): Promise<Buffer> => {
@@ -412,53 +493,89 @@ export default function Configuracoes() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Configuração de Email de Contato */}
+            {/* Configuração de Emails de Contato */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     <Mail className="h-5 w-5" />
-                    Email de Contato
+                    Emails de Contato
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Configure o email que receberá as mensagens do formulário de contato
+                    Configure os emails que receberão as mensagens do formulário de contato
                   </p>
                 </div>
+                <Button
+                  onClick={() => setShowCreateEmailDialog(true)}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Adicionar Email
+                </Button>
               </div>
               
+              {/* Lista de Emails */}
               <div className="space-y-3">
-                <Label htmlFor="contactEmail">Email de Contato</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="contactEmail"
-                    type="email"
-                    value={contactEmail}
-                    onChange={(e) => setContactEmail(e.target.value)}
-                    placeholder="exemplo@empresa.com"
-                    className="flex-1"
-                  />
-                  <Button
-                    onClick={handleSaveContactEmail}
-                    disabled={contactEmailLoading || !contactEmail.trim()}
-                    size="sm"
-                  >
-                    {contactEmailLoading ? 'Salvando...' : 'Salvar'}
-                  </Button>
-                  {contactEmail && (
-                    <Button
-                      onClick={handleRemoveContactEmail}
-                      disabled={contactEmailLoading}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                {contactEmail && (
-                  <p className="text-sm text-green-600">
-                    Email atual: <strong>{contactEmail}</strong>
-                  </p>
+                {contactEmails.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Nenhum email de contato configurado</p>
+                    <p className="text-sm">Clique em "Adicionar Email" para começar</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {contactEmails.map((email) => (
+                      <div
+                        key={email.id}
+                        className={`flex items-center justify-between p-3 rounded-lg border ${
+                          email.ativo 
+                            ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' 
+                            : 'bg-gray-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700'
+                        }`}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{email.email}</span>
+                            {email.nome && (
+                              <span className="text-sm text-muted-foreground">
+                                ({email.nome})
+                              </span>
+                            )}
+                            <Badge variant={email.ativo ? "default" : "secondary"}>
+                              {email.ativo ? 'Ativo' : 'Inativo'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => handleToggleEmailStatus(email.id)}
+                            disabled={contactEmailLoading}
+                            variant="outline"
+                            size="sm"
+                          >
+                            {email.ativo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                          <Button
+                            onClick={() => openEditEmailDialog(email)}
+                            disabled={contactEmailLoading}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteEmail(email.id)}
+                            disabled={contactEmailLoading}
+                            variant="destructive"
+                            size="sm"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
@@ -806,6 +923,112 @@ export default function Configuracoes() {
                   </Button>
                   <Button type="submit" disabled={loading}>
                     {loading ? 'Salvando...' : 'Salvar Alterações'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Dialog para Criar Email de Contato */}
+          <Dialog open={showCreateEmailDialog} onOpenChange={setShowCreateEmailDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Adicionar Email de Contato</DialogTitle>
+                <DialogDescription>
+                  Adicione um novo email que receberá mensagens do formulário de contato
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleCreateEmail}>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="create-email">Email *</Label>
+                    <Input
+                      id="create-email"
+                      type="email"
+                      value={emailForm.email}
+                      onChange={(e) => setEmailForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="exemplo@empresa.com"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="create-nome">Nome (opcional)</Label>
+                    <Input
+                      id="create-nome"
+                      type="text"
+                      value={emailForm.nome || ''}
+                      onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
+                      placeholder="Nome do destinatário"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="create-ativo"
+                      checked={emailForm.ativo || true}
+                      onCheckedChange={(checked) => setEmailForm(prev => ({ ...prev, ativo: checked }))}
+                    />
+                    <Label htmlFor="create-ativo">Email ativo</Label>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowCreateEmailDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" disabled={contactEmailLoading}>
+                    {contactEmailLoading ? 'Adicionando...' : 'Adicionar Email'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Dialog para Editar Email de Contato */}
+          <Dialog open={showEditEmailDialog} onOpenChange={setShowEditEmailDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar Email de Contato</DialogTitle>
+                <DialogDescription>
+                  Edite as informações do email de contato
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleEditEmail}>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-email">Email *</Label>
+                    <Input
+                      id="edit-email"
+                      type="email"
+                      value={emailForm.email}
+                      onChange={(e) => setEmailForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="exemplo@empresa.com"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-nome">Nome (opcional)</Label>
+                    <Input
+                      id="edit-nome"
+                      type="text"
+                      value={emailForm.nome || ''}
+                      onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
+                      placeholder="Nome do destinatário"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="edit-ativo"
+                      checked={emailForm.ativo || false}
+                      onCheckedChange={(checked) => setEmailForm(prev => ({ ...prev, ativo: checked }))}
+                    />
+                    <Label htmlFor="edit-ativo">Email ativo</Label>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowEditEmailDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" disabled={contactEmailLoading}>
+                    {contactEmailLoading ? 'Salvando...' : 'Salvar Alterações'}
                   </Button>
                 </DialogFooter>
               </form>

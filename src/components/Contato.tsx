@@ -7,7 +7,7 @@ import { Textarea } from './ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Mail, Send, User, MessageSquare, Phone } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { getContactEmailConfig } from '../lib/contactEmail'
+import { getRecipientEmails } from '../lib/contactEmail'
 
 interface ContactFormData {
   nome: string
@@ -28,7 +28,7 @@ export default function Contato() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('')
-  const [contactEmail, setContactEmail] = useState('roberio.gomes@atento.com') // Email padrão
+  const [recipientEmails, setRecipientEmails] = useState<string[]>(['roberio.gomes@atento.com']) // Emails padrão
   const { user } = useAuth()
 
   // Preencher email automaticamente se o usuário estiver logado
@@ -41,21 +41,19 @@ export default function Contato() {
     }
   }, [user])
 
-  // Carregar configuração de email de contato
+  // Carregar emails destinatários configurados pelos admins
   useEffect(() => {
-    const loadContactEmail = async () => {
+    const loadRecipientEmails = async () => {
       try {
-        const config = await getContactEmailConfig()
-        if (config?.email) {
-          setContactEmail(config.email)
-        }
+        const emails = await getRecipientEmails()
+        setRecipientEmails(emails)
       } catch (error) {
-        console.error('Erro ao carregar configuração de email de contato:', error)
-        // Manter email padrão em caso de erro
+        console.error('Erro ao carregar emails destinatários:', error)
+        // Manter emails padrão em caso de erro
       }
     }
     
-    loadContactEmail()
+    loadRecipientEmails()
   }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -97,12 +95,20 @@ export default function Contato() {
         `Mensagem:\n${formData.mensagem}`
       )
       
-      const mailtoLink = `mailto:${contactEmail}?subject=${assunto}&body=${corpo}`
+      // Criar links mailto para todos os destinatários
+      const mailtoLinks = recipientEmails.map(email => 
+        `mailto:${email}?subject=${assunto}&body=${corpo}`
+      )
       
-      // Abrir o cliente de email padrão
-      window.open(mailtoLink, '_blank')
+      // Abrir o primeiro cliente de email (usuário pode escolher outros depois)
+      window.open(mailtoLinks[0], '_blank')
       
-      setMessage('Cliente de email aberto com sucesso! Sua mensagem será enviada quando você clicar em enviar.')
+      // Se houver múltiplos destinatários, mostrar informação adicional
+      if (recipientEmails.length > 1) {
+        setMessage(`Cliente de email aberto com sucesso! Sua mensagem será enviada para ${recipientEmails.length} destinatários: ${recipientEmails.join(', ')}`)
+      } else {
+        setMessage('Cliente de email aberto com sucesso! Sua mensagem será enviada quando você clicar em enviar.')
+      }
       setMessageType('success')
       
       // Limpar formulário após sucesso
@@ -133,6 +139,11 @@ export default function Contato() {
           </CardTitle>
           <CardDescription>
             Envie sua mensagem diretamente para nossa equipe. Seu cliente de email será aberto automaticamente.
+            {recipientEmails.length > 1 && (
+              <span className="block mt-2 text-sm text-blue-600 dark:text-blue-400">
+                📧 Sua mensagem será enviada para {recipientEmails.length} destinatários configurados pelos administradores.
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>

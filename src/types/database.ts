@@ -124,3 +124,19 @@ export interface BackupOptions {
   };
   format?: 'json' | 'excel' | 'csv';
 }
+
+// Tipos para configuração de emails de contato
+export interface ContactEmailConfig {
+  id: string;
+  email: string;
+  nome?: string;
+  ativo: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContactEmailFormData {
+  email: string;
+  nome?: string;
+  ativo?: boolean;
+}

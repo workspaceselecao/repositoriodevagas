@@ -47,10 +47,12 @@ CREATE TABLE IF NOT EXISTS backup_logs (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Tabela para configuração de email de contato
+-- Tabela para configuração de emails de contato (múltiplos destinatários)
 CREATE TABLE IF NOT EXISTS contact_email_config (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  email VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  nome VARCHAR(255), -- Nome opcional para identificar o destinatário
+  ativo BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
