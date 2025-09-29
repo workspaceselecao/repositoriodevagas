@@ -262,6 +262,7 @@ export default function ResetPasswordPage() {
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     required
                     disabled={loading}
                     className={`w-full h-12 px-4 pr-12 transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:border-primary ${
@@ -325,6 +326,7 @@ export default function ResetPasswordPage() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     required
                     disabled={loading}
                     className={`w-full h-12 px-4 pr-12 transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:border-primary ${

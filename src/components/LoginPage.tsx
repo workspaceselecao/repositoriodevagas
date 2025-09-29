@@ -133,6 +133,7 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="seu@email.com"
+                  autoComplete="email"
                   required
                   className={`w-full h-12 px-4 transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:border-primary ${
                     config.effects.glassmorphism 
@@ -160,6 +161,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
+                  autoComplete="current-password"
                   required
                   className={`w-full h-12 px-4 pr-12 transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:border-primary ${
                     config.effects.glassmorphism 

@@ -269,6 +269,7 @@ export default function GerenciarUsuarios() {
                     value={userForm.name}
                     onChange={handleInputChange}
                     placeholder="Nome completo"
+                    autoComplete="name"
                     required
                   />
                 </div>
@@ -281,6 +282,7 @@ export default function GerenciarUsuarios() {
                     value={userForm.email}
                     onChange={handleInputChange}
                     placeholder="email@exemplo.com"
+                    autoComplete="email"
                     required
                   />
                 </div>
@@ -293,6 +295,7 @@ export default function GerenciarUsuarios() {
                     value={userForm.password}
                     onChange={handleInputChange}
                     placeholder="Senha temporária"
+                    autoComplete="new-password"
                     required
                   />
                 </div>
@@ -446,6 +449,7 @@ export default function GerenciarUsuarios() {
                   value={userForm.name}
                   onChange={handleInputChange}
                   placeholder="Nome completo"
+                  autoComplete="name"
                   required
                 />
               </div>
@@ -458,6 +462,7 @@ export default function GerenciarUsuarios() {
                   value={userForm.email}
                   onChange={handleInputChange}
                   placeholder="email@exemplo.com"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -538,6 +543,7 @@ export default function GerenciarUsuarios() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Digite a nova senha"
+                autoComplete="new-password"
                 required
               />
             </div>

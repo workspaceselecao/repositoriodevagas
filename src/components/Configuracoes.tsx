@@ -368,6 +368,7 @@ export default function Configuracoes() {
                   <input
                     type="checkbox"
                     id="vagas"
+                    name="vagas"
                     checked={backupOptions.data?.vagas || false}
                     onChange={(e) => handleBackupDataChange('vagas', e.target.checked)}
                     className="rounded"
@@ -378,6 +379,7 @@ export default function Configuracoes() {
                   <input
                     type="checkbox"
                     id="users"
+                    name="users"
                     checked={backupOptions.data?.users || false}
                     onChange={(e) => handleBackupDataChange('users', e.target.checked)}
                     className="rounded"
@@ -388,6 +390,7 @@ export default function Configuracoes() {
                   <input
                     type="checkbox"
                     id="logs"
+                    name="logs"
                     checked={backupOptions.data?.backup_logs || false}
                     onChange={(e) => handleBackupDataChange('backup_logs', e.target.checked)}
                     className="rounded"
@@ -398,6 +401,7 @@ export default function Configuracoes() {
                   <input
                     type="checkbox"
                     id="noticias"
+                    name="noticias"
                     checked={backupOptions.data?.noticias || false}
                     onChange={(e) => handleBackupDataChange('noticias', e.target.checked)}
                     className="rounded"

@@ -201,6 +201,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }: Chan
                     value={formData.currentPassword}
                     onChange={handleInputChange}
                     placeholder="Digite sua senha atual"
+                    autoComplete="current-password"
                     required
                     disabled={loading}
                     className={`pr-12 ${loading ? 'opacity-50' : ''}`}
@@ -249,6 +250,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }: Chan
                     value={formData.newPassword}
                     onChange={handleInputChange}
                     placeholder="Digite sua nova senha"
+                    autoComplete="new-password"
                     required
                     disabled={loading}
                     className={`pr-12 ${loading ? 'opacity-50' : ''}`}
@@ -308,6 +310,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }: Chan
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     placeholder="Confirme sua nova senha"
+                    autoComplete="new-password"
                     required
                     disabled={loading}
                     className={`pr-12 ${loading ? 'opacity-50' : ''}`}
