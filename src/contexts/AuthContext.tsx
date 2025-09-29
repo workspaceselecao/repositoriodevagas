@@ -3,6 +3,7 @@ import { AuthUser, LoginFormData } from '../types/database'
 import { signIn, signOut, getCurrentUser } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { initializeVersionSystem } from '../version'
+import AuthErrorFallback from '../components/AuthErrorFallback'
 import ErrorFallback from '../components/ErrorFallback'
 
 interface AuthContextType {
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [initialized, setInitialized] = useState(false)
   const [isInitializing, setIsInitializing] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   useEffect(() => {
     let isMounted = true
@@ -44,19 +46,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 15000) // Aumentado para 15 segundos
 
     // Verificar sessão atual do Supabase de forma rápida
-    const checkUser = async () => {
+    const checkUser = async (retryCount = 0) => {
       if (hasInitialized || isInitializing) return
       
       setIsInitializing(true)
       
+      // Verificar conectividade antes de tentar autenticação
+      if (!navigator.onLine) {
+        console.warn('⚠️ Sem conexão com a internet - aguardando reconexão')
+        setTimeout(() => checkUser(retryCount), 2000)
+        return
+      }
+      
       try {
-        // Verificar sessão com timeout mais generoso
+        // Verificar sessão com timeout mais generoso e melhor tratamento
         const sessionPromise = supabase.auth.getSession()
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutId = setTimeout(() => reject(new Error('Session timeout')), 10000) // Aumentado para 10 segundos
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error('Session timeout - operação demorou mais que 15 segundos')), 15000) // Aumentado para 15 segundos
         })
 
-        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any
+        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
+        
+        // Verificar se há erro na resposta do Supabase
+        if (error) {
+          console.warn('Erro ao obter sessão:', error.message)
+          throw new Error(`Erro de autenticação: ${error.message}`)
+        }
         
         if (timeoutId) {
           clearTimeout(timeoutId)
@@ -138,10 +153,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           timeoutId = null
         }
         
-        // Em caso de erro, definir erro mas não travar a aplicação
+        // Em caso de erro, tentar uma abordagem mais robusta
         if (isMounted) {
+          const errorMessage = (error as Error)?.message || 'Erro desconhecido'
+          
+          // Se for timeout, tentar verificar sessão local
+          if (errorMessage.includes('timeout')) {
+            console.warn('⚠️ Timeout na verificação de sessão - tentando verificação local')
+            try {
+              const localSession = localStorage.getItem('sb-mywaoaofatgwbbtyqfpd-auth-token')
+              if (localSession) {
+                console.log('Sessão local encontrada, tentando restaurar...')
+                // Tentar restaurar sessão local
+                const sessionData = JSON.parse(localSession)
+                if (sessionData?.access_token) {
+                  setUser(sessionData.user)
+                  hasInitialized = true
+                  setLoading(false)
+                  setInitialized(true)
+                  setIsInitializing(false)
+                  clearTimeout(safetyTimeout)
+                  return
+                }
+              }
+            } catch (localError) {
+              console.warn('Erro ao verificar sessão local:', localError)
+            }
+          }
+          
+          // Tentar retry se for erro de rede e ainda temos tentativas
+          if (errorMessage.includes('timeout') && retryCount < 2) {
+            console.warn(`⚠️ Tentativa ${retryCount + 1} falhou - tentando novamente em 3 segundos...`)
+            setTimeout(() => {
+              if (isMounted) {
+                setIsInitializing(false)
+                checkUser(retryCount + 1)
+              }
+            }, 3000)
+            return
+          }
+          
           console.warn('⚠️ Erro na verificação de sessão - permitindo acesso sem autenticação')
-          setError(error as Error)
+          setError(new Error(`Erro de autenticação: ${errorMessage}`))
           setUser(null)
           hasInitialized = true
           setLoading(false)
@@ -153,6 +206,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     checkUser()
+
+    // Escutar mudanças de conectividade
+    const handleOnline = () => {
+      console.log('🌐 Conexão restaurada - verificando autenticação...')
+      setIsOnline(true)
+      if (!hasInitialized && !isInitializing) {
+        setTimeout(() => checkUser(), 1000)
+      }
+    }
+
+    const handleOffline = () => {
+      console.warn('🌐 Conexão perdida - pausando verificações de autenticação')
+      setIsOnline(false)
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
 
     // Escutar mudanças de autenticação (simplificado)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -229,7 +299,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       isMounted = false
+      if (timeoutId) clearTimeout(timeoutId)
+      if (safetyTimeout) clearTimeout(safetyTimeout)
       subscription.unsubscribe()
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
     }
   }, [])
 
@@ -302,8 +376,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     setInitialized(false)
     setIsInitializing(false)
-    // Recarregar a página para reinicializar
-    window.location.reload()
+    // Tentar verificar autenticação novamente
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
+  }
+
+  const goHome = () => {
+    window.location.href = '/'
   }
 
   const value = {
@@ -313,6 +393,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     error,
     retry
+  }
+
+  // Se há erro e não está carregando, mostrar fallback
+  if (error && !loading && !isInitializing) {
+    return (
+      <AuthContext.Provider value={value}>
+        <AuthErrorFallback 
+          error={error}
+          onRetry={retry}
+          onGoHome={goHome}
+          isOnline={isOnline}
+        />
+      </AuthContext.Provider>
+    )
   }
 
   return (
