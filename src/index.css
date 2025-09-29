@@ -184,7 +184,7 @@
     --secondary: 216 41% 3%; /* #05060C (0.64, 0.41, 0.03) */
     --secondary-foreground: 210 20% 98%;
     --muted: 216 41% 3%; /* #05060C (0.64, 0.41, 0.03) */
-    --muted-foreground: 217.9 10.6% 85%;
+    --muted-foreground: 0 0% 98%;
     --accent: 216 41% 3%; /* #05060C (0.64, 0.41, 0.03) */
     --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
