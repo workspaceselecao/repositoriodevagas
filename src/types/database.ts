@@ -140,3 +140,21 @@ export interface ContactEmailFormData {
   nome?: string;
   ativo?: boolean;
 }
+
+// Tipos para configuração de EmailJS
+export interface EmailJSConfig {
+  id?: string;
+  service_id: string;
+  template_id: string;
+  public_key: string;
+  ativo: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface EmailJSFormData {
+  service_id: string;
+  template_id: string;
+  public_key: string;
+  ativo?: boolean;
+}

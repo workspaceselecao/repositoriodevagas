@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Mail, Send, User, MessageSquare, Phone } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getRecipientEmails } from '../lib/contactEmail'
+import { getEmailJSConfig } from '../lib/emailJSConfig'
+import { sendContactEmail, initEmailJS } from '../lib/emailService'
 
 interface ContactFormData {
   nome: string
@@ -29,6 +31,8 @@ export default function Contato() {
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('')
   const [recipientEmails, setRecipientEmails] = useState<string[]>(['roberio.gomes@atento.com']) // Emails padrão
+  const [emailJSConfig, setEmailJSConfig] = useState<any>(null)
+  const [useDirectEmail, setUseDirectEmail] = useState(false)
   const { user } = useAuth()
 
   // Preencher email automaticamente se o usuário estiver logado
@@ -41,19 +45,24 @@ export default function Contato() {
     }
   }, [user])
 
-  // Carregar emails destinatários configurados pelos admins
+  // Carregar configuração do EmailJS e emails destinatários
   useEffect(() => {
-    const loadRecipientEmails = async () => {
+    const loadConfigs = async () => {
       try {
-        const emails = await getRecipientEmails()
+        const [emails, emailJS] = await Promise.all([
+          getRecipientEmails(),
+          getEmailJSConfig()
+        ])
         setRecipientEmails(emails)
+        setEmailJSConfig(emailJS)
+        setUseDirectEmail(!!emailJS) // Usar envio direto se EmailJS estiver configurado
       } catch (error) {
-        console.error('Erro ao carregar emails destinatários:', error)
-        // Manter emails padrão em caso de erro
+        console.error('Erro ao carregar configurações:', error)
+        // Manter configurações padrão em caso de erro
       }
     }
     
-    loadRecipientEmails()
+    loadConfigs()
   }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -86,39 +95,74 @@ export default function Contato() {
     setMessageType('')
 
     try {
-      // Criar o link mailto com os dados do formulário
-      const assunto = encodeURIComponent(formData.assunto)
-      const corpo = encodeURIComponent(
-        `Nome: ${formData.nome}\n` +
-        `Email: ${formData.email}\n` +
-        `Telefone: ${formData.telefone || 'Não informado'}\n\n` +
-        `Mensagem:\n${formData.mensagem}`
-      )
-      
-      // Criar links mailto para todos os destinatários
-      const mailtoLinks = recipientEmails.map(email => 
-        `mailto:${email}?subject=${assunto}&body=${corpo}`
-      )
-      
-      // Abrir o primeiro cliente de email (usuário pode escolher outros depois)
-      window.open(mailtoLinks[0], '_blank')
-      
-      // Se houver múltiplos destinatários, mostrar informação adicional
-      if (recipientEmails.length > 1) {
-        setMessage(`Cliente de email aberto com sucesso! Sua mensagem será enviada para ${recipientEmails.length} destinatários: ${recipientEmails.join(', ')}`)
+      if (useDirectEmail && emailJSConfig) {
+        // Envio direto via EmailJS
+        const emailData = {
+          nome: formData.nome,
+          email: formData.email,
+          telefone: formData.telefone,
+          assunto: formData.assunto,
+          mensagem: formData.mensagem,
+          destinatarios: recipientEmails
+        }
+
+        const result = await sendContactEmail(emailData, {
+          serviceId: emailJSConfig.service_id,
+          templateId: emailJSConfig.template_id,
+          publicKey: emailJSConfig.public_key
+        })
+
+        if (result.success) {
+          setMessage(result.message)
+          setMessageType('success')
+          
+          // Limpar formulário após sucesso
+          setFormData({
+            nome: '',
+            email: user?.email || '',
+            telefone: '',
+            assunto: '',
+            mensagem: ''
+          })
+        } else {
+          setMessage(result.message)
+          setMessageType('error')
+        }
       } else {
-        setMessage('Cliente de email aberto com sucesso! Sua mensagem será enviada quando você clicar em enviar.')
+        // Fallback para envio via cliente de email (método anterior)
+        const assunto = encodeURIComponent(formData.assunto)
+        const corpo = encodeURIComponent(
+          `Nome: ${formData.nome}\n` +
+          `Email: ${formData.email}\n` +
+          `Telefone: ${formData.telefone || 'Não informado'}\n\n` +
+          `Mensagem:\n${formData.mensagem}`
+        )
+        
+        // Criar links mailto para todos os destinatários
+        const mailtoLinks = recipientEmails.map(email => 
+          `mailto:${email}?subject=${assunto}&body=${corpo}`
+        )
+        
+        // Abrir o primeiro cliente de email (usuário pode escolher outros depois)
+        window.open(mailtoLinks[0], '_blank')
+        
+        // Se houver múltiplos destinatários, mostrar informação adicional
+        if (recipientEmails.length > 1) {
+          setMessage(`Cliente de email aberto com sucesso! Sua mensagem será enviada para ${recipientEmails.length} destinatários: ${recipientEmails.join(', ')}`)
+        } else {
+          setMessage('Cliente de email aberto com sucesso! Sua mensagem será enviada quando você clicar em enviar.')
+        }
+        setMessageType('success')
+        
+        // Limpar formulário após sucesso
+        setFormData({
+          nome: '',
+          email: user?.email || '',
+          telefone: '',
+          assunto: '',
+          mensagem: ''
+        })
       }
-      setMessageType('success')
-      
-      // Limpar formulário após sucesso
-      setFormData({
-        nome: '',
-        email: user?.email || '',
-        telefone: '',
-        assunto: '',
-        mensagem: ''
-      })
       
     } catch (error: any) {
       console.error('Erro ao abrir cliente de email:', error)
@@ -138,11 +182,24 @@ export default function Contato() {
             Entre em Contato
           </CardTitle>
           <CardDescription>
-            Envie sua mensagem diretamente para nossa equipe. Seu cliente de email será aberto automaticamente.
-            {recipientEmails.length > 1 && (
-              <span className="block mt-2 text-sm text-blue-600 dark:text-blue-400">
-                📧 Sua mensagem será enviada para {recipientEmails.length} destinatários configurados pelos administradores.
-              </span>
+            {useDirectEmail ? (
+              <>
+                Envie sua mensagem diretamente através do sistema. O email será enviado automaticamente para nossa equipe.
+                {recipientEmails.length > 1 && (
+                  <span className="block mt-2 text-sm text-blue-600 dark:text-blue-400">
+                    📧 Sua mensagem será enviada para {recipientEmails.length} destinatários configurados pelos administradores.
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                Envie sua mensagem diretamente para nossa equipe. Seu cliente de email será aberto automaticamente.
+                {recipientEmails.length > 1 && (
+                  <span className="block mt-2 text-sm text-blue-600 dark:text-blue-400">
+                    📧 Sua mensagem será enviada para {recipientEmails.length} destinatários configurados pelos administradores.
+                  </span>
+                )}
+              </>
             )}
           </CardDescription>
         </CardHeader>
@@ -250,12 +307,12 @@ export default function Contato() {
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Processando...
+                  {useDirectEmail ? 'Enviando...' : 'Processando...'}
                 </>
               ) : (
                 <>
                   <Send className="h-4 w-4 mr-2" />
-                  Enviar Mensagem
+                  {useDirectEmail ? 'Enviar Mensagem' : 'Abrir Cliente de Email'}
                 </>
               )}
             </Button>

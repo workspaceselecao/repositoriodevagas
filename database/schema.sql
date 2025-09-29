@@ -57,6 +57,17 @@ CREATE TABLE IF NOT EXISTS contact_email_config (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Tabela para configuração do EmailJS
+CREATE TABLE IF NOT EXISTS emailjs_config (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  service_id VARCHAR(255) NOT NULL,
+  template_id VARCHAR(255) NOT NULL,
+  public_key VARCHAR(500) NOT NULL,
+  ativo BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Índices para melhor performance
 CREATE INDEX IF NOT EXISTS idx_vagas_cliente ON vagas(cliente);
 CREATE INDEX IF NOT EXISTS idx_vagas_site ON vagas(site);
@@ -111,6 +122,7 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vagas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE backup_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contact_email_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE emailjs_config ENABLE ROW LEVEL SECURITY;
 
 -- Políticas RLS para users (com verificação de existência)
 DO $$
@@ -238,6 +250,25 @@ BEGIN
         AND policyname = 'Admin can manage contact email config'
     ) THEN
         CREATE POLICY "Admin can manage contact email config" ON contact_email_config
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+-- Políticas RLS para emailjs_config (com verificação de existência)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'emailjs_config' 
+        AND policyname = 'Admin can manage emailjs config'
+    ) THEN
+        CREATE POLICY "Admin can manage emailjs config" ON emailjs_config
           FOR ALL USING (
             EXISTS (
               SELECT 1 FROM users 
