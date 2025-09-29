@@ -831,6 +831,8 @@ export default function Configuracoes() {
                 )}
               </div>
             </div>
+
+            <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">Backup do Sistema</h3>
               <div className="space-y-2">
                 <Label>Dados para Backup</Label>
