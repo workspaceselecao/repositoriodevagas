@@ -662,7 +662,10 @@ export default function Configuracoes() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => setShowCreateEmailDialog(true)}
+                  onClick={() => {
+                    console.log('Botão Adicionar Email clicado')
+                    setShowCreateEmailDialog(true)
+                  }}
                   size="sm"
                   className="flex items-center gap-2"
                 >
@@ -749,7 +752,10 @@ export default function Configuracoes() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => setShowCreateEmailJSDialog(true)}
+                  onClick={() => {
+                    console.log('Botão Adicionar Configuração EmailJS clicado')
+                    setShowCreateEmailJSDialog(true)
+                  }}
                   size="sm"
                   className="flex items-center gap-2"
                 >
