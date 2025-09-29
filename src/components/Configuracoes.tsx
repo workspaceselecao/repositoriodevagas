@@ -12,10 +12,11 @@ import { BackupOptions, BackupLog, Noticia, NoticiaFormData } from '../types/dat
 import { createManualBackup, getBackupLogs } from '../lib/backup'
 import * as XLSX from 'xlsx'
 import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticiaStatus } from '../lib/noticias'
+import { getContactEmailConfig, setContactEmailConfig, removeContactEmailConfig } from '../lib/contactEmail'
 import { useAuth } from '../contexts/AuthContext'
-import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette } from 'lucide-react'
 import { ThemeSelector } from './ThemeSelector'
 import CacheMetricsDisplay from './CacheMetricsDisplay'
+import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash } from 'lucide-react'
 
 export default function Configuracoes() {
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
@@ -42,19 +43,23 @@ export default function Configuracoes() {
     ativa: true,
     prioridade: 'media'
   })
+  const [contactEmail, setContactEmail] = useState('')
+  const [contactEmailLoading, setContactEmailLoading] = useState(false)
   const { user } = useAuth()
 
   useEffect(() => {
     let isMounted = true
     const load = async () => {
       try {
-        const [logs, noticiasData] = await Promise.all([
+        const [logs, noticiasData, contactEmailData] = await Promise.all([
           getBackupLogs(),
-          getNoticias()
+          getNoticias(),
+          getContactEmailConfig()
         ])
         if (isMounted) {
           setBackupLogs(logs)
           setNoticias(noticiasData)
+          setContactEmail(contactEmailData?.email || '')
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
@@ -79,6 +84,52 @@ export default function Configuracoes() {
       setNoticias(noticiasData)
     } catch (error) {
       console.error('Erro ao carregar notícias:', error)
+    }
+  }
+
+  const handleSaveContactEmail = async () => {
+    if (!contactEmail.trim()) {
+      setMessage('Por favor, insira um email válido')
+      return
+    }
+
+    setContactEmailLoading(true)
+    setMessage('')
+
+    try {
+      const result = await setContactEmailConfig(contactEmail.trim())
+      if (result) {
+        setMessage('Email de contato configurado com sucesso!')
+      } else {
+        setMessage('Erro ao configurar email de contato')
+      }
+    } catch (error: any) {
+      console.error('Erro ao salvar email de contato:', error)
+      setMessage(`Erro ao salvar email de contato: ${error.message}`)
+    } finally {
+      setContactEmailLoading(false)
+    }
+  }
+
+  const handleRemoveContactEmail = async () => {
+    if (!confirm('Tem certeza que deseja remover a configuração de email de contato?')) return
+
+    setContactEmailLoading(true)
+    setMessage('')
+
+    try {
+      const result = await removeContactEmailConfig()
+      if (result) {
+        setContactEmail('')
+        setMessage('Configuração de email de contato removida com sucesso!')
+      } else {
+        setMessage('Erro ao remover configuração de email de contato')
+      }
+    } catch (error: any) {
+      console.error('Erro ao remover email de contato:', error)
+      setMessage(`Erro ao remover email de contato: ${error.message}`)
+    } finally {
+      setContactEmailLoading(false)
     }
   }
 
@@ -342,28 +393,80 @@ export default function Configuracoes() {
 
       <Tabs defaultValue="backup" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="backup">Backup do Sistema</TabsTrigger>
+          <TabsTrigger value="backup">Configuração Geral</TabsTrigger>
           <TabsTrigger value="noticias">Gerenciar Notícias</TabsTrigger>
           <TabsTrigger value="personalizacao">Personalização Visual</TabsTrigger>
         </TabsList>
 
         <TabsContent value="backup" className="space-y-6">
           <div className="grid grid-cols-1 gap-8">
-        {/* Backup do Sistema */}
+        {/* Configuração Geral */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <Database className="h-5 w-5 mr-2" />
-              Backup do Sistema
+              Configuração Geral
             </CardTitle>
             <CardDescription>
-              Faça backup dos dados do sistema em diferentes formatos
+              Gerencie configurações gerais do sistema e faça backup dos dados
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <Label>Dados para Backup</Label>
+          <CardContent className="space-y-6">
+            {/* Configuração de Email de Contato */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    Email de Contato
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Configure o email que receberá as mensagens do formulário de contato
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <Label htmlFor="contactEmail">Email de Contato</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    placeholder="exemplo@empresa.com"
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={handleSaveContactEmail}
+                    disabled={contactEmailLoading || !contactEmail.trim()}
+                    size="sm"
+                  >
+                    {contactEmailLoading ? 'Salvando...' : 'Salvar'}
+                  </Button>
+                  {contactEmail && (
+                    <Button
+                      onClick={handleRemoveContactEmail}
+                      disabled={contactEmailLoading}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {contactEmail && (
+                  <p className="text-sm text-green-600">
+                    Email atual: <strong>{contactEmail}</strong>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">Backup do Sistema</h3>
               <div className="space-y-2">
+                <Label>Dados para Backup</Label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"

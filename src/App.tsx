@@ -16,6 +16,7 @@ import ComparativoClientes from './components/ComparativoClientes'
 import NovaVagaFormWithScraping from './components/NovaVagaFormWithScraping'
 import Configuracoes from './components/Configuracoes'
 import GerenciarUsuarios from './components/GerenciarUsuarios'
+import Contato from './components/Contato'
 import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
 import { PWAInstallPrompt } from './components/PWAInstallPrompt'
@@ -109,16 +110,23 @@ function AppRoutes() {
           </DashboardLayout>
         </ProtectedRoute>
       } />
-              <Route path="/dashboard/vaga/:id" element={
-                <ProtectedRoute>
-                  <VagaView />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/editar-vaga/:id" element={
-                <ProtectedRoute>
-                  <EditarVagaForm />
-                </ProtectedRoute>
-              } />
+      <Route path="/dashboard/contato" element={
+        <ProtectedRoute>
+          <DashboardLayout>
+            <Contato />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/vaga/:id" element={
+        <ProtectedRoute>
+          <VagaView />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/editar-vaga/:id" element={
+        <ProtectedRoute>
+          <EditarVagaForm />
+        </ProtectedRoute>
+      } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

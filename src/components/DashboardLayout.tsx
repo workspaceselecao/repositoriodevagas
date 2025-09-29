@@ -24,6 +24,7 @@ import {
   Menu,
   Info,
   Key,
+  Mail,
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -101,6 +102,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       icon: UserPlus,
       label: 'Nova Vaga',
       href: '/dashboard/nova-vaga',
+      show: true
+    },
+    {
+      icon: Mail,
+      label: 'Contato',
+      href: '/dashboard/contato',
       show: true
     },
     {
