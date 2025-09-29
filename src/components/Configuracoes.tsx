@@ -662,10 +662,7 @@ export default function Configuracoes() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => {
-                    console.log('Botão Adicionar Email clicado')
-                    setShowCreateEmailDialog(true)
-                  }}
+                  onClick={() => setShowCreateEmailDialog(true)}
                   size="sm"
                   className="flex items-center gap-2"
                 >
@@ -752,10 +749,7 @@ export default function Configuracoes() {
                   </p>
                 </div>
                 <Button
-                  onClick={() => {
-                    console.log('Botão Adicionar Configuração EmailJS clicado')
-                    setShowCreateEmailJSDialog(true)
-                  }}
+                  onClick={() => setShowCreateEmailJSDialog(true)}
                   size="sm"
                   className="flex items-center gap-2"
                 >
@@ -1250,9 +1244,9 @@ export default function Configuracoes() {
               <form onSubmit={handleCreateEmail}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="create-email">Email *</Label>
+                    <Label htmlFor="create-email-contact">Email *</Label>
                     <Input
-                      id="create-email"
+                      id="create-email-contact"
                       type="email"
                       value={emailForm.email}
                       onChange={(e) => setEmailForm(prev => ({ ...prev, email: e.target.value }))}
@@ -1261,9 +1255,9 @@ export default function Configuracoes() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="create-nome">Nome (opcional)</Label>
+                    <Label htmlFor="create-nome-contact">Nome (opcional)</Label>
                     <Input
-                      id="create-nome"
+                      id="create-nome-contact"
                       type="text"
                       value={emailForm.nome || ''}
                       onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
@@ -1272,11 +1266,11 @@ export default function Configuracoes() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Switch
-                      id="create-ativo"
+                      id="create-ativo-contact"
                       checked={emailForm.ativo || true}
                       onCheckedChange={(checked) => setEmailForm(prev => ({ ...prev, ativo: checked }))}
                     />
-                    <Label htmlFor="create-ativo">Email ativo</Label>
+                    <Label htmlFor="create-ativo-contact">Email ativo</Label>
                   </div>
                 </div>
                 <DialogFooter>
@@ -1303,9 +1297,9 @@ export default function Configuracoes() {
               <form onSubmit={handleEditEmail}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-email">Email *</Label>
+                    <Label htmlFor="edit-email-contact">Email *</Label>
                     <Input
-                      id="edit-email"
+                      id="edit-email-contact"
                       type="email"
                       value={emailForm.email}
                       onChange={(e) => setEmailForm(prev => ({ ...prev, email: e.target.value }))}
@@ -1314,9 +1308,9 @@ export default function Configuracoes() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-nome">Nome (opcional)</Label>
+                    <Label htmlFor="edit-nome-contact">Nome (opcional)</Label>
                     <Input
-                      id="edit-nome"
+                      id="edit-nome-contact"
                       type="text"
                       value={emailForm.nome || ''}
                       onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
@@ -1325,11 +1319,11 @@ export default function Configuracoes() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Switch
-                      id="edit-ativo"
+                      id="edit-ativo-contact"
                       checked={emailForm.ativo || false}
                       onCheckedChange={(checked) => setEmailForm(prev => ({ ...prev, ativo: checked }))}
                     />
-                    <Label htmlFor="edit-ativo">Email ativo</Label>
+                    <Label htmlFor="edit-ativo-contact">Email ativo</Label>
                   </div>
                 </div>
                 <DialogFooter>
@@ -1356,9 +1350,9 @@ export default function Configuracoes() {
               <form onSubmit={handleCreateEmailJS}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="create-service-id">Service ID *</Label>
+                    <Label htmlFor="create-service-id-emailjs">Service ID *</Label>
                     <Input
-                      id="create-service-id"
+                      id="create-service-id-emailjs"
                       type="text"
                       value={emailJSForm.service_id}
                       onChange={(e) => setEmailJSForm(prev => ({ ...prev, service_id: e.target.value }))}
@@ -1367,9 +1361,9 @@ export default function Configuracoes() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="create-template-id">Template ID *</Label>
+                    <Label htmlFor="create-template-id-emailjs">Template ID *</Label>
                     <Input
-                      id="create-template-id"
+                      id="create-template-id-emailjs"
                       type="text"
                       value={emailJSForm.template_id}
                       onChange={(e) => setEmailJSForm(prev => ({ ...prev, template_id: e.target.value }))}
@@ -1378,9 +1372,9 @@ export default function Configuracoes() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="create-public-key">Public Key *</Label>
+                    <Label htmlFor="create-public-key-emailjs">Public Key *</Label>
                     <Input
-                      id="create-public-key"
+                      id="create-public-key-emailjs"
                       type="text"
                       value={emailJSForm.public_key}
                       onChange={(e) => setEmailJSForm(prev => ({ ...prev, public_key: e.target.value }))}
@@ -1390,11 +1384,11 @@ export default function Configuracoes() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Switch
-                      id="create-ativo-emailjs"
+                      id="create-ativo-emailjs-config"
                       checked={emailJSForm.ativo || true}
                       onCheckedChange={(checked) => setEmailJSForm(prev => ({ ...prev, ativo: checked }))}
                     />
-                    <Label htmlFor="create-ativo-emailjs">Configuração ativa</Label>
+                    <Label htmlFor="create-ativo-emailjs-config">Configuração ativa</Label>
                   </div>
                 </div>
                 <DialogFooter>
@@ -1421,9 +1415,9 @@ export default function Configuracoes() {
               <form onSubmit={handleEditEmailJS}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-service-id">Service ID *</Label>
+                    <Label htmlFor="edit-service-id-emailjs">Service ID *</Label>
                     <Input
-                      id="edit-service-id"
+                      id="edit-service-id-emailjs"
                       type="text"
                       value={emailJSForm.service_id}
                       onChange={(e) => setEmailJSForm(prev => ({ ...prev, service_id: e.target.value }))}
@@ -1432,9 +1426,9 @@ export default function Configuracoes() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-template-id">Template ID *</Label>
+                    <Label htmlFor="edit-template-id-emailjs">Template ID *</Label>
                     <Input
-                      id="edit-template-id"
+                      id="edit-template-id-emailjs"
                       type="text"
                       value={emailJSForm.template_id}
                       onChange={(e) => setEmailJSForm(prev => ({ ...prev, template_id: e.target.value }))}
@@ -1443,9 +1437,9 @@ export default function Configuracoes() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-public-key">Public Key *</Label>
+                    <Label htmlFor="edit-public-key-emailjs">Public Key *</Label>
                     <Input
-                      id="edit-public-key"
+                      id="edit-public-key-emailjs"
                       type="text"
                       value={emailJSForm.public_key}
                       onChange={(e) => setEmailJSForm(prev => ({ ...prev, public_key: e.target.value }))}
@@ -1455,11 +1449,11 @@ export default function Configuracoes() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Switch
-                      id="edit-ativo-emailjs"
+                      id="edit-ativo-emailjs-config"
                       checked={emailJSForm.ativo || false}
                       onCheckedChange={(checked) => setEmailJSForm(prev => ({ ...prev, ativo: checked }))}
                     />
-                    <Label htmlFor="edit-ativo-emailjs">Configuração ativa</Label>
+                    <Label htmlFor="edit-ativo-emailjs-config">Configuração ativa</Label>
                   </div>
                 </div>
                 <DialogFooter>
