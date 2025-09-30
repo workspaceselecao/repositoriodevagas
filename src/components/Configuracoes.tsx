@@ -1072,9 +1072,9 @@ export default function Configuracoes() {
                 <form onSubmit={handleCreateNoticia}>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="titulo">Título</Label>
+                      <Label htmlFor="create-titulo-noticia">Título</Label>
                       <Input
-                        id="titulo"
+                        id="create-titulo-noticia"
                         value={noticiaForm.titulo}
                         onChange={(e) => handleNoticiaInputChange('titulo', e.target.value)}
                         placeholder="Digite o título da notícia"
@@ -1082,9 +1082,9 @@ export default function Configuracoes() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="conteudo">Conteúdo</Label>
+                      <Label htmlFor="create-conteudo-noticia">Conteúdo</Label>
                       <Textarea
-                        id="conteudo"
+                        id="create-conteudo-noticia"
                         value={noticiaForm.conteudo}
                         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleNoticiaInputChange('conteudo', e.target.value)}
                         placeholder="Digite o conteúdo da notícia (suporte a emojis)"
@@ -1094,7 +1094,7 @@ export default function Configuracoes() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="tipo">Tipo</Label>
+                        <Label htmlFor="create-tipo-noticia">Tipo</Label>
                         <Select
                           value={noticiaForm.tipo}
                           onValueChange={(value: 'info' | 'alerta' | 'anuncio') => 
@@ -1112,7 +1112,7 @@ export default function Configuracoes() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="prioridade">Prioridade</Label>
+                        <Label htmlFor="create-prioridade-noticia">Prioridade</Label>
                         <Select
                           value={noticiaForm.prioridade}
                           onValueChange={(value: 'baixa' | 'media' | 'alta') => 
@@ -1132,11 +1132,11 @@ export default function Configuracoes() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Switch
-                        id="ativa"
+                        id="create-ativa-noticia"
                         checked={noticiaForm.ativa}
                         onCheckedChange={(checked) => handleNoticiaInputChange('ativa', checked)}
                       />
-                      <Label htmlFor="ativa">Notícia ativa</Label>
+                      <Label htmlFor="create-ativa-noticia">Notícia ativa</Label>
                     </div>
                   </div>
                   <DialogFooter>
@@ -1173,9 +1173,9 @@ export default function Configuracoes() {
               <form onSubmit={handleEditNoticia}>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-titulo">Título</Label>
+                    <Label htmlFor="edit-titulo-noticia">Título</Label>
                     <Input
-                      id="edit-titulo"
+                      id="edit-titulo-noticia"
                       value={noticiaForm.titulo}
                       onChange={(e) => handleNoticiaInputChange('titulo', e.target.value)}
                       placeholder="Digite o título da notícia"
@@ -1183,9 +1183,9 @@ export default function Configuracoes() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-conteudo">Conteúdo</Label>
+                    <Label htmlFor="edit-conteudo-noticia">Conteúdo</Label>
                     <Textarea
-                      id="edit-conteudo"
+                      id="edit-conteudo-noticia"
                       value={noticiaForm.conteudo}
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleNoticiaInputChange('conteudo', e.target.value)}
                       placeholder="Digite o conteúdo da notícia (suporte a emojis)"
@@ -1195,7 +1195,7 @@ export default function Configuracoes() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="edit-tipo">Tipo</Label>
+                      <Label htmlFor="edit-tipo-noticia">Tipo</Label>
                       <Select
                         value={noticiaForm.tipo}
                         onValueChange={(value: 'info' | 'alerta' | 'anuncio') => 
@@ -1213,7 +1213,7 @@ export default function Configuracoes() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="edit-prioridade">Prioridade</Label>
+                      <Label htmlFor="edit-prioridade-noticia">Prioridade</Label>
                       <Select
                         value={noticiaForm.prioridade}
                         onValueChange={(value: 'baixa' | 'media' | 'alta') => 
@@ -1233,11 +1233,11 @@ export default function Configuracoes() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Switch
-                      id="edit-ativa"
+                      id="edit-ativa-noticia"
                       checked={noticiaForm.ativa}
                       onCheckedChange={(checked) => handleNoticiaInputChange('ativa', checked)}
                     />
-                    <Label htmlFor="edit-ativa">Notícia ativa</Label>
+                    <Label htmlFor="edit-ativa-noticia">Notícia ativa</Label>
                   </div>
                 </div>
                 <DialogFooter>
