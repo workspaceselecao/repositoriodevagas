@@ -37,7 +37,7 @@ export function useThemeClasses() {
   
   const cardClasses = {
     base: 'w-full hover-pastel transition-all duration-300',
-    header: 'cursor-pointer hover:bg-gray-50 dark:hover:bg-opacity-20 transition-colors'
+    header: 'cursor-pointer transition-colors'
   }
   
   return {
