@@ -53,6 +53,7 @@ export default function Configuracoes() {
   const [emailForm, setEmailForm] = useState<ContactEmailFormData>({
     email: '',
     nome: '',
+    teams_contact: '',
     ativo: true
   })
   const { user } = useAuth()
@@ -124,6 +125,7 @@ export default function Configuracoes() {
         setEmailForm({
           email: '',
           nome: '',
+          teams_contact: '',
           ativo: true
         })
         setShowCreateEmailDialog(false)
@@ -211,6 +213,7 @@ export default function Configuracoes() {
     setEmailForm({
       email: email.email,
       nome: email.nome || '',
+      teams_contact: email.teams_contact || '',
       ativo: email.ativo
     })
     setShowEditEmailDialog(true)
@@ -1092,6 +1095,16 @@ export default function Configuracoes() {
                   placeholder="Nome do destinatário"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-teams-contact">Contato Teams (opcional)</Label>
+                <Input
+                  id="create-teams-contact"
+                  type="text"
+                  value={emailForm.teams_contact || ''}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, teams_contact: e.target.value }))}
+                  placeholder="https://teams.microsoft.com/l/chat/..."
+                />
+              </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="create-ativo-contact"
@@ -1152,6 +1165,16 @@ export default function Configuracoes() {
                   value={emailForm.nome || ''}
                   onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
                   placeholder="Nome do destinatário"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-teams-contact">Contato Teams (opcional)</Label>
+                <Input
+                  id="edit-teams-contact"
+                  type="text"
+                  value={emailForm.teams_contact || ''}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, teams_contact: e.target.value }))}
+                  placeholder="https://teams.microsoft.com/l/chat/..."
                 />
               </div>
               <div className="flex items-center space-x-2">

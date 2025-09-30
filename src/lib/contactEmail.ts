@@ -50,6 +50,7 @@ export async function createContactEmailConfig(config: ContactEmailFormData): Pr
       .insert({
         email: config.email,
         nome: config.nome || null,
+        teams_contact: config.teams_contact || null,
         ativo: config.ativo !== false, // Padrão true
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -77,6 +78,7 @@ export async function updateContactEmailConfig(id: string, config: ContactEmailF
       .update({
         email: config.email,
         nome: config.nome || null,
+        teams_contact: config.teams_contact || null,
         ativo: config.ativo !== false,
         updated_at: new Date().toISOString()
       })
