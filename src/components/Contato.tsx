@@ -57,14 +57,17 @@ export default function Contato() {
         console.log('📧 [Contato] Emails destinatários carregados:', emails)
         setRecipientEmails(emails)
         
-        // Encontrar o primeiro contato Teams ativo
-        const activeTeamsContact = contactConfigs.find(config => 
-          config.ativo && config.teams_contact
+        // Encontrar email com sufixo @atento.com para Teams
+        const atentoEmail = contactConfigs.find(config => 
+          config.ativo && config.email.endsWith('@atento.com')
         )
         
-        if (activeTeamsContact?.teams_contact) {
-          console.log('💬 [Contato] Contato Teams encontrado:', activeTeamsContact.teams_contact)
-          setTeamsContact(activeTeamsContact.teams_contact)
+        if (atentoEmail) {
+          // Criar link Teams automático baseado no email @atento.com
+          const teamsLink = `mailto:${atentoEmail.email}?subject=Contato via Repositório de Vagas`
+          console.log('💬 [Contato] Link Teams criado automaticamente para:', atentoEmail.email)
+          console.log('💬 [Contato] Link Teams:', teamsLink)
+          setTeamsContact(teamsLink)
         }
         
         console.log('✅ [Contato] Dados de contato carregados com sucesso')
@@ -182,7 +185,7 @@ export default function Contato() {
               <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                 <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                   <MessageCircle className="h-4 w-4" />
-                  <span className="text-sm font-medium">Precisa de uma resposta rápida?</span>
+                  <span className="text-sm font-medium">Contato direto com administrador @atento.com</span>
                 </div>
                 <a 
                   href={teamsContact} 
@@ -191,7 +194,7 @@ export default function Contato() {
                   className="inline-flex items-center gap-2 mt-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
                 >
                   <MessageCircle className="h-4 w-4" />
-                  <span className="text-sm font-medium underline">Me manda um Teams: Clique aqui</span>
+                  <span className="text-sm font-medium underline">Contato direto @atento.com: Clique aqui</span>
                 </a>
               </div>
             )}
