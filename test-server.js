@@ -1,19 +1,28 @@
-// API endpoint para envio de emails via Resend
-// Deploy: Vercel Functions
+// Servidor de teste local para o endpoint Resend
+import express from 'express'
+import cors from 'cors'
+import { Resend } from 'resend'
+import dotenv from 'dotenv'
 
-const { Resend } = require('resend')
+// Carregar variáveis de ambiente
+dotenv.config({ path: '.env.local' })
 
-// Inicializar Resend (você precisa da API key)
+const app = express()
+const port = 3001
+
+// Middleware
+app.use(cors())
+app.use(express.json())
+
+// Inicializar Resend
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-export default async function handler(req, res) {
-  // Permitir apenas POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido' })
-  }
-
+// Endpoint de teste
+app.post('/api/send-email', async (req, res) => {
   try {
     const { nome, email, telefone, assunto, mensagem, destinatarios } = req.body
+
+    console.log('📧 [Teste Local] Recebido:', { nome, email, assunto, destinatarios })
 
     // Validação básica
     if (!nome || !email || !assunto || !mensagem) {
@@ -23,11 +32,18 @@ export default async function handler(req, res) {
       })
     }
 
-    console.log('📧 [Resend] Enviando email para:', destinatarios)
+    if (!destinatarios || !Array.isArray(destinatarios) || destinatarios.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Destinatários não configurados' 
+      })
+    }
+
+    console.log('📧 [Teste Local] Enviando email para:', destinatarios)
 
     // Preparar dados do email
     const emailData = {
-      from: 'Repositório de Vagas <noreply@repositoriodevagas.com>',
+      from: 'Repositório de Vagas <noreply@resend.dev>',
       to: destinatarios,
       replyTo: email,
       subject: `[Contato - Repositório de Vagas] ${assunto}`,
@@ -68,33 +84,13 @@ export default async function handler(req, res) {
             Data: ${new Date().toLocaleString('pt-BR')}
           </p>
         </div>
-      `,
-      text: `
-Nova Mensagem de Contato - Repositório de Vagas
-
-DADOS DO USUÁRIO:
-Nome: ${nome}
-Email: ${email}
-Telefone: ${telefone || 'Não informado'}
-Assunto: ${assunto}
-
-MENSAGEM:
-${mensagem}
-
-DESTINATÁRIOS CONFIGURADOS:
-${destinatarios.map(dest => `- ${dest}`).join('\n')}
-Total: ${destinatarios.length} destinatário(s)
-
----
-Enviado automaticamente pelo Repositório de Vagas
-Data: ${new Date().toLocaleString('pt-BR')}
       `
     }
 
     // Enviar email via Resend
     const result = await resend.emails.send(emailData)
 
-    console.log('✅ [Resend] Email enviado com sucesso:', result)
+    console.log('✅ [Teste Local] Email enviado com sucesso:', result)
 
     return res.status(200).json({
       success: true,
@@ -103,12 +99,19 @@ Data: ${new Date().toLocaleString('pt-BR')}
     })
 
   } catch (error) {
-    console.error('❌ [Resend] Erro ao enviar email:', error)
+    console.error('❌ [Teste Local] Erro ao enviar email:', error)
     
     return res.status(500).json({
       success: false,
       message: `Erro ao enviar email: ${error.message}`,
-      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: error.stack
     })
   }
-}
+})
+
+// Iniciar servidor
+app.listen(port, () => {
+  console.log(`🚀 Servidor de teste rodando em http://localhost:${port}`)
+  console.log(`📧 Endpoint: http://localhost:${port}/api/send-email`)
+  console.log(`🔑 API Key configurada: ${process.env.RESEND_API_KEY ? 'Sim' : 'Não'}`)
+})

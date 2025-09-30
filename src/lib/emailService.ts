@@ -11,7 +11,7 @@ export interface ContactEmailData {
 // Configuração da API
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://repositoriodevagas.vercel.app/api'
-  : 'http://localhost:3000/api'
+  : 'http://localhost:3001/api' // Servidor de teste local
 
 // Função para enviar email via Resend (solução principal)
 async function sendEmailViaResend(emailData: ContactEmailData): Promise<{ success: boolean; message: string }> {
@@ -33,9 +33,25 @@ async function sendEmailViaResend(emailData: ContactEmailData): Promise<{ succes
       })
     })
 
-    const result = await response.json()
+    console.log('📨 [Resend] Status da resposta:', response.status, response.statusText)
     
-    console.log('📨 [Resend] Resposta:', result)
+    // Verificar se a resposta é JSON válido
+    let result
+    try {
+      const responseText = await response.text()
+      console.log('📨 [Resend] Resposta bruta:', responseText.substring(0, 200) + '...')
+      
+      if (responseText.trim().startsWith('{') || responseText.trim().startsWith('[')) {
+        result = JSON.parse(responseText)
+      } else {
+        throw new Error(`Resposta não é JSON válido: ${responseText.substring(0, 100)}`)
+      }
+    } catch (parseError) {
+      console.error('❌ [Resend] Erro ao fazer parse da resposta:', parseError)
+      throw new Error(`Erro na resposta do servidor: ${response.status} ${response.statusText}`)
+    }
+    
+    console.log('📨 [Resend] Resultado parseado:', result)
 
     if (response.ok && result.success) {
       console.log('✅ [Resend] Email enviado com sucesso!')
