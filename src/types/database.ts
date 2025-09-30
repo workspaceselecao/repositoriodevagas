@@ -130,6 +130,7 @@ export interface ContactEmailConfig {
   id: string;
   email: string;
   nome?: string;
+  teams_contact?: string;
   ativo: boolean;
   created_at: string;
   updated_at: string;
@@ -138,6 +139,7 @@ export interface ContactEmailConfig {
 export interface ContactEmailFormData {
   email: string;
   nome?: string;
+  teams_contact?: string;
   ativo?: boolean;
 }
 

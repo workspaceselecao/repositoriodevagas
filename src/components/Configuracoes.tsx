@@ -53,6 +53,7 @@ export default function Configuracoes() {
   const [emailForm, setEmailForm] = useState<ContactEmailFormData>({
     email: '',
     nome: '',
+    teams_contact: '',
     ativo: true
   })
   const { user } = useAuth()
@@ -124,6 +125,7 @@ export default function Configuracoes() {
         setEmailForm({
           email: '',
           nome: '',
+          teams_contact: '',
           ativo: true
         })
         setShowCreateEmailDialog(false)
@@ -211,6 +213,7 @@ export default function Configuracoes() {
     setEmailForm({
       email: email.email,
       nome: email.nome || '',
+      teams_contact: email.teams_contact || '',
       ativo: email.ativo
     })
     setShowEditEmailDialog(true)
@@ -484,15 +487,15 @@ export default function Configuracoes() {
 
         <TabsContent value="backup" className="space-y-6">
           <div className="grid grid-cols-1 gap-8">
-        {/* Configuração Geral */}
+        {/* Emails de Contato */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Database className="h-5 w-5 mr-2" />
-              Configuração Geral
+              <Mail className="h-5 w-5 mr-2" />
+              Emails de Contato
             </CardTitle>
             <CardDescription>
-              Gerencie configurações gerais do sistema e faça backup dos dados
+              Configure os emails que receberão as mensagens do formulário de contato
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -585,137 +588,96 @@ export default function Configuracoes() {
                 )}
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold mb-4">Backup do Sistema</h3>
-              <div className="space-y-2">
-                <Label>Dados para Backup</Label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="vagas"
-                    name="vagas"
-                    checked={backupOptions.data?.vagas || false}
-                    onChange={(e) => handleBackupDataChange('vagas', e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="vagas" className="text-sm">Vagas</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="users"
-                    name="users"
-                    checked={backupOptions.data?.users || false}
-                    onChange={(e) => handleBackupDataChange('users', e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="users" className="text-sm">Usuários</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="logs"
-                    name="logs"
-                    checked={backupOptions.data?.backup_logs || false}
-                    onChange={(e) => handleBackupDataChange('backup_logs', e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="logs" className="text-sm">Logs de Backup</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="noticias"
-                    name="noticias"
-                    checked={backupOptions.data?.noticias || false}
-                    onChange={(e) => handleBackupDataChange('noticias', e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="noticias" className="text-sm">Notícias</Label>
-                </div>
+        {/* Backup do Sistema */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Database className="h-5 w-5 mr-2" />
+              Backup do Sistema
+            </CardTitle>
+            <CardDescription>
+              Faça backup dos dados do sistema em diferentes formatos
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label>Dados para Backup</Label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="vagas"
+                  name="vagas"
+                  checked={backupOptions.data?.vagas || false}
+                  onChange={(e) => handleBackupDataChange('vagas', e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="vagas" className="text-sm">Vagas</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="users"
+                  name="users"
+                  checked={backupOptions.data?.users || false}
+                  onChange={(e) => handleBackupDataChange('users', e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="users" className="text-sm">Usuários</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="logs"
+                  name="logs"
+                  checked={backupOptions.data?.backup_logs || false}
+                  onChange={(e) => handleBackupDataChange('backup_logs', e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="logs" className="text-sm">Logs de Backup</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="noticias"
+                  name="noticias"
+                  checked={backupOptions.data?.noticias || false}
+                  onChange={(e) => handleBackupDataChange('noticias', e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="noticias" className="text-sm">Notícias</Label>
               </div>
             </div>
 
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold mb-4">Backup do Sistema</h3>
-              <div className="space-y-2">
-                <Label>Dados para Backup</Label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="vagas"
-                    name="vagas"
-                    checked={backupOptions.data?.vagas || false}
-                    onChange={(e) => handleBackupDataChange('vagas', e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="vagas" className="text-sm">Vagas</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="users"
-                    name="users"
-                    checked={backupOptions.data?.users || false}
-                    onChange={(e) => handleBackupDataChange('users', e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="users" className="text-sm">Usuários</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="logs"
-                    name="logs"
-                    checked={backupOptions.data?.backup_logs || false}
-                    onChange={(e) => handleBackupDataChange('backup_logs', e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="logs" className="text-sm">Logs de Backup</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="noticias"
-                    name="noticias"
-                    checked={backupOptions.data?.noticias || false}
-                    onChange={(e) => handleBackupDataChange('noticias', e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="noticias" className="text-sm">Notícias</Label>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="format">Formato do Backup</Label>
-                <Select
-                  value={backupOptions.format}
-                  onValueChange={(value: 'json' | 'excel' | 'csv') =>
-                    setBackupOptions(prev => ({ ...prev, format: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="excel">Excel (.xlsx)</SelectItem>
-                    <SelectItem value="json">JSON</SelectItem>
-                    <SelectItem value="csv">CSV</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button 
-                onClick={handleBackup} 
-                disabled={loading} 
-                className="w-full transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            <div className="space-y-2">
+              <Label htmlFor="format">Formato do Backup</Label>
+              <Select
+                value={backupOptions.format}
+                onValueChange={(value: 'json' | 'excel' | 'csv') =>
+                  setBackupOptions(prev => ({ ...prev, format: value }))
+                }
               >
-                <Download className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-12" />
-                {loading ? 'Criando Backup...' : 'Criar Backup'}
-              </Button>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="excel">Excel (.xlsx)</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+            <Button 
+              onClick={handleBackup} 
+              disabled={loading} 
+              className="w-full transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              <Download className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-12" />
+              {loading ? 'Criando Backup...' : 'Criar Backup'}
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -1138,6 +1100,16 @@ export default function Configuracoes() {
                   placeholder="Nome do destinatário"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-teams-contact">Contato Teams (opcional)</Label>
+                <Input
+                  id="create-teams-contact"
+                  type="text"
+                  value={emailForm.teams_contact || ''}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, teams_contact: e.target.value }))}
+                  placeholder="https://teams.microsoft.com/l/chat/..."
+                />
+              </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="create-ativo-contact"
@@ -1198,6 +1170,16 @@ export default function Configuracoes() {
                   value={emailForm.nome || ''}
                   onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
                   placeholder="Nome do destinatário"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-teams-contact">Contato Teams (opcional)</Label>
+                <Input
+                  id="edit-teams-contact"
+                  type="text"
+                  value={emailForm.teams_contact || ''}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, teams_contact: e.target.value }))}
+                  placeholder="https://teams.microsoft.com/l/chat/..."
                 />
               </div>
               <div className="flex items-center space-x-2">

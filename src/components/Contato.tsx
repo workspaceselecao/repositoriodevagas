@@ -5,10 +5,11 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Textarea } from './ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Mail, Send, User, MessageSquare, Phone } from 'lucide-react'
+import { Mail, Send, User, MessageSquare, Phone, MessageCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getRecipientEmails } from '../lib/contactEmail'
 import { sendContactEmail, testEmailConfig } from '../lib/emailService'
+import { getAllContactEmailConfigs } from '../lib/contactEmail'
 
 interface ContactFormData {
   nome: string
@@ -30,6 +31,7 @@ export default function Contato() {
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('')
   const [recipientEmails, setRecipientEmails] = useState<string[]>(['roberio.gomes@atento.com']) // Emails padrão
+  const [teamsContact, setTeamsContact] = useState<string>('') // Contato Teams
   const { user } = useAuth()
 
   // Preencher email automaticamente se o usuário estiver logado
@@ -42,22 +44,37 @@ export default function Contato() {
     }
   }, [user])
 
-  // Carregar emails destinatários
+  // Carregar emails destinatários e contato Teams
   useEffect(() => {
-    const loadRecipientEmails = async () => {
-      console.log('🔧 [Contato] Carregando emails destinatários...')
+    const loadContactData = async () => {
+      console.log('🔧 [Contato] Carregando dados de contato...')
       try {
-        const emails = await getRecipientEmails()
+        const [emails, contactConfigs] = await Promise.all([
+          getRecipientEmails(),
+          getAllContactEmailConfigs()
+        ])
+        
         console.log('📧 [Contato] Emails destinatários carregados:', emails)
         setRecipientEmails(emails)
-        console.log('✅ [Contato] Emails carregados com sucesso')
+        
+        // Encontrar o primeiro contato Teams ativo
+        const activeTeamsContact = contactConfigs.find(config => 
+          config.ativo && config.teams_contact
+        )
+        
+        if (activeTeamsContact?.teams_contact) {
+          console.log('💬 [Contato] Contato Teams encontrado:', activeTeamsContact.teams_contact)
+          setTeamsContact(activeTeamsContact.teams_contact)
+        }
+        
+        console.log('✅ [Contato] Dados de contato carregados com sucesso')
       } catch (error) {
-        console.error('❌ [Contato] Erro ao carregar emails:', error)
+        console.error('❌ [Contato] Erro ao carregar dados de contato:', error)
         // Manter configurações padrão em caso de erro
       }
     }
 
-    loadRecipientEmails()
+    loadContactData()
   }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -160,6 +177,23 @@ export default function Contato() {
               <span className="block mt-2 text-sm text-blue-600 dark:text-blue-400">
                 📧 Sua mensagem será enviada para {recipientEmails.length} destinatários configurados pelos administradores.
               </span>
+            )}
+            {teamsContact && (
+              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                  <MessageCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Precisa de uma resposta rápida?</span>
+                </div>
+                <a 
+                  href={teamsContact} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 mt-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium underline">Me manda um Teams: Clique aqui</span>
+                </a>
+              </div>
             )}
           </CardDescription>
         </CardHeader>

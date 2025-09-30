@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS contact_email_config (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
   nome VARCHAR(255), -- Nome opcional para identificar o destinatário
+  teams_contact TEXT, -- Link do Teams para contato direto
   ativo BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
