@@ -8,12 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
 import { Switch } from './ui/switch'
 import { Textarea } from './ui/textarea'
-import { BackupOptions, BackupLog, Noticia, NoticiaFormData, ContactEmailConfig, ContactEmailFormData, EmailJSConfig, EmailJSFormData } from '../types/database'
+import { BackupOptions, BackupLog, Noticia, NoticiaFormData, ContactEmailConfig, ContactEmailFormData } from '../types/database'
 import { createManualBackup, getBackupLogs } from '../lib/backup'
 import * as XLSX from 'xlsx'
 import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticiaStatus } from '../lib/noticias'
 import { getAllContactEmailConfigs, createContactEmailConfig, updateContactEmailConfig, deleteContactEmailConfig, toggleContactEmailConfigStatus } from '../lib/contactEmail'
-import { getAllEmailJSConfigs, createEmailJSConfig, updateEmailJSConfig, deleteEmailJSConfig, toggleEmailJSConfigStatus } from '../lib/emailJSConfig'
 import { testEmailConfig } from '../lib/emailService'
 import { useAuth } from '../contexts/AuthContext'
 import { ThemeSelector } from './ThemeSelector'
@@ -56,34 +55,21 @@ export default function Configuracoes() {
     nome: '',
     ativo: true
   })
-  const [emailJSConfigs, setEmailJSConfigs] = useState<EmailJSConfig[]>([])
-  const [emailJSLoading, setEmailJSLoading] = useState(false)
-  const [showCreateEmailJSDialog, setShowCreateEmailJSDialog] = useState(false)
-  const [showEditEmailJSDialog, setShowEditEmailJSDialog] = useState(false)
-  const [editingEmailJS, setEditingEmailJS] = useState<EmailJSConfig | null>(null)
-  const [emailJSForm, setEmailJSForm] = useState<EmailJSFormData>({
-    service_id: '',
-    template_id: '',
-    public_key: '',
-    ativo: true
-  })
   const { user } = useAuth()
 
   useEffect(() => {
     let isMounted = true
     const load = async () => {
       try {
-        const [logs, noticiasData, contactEmailsData, emailJSData] = await Promise.all([
+        const [logs, noticiasData, contactEmailsData] = await Promise.all([
           getBackupLogs(),
           getNoticias(),
-          getAllContactEmailConfigs(),
-          getAllEmailJSConfigs()
+          getAllContactEmailConfigs()
         ])
         if (isMounted) {
           setBackupLogs(logs)
           setNoticias(noticiasData)
           setContactEmails(contactEmailsData)
-          setEmailJSConfigs(emailJSData)
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
@@ -120,14 +106,6 @@ export default function Configuracoes() {
     }
   }
 
-  const loadEmailJSConfigs = async () => {
-    try {
-      const emailJSData = await getAllEmailJSConfigs()
-      setEmailJSConfigs(emailJSData)
-    } catch (error) {
-      console.error('Erro ao carregar configurações do EmailJS:', error)
-    }
-  }
 
   const handleCreateEmail = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -238,137 +216,6 @@ export default function Configuracoes() {
     setShowEditEmailDialog(true)
   }
 
-  // Funções para gerenciar EmailJS
-  const handleCreateEmailJS = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!emailJSForm.service_id.trim() || !emailJSForm.template_id.trim() || !emailJSForm.public_key.trim()) {
-      setMessage('Por favor, preencha todos os campos obrigatórios')
-      return
-    }
-
-    setEmailJSLoading(true)
-    setMessage('')
-
-    try {
-      const result = await createEmailJSConfig(emailJSForm)
-      if (result) {
-        setMessage('Configuração do EmailJS adicionada com sucesso!')
-        setEmailJSForm({
-          service_id: '',
-          template_id: '',
-          public_key: '',
-          ativo: true
-        })
-        setShowCreateEmailJSDialog(false)
-        loadEmailJSConfigs()
-      } else {
-        setMessage('Erro ao adicionar configuração do EmailJS')
-      }
-    } catch (error: any) {
-      console.error('Erro ao criar configuração do EmailJS:', error)
-      setMessage(`Erro ao criar configuração do EmailJS: ${error.message}`)
-    } finally {
-      setEmailJSLoading(false)
-    }
-  }
-
-  const handleEditEmailJS = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editingEmailJS) return
-
-    setEmailJSLoading(true)
-    setMessage('')
-
-    try {
-      const result = await updateEmailJSConfig(editingEmailJS.id!, emailJSForm)
-      if (result) {
-        setMessage('Configuração do EmailJS atualizada com sucesso!')
-        setShowEditEmailJSDialog(false)
-        setEditingEmailJS(null)
-        loadEmailJSConfigs()
-      } else {
-        setMessage('Erro ao atualizar configuração do EmailJS')
-      }
-    } catch (error: any) {
-      console.error('Erro ao atualizar configuração do EmailJS:', error)
-      setMessage(`Erro ao atualizar configuração do EmailJS: ${error.message}`)
-    } finally {
-      setEmailJSLoading(false)
-    }
-  }
-
-  const handleDeleteEmailJS = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta configuração do EmailJS?')) return
-
-    setEmailJSLoading(true)
-    setMessage('')
-
-    try {
-      const result = await deleteEmailJSConfig(id)
-      if (result) {
-        setMessage('Configuração do EmailJS removida com sucesso!')
-        loadEmailJSConfigs()
-      } else {
-        setMessage('Erro ao remover configuração do EmailJS')
-      }
-    } catch (error: any) {
-      console.error('Erro ao remover configuração do EmailJS:', error)
-      setMessage(`Erro ao remover configuração do EmailJS: ${error.message}`)
-    } finally {
-      setEmailJSLoading(false)
-    }
-  }
-
-  const handleToggleEmailJSStatus = async (id: string) => {
-    setEmailJSLoading(true)
-    setMessage('')
-
-    try {
-      const result = await toggleEmailJSConfigStatus(id)
-      if (result) {
-        setMessage(`Configuração do EmailJS ${result.ativo ? 'ativada' : 'desativada'} com sucesso!`)
-        loadEmailJSConfigs()
-      } else {
-        setMessage('Erro ao alterar status da configuração do EmailJS')
-      }
-    } catch (error: any) {
-      console.error('Erro ao alterar status da configuração do EmailJS:', error)
-      setMessage(`Erro ao alterar status da configuração do EmailJS: ${error.message}`)
-    } finally {
-      setEmailJSLoading(false)
-    }
-  }
-
-  const handleTestEmailJS = async (config: EmailJSConfig) => {
-    setEmailJSLoading(true)
-    setMessage('')
-
-    try {
-      const result = await testEmailConfig({
-        serviceId: config.service_id,
-        templateId: config.template_id,
-        publicKey: config.public_key
-      })
-      
-      setMessage(result.message)
-    } catch (error: any) {
-      console.error('Erro ao testar configuração do EmailJS:', error)
-      setMessage(`Erro ao testar configuração: ${error.message}`)
-    } finally {
-      setEmailJSLoading(false)
-    }
-  }
-
-  const openEditEmailJSDialog = (config: EmailJSConfig) => {
-    setEditingEmailJS(config)
-    setEmailJSForm({
-      service_id: config.service_id,
-      template_id: config.template_id,
-      public_key: config.public_key,
-      ativo: config.ativo
-    })
-    setShowEditEmailJSDialog(true)
-  }
 
   const generateExcelFromBackup = async (backupData: any): Promise<Buffer> => {
     const workbook = XLSX.utils.book_new()
@@ -739,105 +586,6 @@ export default function Configuracoes() {
               </div>
             </div>
 
-            {/* Configuração do EmailJS */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Mail className="h-5 w-5" />
-                    Configuração EmailJS
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Configure o EmailJS para envio direto de emails do formulário de contato
-                  </p>
-                </div>
-                <Button
-                  onClick={() => setShowCreateEmailJSDialog(true)}
-                  size="sm"
-                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95 group"
-                >
-                  <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
-                  Adicionar Configuração
-                </Button>
-              </div>
-              
-              {/* Lista de Configurações EmailJS */}
-              <div className="space-y-3">
-                {emailJSConfigs.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Nenhuma configuração do EmailJS cadastrada</p>
-                    <p className="text-sm">Clique em "Adicionar Configuração" para começar</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {emailJSConfigs.map((config) => (
-                      <div
-                        key={config.id}
-                        className={`flex items-center justify-between p-3 rounded-lg border ${
-                          config.ativo 
-                            ? 'bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800' 
-                            : 'bg-gray-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700'
-                        }`}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">Service: {config.service_id}</span>
-                            <span className="text-sm text-muted-foreground">
-                              Template: {config.template_id}
-                            </span>
-                            <Badge variant={config.ativo ? "default" : "secondary"}>
-                              {config.ativo ? 'Ativo' : 'Inativo'}
-                            </Badge>
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Public Key: {config.public_key.substring(0, 20)}...
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            onClick={() => handleTestEmailJS(config)}
-                            disabled={emailJSLoading}
-                            variant="outline"
-                            size="sm"
-                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                          >
-                            <AlertCircle className="h-4 w-4 transition-transform duration-200" />
-                          </Button>
-                          <Button
-                            onClick={() => handleToggleEmailJSStatus(config.id!)}
-                            disabled={emailJSLoading}
-                            variant="outline"
-                            size="sm"
-                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                          >
-                            {config.ativo ? <EyeOff className="h-4 w-4 transition-transform duration-200" /> : <Eye className="h-4 w-4 transition-transform duration-200" />}
-                          </Button>
-                          <Button
-                            onClick={() => openEditEmailJSDialog(config)}
-                            disabled={emailJSLoading}
-                            variant="outline"
-                            size="sm"
-                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                          >
-                            <Edit className="h-4 w-4 transition-transform duration-200" />
-                          </Button>
-                          <Button
-                            onClick={() => handleDeleteEmailJS(config.id!)}
-                            disabled={emailJSLoading}
-                            variant="destructive"
-                            size="sm"
-                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                          >
-                            <Trash className="h-4 w-4 transition-transform duration-200" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
 
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">Backup do Sistema</h3>
@@ -1482,153 +1230,6 @@ export default function Configuracoes() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog para Criar Configuração EmailJS */}
-      <Dialog open={showCreateEmailJSDialog} onOpenChange={setShowCreateEmailJSDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar Configuração EmailJS</DialogTitle>
-            <DialogDescription>
-              Configure o EmailJS para envio direto de emails
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreateEmailJS}>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="create-service-id-emailjs">Service ID *</Label>
-                <Input
-                  id="create-service-id-emailjs"
-                  type="text"
-                  value={emailJSForm.service_id}
-                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, service_id: e.target.value }))}
-                  placeholder="service_xxxxxxx"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-template-id-emailjs">Template ID *</Label>
-                <Input
-                  id="create-template-id-emailjs"
-                  type="text"
-                  value={emailJSForm.template_id}
-                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, template_id: e.target.value }))}
-                  placeholder="template_xxxxxxx"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-public-key-emailjs">Public Key *</Label>
-                <Input
-                  id="create-public-key-emailjs"
-                  type="text"
-                  value={emailJSForm.public_key}
-                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, public_key: e.target.value }))}
-                  placeholder="xxxxxxxxxxxxxxxxxxxx"
-                  required
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="create-ativo-emailjs-config"
-                  checked={emailJSForm.ativo || true}
-                  onCheckedChange={(checked) => setEmailJSForm(prev => ({ ...prev, ativo: checked }))}
-                />
-                <Label htmlFor="create-ativo-emailjs-config">Configuração ativa</Label>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setShowCreateEmailJSDialog(false)}
-                className="transition-all duration-200 hover:scale-105 hover:shadow-sm active:scale-95"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={emailJSLoading}
-                className="transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                {emailJSLoading ? 'Adicionando...' : 'Adicionar Configuração'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog para Editar Configuração EmailJS */}
-      <Dialog open={showEditEmailJSDialog} onOpenChange={setShowEditEmailJSDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Configuração EmailJS</DialogTitle>
-            <DialogDescription>
-              Edite as informações da configuração do EmailJS
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleEditEmailJS}>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-service-id-emailjs">Service ID *</Label>
-                <Input
-                  id="edit-service-id-emailjs"
-                  type="text"
-                  value={emailJSForm.service_id}
-                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, service_id: e.target.value }))}
-                  placeholder="service_xxxxxxx"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-template-id-emailjs">Template ID *</Label>
-                <Input
-                  id="edit-template-id-emailjs"
-                  type="text"
-                  value={emailJSForm.template_id}
-                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, template_id: e.target.value }))}
-                  placeholder="template_xxxxxxx"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-public-key-emailjs">Public Key *</Label>
-                <Input
-                  id="edit-public-key-emailjs"
-                  type="text"
-                  value={emailJSForm.public_key}
-                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, public_key: e.target.value }))}
-                  placeholder="xxxxxxxxxxxxxxxxxxxx"
-                  required
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="edit-ativo-emailjs-config"
-                  checked={emailJSForm.ativo || false}
-                  onCheckedChange={(checked) => setEmailJSForm(prev => ({ ...prev, ativo: checked }))}
-                />
-                <Label htmlFor="edit-ativo-emailjs-config">Configuração ativa</Label>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setShowEditEmailJSDialog(false)}
-                className="transition-all duration-200 hover:scale-105 hover:shadow-sm active:scale-95"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={emailJSLoading}
-                className="transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                {emailJSLoading ? 'Salvando...' : 'Salvar Alterações'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
