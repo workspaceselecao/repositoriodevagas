@@ -31,7 +31,8 @@
     "release:patch": "tsx scripts/release-manager.ts patch",
     "release:minor": "tsx scripts/release-manager.ts minor",
     "release:major": "tsx scripts/release-manager.ts major",
-    "release:last": "tsx scripts/release-manager.ts --last"
+    "release:last": "tsx scripts/release-manager.ts --last",
+    "test-resend": "node scripts/test-resend-config.js"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -55,6 +56,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
     "recharts": "^3.2.1",
+    "resend": "^6.1.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "xlsx": "^0.18.5"

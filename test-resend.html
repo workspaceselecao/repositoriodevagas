@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Resend</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #2563eb; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #1d4ed8; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 4px; }
+        .success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .loading { background: #fef3c7; color: #d97706; border: 1px solid #fed7aa; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste Resend - Sistema de Email</h1>
+    
+    <form id="testForm">
+        <div class="form-group">
+            <label>Nome:</label>
+            <input type="text" name="nome" value="Teste Sistema" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" name="email" value="teste@sistema.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Telefone:</label>
+            <input type="tel" name="telefone" value="11999999999">
+        </div>
+        
+        <div class="form-group">
+            <label>Assunto:</label>
+            <select name="assunto" required>
+                <option value="teste">Teste Resend</option>
+                <option value="duvida">Dúvida sobre vagas</option>
+                <option value="sugestao">Sugestão de melhoria</option>
+                <option value="problema">Reportar problema</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Mensagem:</label>
+            <textarea name="mensagem" rows="4" required>Este é um teste do sistema Resend para verificar se os emails estão sendo entregues corretamente.
+
+Data do teste: ${new Date().toLocaleString('pt-BR')}
+Sistema: Repositório de Vagas
+Versão: 1.0.5</textarea>
+        </div>
+        
+        <button type="submit">📧 Enviar Teste</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            // Adicionar destinatários
+            data.destinatarios = ['roberio.gomes@atento.com'];
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="loading">⏳ Enviando email via Resend...</div>';
+            
+            console.log('🚀 Enviando teste para Resend...');
+            console.log('📧 Dados:', data);
+            
+            try {
+                // Determinar URL da API
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const apiUrl = isLocal 
+                    ? 'http://localhost:3000/api/send-email'
+                    : 'https://repositoriodevagas.vercel.app/api/send-email';
+                
+                console.log('📤 Enviando para:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                console.log('📨 Resposta:', result);
+                
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ <strong>Email enviado com sucesso!</strong><br>
+                            ${result.message}<br>
+                            <small>Verifique sua caixa de entrada em alguns segundos.</small>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ <strong>Erro no envio:</strong><br>
+                            ${result.message || 'Erro desconhecido'}<br>
+                            <small>Status: ${response.status}</small>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ <strong>Erro de conexão:</strong><br>
+                        ${error.message}<br>
+                        <small>Verifique se a API está rodando e se a RESEND_API_KEY está configurada.</small>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

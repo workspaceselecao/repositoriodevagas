@@ -22,6 +22,7 @@ Sistema de gerenciamento e comparação de vagas de emprego desenvolvido com **R
 - **Roteamento**: React Router DOM
 - **Backend**: Supabase (PostgreSQL)
 - **Autenticação**: bcryptjs
+- **Email**: Resend (sistema de contato)
 - **Exportação**: XLSX
 
 ## 📋 Pré-requisitos
@@ -29,6 +30,7 @@ Sistema de gerenciamento e comparação de vagas de emprego desenvolvido com **R
 - Node.js 18+ 
 - npm ou yarn
 - Conta no Supabase
+- Conta no Resend (para sistema de contato)
 
 ## 🔧 Instalação
 
@@ -51,16 +53,34 @@ Sistema de gerenciamento e comparação de vagas de emprego desenvolvido com **R
    VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrY3JhenVlZ2xldGd4b3FmbG5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1OTM5NjMsImV4cCI6MjA3NDE2OTk2M30.EV-UhjfAqY2ggLbA1fYaVHVr2hv3dK3NR8c3RQiV2xI
    ```
 
-4. **Configure o banco de dados**
+4. **Configure o sistema de email (Resend)**
+   
+   Crie um arquivo `.env.local` na raiz do projeto:
+   ```env
+   RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
+   
+   Para obter a API key:
+   1. Acesse: https://resend.com
+   2. Crie uma conta gratuita
+   3. Vá em "API Keys" > "Create API Key"
+   4. Copie a chave gerada
+   
+   **Teste a configuração:**
+   ```bash
+   npm run test-resend
+   ```
+
+5. **Configure o banco de dados**
    
    Execute o SQL do arquivo `database/schema.sql` no seu projeto Supabase para criar as tabelas.
 
-5. **Popule o banco com dados iniciais**
+6. **Popule o banco com dados iniciais**
    ```bash
    npm run populate-db
    ```
 
-6. **Execute o projeto**
+7. **Execute o projeto**
    ```bash
    npm run dev
    ```

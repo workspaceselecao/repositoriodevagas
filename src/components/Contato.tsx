@@ -78,7 +78,7 @@ export default function Contato() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log('📝 [Contato] Iniciando envio do formulário via FormSubmit...')
+    console.log('📝 [Contato] Iniciando envio do formulário via Resend...')
     console.log('📝 [Contato] Dados do formulário:', formData)
     console.log('📝 [Contato] Emails destinatários:', recipientEmails)
     
@@ -95,9 +95,9 @@ export default function Contato() {
     setMessageType('')
 
     try {
-      console.log('📧 [Contato] Enviando via FormSubmit...')
+      console.log('📧 [Contato] Enviando via Resend...')
       
-      // Envio via FormSubmit
+      // Envio via Resend
       const emailData = {
         nome: formData.nome,
         email: formData.email,
@@ -155,7 +155,7 @@ export default function Contato() {
             Entre em Contato
           </CardTitle>
           <CardDescription>
-            Envie sua mensagem diretamente através do sistema. O email será enviado automaticamente para nossa equipe.
+            Envie sua mensagem diretamente através do sistema. O email será enviado automaticamente via Resend para nossa equipe.
             {recipientEmails.length > 1 && (
               <span className="block mt-2 text-sm text-blue-600 dark:text-blue-400">
                 📧 Sua mensagem será enviada para {recipientEmails.length} destinatários configurados pelos administradores.
