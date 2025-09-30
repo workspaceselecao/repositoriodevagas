@@ -664,9 +664,9 @@ export default function Configuracoes() {
                 <Button
                   onClick={() => setShowCreateEmailDialog(true)}
                   size="sm"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95 group"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
                   Adicionar Email
                 </Button>
               </div>
@@ -709,24 +709,27 @@ export default function Configuracoes() {
                             disabled={contactEmailLoading}
                             variant="outline"
                             size="sm"
+                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                           >
-                            {email.ativo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            {email.ativo ? <EyeOff className="h-4 w-4 transition-transform duration-200" /> : <Eye className="h-4 w-4 transition-transform duration-200" />}
                           </Button>
                           <Button
                             onClick={() => openEditEmailDialog(email)}
                             disabled={contactEmailLoading}
                             variant="outline"
                             size="sm"
+                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-4 w-4 transition-transform duration-200" />
                           </Button>
                           <Button
                             onClick={() => handleDeleteEmail(email.id)}
                             disabled={contactEmailLoading}
                             variant="destructive"
                             size="sm"
+                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                           >
-                            <Trash className="h-4 w-4" />
+                            <Trash className="h-4 w-4 transition-transform duration-200" />
                           </Button>
                         </div>
                       </div>
@@ -751,9 +754,9 @@ export default function Configuracoes() {
                 <Button
                   onClick={() => setShowCreateEmailJSDialog(true)}
                   size="sm"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95 group"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
                   Adicionar Configuração
                 </Button>
               </div>
@@ -797,32 +800,36 @@ export default function Configuracoes() {
                             disabled={emailJSLoading}
                             variant="outline"
                             size="sm"
+                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                           >
-                            <AlertCircle className="h-4 w-4" />
+                            <AlertCircle className="h-4 w-4 transition-transform duration-200" />
                           </Button>
                           <Button
                             onClick={() => handleToggleEmailJSStatus(config.id!)}
                             disabled={emailJSLoading}
                             variant="outline"
                             size="sm"
+                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                           >
-                            {config.ativo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            {config.ativo ? <EyeOff className="h-4 w-4 transition-transform duration-200" /> : <Eye className="h-4 w-4 transition-transform duration-200" />}
                           </Button>
                           <Button
                             onClick={() => openEditEmailJSDialog(config)}
                             disabled={emailJSLoading}
                             variant="outline"
                             size="sm"
+                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-4 w-4 transition-transform duration-200" />
                           </Button>
                           <Button
                             onClick={() => handleDeleteEmailJS(config.id!)}
                             disabled={emailJSLoading}
                             variant="destructive"
                             size="sm"
+                            className="transition-all duration-200 hover:scale-110 hover:shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                           >
-                            <Trash className="h-4 w-4" />
+                            <Trash className="h-4 w-4 transition-transform duration-200" />
                           </Button>
                         </div>
                       </div>
@@ -952,8 +959,12 @@ export default function Configuracoes() {
                 </Select>
               </div>
 
-              <Button onClick={handleBackup} disabled={loading} className="w-full">
-                <Download className="h-4 w-4 mr-2" />
+              <Button 
+                onClick={handleBackup} 
+                disabled={loading} 
+                className="w-full transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                <Download className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-12" />
                 {loading ? 'Criando Backup...' : 'Criar Backup'}
               </Button>
             </div>
@@ -1129,10 +1140,19 @@ export default function Configuracoes() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setShowCreateNoticiaDialog(false)}>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowCreateNoticiaDialog(false)}
+                      className="transition-all duration-200 hover:scale-105 hover:shadow-sm active:scale-95"
+                    >
                       Cancelar
                     </Button>
-                    <Button type="submit" disabled={loading}>
+                    <Button 
+                      type="submit" 
+                      disabled={loading}
+                      className="transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    >
                       {loading ? 'Criando...' : 'Criar Notícia'}
                     </Button>
                   </DialogFooter>
@@ -1232,241 +1252,6 @@ export default function Configuracoes() {
             </DialogContent>
           </Dialog>
 
-          {/* Dialog para Criar Email de Contato */}
-          <Dialog open={showCreateEmailDialog} onOpenChange={setShowCreateEmailDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Adicionar Email de Contato</DialogTitle>
-                <DialogDescription>
-                  Adicione um novo email que receberá mensagens do formulário de contato
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreateEmail}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="create-email-contact">Email *</Label>
-                    <Input
-                      id="create-email-contact"
-                      type="email"
-                      value={emailForm.email}
-                      onChange={(e) => setEmailForm(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="exemplo@empresa.com"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="create-nome-contact">Nome (opcional)</Label>
-                    <Input
-                      id="create-nome-contact"
-                      type="text"
-                      value={emailForm.nome || ''}
-                      onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
-                      placeholder="Nome do destinatário"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="create-ativo-contact"
-                      checked={emailForm.ativo || true}
-                      onCheckedChange={(checked) => setEmailForm(prev => ({ ...prev, ativo: checked }))}
-                    />
-                    <Label htmlFor="create-ativo-contact">Email ativo</Label>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setShowCreateEmailDialog(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={contactEmailLoading}>
-                    {contactEmailLoading ? 'Adicionando...' : 'Adicionar Email'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          {/* Dialog para Editar Email de Contato */}
-          <Dialog open={showEditEmailDialog} onOpenChange={setShowEditEmailDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Editar Email de Contato</DialogTitle>
-                <DialogDescription>
-                  Edite as informações do email de contato
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleEditEmail}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-email-contact">Email *</Label>
-                    <Input
-                      id="edit-email-contact"
-                      type="email"
-                      value={emailForm.email}
-                      onChange={(e) => setEmailForm(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="exemplo@empresa.com"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-nome-contact">Nome (opcional)</Label>
-                    <Input
-                      id="edit-nome-contact"
-                      type="text"
-                      value={emailForm.nome || ''}
-                      onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
-                      placeholder="Nome do destinatário"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="edit-ativo-contact"
-                      checked={emailForm.ativo || false}
-                      onCheckedChange={(checked) => setEmailForm(prev => ({ ...prev, ativo: checked }))}
-                    />
-                    <Label htmlFor="edit-ativo-contact">Email ativo</Label>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setShowEditEmailDialog(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={contactEmailLoading}>
-                    {contactEmailLoading ? 'Salvando...' : 'Salvar Alterações'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          {/* Dialog para Criar Configuração EmailJS */}
-          <Dialog open={showCreateEmailJSDialog} onOpenChange={setShowCreateEmailJSDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Adicionar Configuração EmailJS</DialogTitle>
-                <DialogDescription>
-                  Configure o EmailJS para envio direto de emails
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreateEmailJS}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="create-service-id-emailjs">Service ID *</Label>
-                    <Input
-                      id="create-service-id-emailjs"
-                      type="text"
-                      value={emailJSForm.service_id}
-                      onChange={(e) => setEmailJSForm(prev => ({ ...prev, service_id: e.target.value }))}
-                      placeholder="service_xxxxxxx"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="create-template-id-emailjs">Template ID *</Label>
-                    <Input
-                      id="create-template-id-emailjs"
-                      type="text"
-                      value={emailJSForm.template_id}
-                      onChange={(e) => setEmailJSForm(prev => ({ ...prev, template_id: e.target.value }))}
-                      placeholder="template_xxxxxxx"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="create-public-key-emailjs">Public Key *</Label>
-                    <Input
-                      id="create-public-key-emailjs"
-                      type="text"
-                      value={emailJSForm.public_key}
-                      onChange={(e) => setEmailJSForm(prev => ({ ...prev, public_key: e.target.value }))}
-                      placeholder="xxxxxxxxxxxxxxxxxxxx"
-                      required
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="create-ativo-emailjs-config"
-                      checked={emailJSForm.ativo || true}
-                      onCheckedChange={(checked) => setEmailJSForm(prev => ({ ...prev, ativo: checked }))}
-                    />
-                    <Label htmlFor="create-ativo-emailjs-config">Configuração ativa</Label>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setShowCreateEmailJSDialog(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={emailJSLoading}>
-                    {emailJSLoading ? 'Adicionando...' : 'Adicionar Configuração'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          {/* Dialog para Editar Configuração EmailJS */}
-          <Dialog open={showEditEmailJSDialog} onOpenChange={setShowEditEmailJSDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Editar Configuração EmailJS</DialogTitle>
-                <DialogDescription>
-                  Edite as informações da configuração do EmailJS
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleEditEmailJS}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-service-id-emailjs">Service ID *</Label>
-                    <Input
-                      id="edit-service-id-emailjs"
-                      type="text"
-                      value={emailJSForm.service_id}
-                      onChange={(e) => setEmailJSForm(prev => ({ ...prev, service_id: e.target.value }))}
-                      placeholder="service_xxxxxxx"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-template-id-emailjs">Template ID *</Label>
-                    <Input
-                      id="edit-template-id-emailjs"
-                      type="text"
-                      value={emailJSForm.template_id}
-                      onChange={(e) => setEmailJSForm(prev => ({ ...prev, template_id: e.target.value }))}
-                      placeholder="template_xxxxxxx"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-public-key-emailjs">Public Key *</Label>
-                    <Input
-                      id="edit-public-key-emailjs"
-                      type="text"
-                      value={emailJSForm.public_key}
-                      onChange={(e) => setEmailJSForm(prev => ({ ...prev, public_key: e.target.value }))}
-                      placeholder="xxxxxxxxxxxxxxxxxxxx"
-                      required
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="edit-ativo-emailjs-config"
-                      checked={emailJSForm.ativo || false}
-                      onCheckedChange={(checked) => setEmailJSForm(prev => ({ ...prev, ativo: checked }))}
-                    />
-                    <Label htmlFor="edit-ativo-emailjs-config">Configuração ativa</Label>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setShowEditEmailJSDialog(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={emailJSLoading}>
-                    {emailJSLoading ? 'Salvando...' : 'Salvar Alterações'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
 
           <Card>
             <CardHeader>
@@ -1571,6 +1356,279 @@ export default function Configuracoes() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Diálogos - Fora da estrutura de abas para evitar problemas de renderização */}
+      {/* Dialog para Criar Email de Contato */}
+      <Dialog open={showCreateEmailDialog} onOpenChange={setShowCreateEmailDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Email de Contato</DialogTitle>
+            <DialogDescription>
+              Adicione um novo email que receberá mensagens do formulário de contato
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateEmail}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="create-email-contact">Email *</Label>
+                <Input
+                  id="create-email-contact"
+                  type="email"
+                  value={emailForm.email}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="exemplo@empresa.com"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-nome-contact">Nome (opcional)</Label>
+                <Input
+                  id="create-nome-contact"
+                  type="text"
+                  value={emailForm.nome || ''}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
+                  placeholder="Nome do destinatário"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="create-ativo-contact"
+                  checked={emailForm.ativo || true}
+                  onCheckedChange={(checked) => setEmailForm(prev => ({ ...prev, ativo: checked }))}
+                />
+                <Label htmlFor="create-ativo-contact">Email ativo</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowCreateEmailDialog(false)}
+                className="transition-all duration-200 hover:scale-105 hover:shadow-sm active:scale-95"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={contactEmailLoading}
+                className="transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {contactEmailLoading ? 'Adicionando...' : 'Adicionar Email'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para Editar Email de Contato */}
+      <Dialog open={showEditEmailDialog} onOpenChange={setShowEditEmailDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Email de Contato</DialogTitle>
+            <DialogDescription>
+              Edite as informações do email de contato
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditEmail}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-email-contact">Email *</Label>
+                <Input
+                  id="edit-email-contact"
+                  type="email"
+                  value={emailForm.email}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="exemplo@empresa.com"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-nome-contact">Nome (opcional)</Label>
+                <Input
+                  id="edit-nome-contact"
+                  type="text"
+                  value={emailForm.nome || ''}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, nome: e.target.value }))}
+                  placeholder="Nome do destinatário"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="edit-ativo-contact"
+                  checked={emailForm.ativo || false}
+                  onCheckedChange={(checked) => setEmailForm(prev => ({ ...prev, ativo: checked }))}
+                />
+                <Label htmlFor="edit-ativo-contact">Email ativo</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowEditEmailDialog(false)}
+                className="transition-all duration-200 hover:scale-105 hover:shadow-sm active:scale-95"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={contactEmailLoading}
+                className="transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {contactEmailLoading ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para Criar Configuração EmailJS */}
+      <Dialog open={showCreateEmailJSDialog} onOpenChange={setShowCreateEmailJSDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Configuração EmailJS</DialogTitle>
+            <DialogDescription>
+              Configure o EmailJS para envio direto de emails
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateEmailJS}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="create-service-id-emailjs">Service ID *</Label>
+                <Input
+                  id="create-service-id-emailjs"
+                  type="text"
+                  value={emailJSForm.service_id}
+                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, service_id: e.target.value }))}
+                  placeholder="service_xxxxxxx"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-template-id-emailjs">Template ID *</Label>
+                <Input
+                  id="create-template-id-emailjs"
+                  type="text"
+                  value={emailJSForm.template_id}
+                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, template_id: e.target.value }))}
+                  placeholder="template_xxxxxxx"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-public-key-emailjs">Public Key *</Label>
+                <Input
+                  id="create-public-key-emailjs"
+                  type="text"
+                  value={emailJSForm.public_key}
+                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, public_key: e.target.value }))}
+                  placeholder="xxxxxxxxxxxxxxxxxxxx"
+                  required
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="create-ativo-emailjs-config"
+                  checked={emailJSForm.ativo || true}
+                  onCheckedChange={(checked) => setEmailJSForm(prev => ({ ...prev, ativo: checked }))}
+                />
+                <Label htmlFor="create-ativo-emailjs-config">Configuração ativa</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowCreateEmailJSDialog(false)}
+                className="transition-all duration-200 hover:scale-105 hover:shadow-sm active:scale-95"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={emailJSLoading}
+                className="transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {emailJSLoading ? 'Adicionando...' : 'Adicionar Configuração'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para Editar Configuração EmailJS */}
+      <Dialog open={showEditEmailJSDialog} onOpenChange={setShowEditEmailJSDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Configuração EmailJS</DialogTitle>
+            <DialogDescription>
+              Edite as informações da configuração do EmailJS
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditEmailJS}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-service-id-emailjs">Service ID *</Label>
+                <Input
+                  id="edit-service-id-emailjs"
+                  type="text"
+                  value={emailJSForm.service_id}
+                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, service_id: e.target.value }))}
+                  placeholder="service_xxxxxxx"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-template-id-emailjs">Template ID *</Label>
+                <Input
+                  id="edit-template-id-emailjs"
+                  type="text"
+                  value={emailJSForm.template_id}
+                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, template_id: e.target.value }))}
+                  placeholder="template_xxxxxxx"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-public-key-emailjs">Public Key *</Label>
+                <Input
+                  id="edit-public-key-emailjs"
+                  type="text"
+                  value={emailJSForm.public_key}
+                  onChange={(e) => setEmailJSForm(prev => ({ ...prev, public_key: e.target.value }))}
+                  placeholder="xxxxxxxxxxxxxxxxxxxx"
+                  required
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="edit-ativo-emailjs-config"
+                  checked={emailJSForm.ativo || false}
+                  onCheckedChange={(checked) => setEmailJSForm(prev => ({ ...prev, ativo: checked }))}
+                />
+                <Label htmlFor="edit-ativo-emailjs-config">Configuração ativa</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowEditEmailJSDialog(false)}
+                className="transition-all duration-200 hover:scale-105 hover:shadow-sm active:scale-95"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={emailJSLoading}
+                className="transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {emailJSLoading ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
