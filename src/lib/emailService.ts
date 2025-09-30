@@ -77,7 +77,11 @@ export async function sendContactEmail(
       reply_to: emailData.email,
       // Adicionar destinatários no corpo da mensagem
       destinatarios: emailData.destinatarios.join(', '),
-      destinatarios_count: emailData.destinatarios.length
+      destinatarios_count: emailData.destinatarios.length,
+      // Configurações para preservar o remetente original
+      user_email: emailData.email,
+      user_name: emailData.nome,
+      original_sender: `${emailData.nome} <${emailData.email}>`
     }
 
     console.log('📝 [EmailJS] Parâmetros do template:', templateParams)
