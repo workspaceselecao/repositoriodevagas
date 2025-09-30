@@ -48,16 +48,29 @@ export default function Contato() {
   // Carregar configuração do EmailJS e emails destinatários
   useEffect(() => {
     const loadConfigs = async () => {
+      console.log('🔧 [Contato] Carregando configurações...')
       try {
         const [emails, emailJS] = await Promise.all([
           getRecipientEmails(),
           getEmailJSConfig()
         ])
+        
+        console.log('📧 [Contato] Emails destinatários carregados:', emails)
+        console.log('⚙️ [Contato] Configuração EmailJS carregada:', emailJS ? {
+          serviceId: emailJS.service_id,
+          templateId: emailJS.template_id,
+          publicKey: emailJS.public_key ? `${emailJS.public_key.substring(0, 10)}...` : 'N/A',
+          ativo: emailJS.ativo
+        } : null)
+        
         setRecipientEmails(emails)
         setEmailJSConfig(emailJS)
         setUseDirectEmail(!!emailJS) // Usar envio direto se EmailJS estiver configurado
+        
+        console.log('✅ [Contato] Configurações carregadas com sucesso')
+        console.log('📧 [Contato] Usar envio direto:', !!emailJS)
       } catch (error) {
-        console.error('Erro ao carregar configurações:', error)
+        console.error('❌ [Contato] Erro ao carregar configurações:', error)
         // Manter configurações padrão em caso de erro
       }
     }
@@ -83,8 +96,21 @@ export default function Contato() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    console.log('📝 [Contato] Iniciando envio do formulário...')
+    console.log('📝 [Contato] Dados do formulário:', formData)
+    console.log('📝 [Contato] Configurações:', {
+      useDirectEmail,
+      emailJSConfig: emailJSConfig ? {
+        serviceId: emailJSConfig.service_id,
+        templateId: emailJSConfig.template_id,
+        publicKey: emailJSConfig.public_key ? `${emailJSConfig.public_key.substring(0, 10)}...` : 'N/A'
+      } : null,
+      recipientEmails
+    })
+    
     // Validação básica
     if (!formData.nome || !formData.email || !formData.assunto || !formData.mensagem) {
+      console.error('❌ [Contato] Validação falhou - campos obrigatórios não preenchidos')
       setMessage('Por favor, preencha todos os campos obrigatórios.')
       setMessageType('error')
       return
@@ -96,6 +122,8 @@ export default function Contato() {
 
     try {
       if (useDirectEmail && emailJSConfig) {
+        console.log('📧 [Contato] Usando envio direto via EmailJS')
+        
         // Envio direto via EmailJS
         const emailData = {
           nome: formData.nome,
@@ -106,13 +134,18 @@ export default function Contato() {
           destinatarios: recipientEmails
         }
 
+        console.log('📧 [Contato] Dados do email preparados:', emailData)
+
         const result = await sendContactEmail(emailData, {
           serviceId: emailJSConfig.service_id,
           templateId: emailJSConfig.template_id,
           publicKey: emailJSConfig.public_key
         })
 
+        console.log('📧 [Contato] Resultado do envio:', result)
+
         if (result.success) {
+          console.log('✅ [Contato] Email enviado com sucesso!')
           setMessage(result.message)
           setMessageType('success')
           
@@ -125,10 +158,17 @@ export default function Contato() {
             mensagem: ''
           })
         } else {
+          console.error('❌ [Contato] Falha no envio do email:', result.message)
           setMessage(result.message)
           setMessageType('error')
         }
       } else {
+        console.log('📧 [Contato] Usando fallback para mailto')
+        console.log('📧 [Contato] Motivo do fallback:', {
+          useDirectEmail,
+          hasEmailJSConfig: !!emailJSConfig
+        })
+        
         // Fallback para envio via cliente de email (método anterior)
         const assunto = encodeURIComponent(formData.assunto)
         const corpo = encodeURIComponent(
@@ -142,6 +182,8 @@ export default function Contato() {
         const mailtoLinks = recipientEmails.map(email => 
           `mailto:${email}?subject=${assunto}&body=${corpo}`
         )
+        
+        console.log('📧 [Contato] Links mailto criados:', mailtoLinks)
         
         // Abrir o primeiro cliente de email (usuário pode escolher outros depois)
         window.open(mailtoLinks[0], '_blank')
@@ -165,10 +207,15 @@ export default function Contato() {
       }
       
     } catch (error: any) {
-      console.error('Erro ao abrir cliente de email:', error)
-      setMessage('Erro ao abrir cliente de email. Tente novamente.')
+      console.error('💥 [Contato] Erro ao enviar mensagem:', error)
+      console.error('💥 [Contato] Detalhes do erro:', {
+        message: error.message,
+        stack: error.stack
+      })
+      setMessage('Erro ao enviar mensagem. Tente novamente.')
       setMessageType('error')
     } finally {
+      console.log('🏁 [Contato] Finalizando envio do formulário')
       setLoading(false)
     }
   }
