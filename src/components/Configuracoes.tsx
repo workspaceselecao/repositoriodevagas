@@ -499,16 +499,11 @@ export default function Configuracoes() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Configuração de Emails de Contato */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Mail className="h-5 w-5" />
-                    Emails de Contato
-                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    Configure os emails que receberão as mensagens do formulário de contato
+                    Gerencie os emails que receberão as mensagens do formulário de contato
                   </p>
                 </div>
                 <Button
