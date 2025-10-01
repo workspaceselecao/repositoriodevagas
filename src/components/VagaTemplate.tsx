@@ -130,7 +130,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
         {/* Salário */}
         <VagaSection title="Salário">
           {vaga.salario ? (
-            <p><strong>{vaga.salario}</strong></p>
+            <p className={`${textClasses.primary}`}><strong>{vaga.salario}</strong></p>
           ) : null}
         </VagaSection>
 
@@ -146,8 +146,8 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
             <div className="space-y-2">
               {vaga.beneficios.split(';').map((beneficio, index) => (
                 <div key={index} className="flex items-start">
-                  <span className="text-gray-400 dark:text-contrast-muted mr-2 mt-1">•</span>
-                  <span>{beneficio.trim()}</span>
+                  <span className={`${textClasses.primary} mr-2 mt-1`}>•</span>
+                  <span className={`${textClasses.primary}`}>{beneficio.trim()}</span>
                 </div>
               ))}
             </div>
@@ -169,7 +169,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                     <div className="flex-shrink-0 w-8 h-8 bg-gray-800 dark:bg-gray-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
                       {index + 1}
                     </div>
-                    <span>{cleanEtapa}</span>
+                    <span className={`${textClasses.primary}`}>{cleanEtapa}</span>
                   </div>
                 )
               })}

@@ -58,16 +58,16 @@ export default function VagaSection({ title, content, children }: VagaSectionPro
   
   return (
     <div className="space-y-4">
-      <h2 className={`${textClasses.heading} border-b border-border/50 pb-2`}>
+      <h2 className={`${textClasses.primary} text-xl font-bold uppercase tracking-wide border-b border-border/50 pb-2`}>
         {title}
       </h2>
-      <div className={`${textClasses.secondary} leading-relaxed`}>
+      <div className={`${textClasses.primary} leading-relaxed`}>
         {content ? (
           renderFormattedContent(content)
         ) : children ? (
           children
         ) : (
-          <p className={`${textClasses.muted} italic`}>Informação não disponível</p>
+          <p className={`${textClasses.primary} italic`}>Informação não disponível</p>
         )}
       </div>
     </div>
