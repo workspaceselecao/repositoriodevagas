@@ -153,7 +153,7 @@ export default function NovaVagaForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="titulo">Título da Vaga</Label>
+                <Label htmlFor="titulo">Título da Oportunidade</Label>
                 <Input
                   id="titulo"
                   name="titulo"
@@ -175,15 +175,15 @@ export default function NovaVagaForm() {
               </div>
             </div>
 
-            {/* Descrição da Vaga */}
+            {/* Descrição da Oportunidade */}
             <div className="space-y-2">
-              <Label htmlFor="descricao_vaga">Descrição da Vaga</Label>
+              <Label htmlFor="descricao_vaga">Descrição da Oportunidade</Label>
               <textarea
                 id="descricao_vaga"
                 name="descricao_vaga"
                 value={formData.descricao_vaga}
                 onChange={handleInputChange}
-                placeholder="Descreva a vaga..."
+                placeholder="Descreva a oportunidade..."
                 rows={4}
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
@@ -303,7 +303,7 @@ export default function NovaVagaForm() {
                 Cancelar
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? 'Salvando...' : 'Criar Vaga'}
+                {loading ? 'Salvando...' : 'Criar Oportunidade'}
               </Button>
             </div>
           </form>

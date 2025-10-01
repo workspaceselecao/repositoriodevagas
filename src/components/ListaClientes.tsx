@@ -187,12 +187,12 @@ export default function ListaClientes() {
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
                 <Users className="h-5 w-5 text-primary-foreground" />
               </div>
-              <CardTitle className="text-sm font-semibold field-subtitle">Total de Vagas</CardTitle>
+              <CardTitle className="text-sm font-semibold field-subtitle">Total de Oportunidades</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-primary">{totalItems}</div>
-            <p className="text-sm info-text mt-1">vagas cadastradas</p>
+            <p className="text-sm info-text mt-1">oportunidades cadastradas</p>
           </CardContent>
         </Card>
         <Card className="relative overflow-hidden">
@@ -231,7 +231,7 @@ export default function ListaClientes() {
         </Card>
       </div>
 
-        {/* Vagas List */}
+        {/* Oportunidades List */}
         <div className="space-y-6">
           {paginatedVagas.map((vaga, index) => (
             <VagaTemplate
@@ -367,11 +367,11 @@ export default function ListaClientes() {
               </div>
             </DialogHeader>
 
-            {/* Conteúdo da Vaga */}
+            {/* Conteúdo da Oportunidade */}
             <div className={`${isFullscreen ? 'flex-1 overflow-auto p-6' : 'p-6'}`}>
               {focusedVaga && (
                 <div className="space-y-6">
-                  {/* Informações da Vaga */}
+                  {/* Informações da Oportunidade */}
                   <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg p-6 border border-primary/20">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>

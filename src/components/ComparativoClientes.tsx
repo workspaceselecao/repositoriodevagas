@@ -520,7 +520,7 @@ export default function ComparativoClientes() {
               <span className="hidden tablet:inline">Seção ativa: </span>
               {
                 {
-                  'descricao': 'Descrição da Vaga',
+                  'descricao': 'Descrição da Oportunidade',
                   'responsabilidades': 'Responsabilidades e Atribuições',
                   'requisitos': 'Requisitos e Qualificações',
                   'salario': 'Salário',
@@ -621,7 +621,7 @@ export default function ComparativoClientes() {
                   ) : (
                     <div className="space-y-2">
                       {[
-                        { key: 'descricao', title: 'Descrição da Vaga' },
+                        { key: 'descricao', title: 'Descrição da Oportunidade' },
                         { key: 'responsabilidades', title: 'Responsabilidades e Atribuições' },
                         { key: 'requisitos', title: 'Requisitos e Qualificações' },
                         { key: 'salario', title: 'Salário' },
@@ -675,7 +675,7 @@ export default function ComparativoClientes() {
                                   <div key={vaga.id} className="mb-4 last:mb-0">
                                     {vagasCliente.length > 1 && (
                                       <div className={`text-xs ${textClasses.secondary} mb-2 font-medium`}>
-                                        Vaga {index + 1}: {vaga.cargo} - {vaga.celula}
+                                        Oportunidade {index + 1}: {vaga.cargo} - {vaga.celula}
                                       </div>
                                     )}
                                     {renderVagaContent(vaga, section.key)}

@@ -80,7 +80,7 @@ export default function NovaVagaFormWithScraping() {
         })
         setMessage('✅ Dados da vaga carregados com sucesso!')
       } else {
-        setMessage('❌ Vaga não encontrada')
+        setMessage('❌ Oportunidade não encontrada')
       }
     } catch (error) {
       console.error('Erro ao carregar vaga:', error)
@@ -130,7 +130,7 @@ export default function NovaVagaFormWithScraping() {
         const vagaAtualizada = await Promise.race([updatePromise, timeoutPromise])
         
         if (vagaAtualizada) {
-          setMessage('✅ Vaga atualizada com sucesso!')
+          setMessage('✅ Oportunidade atualizada com sucesso!')
           console.log('Vaga atualizada:', vagaAtualizada)
           
           // Atualizar vaga no cache
@@ -143,7 +143,7 @@ export default function NovaVagaFormWithScraping() {
             navigate('/dashboard/clientes')
           }, 1500)
         } else {
-          setMessage('❌ Erro: Vaga não foi atualizada (retorno nulo)')
+          setMessage('❌ Erro: Oportunidade não foi atualizada (retorno nulo)')
         }
       } else {
         setMessage('⏳ Salvando vaga no banco de dados...')
@@ -158,7 +158,7 @@ export default function NovaVagaFormWithScraping() {
         const novaVaga = await Promise.race([createPromise, timeoutPromise])
         
         if (novaVaga) {
-          setMessage('✅ Vaga criada com sucesso!')
+          setMessage('✅ Oportunidade criada com sucesso!')
           console.log('Vaga criada:', novaVaga)
           
           // Adicionar vaga ao cache
@@ -174,7 +174,7 @@ export default function NovaVagaFormWithScraping() {
             navigate('/dashboard')
           }, 1500)
         } else {
-          setMessage('❌ Erro: Vaga não foi criada (retorno nulo)')
+          setMessage('❌ Erro: Oportunidade não foi criada (retorno nulo)')
         }
       }
     } catch (error: any) {
@@ -379,12 +379,12 @@ export default function NovaVagaFormWithScraping() {
     <div className="space-y-6">
       <div>
         <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
-          {isEditing ? 'Editar Vaga' : 'Nova Vaga'}
+          {isEditing ? 'Editar Oportunidade' : 'Nova Oportunidade'}
         </h1>
         <p className="page-subtitle text-lg">
           {isEditing 
-            ? 'Edite as informações da vaga com extração automática ou manual'
-            : 'Adicione uma nova vaga ao sistema com extração automática ou manual'
+            ? 'Edite as informações da oportunidade com extração automática ou manual'
+            : 'Adicione uma nova oportunidade ao sistema com extração automática ou manual'
           }
         </p>
       </div>
@@ -400,8 +400,8 @@ export default function NovaVagaFormWithScraping() {
           : 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-400 dark:border-gray-600 border-l-gray-500 dark:border-l-gray-400'
       }`}>
         {message || (isEditing 
-          ? '💡 Edite os campos necessários e clique em "Atualizar Vaga" para salvar as alterações.'
-          : '💡 Preencha os campos obrigatórios e clique em "Salvar Vaga" para criar uma nova vaga.'
+          ? '💡 Edite os campos necessários e clique em "Atualizar Oportunidade" para salvar as alterações.'
+          : '💡 Preencha os campos obrigatórios e clique em "Salvar Oportunidade" para criar uma nova oportunidade.'
         )}
       </div>
 
@@ -431,7 +431,7 @@ export default function NovaVagaFormWithScraping() {
             <CardContent className="space-y-4">
               {/* Extração por URL */}
               <div className="space-y-2">
-                <Label htmlFor="scraping-url" className="field-title">URL da Vaga</Label>
+                <Label htmlFor="scraping-url" className="field-title">URL da Oportunidade</Label>
                 <div className="flex space-x-2">
                   <Input
                     id="scraping-url"
@@ -608,10 +608,10 @@ export default function NovaVagaFormWithScraping() {
             <CardHeader>
               <CardTitle className="flex items-center page-title">
                 <Plus className="h-5 w-5 mr-2 icon-primary" />
-                Informações da Vaga
+                Informações da Oportunidade
               </CardTitle>
               <CardDescription className="page-subtitle">
-                Preencha todas as informações necessárias sobre a vaga
+                Preencha todas as informações necessárias sobre a oportunidade
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -622,12 +622,12 @@ export default function NovaVagaFormWithScraping() {
                   {renderFormField('categoria', 'Categoria', 'Ex: Operações', 'input')}
                   {renderFormField('cargo', 'Cargo', 'Ex: Especialista I', 'input')}
                   {renderFormField('cliente', 'Cliente', 'Ex: VIVO, REDE, etc.', 'input')}
-                  {renderFormField('titulo', 'Título da Vaga', 'Ex: Desenvolvedor Full Stack', 'input')}
+                  {renderFormField('titulo', 'Título da Oportunidade', 'Ex: Desenvolvedor Full Stack', 'input')}
                   {renderFormField('celula', 'Célula', 'Ex: VIVO - Telecom I', 'input')}
                 </div>
 
                 {/* Campos principais extraídos */}
-                {renderFormField('descricao_vaga', 'Descrição da Vaga', 'Descreva a vaga...', 'textarea')}
+                {renderFormField('descricao_vaga', 'Descrição da Oportunidade', 'Descreva a oportunidade...', 'textarea')}
                 {renderFormField('responsabilidades_atribuicoes', 'Responsabilidades e Atribuições', 'Liste as responsabilidades...', 'textarea')}
                 {renderFormField('requisitos_qualificacoes', 'Requisitos e Qualificações', 'Liste os requisitos...', 'textarea')}
 
@@ -671,7 +671,7 @@ export default function NovaVagaFormWithScraping() {
                       ) : (
                         <>
                           <Save className="h-4 w-4 mr-2" />
-                          {isEditing ? 'Atualizar Vaga' : 'Salvar Vaga'}
+                          {isEditing ? 'Atualizar Oportunidade' : 'Salvar Oportunidade'}
                         </>
                       )}
                     </Button>

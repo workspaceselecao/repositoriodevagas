@@ -125,7 +125,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
       {isExpanded && (
         <CardContent className="space-y-8 animate-in slide-in-from-top-2 duration-300">
         {/* Descrição da vaga */}
-        <VagaSection title="Descrição da vaga" content={vaga.descricao_vaga} />
+        <VagaSection title="Descrição da oportunidade" content={vaga.descricao_vaga} />
 
         {/* Responsabilidades e atribuições */}
         <VagaSection title="Responsabilidades e atribuições" content={vaga.responsabilidades_atribuicoes} />

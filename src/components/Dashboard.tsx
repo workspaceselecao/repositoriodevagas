@@ -259,7 +259,7 @@ export default function Dashboard() {
           config.effects.glassmorphism ? 'bg-white/10 backdrop-blur-xl border-white/20' : ''
         }`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-foreground">Total de Vagas</CardTitle>
+            <CardTitle className="text-sm font-medium text-foreground">Total de Oportunidades</CardTitle>
             <div className={`p-2 rounded-lg ${
               config.effects.gradients 
                 ? 'bg-gradient-to-br from-blue-500 to-blue-600' 

@@ -29,7 +29,7 @@ export default function VagaView() {
       if (data) {
         setVaga(data)
       } else {
-        setError('Vaga não encontrada')
+        setError('Oportunidade não encontrada')
       }
     } catch (error) {
       console.error('Erro ao carregar vaga:', error)
@@ -83,7 +83,7 @@ export default function VagaView() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-contrast-primary mb-4">Vaga não encontrada</h1>
+          <h1 className="text-2xl font-bold text-contrast-primary mb-4">Oportunidade não encontrada</h1>
           <p className="text-contrast-primary mb-6">{error}</p>
           <Button onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -105,12 +105,12 @@ export default function VagaView() {
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar para Lista de Vagas
+            Voltar para Lista de Oportunidades
           </Button>
         </div>
       </div>
 
-      {/* Template da Vaga */}
+      {/* Template da Oportunidade */}
       <div className="py-8">
         <VagaTemplate 
           vaga={vaga}
