@@ -15,6 +15,7 @@ export default function ComparativoClientes() {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const [expandedFilters, setExpandedFilters] = useState<{[cliente: string]: boolean}>({})
   const [activeSection, setActiveSection] = useState<string | null>(null)
+  const [isReloading, setIsReloading] = useState(false)
   
   // Refs para controle de rolagem
   const comparativoRef = useRef<HTMLDivElement>(null)
@@ -166,6 +167,36 @@ export default function ComparativoClientes() {
     setExpandedSections(new Set())
     setExpandedFilters({})
     setActiveSection(null)
+  }
+
+  const handleReload = async () => {
+    setIsReloading(true)
+    try {
+      console.log('🔄 Recarregando dados da página Comparativo...')
+      const [clientesData, vagasData] = await Promise.all([
+        getClientes(),
+        getVagas()
+      ])
+      
+      setClientes(clientesData)
+      setAllVagas(vagasData)
+      
+      // Resetar todos os estados para uma experiência limpa
+      setSelectedClientes([])
+      setClientFilters({})
+      setExpandedSections(new Set())
+      setExpandedFilters({})
+      setActiveSection(null)
+      
+      console.log('✅ Dados recarregados com sucesso:', {
+        clientes: clientesData.length,
+        vagas: vagasData.length
+      })
+    } catch (error) {
+      console.error('❌ Erro ao recarregar dados:', error)
+    } finally {
+      setIsReloading(false)
+    }
   }
 
   const clearClientFilters = (cliente: string) => {
@@ -500,10 +531,21 @@ export default function ComparativoClientes() {
             </div>
           )}
         </div>
-        <Button variant="outline" onClick={clearAllFilters}>
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Limpar Filtros
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleReload}
+            disabled={isReloading}
+            className="flex items-center gap-2"
+          >
+            <RotateCcw className={`h-4 w-4 ${isReloading ? 'animate-spin' : ''}`} />
+            {isReloading ? 'Recarregando...' : 'Recarregar'}
+          </Button>
+          <Button variant="outline" onClick={clearAllFilters}>
+            <X className="h-4 w-4 mr-2" />
+            Limpar Filtros
+          </Button>
+        </div>
       </div>
 
       {/* Seleção de Clientes */}

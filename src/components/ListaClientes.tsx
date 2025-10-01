@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Vaga } from '../types/database'
 import { deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X } from 'lucide-react'
+import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
 import { useAuth } from '../contexts/AuthContext'
 import { useVagas } from '../hooks/useCacheData'
@@ -18,6 +18,11 @@ export default function ListaClientes() {
   const [searchTerm, setSearchTerm] = useState('')
   const [focusedVaga, setFocusedVaga] = useState<Vaga | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  
+  // Estados de paginação
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  
   const { user } = useAuth()
   const navigate = useNavigate()
   const { vagas, loading } = useVagas()
@@ -38,6 +43,36 @@ export default function ListaClientes() {
       (vaga.titulo && vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()))
     )
   }, [vagas, searchTerm])
+
+  // Calcular paginação
+  const totalItems = filteredVagas.length
+  const totalPages = Math.ceil(totalItems / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedVagas = filteredVagas.slice(startIndex, endIndex)
+
+  // Resetar página quando o filtro ou quantidade de itens mudar
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, itemsPerPage])
+
+  // Funções de navegação da paginação
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)))
+  }
+
+  const goToPreviousPage = () => {
+    goToPage(currentPage - 1)
+  }
+
+  const goToNextPage = () => {
+    goToPage(currentPage + 1)
+  }
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage)
+    setCurrentPage(1)
+  }
 
   const handleEdit = (vaga: Vaga) => {
     navigate(`/dashboard/nova-vaga/${vaga.id}`)
@@ -155,7 +190,7 @@ export default function ListaClientes() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary">{vagas.length}</div>
+            <div className="text-3xl font-bold text-primary">{totalItems}</div>
             <p className="text-sm info-text mt-1">vagas cadastradas</p>
           </CardContent>
         </Card>
@@ -197,7 +232,7 @@ export default function ListaClientes() {
 
         {/* Vagas List */}
         <div className="space-y-6">
-          {filteredVagas.map((vaga, index) => (
+          {paginatedVagas.map((vaga, index) => (
             <VagaTemplate
               key={vaga.id}
               vaga={vaga}
@@ -210,6 +245,82 @@ export default function ListaClientes() {
           ))}
         </div>
 
+        {/* Controles de Paginação */}
+        {totalItems > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Itens por página:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={15}>15</option>
+                  <option value={20}>20</option>
+                  <option value={25}>25</option>
+                </select>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} vagas
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className="flex items-center gap-1"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Anterior
+              </Button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNumber;
+                  if (totalPages <= 5) {
+                    pageNumber = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNumber = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNumber = totalPages - 4 + i;
+                  } else {
+                    pageNumber = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNumber}
+                      variant={currentPage === pageNumber ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => goToPage(pageNumber)}
+                      className="w-8 h-8 p-0"
+                    >
+                      {pageNumber}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-1"
+              >
+                Próximo
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
       {filteredVagas.length === 0 && !loading && (
         <div className="text-center py-12">
           <div className="text-contrast-primary text-lg">
@@ -220,7 +331,10 @@ export default function ListaClientes() {
 
       {/* Modal de Visualização Focada */}
       <Dialog open={!!focusedVaga} onOpenChange={handleCloseFocus}>
-        <DialogContent className={`${isFullscreen ? 'max-w-none w-screen h-screen' : 'max-w-4xl'} p-0`}>
+        <DialogContent 
+          className={`${isFullscreen ? 'max-w-none w-screen h-screen' : 'max-w-4xl'} p-0`}
+          hideCloseButton={isFullscreen}
+        >
           <div className={`${isFullscreen ? 'h-screen flex flex-col' : ''}`}>
             {/* Header do Modal */}
             <DialogHeader className={`${isFullscreen ? 'p-6 border-b bg-gradient-to-r from-primary/10 to-primary/5' : 'p-6 border-b'}`}>
