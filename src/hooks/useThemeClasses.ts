@@ -28,11 +28,11 @@ export function useThemeClasses() {
   }
   
   const textClasses = {
-    primary: 'text-gray-900 dark:text-contrast-primary',
-    secondary: 'text-gray-700 dark:text-contrast-secondary',
-    muted: 'text-gray-500 dark:text-contrast-muted',
-    accent: 'text-blue-600 dark:text-contrast-accent',
-    heading: 'text-xl font-bold text-gray-900 dark:text-contrast-primary uppercase tracking-wide'
+    primary: mode === 'dark' ? 'text-contrast-primary' : 'text-gray-900',
+    secondary: mode === 'dark' ? 'text-contrast-secondary' : 'text-gray-700',
+    muted: mode === 'dark' ? 'text-contrast-muted' : 'text-gray-500',
+    accent: mode === 'dark' ? 'text-contrast-accent' : 'text-blue-600',
+    heading: mode === 'dark' ? 'text-xl font-bold text-contrast-primary uppercase tracking-wide' : 'text-xl font-bold text-gray-900 uppercase tracking-wide'
   }
   
   const cardClasses = {

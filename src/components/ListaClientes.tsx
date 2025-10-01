@@ -47,6 +47,7 @@ export default function ListaClientes() {
 
   const handleFocusVaga = (vaga: Vaga) => {
     setFocusedVaga(vaga)
+    setIsFullscreen(true) // Abrir automaticamente em fullscreen
   }
 
   const handleCloseFocus = () => {
@@ -310,6 +311,7 @@ export default function ListaClientes() {
                     vaga={focusedVaga}
                     showActions={false}
                     variantIndex={0}
+                    isExpanded={true}
                   />
                 </div>
               )}

@@ -21,14 +21,20 @@ interface VagaTemplateProps {
   onFocus?: () => void
   showActions?: boolean
   variantIndex?: number
+  isExpanded?: boolean
 }
 
-export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActions = false, variantIndex = 0 }: VagaTemplateProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActions = false, variantIndex = 0, isExpanded: isExpandedProp }: VagaTemplateProps) {
+  const [isExpandedInternal, setIsExpandedInternal] = useState(false)
+  const isExpanded = isExpandedProp !== undefined ? isExpandedProp : isExpandedInternal
   const { textClasses, cardClasses, getCardVariant } = useThemeClasses()
 
   const toggleExpansion = () => {
-    setIsExpanded(!isExpanded)
+    if (isExpandedProp !== undefined) {
+      // Se isExpanded é controlado externamente, não fazemos nada
+      return
+    }
+    setIsExpandedInternal(!isExpandedInternal)
   }
 
   const handleDownload = (e: React.MouseEvent) => {
