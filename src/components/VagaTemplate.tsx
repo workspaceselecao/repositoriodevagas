@@ -49,18 +49,18 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
         className={cardClasses.header}
         onClick={toggleExpansion}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <CardTitle className={`${textClasses.heading} mb-1`}>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <CardTitle className={`${textClasses.heading} mb-1 text-sm md:text-base`}>
               {vaga.titulo || vaga.cargo} - {vaga.cliente}
             </CardTitle>
-            <CardDescription className={`text-lg ${textClasses.accent} font-semibold`}>
+            <CardDescription className={`text-sm md:text-lg ${textClasses.accent} font-semibold`}>
               {vaga.celula}
             </CardDescription>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between lg:justify-end gap-2">
             {showActions && (
-              <>
+              <div className="flex items-center gap-1">
                 {onFocus && (
                   <Button
                     size="sm"
@@ -71,8 +71,8 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                     }}
                     className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 transition-all duration-200 hover:scale-105"
                   >
-                    <Eye className="h-4 w-4" />
-                    Focar
+                    <Eye className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="hidden sm:inline">Focar</span>
                   </Button>
                 )}
                 {onEdit && (
@@ -85,8 +85,8 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                     }}
                     className="flex items-center gap-1 transition-all duration-200 hover:scale-105"
                   >
-                    <Edit className="h-4 w-4" />
-                    Editar
+                    <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="hidden sm:inline">Editar</span>
                   </Button>
                 )}
                 <Button
@@ -95,8 +95,8 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                   onClick={handleDownload}
                   className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200 transition-all duration-200 hover:scale-105"
                 >
-                  <Download className="h-4 w-4" />
-                  Download
+                  <Download className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Download</span>
                 </Button>
                 {onDelete && (
                   <Button
@@ -108,14 +108,14 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                     }}
                     className="text-red-600 hover:text-red-700 flex items-center gap-1 transition-all duration-200 hover:scale-105"
                   >
-                    <Trash2 className="h-4 w-4" />
-                    Excluir
+                    <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="hidden sm:inline">Excluir</span>
                   </Button>
                 )}
-              </>
+              </div>
             )}
             <div className="transition-transform duration-200 group-hover:scale-110">
-              {isExpanded ? <ChevronUp className="h-6 w-6" /> : <ChevronDown className="h-6 w-6" />}
+              {isExpanded ? <ChevronUp className="h-5 w-5 md:h-6 md:w-6" /> : <ChevronDown className="h-5 w-5 md:h-6 md:w-6" />}
             </div>
           </div>
         </div>

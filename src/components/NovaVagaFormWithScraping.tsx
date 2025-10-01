@@ -617,7 +617,7 @@ export default function NovaVagaFormWithScraping() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Informações Básicas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
                   {renderFormField('site', 'Site', 'Ex: São Bento, Casa, etc.', 'input')}
                   {renderFormField('categoria', 'Categoria', 'Ex: Operações', 'input')}
                   {renderFormField('cargo', 'Cargo', 'Ex: Especialista I', 'input')}
@@ -632,7 +632,7 @@ export default function NovaVagaFormWithScraping() {
                 {renderFormField('requisitos_qualificacoes', 'Requisitos e Qualificações', 'Liste os requisitos...', 'textarea')}
 
                 {/* Informações Adicionais */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4">
                   {renderFormField('salario', 'Salário', 'Ex: R$ 1.518,00', 'input')}
                   {renderFormField('horario_trabalho', 'Horário de Trabalho', 'Ex: Das 09:00 às 18:00', 'input')}
                   {renderFormField('jornada_trabalho', 'Jornada de Trabalho', 'Ex: 180h mês | Escala 5x2', 'input')}
@@ -643,24 +643,26 @@ export default function NovaVagaFormWithScraping() {
                 {renderFormField('etapas_processo', 'Etapas do Processo', 'Liste as etapas do processo seletivo...', 'textarea')}
 
                 {/* Botões */}
-                <div className="flex justify-between space-x-4 pt-6">
+                <div className="flex flex-col tablet:flex-row justify-between gap-4 pt-6">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={clearForm}
+                    className="w-full tablet:w-auto"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Limpar Formulário
                   </Button>
-                  <div className="space-x-2">
+                  <div className="flex flex-col tablet:flex-row gap-2 w-full tablet:w-auto">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => navigate('/dashboard')}
+                      className="w-full tablet:w-auto"
                     >
                       Cancelar
                     </Button>
-                    <Button type="submit" disabled={loading}>
+                    <Button type="submit" disabled={loading} className="w-full tablet:w-auto">
                       {loading ? (
                         <>
                           <RefreshCw className="h-4 w-4 mr-2 animate-spin" />

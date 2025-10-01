@@ -131,8 +131,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <TooltipProvider>
       <div className="flex h-screen bg-background">
-        {/* Sidebar Desktop - Sempre visível */}
-        <div className={`flex transition-all duration-300 ${
+        {/* Sidebar Desktop - Visível a partir de 800px */}
+        <div className={`hidden tablet:flex transition-all duration-300 ${
           isCollapsed ? 'w-16' : 'w-64'
         }`}>
           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
@@ -236,9 +236,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </Sidebar>
         </div>
 
-        {/* Sidebar Mobile Overlay - Removido pois sidebar sempre visível */}
-        {false && (
-          <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}>
+        {/* Sidebar Mobile Overlay */}
+        {isMobileMenuOpen && (
+          <div className="tablet:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="fixed left-0 top-0 h-full w-64 bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <Sidebar isCollapsed={false} onToggle={() => {}}>
 
@@ -314,19 +314,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Mobile Menu Button - Removido pois sidebar sempre visível */}
-          {false && (
-            <div className="md:hidden fixed top-4 left-4 z-50">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover-scale bg-card/80 shadow-lg"
-                onClick={() => setIsMobileMenuOpen(true)}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </div>
-          )}
+          {/* Mobile Menu Button */}
+          <div className="tablet:hidden fixed top-4 left-4 z-50">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover-scale bg-card/80 shadow-lg"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
 
           {/* Theme Toggle - Fixed Position */}
           <div className="fixed top-4 right-4 z-50">
@@ -335,7 +333,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto bg-background">
-            <div className="max-w-7xl mx-auto p-6">
+            <div className="max-w-7xl mx-auto p-3 tablet:p-4 laptop:p-6">
               <div className="animate-fade-in">
                 {children}
               </div>

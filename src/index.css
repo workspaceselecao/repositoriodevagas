@@ -311,3 +311,198 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Melhorias de responsividade */
+@layer utilities {
+  /* Texto responsivo */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl;
+  }
+  
+  .text-responsive-2xl {
+    @apply text-2xl sm:text-3xl md:text-4xl;
+  }
+  
+  /* Espaçamento responsivo */
+  .space-responsive {
+    @apply space-y-4 sm:space-y-6;
+  }
+  
+  .gap-responsive {
+    @apply gap-3 sm:gap-4 md:gap-6;
+  }
+  
+  /* Padding responsivo */
+  .p-responsive {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+  
+  .px-responsive {
+    @apply px-3 sm:px-4 md:px-6;
+  }
+  
+  .py-responsive {
+    @apply py-3 sm:py-4 md:py-6;
+  }
+  
+  /* Margin responsivo */
+  .m-responsive {
+    @apply m-3 sm:m-4 md:m-6;
+  }
+  
+  .mx-responsive {
+    @apply mx-3 sm:mx-4 md:mx-6;
+  }
+  
+  .my-responsive {
+    @apply my-3 sm:my-4 md:my-6;
+  }
+  
+  /* Grid responsivo para cards */
+  .grid-responsive-cards {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+  }
+  
+  .grid-responsive-stats {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+  }
+  
+  /* Flex responsivo */
+  .flex-responsive {
+    @apply flex flex-col sm:flex-row;
+  }
+  
+  .flex-responsive-reverse {
+    @apply flex flex-col-reverse sm:flex-row;
+  }
+  
+  /* Botões responsivos */
+  .btn-responsive {
+    @apply w-full sm:w-auto;
+  }
+  
+  .btn-group-responsive {
+    @apply flex flex-col sm:flex-row gap-2;
+  }
+  
+  /* Cards responsivos */
+  .card-responsive {
+    @apply w-full max-w-full overflow-hidden;
+  }
+  
+  /* Texto truncado responsivo */
+  .truncate-responsive {
+    @apply truncate sm:whitespace-normal;
+  }
+  
+  /* Visibilidade responsiva */
+  .mobile-only {
+    @apply block tablet:hidden;
+  }
+  
+  .desktop-only {
+    @apply hidden tablet:block;
+  }
+  
+  .tablet-up {
+    @apply hidden tablet:block;
+  }
+  
+  .mobile-tablet-only {
+    @apply block tablet:hidden;
+  }
+  
+  /* Classes específicas para resoluções intermediárias */
+  .tablet-only {
+    @apply hidden tablet:block laptop:hidden;
+  }
+  
+  .laptop-up {
+    @apply hidden laptop:block;
+  }
+  
+  .tablet-laptop-only {
+    @apply hidden tablet:block laptop-lg:hidden;
+  }
+  
+  /* Grid responsivo otimizado para 800x600+ */
+  .grid-tablet-optimized {
+    @apply grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 xl:grid-cols-4 gap-4 tablet:gap-6;
+  }
+  
+  .grid-tablet-stats {
+    @apply grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4 tablet:gap-6;
+  }
+  
+  /* Flex responsivo otimizado */
+  .flex-tablet-responsive {
+    @apply flex flex-col tablet:flex-row;
+  }
+  
+  .flex-tablet-responsive-reverse {
+    @apply flex flex-col-reverse tablet:flex-row;
+  }
+  
+  /* Espaçamento otimizado para tablets */
+  .space-tablet-responsive {
+    @apply space-y-3 tablet:space-y-4 laptop:space-y-6;
+  }
+  
+  .gap-tablet-responsive {
+    @apply gap-3 tablet:gap-4 laptop:gap-6;
+  }
+  
+  /* Padding otimizado para resoluções intermediárias */
+  .p-tablet-responsive {
+    @apply p-3 tablet:p-4 laptop:p-6;
+  }
+  
+  .px-tablet-responsive {
+    @apply px-3 tablet:px-4 laptop:px-6;
+  }
+  
+  .py-tablet-responsive {
+    @apply py-3 tablet:py-4 laptop:py-6;
+  }
+  
+  /* Texto responsivo otimizado */
+  .text-tablet-responsive-xs {
+    @apply text-xs tablet:text-sm laptop:text-base;
+  }
+  
+  .text-tablet-responsive-sm {
+    @apply text-sm tablet:text-base laptop:text-lg;
+  }
+  
+  .text-tablet-responsive-base {
+    @apply text-base tablet:text-lg laptop:text-xl;
+  }
+  
+  .text-tablet-responsive-lg {
+    @apply text-lg tablet:text-xl laptop:text-2xl;
+  }
+  
+  .text-tablet-responsive-xl {
+    @apply text-xl tablet:text-2xl laptop:text-3xl;
+  }
+  
+  .text-tablet-responsive-2xl {
+    @apply text-2xl tablet:text-3xl laptop:text-4xl;
+  }
+}

@@ -506,18 +506,19 @@ export default function ComparativoClientes() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col tablet:flex-row tablet:items-center justify-between gap-3 tablet:gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
+          <h1 className="text-2xl tablet:text-3xl laptop:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
             Comparativo de Clientes
           </h1>
-          <p className="page-subtitle text-lg">
+          <p className="page-subtitle text-sm tablet:text-base laptop:text-lg">
             Compare vagas entre diferentes clientes
           </p>
           {activeSection && (
             <div className="mt-2 inline-flex items-center px-3 py-1 bg-primary/10 text-primary text-sm rounded-full border border-primary/20">
               <div className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></div>
-              Seção ativa: {
+              <span className="hidden tablet:inline">Seção ativa: </span>
+              {
                 {
                   'descricao': 'Descrição da Vaga',
                   'responsabilidades': 'Responsabilidades e Atribuições',
@@ -533,7 +534,7 @@ export default function ComparativoClientes() {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col tablet:flex-row items-stretch tablet:items-center gap-2">
           <Button 
             variant="outline" 
             onClick={handleReload}
@@ -586,7 +587,7 @@ export default function ComparativoClientes() {
       {selectedClientes.length > 0 && (
         <div ref={comparativoRef} className="space-y-4">
           {/* Layout em Colunas com Filtros Acima */}
-          <div data-client-headers="true" className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div data-client-headers="true" className="grid grid-cols-1 tablet:grid-cols-2 laptop-lg:grid-cols-3 gap-4 tablet:gap-6">
             {selectedClientes.map(cliente => {
               const vagasCliente = getVagasByCliente(cliente)
               return (

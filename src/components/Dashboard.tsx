@@ -223,16 +223,16 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col tablet:flex-row tablet:items-center justify-between gap-3 tablet:gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
+          <h1 className="text-2xl tablet:text-3xl laptop:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
             Dashboard
           </h1>
-          <p className="page-subtitle text-lg">
+          <p className="page-subtitle text-sm tablet:text-base laptop:text-lg">
             Visão geral do sistema e notícias importantes
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-col tablet:flex-row gap-2">
           <Button 
             onClick={handleRefresh} 
             variant="outline" 
@@ -247,13 +247,14 @@ export default function Dashboard() {
           </Button>
           <Button onClick={handleEmergencyRefresh} variant="destructive" size="sm">
             <AlertTriangle className="h-4 w-4 mr-2" />
-            Recarregar Aplicação
+            <span className="hidden tablet:inline">Recarregar Aplicação</span>
+            <span className="tablet:hidden">Recarregar</span>
           </Button>
         </div>
       </div>
 
       {/* Métricas Principais com Cards 3D */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-4 gap-4 tablet:gap-6">
         <Card className={`card-3d hover-lift-3d transition-all duration-300 ${
           config.effects.glassmorphism ? 'bg-white/10 backdrop-blur-xl border-white/20' : ''
         }`}>
@@ -403,7 +404,7 @@ export default function Dashboard() {
               }}
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4 tablet:gap-6">
               {noticiasExibidas.map((noticia, index) => {
                 const isExpanded = expandedCards.has(index)
                 const shouldShowExpandButton = noticia.conteudo.length > 150

@@ -145,23 +145,24 @@ export default function ListaClientes() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col tablet:flex-row tablet:items-center justify-between gap-3 tablet:gap-4">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
+          <h1 className="text-2xl tablet:text-3xl laptop:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
             Lista de Vagas
           </h1>
-          <p className="page-subtitle text-lg">
+          <p className="page-subtitle text-sm tablet:text-base laptop:text-lg">
             Gerencie todas as vagas de emprego disponíveis
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button onClick={() => navigate('/dashboard/nova-vaga')} size="lg" className="h-12 btn-text">
-            <Plus className="h-5 w-5 mr-2 icon-primary" />
+        <div className="flex flex-col tablet:flex-row gap-2 tablet:gap-3">
+          <Button onClick={() => navigate('/dashboard/nova-vaga')} size="lg" className="h-10 tablet:h-12 btn-text">
+            <Plus className="h-4 w-4 tablet:h-5 tablet:w-5 mr-2 icon-primary" />
             Nova Vaga
           </Button>
-          <Button variant="outline" onClick={handleExport} size="lg" className="h-12">
-            <Download className="h-5 w-5 mr-2" />
-            Exportar Excel
+          <Button variant="outline" onClick={handleExport} size="lg" className="h-10 tablet:h-12">
+            <Download className="h-4 w-4 tablet:h-5 tablet:w-5 mr-2" />
+            <span className="hidden tablet:inline">Exportar Excel</span>
+            <span className="tablet:hidden">Exportar</span>
           </Button>
         </div>
       </div>
@@ -178,7 +179,7 @@ export default function ListaClientes() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4 tablet:gap-6">
         <Card className="relative overflow-hidden">
           <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full -translate-y-10 translate-x-10"></div>
           <CardHeader className="pb-3">
