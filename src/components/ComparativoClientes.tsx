@@ -265,10 +265,10 @@ export default function ComparativoClientes() {
     }
 
     const content = sections[section as keyof typeof sections]
-    if (!content) return 'Não informado'
+    if (!content) return <span className="text-contrast-primary">Não informado</span>
 
     return (
-      <div className="text-sm text-gray-700 whitespace-pre-wrap">
+      <div className="text-sm text-contrast-primary whitespace-pre-wrap">
         {content}
       </div>
     )
@@ -610,7 +610,7 @@ export default function ComparativoClientes() {
                               onClick={(e) => toggleSection(section.key, e)}
                             >
                               <div className="flex items-center justify-between">
-                                <CardTitle className={`text-sm transition-colors ${
+                                <CardTitle className={`text-sm text-contrast-primary transition-colors ${
                                   isActive ? 'text-primary font-semibold' : ''
                                 }`}>
                                   {section.title}
