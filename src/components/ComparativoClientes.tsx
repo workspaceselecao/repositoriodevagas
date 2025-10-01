@@ -6,8 +6,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './
 import { Vaga, VagaFilter, ComparisonData } from '../types/database'
 import { getVagas, getClientes, getSites, getCategorias, getCargos, getCelulas } from '../lib/vagas'
 import { X, Filter, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
+import { useThemeClasses } from '../hooks/useThemeClasses'
 
 export default function ComparativoClientes() {
+  const { textClasses } = useThemeClasses()
   const [clientes, setClientes] = useState<string[]>([])
   const [allVagas, setAllVagas] = useState<Vaga[]>([])
   const [selectedClientes, setSelectedClientes] = useState<string[]>([])
@@ -296,10 +298,10 @@ export default function ComparativoClientes() {
     }
 
     const content = sections[section as keyof typeof sections]
-    if (!content) return <span className="text-contrast-primary">Não informado</span>
+    if (!content) return <span className={textClasses.primary}>Não informado</span>
 
     return (
-      <div className="text-sm text-contrast-primary whitespace-pre-wrap">
+      <div className={`text-sm ${textClasses.primary} whitespace-pre-wrap`}>
         {content}
       </div>
     )
@@ -652,7 +654,7 @@ export default function ComparativoClientes() {
                               onClick={(e) => toggleSection(section.key, e)}
                             >
                               <div className="flex items-center justify-between">
-                                <CardTitle className={`text-sm text-contrast-primary transition-colors ${
+                                <CardTitle className={`text-sm ${textClasses.primary} transition-colors ${
                                   isActive ? 'text-primary font-semibold' : ''
                                 }`}>
                                   {section.title}
@@ -671,7 +673,7 @@ export default function ComparativoClientes() {
                                 {vagasCliente.map((vaga, index) => (
                                   <div key={vaga.id} className="mb-4 last:mb-0">
                                     {vagasCliente.length > 1 && (
-                                      <div className="text-xs text-muted-foreground mb-2 font-medium">
+                                      <div className={`text-xs ${textClasses.secondary} mb-2 font-medium`}>
                                         Vaga {index + 1}: {vaga.cargo} - {vaga.celula}
                                       </div>
                                     )}
