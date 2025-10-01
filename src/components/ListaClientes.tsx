@@ -212,7 +212,7 @@ export default function ListaClientes() {
 
       {filteredVagas.length === 0 && !loading && (
         <div className="text-center py-12">
-          <div className="text-gray-500 text-lg">
+          <div className="text-contrast-primary text-lg">
             {searchTerm ? 'Nenhuma vaga encontrada com os filtros aplicados' : 'Nenhuma vaga cadastrada'}
           </div>
         </div>
@@ -278,27 +278,27 @@ export default function ListaClientes() {
                   <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg p-6 border border-primary/20">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-primary mb-2">
+                        <h3 className="text-lg font-semibold text-contrast-primary mb-2">
                           {focusedVaga.titulo || focusedVaga.cargo}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-contrast-primary">
                           <strong>Cliente:</strong> {focusedVaga.cliente}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-contrast-primary">
                           <strong>Célula:</strong> {focusedVaga.celula}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-contrast-primary">
                           <strong>Site:</strong> {focusedVaga.site}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-contrast-primary">
                           <strong>Categoria:</strong> {focusedVaga.categoria}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-contrast-primary">
                           <strong>Cargo:</strong> {focusedVaga.cargo}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-contrast-primary">
                           <strong>Criado em:</strong> {new Date(focusedVaga.created_at).toLocaleDateString('pt-BR')}
                         </p>
                       </div>

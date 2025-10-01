@@ -73,7 +73,7 @@ export default function VagaView() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Carregando vaga...</p>
+          <p className="text-contrast-primary">Carregando vaga...</p>
         </div>
       </div>
     )
@@ -83,8 +83,8 @@ export default function VagaView() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Vaga não encontrada</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <h1 className="text-2xl font-bold text-contrast-primary mb-4">Vaga não encontrada</h1>
+          <p className="text-contrast-primary mb-6">{error}</p>
           <Button onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar para Lista
