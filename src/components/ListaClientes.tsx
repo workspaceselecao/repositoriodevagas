@@ -7,11 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Vaga } from '../types/database'
 import { deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, Maximize2, Minimize2 } from 'lucide-react'
+import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
 import { useAuth } from '../contexts/AuthContext'
 import { useVagas } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
+import { useThemeClasses } from '../hooks/useThemeClasses'
 
 export default function ListaClientes() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -21,6 +22,7 @@ export default function ListaClientes() {
   const navigate = useNavigate()
   const { vagas, loading } = useVagas()
   const { removeVaga } = useCache()
+  const { textClasses } = useThemeClasses()
 
   // Filtrar vagas baseado no termo de busca
   const filteredVagas = useMemo(() => {
@@ -55,9 +57,6 @@ export default function ListaClientes() {
     setIsFullscreen(false)
   }
 
-  const handleToggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
-  }
 
   const handleDelete = async (id: string) => {
     if (user?.role !== 'ADMIN') {
@@ -243,24 +242,6 @@ export default function ListaClientes() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleToggleFullscreen}
-                    className="flex items-center space-x-2"
-                  >
-                    {isFullscreen ? (
-                      <>
-                        <Minimize2 className="h-4 w-4" />
-                        <span>Sair do Fullscreen</span>
-                      </>
-                    ) : (
-                      <>
-                        <Maximize2 className="h-4 w-4" />
-                        <span>Fullscreen</span>
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
                     onClick={handleCloseFocus}
                     className="flex items-center space-x-2"
                   >
@@ -279,27 +260,27 @@ export default function ListaClientes() {
                   <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg p-6 border border-primary/20">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-contrast-primary mb-2">
+                        <h3 className={`text-lg font-semibold ${textClasses.primary} mb-2`}>
                           {focusedVaga.titulo || focusedVaga.cargo}
                         </h3>
-                        <p className="text-sm text-contrast-primary">
+                        <p className={`text-sm ${textClasses.primary}`}>
                           <strong>Cliente:</strong> {focusedVaga.cliente}
                         </p>
-                        <p className="text-sm text-contrast-primary">
+                        <p className={`text-sm ${textClasses.primary}`}>
                           <strong>Célula:</strong> {focusedVaga.celula}
                         </p>
-                        <p className="text-sm text-contrast-primary">
+                        <p className={`text-sm ${textClasses.primary}`}>
                           <strong>Site:</strong> {focusedVaga.site}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-contrast-primary">
+                        <p className={`text-sm ${textClasses.primary}`}>
                           <strong>Categoria:</strong> {focusedVaga.categoria}
                         </p>
-                        <p className="text-sm text-contrast-primary">
+                        <p className={`text-sm ${textClasses.primary}`}>
                           <strong>Cargo:</strong> {focusedVaga.cargo}
                         </p>
-                        <p className="text-sm text-contrast-primary">
+                        <p className={`text-sm ${textClasses.primary}`}>
                           <strong>Criado em:</strong> {new Date(focusedVaga.created_at).toLocaleDateString('pt-BR')}
                         </p>
                       </div>

@@ -18,7 +18,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { ThemeSelector } from './ThemeSelector'
 import CacheMetricsDisplay from './CacheMetricsDisplay'
 import { Badge } from './ui/badge'
-import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash } from 'lucide-react'
+import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash, RefreshCw } from 'lucide-react'
 
 export default function Configuracoes() {
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
@@ -60,24 +60,59 @@ export default function Configuracoes() {
 
   useEffect(() => {
     let isMounted = true
+    let retryCount = 0
+    const maxRetries = 3
+
     const load = async () => {
       try {
+        console.log('🔄 Carregando dados da página Configurações...')
         const [logs, noticiasData, contactEmailsData] = await Promise.all([
           getBackupLogs(),
           getNoticias(),
           getAllContactEmailConfigs()
         ])
+        
         if (isMounted) {
+          console.log('✅ Dados carregados com sucesso:', {
+            logs: logs.length,
+            noticias: noticiasData.length,
+            emails: contactEmailsData.length
+          })
+          
           setBackupLogs(logs)
           setNoticias(noticiasData)
           setContactEmails(contactEmailsData)
         }
       } catch (error) {
-        console.error('Erro ao carregar dados:', error)
+        console.error('❌ Erro ao carregar dados:', error)
+        
+        // Retry automático para emails de contato
+        if (retryCount < maxRetries) {
+          retryCount++
+          console.log(`🔄 Tentativa ${retryCount}/${maxRetries} para recarregar emails...`)
+          setTimeout(() => {
+            if (isMounted) {
+              loadContactEmails()
+            }
+          }, 2000 * retryCount) // Delay progressivo
+        }
       }
     }
+    
     load()
-    return () => { isMounted = false }
+    
+    // Recarregar emails de contato a cada 30 segundos se não houver emails
+    const interval = setInterval(() => {
+      if (isMounted && contactEmails.length === 0) {
+        console.log('🔄 Verificando emails de contato (intervalo)...')
+        loadContactEmails()
+      }
+    }, 30000)
+    
+    return () => { 
+      isMounted = false
+      clearInterval(interval)
+    }
   }, [])
 
   const loadBackupLogs = async () => {
@@ -99,11 +134,27 @@ export default function Configuracoes() {
   }
 
   const loadContactEmails = async () => {
+    setContactEmailLoading(true)
     try {
+      console.log('🔄 Carregando emails de contato...')
       const emailsData = await getAllContactEmailConfigs()
+      console.log('✅ Emails carregados:', emailsData.length, 'emails encontrados')
       setContactEmails(emailsData)
+      
+      // Se não há emails, mostrar log de debug
+      if (emailsData.length === 0) {
+        console.warn('⚠️ Nenhum email de contato encontrado no banco de dados')
+      }
     } catch (error) {
-      console.error('Erro ao carregar emails de contato:', error)
+      console.error('❌ Erro ao carregar emails de contato:', error)
+      
+      // Em caso de erro, tentar novamente após um delay
+      setTimeout(() => {
+        console.log('🔄 Tentando recarregar emails após erro...')
+        loadContactEmails()
+      }, 5000)
+    } finally {
+      setContactEmailLoading(false)
     }
   }
 
@@ -505,20 +556,42 @@ export default function Configuracoes() {
                   <p className="text-sm text-muted-foreground">
                     Gerencie os emails que receberão as mensagens do formulário de contato
                   </p>
+                  {contactEmails.length === 0 && (
+                    <p className="text-xs text-orange-600 mt-1">
+                      ⚠️ Se você tem emails cadastrados mas não aparecem aqui, clique em "Recarregar"
+                    </p>
+                  )}
                 </div>
-                <Button
-                  onClick={() => setShowCreateEmailDialog(true)}
-                  size="sm"
-                  className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95 group"
-                >
-                  <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
-                  Adicionar Email
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={loadContactEmails}
+                    size="sm"
+                    variant="outline"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
+                    disabled={contactEmailLoading}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${contactEmailLoading ? 'animate-spin' : ''}`} />
+                    Recarregar
+                  </Button>
+                  <Button
+                    onClick={() => setShowCreateEmailDialog(true)}
+                    size="sm"
+                    className="flex items-center gap-2 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95 group"
+                  >
+                    <Plus className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" />
+                    Adicionar Email
+                  </Button>
+                </div>
               </div>
               
               {/* Lista de Emails */}
               <div className="space-y-3">
-                {contactEmails.length === 0 ? (
+                {contactEmailLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <RefreshCw className="h-12 w-12 mx-auto mb-4 opacity-50 animate-spin" />
+                    <p>Carregando emails de contato...</p>
+                  </div>
+                ) : contactEmails.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Nenhum email de contato configurado</p>
