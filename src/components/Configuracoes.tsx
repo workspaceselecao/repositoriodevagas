@@ -17,6 +17,7 @@ import { testEmailConfig } from '../lib/emailService'
 import { useAuth } from '../contexts/AuthContext'
 import { ThemeSelector } from './ThemeSelector'
 import CacheMetricsDisplay from './CacheMetricsDisplay'
+import Header from './Header'
 import { Badge } from './ui/badge'
 import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash, RefreshCw } from 'lucide-react'
 
@@ -510,14 +511,10 @@ export default function Configuracoes() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
-          Configurações
-        </h1>
-        <p className="page-subtitle text-lg">
-          Gerencie backups do sistema, notícias e configurações gerais
-        </p>
-      </div>
+      <Header 
+        title="Configurações"
+        subtitle="Gerencie backups do sistema, notícias e configurações gerais"
+      />
 
       {message && (
         <div className={`p-4 rounded-md ${

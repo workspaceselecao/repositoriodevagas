@@ -33,6 +33,9 @@ const config: Config = {
   		'laptop-lg': '1280px'
   	},
   	extend: {
+  		fontFamily: {
+  			sans: ['Inter', 'system-ui', 'sans-serif'],
+  		},
   		colors: {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
@@ -81,6 +84,14 @@ const config: Config = {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
+  			},
+  			// Cores específicas da marca RepoVagas
+  			repovagas: {
+  				primary: '#2563EB',      // Azul Primário
+  				success: '#10B981',      // Verde de Destaque
+  				'text-primary': '#334155',   // Cinza Escuro
+  				'text-secondary': '#64748B', // Cinza Médio
+  				'bg-light': '#F1F5F9'    // Cinza Claro
   			}
   		},
   		borderRadius: {

@@ -6,6 +6,7 @@ import { useUpdateCheck } from '../hooks/useUpdateCheck'
 import { Sidebar, SidebarItem } from './ui/sidebar'
 import { Button } from './ui/button'
 import { ThemeToggle } from './ThemeToggle'
+import Logo from './Logo'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { Badge } from './ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
@@ -88,7 +89,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     },
     {
       icon: Building2,
-      label: 'Lista de Vagas',
+      label: 'Oportunidades',
       href: '/dashboard/clientes',
       show: true
     },
@@ -100,7 +101,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     },
     {
       icon: UserPlus,
-      label: 'Nova Vaga',
+      label: 'Nova Oportunidade',
       href: '/dashboard/nova-vaga',
       show: true
     },
@@ -137,6 +138,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }`}>
           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
             <div className="flex flex-col h-full">
+              {/* Logo Section */}
+              <div className={`flex items-center justify-center py-4 ${
+                isCollapsed ? "px-2" : "px-4"
+              }`}>
+                {isCollapsed ? (
+                  <Logo variant="icon" width={32} height={32} />
+                ) : (
+                  <Logo variant="compacto" width={120} height={40} />
+                )}
+              </div>
+              
               {/* Menu Items */}
               <div className={`flex-1 space-y-2 ${
                 isCollapsed ? "p-2 flex flex-col items-center" : "p-4"

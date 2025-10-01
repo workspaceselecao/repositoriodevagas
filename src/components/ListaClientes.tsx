@@ -136,7 +136,7 @@ export default function ListaClientes() {
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent"></div>
-          <p className="text-muted-foreground">Carregando vagas...</p>
+          <p className="text-muted-foreground font-body">Carregando oportunidades...</p>
         </div>
       </div>
     )
@@ -147,17 +147,17 @@ export default function ListaClientes() {
       {/* Header */}
       <div className="flex flex-col tablet:flex-row tablet:items-center justify-between gap-3 tablet:gap-4">
         <div className="space-y-2">
-          <h1 className="text-2xl tablet:text-3xl laptop:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
-            Lista de Vagas
+          <h1 className="text-2xl tablet:text-3xl laptop:text-4xl font-bold font-heading bg-gradient-to-r from-repovagas-primary to-repovagas-primary/70 bg-clip-text text-transparent page-title">
+            Repositório de Oportunidades
           </h1>
-          <p className="page-subtitle text-sm tablet:text-base laptop:text-lg">
-            Gerencie todas as vagas de emprego disponíveis
+          <p className="page-subtitle text-sm tablet:text-base laptop:text-lg font-body text-repovagas-text-secondary">
+            Gerencie todas as oportunidades profissionais disponíveis
           </p>
         </div>
         <div className="flex flex-col tablet:flex-row gap-2 tablet:gap-3">
           <Button onClick={() => navigate('/dashboard/nova-vaga')} size="lg" className="h-10 tablet:h-12 btn-text">
             <Plus className="h-4 w-4 tablet:h-5 tablet:w-5 mr-2 icon-primary" />
-            Nova Vaga
+            Nova Oportunidade
           </Button>
           <Button variant="outline" onClick={handleExport} size="lg" className="h-10 tablet:h-12">
             <Download className="h-4 w-4 tablet:h-5 tablet:w-5 mr-2" />

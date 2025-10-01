@@ -1,11 +1,11 @@
 {
   "name": "Repositório de Vagas",
   "short_name": "RepoVagas",
-  "description": "Sistema de gerenciamento de vagas e clientes",
+  "description": "Seu repositório de oportunidades profissionais",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "background_color": "#F1F5F9",
+  "theme_color": "#2563EB",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "pt-BR",
@@ -16,13 +16,13 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/icons/icon.svg",
+      "src": "/logos/logo-repovagas-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon.svg",
+      "src": "/logos/logo-repovagas-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
@@ -46,26 +46,26 @@
   ],
   "shortcuts": [
     {
-      "name": "Nova Vaga",
-      "short_name": "Nova Vaga",
-      "description": "Criar uma nova vaga",
+      "name": "Nova Oportunidade",
+      "short_name": "Nova Oportunidade",
+      "description": "Criar uma nova oportunidade profissional",
       "url": "/dashboard/nova-vaga",
       "icons": [
         {
-          "src": "/icons/icon.svg",
+          "src": "/logos/logo-repovagas-icon.svg",
           "sizes": "any",
           "type": "image/svg+xml"
         }
       ]
     },
     {
-      "name": "Clientes",
-      "short_name": "Clientes",
-      "description": "Visualizar lista de clientes",
+      "name": "Oportunidades",
+      "short_name": "Oportunidades",
+      "description": "Visualizar oportunidades disponíveis",
       "url": "/dashboard/clientes",
       "icons": [
         {
-          "src": "/icons/icon.svg",
+          "src": "/logos/logo-repovagas-icon.svg",
           "sizes": "any",
           "type": "image/svg+xml"
         }

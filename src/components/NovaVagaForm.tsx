@@ -42,17 +42,17 @@ export default function NovaVagaForm() {
     try {
       const novaVaga = await createVaga(formData, user.id)
       if (novaVaga) {
-        setMessage('Vaga criada com sucesso!')
+        setMessage('Oportunidade criada com sucesso!')
         setTimeout(() => {
           navigate('/dashboard')
         }, 2000)
       } else {
-        setMessage('Erro ao criar vaga')
+        setMessage('Erro ao criar oportunidade')
       }
     } catch (error: any) {
       console.error('Erro detalhado ao criar vaga:', error)
       const errorMessage = error?.message || 'Erro ao criar vaga'
-      setMessage(`Erro ao criar vaga: ${errorMessage}`)
+      setMessage(`Erro ao criar oportunidade: ${errorMessage}`)
     } finally {
       setLoading(false)
     }
@@ -77,17 +77,17 @@ export default function NovaVagaForm() {
           Voltar
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Nova Vaga</h1>
-          <p className="text-gray-600 mt-2">
-            Adicione uma nova vaga ao sistema
+          <h1 className="text-3xl font-bold font-heading text-repovagas-primary">Nova Oportunidade</h1>
+          <p className="text-repovagas-text-secondary mt-2 font-body">
+            Adicione uma nova oportunidade profissional ao repositório
           </p>
         </div>
       </div>
 
       {message && (
-        <div className={`p-4 rounded-md ${
+        <div className={`p-4 rounded-md font-body ${
           message.includes('sucesso') 
-            ? 'bg-green-50 text-green-800 border border-green-200' 
+            ? 'bg-repovagas-success/10 text-repovagas-success border border-repovagas-success/20' 
             : 'bg-red-50 text-red-800 border border-red-200'
         }`}>
           {message}
@@ -96,12 +96,12 @@ export default function NovaVagaForm() {
 
       <Card className="max-w-4xl">
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center font-heading">
             <Plus className="h-5 w-5 mr-2" />
-            Informações da Vaga
+            Informações da Oportunidade
           </CardTitle>
-          <CardDescription>
-            Preencha todas as informações necessárias sobre a vaga
+          <CardDescription className="font-body text-repovagas-text-secondary">
+            Preencha todas as informações necessárias sobre a oportunidade profissional
           </CardDescription>
         </CardHeader>
         <CardContent>

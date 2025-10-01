@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -21,44 +23,70 @@
 
 @layer base {
   :root {
-    /* Variáveis CSS base para tema claro */
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
-    --card: 180 8% 97%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: 220.9 39.3% 11%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --success: 142 76% 36%;
-    --success-foreground: 210 40% 98%;
+    /* Paleta de Cores RepoVagas - Tema Claro */
+    --background: 0 0% 100%; /* Branco */
+    --foreground: 215 25% 27%; /* Cinza Escuro #334155 */
+    --card: 0 0% 100%; /* Branco */
+    --card-foreground: 215 25% 27%; /* Cinza Escuro #334155 */
+    --popover: 0 0% 100%; /* Branco */
+    --popover-foreground: 215 25% 27%; /* Cinza Escuro #334155 */
+    
+    /* Azul Primário RepoVagas */
+    --primary: 221 83% 53%; /* #2563EB */
+    --primary-foreground: 0 0% 100%; /* Branco */
+    
+    /* Cinza Claro para secundário */
+    --secondary: 210 40% 98%; /* #F1F5F9 */
+    --secondary-foreground: 215 25% 27%; /* Cinza Escuro #334155 */
+    
+    /* Cinza Médio para muted */
+    --muted: 210 40% 98%; /* #F1F5F9 */
+    --muted-foreground: 215 16% 47%; /* Cinza Médio #64748B */
+    
+    /* Accent com cinza claro */
+    --accent: 210 40% 98%; /* #F1F5F9 */
+    --accent-foreground: 215 25% 27%; /* Cinza Escuro #334155 */
+    
+    /* Cores de estado */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Verde de Destaque RepoVagas */
+    --success: 158 64% 52%; /* #10B981 */
+    --success-foreground: 0 0% 100%;
+    
     --warning: 38 92% 50%;
-    --warning-foreground: 210 40% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71.4% 4.1%;
+    --warning-foreground: 0 0% 100%;
+    
+    /* Bordas e inputs */
+    --border: 210 40% 90%;
+    --input: 210 40% 90%;
+    --ring: 221 83% 53%; /* Azul Primário */
+    
+    /* Design tokens */
     --radius: 0.5rem;
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --animation: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    
+    /* Cores de gráficos */
+    --chart-1: 221 83% 53%; /* Azul Primário */
+    --chart-2: 158 64% 52%; /* Verde de Destaque */
+    --chart-3: 215 25% 27%; /* Cinza Escuro */
+    --chart-4: 215 16% 47%; /* Cinza Médio */
+    --chart-5: 210 40% 98%; /* Cinza Claro */
+    
+    /* Tipografia RepoVagas */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
     
     /* Cores de texto com melhor contraste */
-    --text-primary: 0.67 11% 98%;
-    --text-secondary: 0.67 11% 95%;
-    --text-muted: 0.67 11% 90%;
-    --text-accent: 0.67 11% 85%;
+    --text-primary: 215 25% 27%; /* Cinza Escuro #334155 */
+    --text-secondary: 215 16% 47%; /* Cinza Médio #64748B */
+    --text-muted: 215 16% 47%; /* Cinza Médio #64748B */
+    --text-accent: 221 83% 53%; /* Azul Primário #2563EB */
   }
 
   /* Tema Rosa */
@@ -226,39 +254,59 @@
     --text-accent: 0.67 11% 85%;
   }
 
-  /* NOVO TEMA ESCURO - Base */
+  /* Tema Escuro RepoVagas */
   .dark {
-    --background: 216 51% 11%; /* #0e192b (HSL: 0.60, 0.51, 0.11) */
-    --foreground: 210 20% 98%;
-    --card: 213 33% 17%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --secondary: 216 41% 3%; /* #05060C (0.64, 0.41, 0.03) */
-    --secondary-foreground: 210 20% 98%;
-    --muted: 216 41% 3%; /* #05060C (0.64, 0.41, 0.03) */
-    --muted-foreground: 0 0% 98%;
-    --accent: 216 41% 3%; /* #05060C (0.64, 0.41, 0.03) */
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 216 41% 3%; /* #05060C (0.64, 0.41, 0.03) */
-    --input: 216 41% 3%; /* #05060C (0.64, 0.41, 0.03) */
-    --success: 142 76% 36%;
-    --success-foreground: 210 20% 98%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 210 20% 98%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 215 25% 8%; /* Cinza muito escuro baseado na paleta */
+    --foreground: 210 40% 98%; /* Branco */
+    --card: 215 25% 12%; /* Cinza escuro para cards */
+    --card-foreground: 210 40% 98%; /* Branco */
+    --popover: 215 25% 8%; /* Cinza muito escuro */
+    --popover-foreground: 210 40% 98%; /* Branco */
     
-    /* Cores de texto com melhor contraste */
-    --text-primary: 0.67 11% 98%;
-    --text-secondary: 0.67 11% 95%;
-    --text-muted: 0.67 11% 90%;
-    --text-accent: 0.67 11% 85%;
+    /* Azul Primário RepoVagas (mais claro no tema escuro) */
+    --primary: 221 83% 58%; /* #2563EB mais claro */
+    --primary-foreground: 215 25% 8%; /* Cinza muito escuro */
+    
+    /* Cinza médio para secundário */
+    --secondary: 215 16% 20%; /* Cinza médio escuro */
+    --secondary-foreground: 210 40% 98%; /* Branco */
+    
+    /* Cinza para muted */
+    --muted: 215 16% 20%; /* Cinza médio escuro */
+    --muted-foreground: 215 16% 65%; /* Cinza médio claro */
+    
+    /* Accent */
+    --accent: 215 16% 20%; /* Cinza médio escuro */
+    --accent-foreground: 210 40% 98%; /* Branco */
+    
+    /* Cores de estado */
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Verde de Destaque RepoVagas (mais claro no tema escuro) */
+    --success: 158 64% 58%; /* #10B981 mais claro */
+    --success-foreground: 215 25% 8%; /* Cinza muito escuro */
+    
+    --warning: 38 92% 55%;
+    --warning-foreground: 215 25% 8%;
+    
+    /* Bordas e inputs */
+    --border: 215 16% 20%; /* Cinza médio escuro */
+    --input: 215 16% 20%; /* Cinza médio escuro */
+    --ring: 221 83% 58%; /* Azul Primário */
+    
+    /* Cores de gráficos para tema escuro */
+    --chart-1: 221 83% 58%; /* Azul Primário */
+    --chart-2: 158 64% 58%; /* Verde de Destaque */
+    --chart-3: 215 16% 65%; /* Cinza médio claro */
+    --chart-4: 215 16% 50%; /* Cinza médio */
+    --chart-5: 215 25% 12%; /* Cinza escuro */
+    
+    /* Cores de texto para tema escuro */
+    --text-primary: 210 40% 98%; /* Branco */
+    --text-secondary: 215 16% 75%; /* Cinza claro */
+    --text-muted: 215 16% 65%; /* Cinza médio claro */
+    --text-accent: 221 83% 58%; /* Azul Primário */
   }
 
   /* Tema Rosa Escuro */
@@ -296,10 +344,62 @@
     --ring: 188.7 94.5% 42.7%;
   }
 
+  /* Tipografia RepoVagas */
+  body {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-regular);
+  }
+  
+  /* Hierarquia tipográfica RepoVagas */
+  .font-logo {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.025em;
+  }
+  
+  .font-heading {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.025em;
+  }
+  
+  .font-body {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-regular);
+  }
+  
+  .font-medium {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-medium);
+  }
+  
   /* Classe para título da aplicação */
   .app-title {
     color: hsl(var(--primary));
     transition: color 200ms ease-in-out;
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-semibold);
+  }
+  
+  /* Classes específicas da marca RepoVagas */
+  .brand-primary {
+    color: #2563EB;
+  }
+  
+  .brand-success {
+    color: #10B981;
+  }
+  
+  .brand-text-primary {
+    color: #334155;
+  }
+  
+  .brand-text-secondary {
+    color: #64748B;
+  }
+  
+  .brand-bg-light {
+    background-color: #F1F5F9;
   }
 }
 

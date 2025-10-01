@@ -7,8 +7,9 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { ThemeToggle } from './ThemeToggle'
+import Logo from './Logo'
 import { LoginFormData } from '../types/database'
-import { Building2, Lock, Mail, Eye, EyeOff, CheckCircle, AlertCircle, KeyRound } from 'lucide-react'
+import { Lock, Mail, Eye, EyeOff, CheckCircle, AlertCircle, KeyRound } from 'lucide-react'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({
@@ -91,28 +92,29 @@ export default function LoginPage() {
           : 'bg-card shadow-xl'
       } ${shakeError ? 'animate-shake' : ''}`}>
         <CardHeader className="text-center space-y-6 pb-8">
-          {/* Logo animado */}
+          {/* Logo RepoVagas */}
           <div className="flex justify-center">
-            <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 hover:rotate-6 ${
-              config.effects.gradients 
-                ? 'bg-gradient-to-br from-primary via-primary/80 to-primary/60' 
-                : 'bg-primary'
-            }`}>
-              <Building2 className="h-10 w-10 text-primary-foreground animate-bounce-in" />
+            <div className="transition-all duration-300 hover:scale-105">
+              <Logo 
+                variant="icon" 
+                width={80} 
+                height={80} 
+                className="drop-shadow-lg" 
+              />
             </div>
           </div>
           
-          {/* Título com gradiente */}
+          {/* Título com marca RepoVagas */}
           <div className="space-y-2">
-            <CardTitle className={`text-4xl font-bold transition-all duration-300 page-title ${
+            <CardTitle className={`text-4xl font-bold font-logo transition-all duration-300 page-title ${
               config.effects.gradients 
-                ? 'bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent' 
-                : ''
+                ? 'bg-gradient-to-r from-repovagas-primary via-repovagas-primary/80 to-repovagas-primary/60 bg-clip-text text-transparent' 
+                : 'text-repovagas-primary'
             }`}>
               Repositório de Vagas
             </CardTitle>
-            <CardDescription className="page-subtitle text-lg">
-              Faça login para acessar o sistema
+            <CardDescription className="page-subtitle text-lg font-body text-repovagas-text-secondary">
+              Seu repositório de oportunidades profissionais
             </CardDescription>
           </div>
         </CardHeader>
