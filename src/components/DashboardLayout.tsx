@@ -144,25 +144,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               }`}>
                 {isCollapsed ? (
                   <div className="flex items-center justify-center w-full">
-                    <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">RV</span>
-                    </div>
+                    <Logo variant="icon" width={32} height={32} />
                   </div>
                 ) : (
                   <div className="flex items-center space-x-3 w-full">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">RV</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-foreground">Repo Vagas</span>
-                        <span className="text-xs text-muted-foreground">RV Repositório</span>
-                      </div>
-                    </div>
+                    <Logo variant="compacto" width={120} height={40} />
                   </div>
                 )}
                 
                 {/* Toggle Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                  className="h-8 w-8 hover:bg-primary/10 transition-colors"
+                >
+                  {isCollapsed ? (
+                    <Menu className="h-4 w-4" />
+                  ) : (
+                    <Menu className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
               
               {/* Menu Items */}
@@ -276,16 +278,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Mobile Header */}
                 <div className="flex items-center justify-between py-4 px-4 border-b border-border/50">
                   <div className="flex items-center space-x-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">RV</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-foreground">Repo Vagas</span>
-                        <span className="text-xs text-muted-foreground">RV Repositório</span>
-                      </div>
-                    </div>
+                    <Logo variant="compacto" width={120} height={40} />
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="h-8 w-8 hover:bg-primary/10 transition-colors"
+                  >
+                    <Menu className="h-4 w-4" />
+                  </Button>
                 </div>
 
                 {/* Menu Items Mobile */}
