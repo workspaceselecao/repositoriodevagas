@@ -157,14 +157,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 )}
                 
                 {/* Toggle Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 hover:bg-primary/10 transition-all duration-200"
-                  onClick={() => setIsCollapsed(!isCollapsed)}
-                >
-                  <Menu className="h-4 w-4" />
-                </Button>
               </div>
               
               {/* Menu Items */}
@@ -284,14 +276,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <span className="text-xs text-muted-foreground">Repositório</span>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 hover:bg-primary/10"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Menu className="h-4 w-4" />
-                  </Button>
                 </div>
 
                 {/* Menu Items Mobile */}

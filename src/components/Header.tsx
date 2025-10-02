@@ -38,18 +38,7 @@ export default function Header({
         )}
         
         <div className="flex items-center space-x-4">
-          <Logo variant="compacto" width={100} height={32} />
-          <div className="h-8 w-px bg-border" />
-          <div>
-            <h1 className="text-2xl font-bold font-heading text-repovagas-primary">
-              {title}
-            </h1>
-            {subtitle && (
-              <p className="text-sm font-body text-repovagas-text-secondary">
-                {subtitle}
-              </p>
-            )}
-          </div>
+          <Logo variant="principal" width={200} height={40} />
         </div>
       </div>
       
