@@ -22,6 +22,8 @@ interface VagaTemplateProps {
   showActions?: boolean
   showEditAction?: boolean
   showDeleteAction?: boolean
+  showFocusAction?: boolean
+  showDownloadAction?: boolean
   variantIndex?: number
   isExpanded?: boolean
 }
@@ -34,6 +36,8 @@ export default function VagaTemplate({
   showActions = false, 
   showEditAction = true,
   showDeleteAction = true,
+  showFocusAction = true,
+  showDownloadAction = true,
   variantIndex = 0, 
   isExpanded: isExpandedProp 
 }: VagaTemplateProps) {
@@ -71,9 +75,9 @@ export default function VagaTemplate({
             </CardDescription>
           </div>
           <div className="flex items-center justify-between lg:justify-end gap-2">
-            {showActions && (
+            {(showActions || showFocusAction || showDownloadAction) && (
               <div className="flex items-center gap-1">
-                {onFocus && (
+                {onFocus && showFocusAction && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -101,15 +105,17 @@ export default function VagaTemplate({
                     <span className="hidden sm:inline">Editar</span>
                   </Button>
                 )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleDownload}
-                  className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
-                >
-                  <Download className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-200 hover:scale-110" />
-                  <span className="hidden sm:inline">Download</span>
-                </Button>
+                {showDownloadAction && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleDownload}
+                    className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
+                  >
+                    <Download className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-200 hover:scale-110" />
+                    <span className="hidden sm:inline">Download</span>
+                  </Button>
+                )}
                 {onDelete && showDeleteAction && (
                   <Button
                     size="sm"

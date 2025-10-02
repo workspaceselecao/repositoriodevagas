@@ -275,6 +275,8 @@ export default function ListaClientes() {
               showActions={user?.role === 'ADMIN'}
               showEditAction={user?.role === 'ADMIN'}
               showDeleteAction={user?.role === 'ADMIN'}
+              showFocusAction={true}
+              showDownloadAction={true}
               variantIndex={index}
               onEdit={user?.role === 'ADMIN' ? () => handleEdit(vaga) : undefined}
               onDelete={user?.role === 'ADMIN' ? () => handleDelete(vaga.id) : undefined}

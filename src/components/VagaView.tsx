@@ -122,6 +122,8 @@ export default function VagaView() {
           showActions={user?.role === 'ADMIN'}
           showEditAction={user?.role === 'ADMIN'}
           showDeleteAction={user?.role === 'ADMIN'}
+          showFocusAction={true}
+          showDownloadAction={true}
         />
       </div>
     </div>
