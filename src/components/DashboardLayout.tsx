@@ -138,19 +138,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         }`}>
           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
             <div className="flex flex-col h-full">
-              {/* Logo Section */}
-              <div className={`flex items-center justify-center py-4 ${
+              {/* Header Section - Logo + Toggle */}
+              <div className={`flex items-center justify-between py-4 border-b border-border/50 ${
                 isCollapsed ? "px-2" : "px-4"
               }`}>
                 {isCollapsed ? (
-                  <Logo variant="icon" width={32} height={32} />
+                  <div className="flex items-center justify-center w-full">
+                    <Logo variant="icon" width={32} height={32} />
+                  </div>
                 ) : (
-                  <Logo variant="compacto" width={120} height={40} />
+                  <div className="flex items-center space-x-3 w-full">
+                    <Logo variant="compacto" width={100} height={32} />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-primary">RV</span>
+                      <span className="text-xs text-muted-foreground">Repositório</span>
+                    </div>
+                  </div>
                 )}
+                
+                {/* Toggle Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover:bg-primary/10 transition-all duration-200"
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
               </div>
               
               {/* Menu Items */}
-              <div className={`flex-1 space-y-2 ${
+              <div className={`flex-1 space-y-1 ${
                 isCollapsed ? "p-2 flex flex-col items-center" : "p-4"
               }`}>
               {menuItems.map((item, index) => {
@@ -163,20 +181,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Tooltip key={index}>
                     <TooltipTrigger asChild>
                       <Button
-                        variant={isActiveItem ? "default" : "ghost"}
-                        className={`transition-all duration-200 rounded-xl hover-modern ${
+                        variant="ghost"
+                        className={`transition-all duration-200 rounded-lg hover-modern ${
                           isCollapsed 
-                            ? "justify-center p-3 h-12 w-12" 
-                            : "justify-start px-3 py-2 w-full"
+                            ? "justify-center p-3 h-11 w-11" 
+                            : "justify-start px-3 py-2.5 w-full h-11"
                         } ${
                           isActiveItem 
-                            ? "btn-active shadow-md hover-gradient" 
-                            : "btn-text hover:bg-primary/10 hover:shadow-sm"
+                            ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90" 
+                            : "hover:bg-primary/5 hover:text-primary"
                         }`}
                         onClick={() => navigate(item.href)}
                       >
-                        <Icon className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} ${isActiveItem ? "icon-primary" : ""}`} />
-                        {!isCollapsed && <span className="ml-3 text-sm font-medium">{item.label}</span>}
+                        <Icon className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} ${isActiveItem ? "text-primary-foreground" : ""}`} />
+                        {!isCollapsed && (
+                          <span className={`ml-3 text-sm font-medium ${isActiveItem ? "text-primary-foreground" : ""}`}>
+                            {item.label}
+                          </span>
+                        )}
                       </Button>
                     </TooltipTrigger>
                     {isCollapsed && (
@@ -193,7 +215,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* Botão Sobre - Removido, agora o card do usuário abre o modal */}
 
               {/* Rodapé - Informações do Usuário */}
-              <div className={`border-t mt-auto ${
+              <div className={`border-t border-border/50 mt-auto ${
                 isCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-4 space-y-3"
               }`}>
               {/* Informações do Usuário - Clicável para abrir modal Sobre */}
@@ -204,7 +226,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 onClick={() => setIsSobreModalOpen(true)}
                 title={isCollapsed ? `${user?.name || 'Usuário'} - ${user?.role}` : undefined}
               >
-                <div className={`${isCollapsed ? "w-10 h-10" : "w-8 h-8"} bg-primary rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
+                <div className={`${isCollapsed ? "w-10 h-10" : "w-8 h-8"} bg-primary rounded-full flex items-center justify-center flex-shrink-0 shadow-sm`}>
                   <span className="text-primary-foreground font-bold text-sm">
                     {user?.name?.charAt(0).toUpperCase() || 'U'}
                   </span>
@@ -214,7 +236,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <p className="text-sm font-medium text-foreground truncate">
                       {user?.name || 'Usuário'}
                     </p>
-                    <Badge variant="outline" className="text-xs w-fit">
+                    <Badge variant="outline" className="text-xs w-fit bg-primary/5 text-primary border-primary/20">
                       {user?.role}
                     </Badge>
                   </div>
@@ -226,10 +248,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    className={`w-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 rounded-xl hover-button ${
+                    className={`w-full text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 rounded-lg hover-button ${
                       isCollapsed 
-                        ? "justify-center p-3 h-12 w-12" 
-                        : "justify-start px-3 py-2"
+                        ? "justify-center p-3 h-11 w-11" 
+                        : "justify-start px-3 py-2.5 h-11"
                     }`}
                     onClick={handleLogout}
                   >
@@ -253,9 +275,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="tablet:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="fixed left-0 top-0 h-full w-64 bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <Sidebar isCollapsed={false} onToggle={() => {}}>
+                {/* Mobile Header */}
+                <div className="flex items-center justify-between py-4 px-4 border-b border-border/50">
+                  <div className="flex items-center space-x-3">
+                    <Logo variant="compacto" width={80} height={24} />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-primary">RV</span>
+                      <span className="text-xs text-muted-foreground">Repositório</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 hover:bg-primary/10"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </div>
 
                 {/* Menu Items Mobile */}
-                <div className="flex-1 p-4 space-y-2">
+                <div className="flex-1 p-4 space-y-1">
                   {menuItems.map((item, index) => {
                     if (!item.show) return null
                     
@@ -265,11 +305,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     return (
                       <Button
                         key={index}
-                        variant={isActiveItem ? "default" : "ghost"}
-                        className={`w-full justify-start px-3 py-2 transition-all duration-200 rounded-xl hover-modern ${
+                        variant="ghost"
+                        className={`w-full justify-start px-3 py-2.5 h-11 transition-all duration-200 rounded-lg hover-modern ${
                           isActiveItem 
-                            ? "bg-primary text-primary-foreground shadow-md hover-gradient" 
-                            : "hover:bg-primary/10"
+                            ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90" 
+                            : "hover:bg-primary/5 hover:text-primary"
                         }`}
                         onClick={() => {
                           navigate(item.href)
@@ -284,9 +324,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
                 
                 {/* User Info Mobile */}
-                <div className="p-4 border-t space-y-3">
-                  <div className="flex items-center space-x-3 p-3 rounded-lg">
-                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-md">
+                <div className="p-4 border-t border-border/50 space-y-3">
+                  <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/50 transition-all duration-200 cursor-pointer"
+                       onClick={() => setIsSobreModalOpen(true)}>
+                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-sm">
                       <span className="text-primary-foreground font-bold text-sm">
                         {user?.name?.charAt(0).toUpperCase() || 'U'}
                       </span>
@@ -295,7 +336,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <p className="text-sm font-medium text-foreground truncate">
                         Olá, {user?.name}
                       </p>
-                      <Badge variant="outline" className="text-xs w-fit">
+                      <Badge variant="outline" className="text-xs w-fit bg-primary/5 text-primary border-primary/20">
                         {user?.role}
                       </Badge>
                     </div>
@@ -303,7 +344,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   
                   <Button
                     variant="ghost"
-                    className="w-full justify-start px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200 rounded-xl mb-2"
+                    className="w-full justify-start px-3 py-2.5 h-11 text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 rounded-lg mb-2"
                     onClick={() => setIsChangePasswordModalOpen(true)}
                   >
                     <Key className="h-4 w-4" />
@@ -312,7 +353,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   
                   <Button
                     variant="ghost"
-                    className="w-full justify-start px-3 py-2 text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 rounded-xl"
+                    className="w-full justify-start px-3 py-2.5 h-11 text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200 rounded-lg"
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
