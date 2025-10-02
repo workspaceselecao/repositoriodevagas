@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, supabaseAdmin } from './supabase'
 import { Vaga, VagaFormData, VagaFilter } from '../types/database'
 import { sessionCacheUtils } from './session-cache'
 
@@ -36,9 +36,43 @@ export async function getVagas(filter?: VagaFilter): Promise<Vaga[]> {
         const { data: vagas, error } = await query
 
         if (error) {
-          throw new Error(error.message)
+          console.warn('⚠️ Erro com cliente normal, tentando com cliente admin:', error.message)
+          
+          // Se falhar com cliente normal, tentar com cliente admin
+          let adminQuery = supabaseAdmin
+            .from('vagas')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(1000)
+
+          // Aplicar filtros se fornecidos
+          if (filter?.cliente) {
+            adminQuery = adminQuery.eq('cliente', filter.cliente)
+          }
+          if (filter?.site) {
+            adminQuery = adminQuery.eq('site', filter.site)
+          }
+          if (filter?.categoria) {
+            adminQuery = adminQuery.eq('categoria', filter.categoria)
+          }
+          if (filter?.cargo) {
+            adminQuery = adminQuery.eq('cargo', filter.cargo)
+          }
+          if (filter?.celula) {
+            adminQuery = adminQuery.eq('celula', filter.celula)
+          }
+
+          const { data: adminVagas, error: adminError } = await adminQuery
+
+          if (adminError) {
+            throw new Error(`Erro com cliente admin: ${adminError.message}`)
+          }
+
+          console.log(`✅ ${adminVagas?.length || 0} vagas carregadas com cliente admin`)
+          return adminVagas || []
         }
 
+        console.log(`✅ ${vagas?.length || 0} vagas carregadas com cliente normal`)
         return vagas || []
       } catch (error) {
         console.error('Erro ao buscar vagas:', error)
@@ -202,11 +236,27 @@ export async function getClientes(): Promise<string[]> {
           .order('cliente')
 
         if (error) {
-          throw new Error(error.message)
+          console.warn('⚠️ Erro com cliente normal para clientes, tentando com cliente admin:', error.message)
+          
+          // Se falhar com cliente normal, tentar com cliente admin
+          const { data: adminData, error: adminError } = await supabaseAdmin
+            .from('vagas')
+            .select('cliente')
+            .not('cliente', 'is', null)
+            .order('cliente')
+
+          if (adminError) {
+            throw new Error(`Erro com cliente admin: ${adminError.message}`)
+          }
+
+          const clientes = [...new Set(adminData?.map((item: any) => item.cliente).filter(Boolean) || [])] as string[]
+          console.log(`✅ ${clientes.length} clientes carregados com cliente admin`)
+          return clientes
         }
 
         // Remover duplicatas e valores nulos de forma mais eficiente
         const clientes = [...new Set(data?.map((item: any) => item.cliente).filter(Boolean) || [])] as string[]
+        console.log(`✅ ${clientes.length} clientes carregados com cliente normal`)
         return clientes
       } catch (error) {
         console.error('Erro ao buscar clientes:', error)
@@ -231,10 +281,26 @@ export async function getSites(): Promise<string[]> {
           .order('site')
 
         if (error) {
-          throw new Error(error.message)
+          console.warn('⚠️ Erro com cliente normal para sites, tentando com cliente admin:', error.message)
+          
+          // Se falhar com cliente normal, tentar com cliente admin
+          const { data: adminData, error: adminError } = await supabaseAdmin
+            .from('vagas')
+            .select('site')
+            .not('site', 'is', null)
+            .order('site')
+
+          if (adminError) {
+            throw new Error(`Erro com cliente admin: ${adminError.message}`)
+          }
+
+          const sites = [...new Set(adminData?.map((item: any) => item.site).filter(Boolean) || [])] as string[]
+          console.log(`✅ ${sites.length} sites carregados com cliente admin`)
+          return sites
         }
 
         const sites = [...new Set(data?.map((item: any) => item.site).filter(Boolean) || [])] as string[]
+        console.log(`✅ ${sites.length} sites carregados com cliente normal`)
         return sites
       } catch (error) {
         console.error('Erro ao buscar sites:', error)

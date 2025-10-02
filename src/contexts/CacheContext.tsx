@@ -40,6 +40,9 @@ interface CacheContextType {
   // Função para atualizar tudo
   refreshAll: () => Promise<void>
   
+  // Função para forçar carregamento inicial
+  forceInitialLoad: () => Promise<void>
+  
   // Funções para adicionar/atualizar dados no cache
   addVaga: (vaga: Vaga) => void
   updateVaga: (vaga: Vaga) => void
@@ -446,6 +449,34 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     }
   }, [updateCacheStatus])
 
+  // Função para forçar carregamento inicial
+  const forceInitialLoad = useCallback(async () => {
+    console.log('🚀 Forçando carregamento inicial de todos os dados...')
+    setLoading(true)
+    
+    try {
+      // Carregar todas as seções em paralelo, ignorando cache
+      const promises = [
+        refreshVagas(),
+        refreshClientes(),
+        refreshSites(),
+        refreshCategorias(),
+        refreshCargos(),
+        refreshCelulas(),
+        refreshUsuarios(),
+        refreshNoticias()
+      ]
+      
+      await Promise.all(promises)
+      console.log('✅ Carregamento inicial forçado concluído')
+      
+    } catch (error) {
+      console.error('❌ Erro no carregamento inicial forçado:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [refreshVagas, refreshClientes, refreshSites, refreshCategorias, refreshCargos, refreshCelulas, refreshUsuarios, refreshNoticias])
+
   // Função para atualizar tudo com cache inteligente
   const refreshAll = useCallback(async () => {
     if (loading) return // Evitar múltiplas execuções simultâneas
@@ -590,13 +621,20 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       if (shouldRefresh) {
         console.log(`👤 Usuário logado, cache com ${Math.round(cacheAge / 1000 / 60)} minutos - carregando dados...`)
         setIsInitialized(true) // Marcar como inicializado ANTES de carregar
-        refreshAll()
+        
+        // Se não há dados, usar carregamento forçado
+        if (!hasAnyData) {
+          console.log('🚀 Nenhum dado em cache - usando carregamento forçado')
+          forceInitialLoad()
+        } else {
+          refreshAll()
+        }
       } else {
         console.log(`📦 Usando cache existente (${Math.round(cacheAge / 1000 / 60)} minutos)`)
         setIsInitialized(true) // Marcar como inicializado mesmo usando cache
       }
     }
-  }, [user, loading, isInitialized, cache.lastUpdated, cacheStatus, refreshAll]) // Usar cacheStatus completo
+  }, [user, loading, isInitialized, cache.lastUpdated, cacheStatus, refreshAll, forceInitialLoad]) // Usar cacheStatus completo
 
   // Fallback: se após 10 segundos não há dados carregados, forçar carregamento
   useEffect(() => {
@@ -606,11 +644,11 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       if (!hasAnyData) {
         console.log('⚠️ Fallback: Nenhum dado carregado após inicialização - forçando carregamento')
         setTimeout(() => {
-          refreshAll()
+          forceInitialLoad()
         }, 2000) // Aguardar 2 segundos antes de forçar
       }
     }
-  }, [user, isInitialized, loading, cacheStatus, refreshAll])
+  }, [user, isInitialized, loading, cacheStatus, forceInitialLoad])
 
   // Debug: log do estado do cache para diagnóstico
   useEffect(() => {
@@ -643,11 +681,11 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       if (!hasAnyData) {
         console.log('⚠️ Forçando carregamento inicial - nenhum dado encontrado')
         setTimeout(() => {
-          refreshAll()
+          forceInitialLoad()
         }, 1000) // Aguardar 1 segundo antes de forçar
       }
     }
-  }, [user, isInitialized, loading, cacheStatus, refreshAll])
+  }, [user, isInitialized, loading, cacheStatus, forceInitialLoad])
 
   // Limpar cache antigo ao mudar de usuário
   useEffect(() => {
@@ -700,6 +738,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     refreshUsuarios,
     refreshNoticias,
     refreshAll,
+    forceInitialLoad,
     addVaga,
     updateVaga,
     removeVaga,
