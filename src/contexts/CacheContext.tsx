@@ -252,6 +252,8 @@ export function CacheProvider({ children }: { children: ReactNode }) {
           } else {
             console.log('⏰ Cache expirado, será recarregado')
           }
+        } else {
+          console.log('📦 Nenhum cache encontrado no localStorage')
         }
       } catch (error) {
         console.error('Erro ao carregar cache do localStorage:', error)
@@ -465,6 +467,20 @@ export function CacheProvider({ children }: { children: ReactNode }) {
         noticias: !cacheStatus.noticias || (now - cache.lastUpdated > CACHE_EXPIRY)
       }
       
+      // Se não há dados em cache, forçar carregamento de todas as seções
+      const hasAnyData = Object.values(cacheStatus).some(status => status)
+      if (!hasAnyData) {
+        console.log('📦 Nenhum dado em cache - carregando todas as seções')
+        needsRefresh.vagas = true
+        needsRefresh.clientes = true
+        needsRefresh.sites = true
+        needsRefresh.categorias = true
+        needsRefresh.cargos = true
+        needsRefresh.celulas = true
+        needsRefresh.usuarios = true
+        needsRefresh.noticias = true
+      }
+      
       // Criar array de promises apenas para seções que precisam ser atualizadas
       const refreshPromises = []
       
@@ -490,7 +506,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }, [loading, cacheStatus, cache.lastUpdated]) // Dependências otimizadas
+  }, [loading, cacheStatus, cache.lastUpdated, refreshVagas, refreshClientes, refreshSites, refreshCategorias, refreshCargos, refreshCelulas, refreshUsuarios, refreshNoticias]) // Dependências completas
 
   // Função para adicionar vaga ao cache
   const addVaga = useCallback((vaga: Vaga) => {
@@ -567,7 +583,8 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     if (user && !loading && !isInitialized) {
       const now = Date.now()
       const cacheAge = now - cache.lastUpdated
-      const shouldRefresh = cacheAge > CACHE_EXPIRY || !cacheStatus.vagas
+      const hasAnyData = Object.values(cacheStatus).some(status => status)
+      const shouldRefresh = cacheAge > CACHE_EXPIRY || !hasAnyData
       
       // Evitar múltiplas execuções simultâneas
       if (shouldRefresh) {
@@ -579,7 +596,74 @@ export function CacheProvider({ children }: { children: ReactNode }) {
         setIsInitialized(true) // Marcar como inicializado mesmo usando cache
       }
     }
-  }, [user, loading, isInitialized, cache.lastUpdated, cacheStatus.vagas]) // Adicionado isInitialized
+  }, [user, loading, isInitialized, cache.lastUpdated, cacheStatus, refreshAll]) // Usar cacheStatus completo
+
+  // Fallback: se após 10 segundos não há dados carregados, forçar carregamento
+  useEffect(() => {
+    if (user && isInitialized && !loading) {
+      const hasAnyData = Object.values(cacheStatus).some(status => status)
+      
+      if (!hasAnyData) {
+        console.log('⚠️ Fallback: Nenhum dado carregado após inicialização - forçando carregamento')
+        setTimeout(() => {
+          refreshAll()
+        }, 2000) // Aguardar 2 segundos antes de forçar
+      }
+    }
+  }, [user, isInitialized, loading, cacheStatus, refreshAll])
+
+  // Debug: log do estado do cache para diagnóstico
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 [CacheContext] Estado atual:', {
+        userId: user.id,
+        loading,
+        isInitialized,
+        cacheStatus,
+        cacheSize: {
+          vagas: cache.vagas.length,
+          clientes: cache.clientes.length,
+          sites: cache.sites.length,
+          categorias: cache.categorias.length,
+          cargos: cache.cargos.length,
+          celulas: cache.celulas.length,
+          usuarios: cache.usuarios.length,
+          noticias: cache.noticias.length
+        },
+        lastUpdated: new Date(cache.lastUpdated).toLocaleString()
+      })
+    }
+  }, [user, loading, isInitialized, cacheStatus, cache])
+
+  // Forçar carregamento inicial se não há dados após 5 segundos
+  useEffect(() => {
+    if (user && isInitialized && !loading) {
+      const hasAnyData = Object.values(cacheStatus).some(status => status)
+      
+      if (!hasAnyData) {
+        console.log('⚠️ Forçando carregamento inicial - nenhum dado encontrado')
+        setTimeout(() => {
+          refreshAll()
+        }, 1000) // Aguardar 1 segundo antes de forçar
+      }
+    }
+  }, [user, isInitialized, loading, cacheStatus, refreshAll])
+
+  // Limpar cache antigo ao mudar de usuário
+  useEffect(() => {
+    if (user?.id) {
+      // Limpar cache de outros usuários
+      const allKeys = Object.keys(localStorage)
+      const cacheKeys = allKeys.filter(key => key.startsWith('repositoriodevagas_cache_user_'))
+      
+      cacheKeys.forEach(key => {
+        if (!key.includes(user.id)) {
+          localStorage.removeItem(key)
+          console.log(`🧹 Cache de outro usuário removido: ${key}`)
+        }
+      })
+    }
+  }, [user?.id])
 
   // Escutar eventos de atualização de vagas
   useEffect(() => {

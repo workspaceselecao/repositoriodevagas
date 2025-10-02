@@ -67,6 +67,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
         
+        // Log para debug
+        console.log('🔍 [AuthContext] Verificando sessão:', { 
+          hasSession: !!session, 
+          userId: session?.user?.id, 
+          email: session?.user?.email,
+          error: error?.message 
+        })
+        
         // Verificar se há erro na resposta do Supabase
         if (error) {
           console.warn('Erro ao obter sessão:', error.message)
