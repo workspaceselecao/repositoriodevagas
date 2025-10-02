@@ -61,10 +61,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   })
 
 
-  // Fechar menu mobile ao redimensionar
+  // Fechar menu mobile ao redimensionar e garantir sidebar persistente
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      // Fechar menu mobile quando a tela for >= 800px (tablet)
+      if (window.innerWidth >= 800) {
         setIsMobileMenuOpen(false)
       }
     }
@@ -136,7 +137,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <TooltipProvider>
       <div className="flex h-screen bg-background">
-        {/* Sidebar Desktop - Visível a partir de 800px */}
+        {/* Sidebar Desktop - Persistente a partir de 800px */}
         <div className={`hidden tablet:flex transition-all duration-300 ${
           isCollapsed ? 'w-16' : 'w-64'
         }`}>
@@ -282,7 +283,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </Sidebar>
         </div>
 
-        {/* Sidebar Mobile Overlay */}
+        {/* Sidebar Mobile Overlay - Apenas para resoluções < 800px */}
         {isMobileMenuOpen && (
           <div className="tablet:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="fixed left-0 top-0 h-full w-64 bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -375,7 +376,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Apenas para resoluções < 800px */}
           <div className="tablet:hidden fixed top-4 left-4 z-50">
             <Button
               variant="ghost"
