@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion'
 import { Vaga, VagaFilter, ComparisonData } from '../types/database'
 import { getVagas, getClientes, getSites, getCategorias, getCargos, getCelulas } from '../lib/vagas'
-import { X, Filter, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
+import { X, Filter, RotateCcw, ChevronDown, ChevronUp, Edit } from 'lucide-react'
 import { useThemeClasses } from '../hooks/useThemeClasses'
 
 export default function ComparativoClientes() {
   const { textClasses } = useThemeClasses()
+  const navigate = useNavigate()
   const [clientes, setClientes] = useState<string[]>([])
   const [allVagas, setAllVagas] = useState<Vaga[]>([])
   const [selectedClientes, setSelectedClientes] = useState<string[]>([])
@@ -235,6 +237,17 @@ export default function ComparativoClientes() {
       ...prev,
       [cliente]: !prev[cliente]
     }))
+  }
+
+  const handleEditVaga = (vaga: Vaga) => {
+    navigate(`/dashboard/editar-vaga/${vaga.id}`)
+  }
+
+  const handleEditFirstVaga = (cliente: string) => {
+    const vagasCliente = getVagasByCliente(cliente)
+    if (vagasCliente.length > 0) {
+      handleEditVaga(vagasCliente[0])
+    }
   }
 
   const getVagasByCliente = (cliente: string) => {
@@ -604,7 +617,20 @@ export default function ComparativoClientes() {
                     className="py-2 border-2 border-primary/20 bg-primary/5 shadow-sm"
                   >
                     <CardHeader className="py-3">
-                      <CardTitle className="text-center text-base font-semibold text-foreground">{cliente}</CardTitle>
+                      <div className="flex items-center justify-center gap-2">
+                        <CardTitle className="text-center text-base font-semibold text-foreground">{cliente}</CardTitle>
+                        {vagasCliente.length > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditFirstVaga(cliente)}
+                            className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
+                            title="Editar oportunidade"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
                       <CardDescription className="text-center text-sm text-muted-foreground">
                         {vagasCliente.length} vaga(s) encontrada(s)
                       </CardDescription>
