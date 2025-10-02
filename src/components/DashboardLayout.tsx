@@ -15,6 +15,7 @@ import SobreModal from './SobreModal'
 import UpdateModal from './UpdateModal'
 import UpdateNotification from './UpdateNotification'
 import ChangePasswordModal from './ChangePasswordModal'
+import { SidebarDebug } from './SidebarDebug'
 import { 
   Home, 
   Users, 
@@ -42,9 +43,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false)
   const { user, logout } = useAuth()
   const { config } = useTheme()
-  const { isTablet, isMobile } = useScreenSize()
+  const { isTablet, isMobile, width } = useScreenSize()
   const navigate = useNavigate()
   const location = useLocation()
+  
+  // Debug temporário - remover após confirmação
+  useEffect(() => {
+    console.log('Screen size:', { width, isTablet, isMobile })
+  }, [width, isTablet, isMobile])
   
 
   // Hook para verificar atualizações automaticamente
@@ -133,12 +139,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <TooltipProvider>
+      <SidebarDebug />
       <div className="flex h-screen bg-background">
         {/* Sidebar Desktop - Persistente a partir de 800px */}
         {isTablet && (
-          <div className={`flex transition-all duration-300 ${
-            isCollapsed ? 'w-16' : 'w-64'
-          }`}>
+          <div 
+            className={`flex transition-all duration-300 ${
+              isCollapsed ? 'w-16' : 'w-64'
+            }`}
+            style={{ 
+              minWidth: isCollapsed ? '64px' : '256px',
+              maxWidth: isCollapsed ? '64px' : '256px'
+            }}
+          >
           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
             <div className="flex flex-col h-full">
               {/* Header Section - Logo + Toggle */}

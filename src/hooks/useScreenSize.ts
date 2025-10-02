@@ -16,6 +16,9 @@ export function useScreenSize() {
       })
     }
 
+    // Definir tamanho inicial imediatamente
+    handleResize()
+
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
