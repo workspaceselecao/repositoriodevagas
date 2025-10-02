@@ -20,11 +20,23 @@ interface VagaTemplateProps {
   onDelete?: () => void
   onFocus?: () => void
   showActions?: boolean
+  showEditAction?: boolean
+  showDeleteAction?: boolean
   variantIndex?: number
   isExpanded?: boolean
 }
 
-export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActions = false, variantIndex = 0, isExpanded: isExpandedProp }: VagaTemplateProps) {
+export default function VagaTemplate({ 
+  vaga, 
+  onEdit, 
+  onDelete, 
+  onFocus, 
+  showActions = false, 
+  showEditAction = true,
+  showDeleteAction = true,
+  variantIndex = 0, 
+  isExpanded: isExpandedProp 
+}: VagaTemplateProps) {
   const [isExpandedInternal, setIsExpandedInternal] = useState(false)
   const isExpanded = isExpandedProp !== undefined ? isExpandedProp : isExpandedInternal
   const { textClasses, cardClasses, getCardVariant } = useThemeClasses()
@@ -75,7 +87,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                     <span className="hidden sm:inline">Focar</span>
                   </Button>
                 )}
-                {onEdit && (
+                {onEdit && showEditAction && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -98,7 +110,7 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                   <Download className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-200 hover:scale-110" />
                   <span className="hidden sm:inline">Download</span>
                 </Button>
-                {onDelete && (
+                {onDelete && showDeleteAction && (
                   <Button
                     size="sm"
                     variant="outline"

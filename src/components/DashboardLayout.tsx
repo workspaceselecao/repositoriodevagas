@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useRHNovaVagaAccess } from '../hooks/useSystemConfig'
 import { useTheme } from '../contexts/ThemeContext'
 import { useUpdateCheck } from '../hooks/useUpdateCheck'
 import { useScreenSize } from '../hooks/useScreenSize'
@@ -43,6 +44,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth()
   const { config } = useTheme()
   const { isTablet, isMobile } = useScreenSize()
+  const { isEnabled: rhNovaVagaEnabled } = useRHNovaVagaAccess()
   const navigate = useNavigate()
   const location = useLocation()
   
@@ -105,7 +107,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       icon: UserPlus,
       label: 'Nova Oportunidade',
       href: '/dashboard/nova-vaga',
-      show: true
+      show: user?.role === 'ADMIN' || (user?.role === 'RH' && rhNovaVagaEnabled)
     },
     {
       icon: Mail,

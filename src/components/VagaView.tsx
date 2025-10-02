@@ -117,9 +117,11 @@ export default function VagaView() {
       <div className="py-8">
         <VagaTemplate 
           vaga={vaga}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={user?.role === 'ADMIN' ? handleEdit : undefined}
+          onDelete={user?.role === 'ADMIN' ? handleDelete : undefined}
           showActions={user?.role === 'ADMIN'}
+          showEditAction={user?.role === 'ADMIN'}
+          showDeleteAction={user?.role === 'ADMIN'}
         />
       </div>
     </div>

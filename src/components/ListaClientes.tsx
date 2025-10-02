@@ -272,10 +272,12 @@ export default function ListaClientes() {
             <VagaTemplate
               key={vaga.id}
               vaga={vaga}
-              showActions={true}
+              showActions={user?.role === 'ADMIN'}
+              showEditAction={user?.role === 'ADMIN'}
+              showDeleteAction={user?.role === 'ADMIN'}
               variantIndex={index}
-              onEdit={() => handleEdit(vaga)}
-              onDelete={() => handleDelete(vaga.id)}
+              onEdit={user?.role === 'ADMIN' ? () => handleEdit(vaga) : undefined}
+              onDelete={user?.role === 'ADMIN' ? () => handleDelete(vaga.id) : undefined}
               onFocus={() => handleFocusVaga(vaga)}
             />
           ))}

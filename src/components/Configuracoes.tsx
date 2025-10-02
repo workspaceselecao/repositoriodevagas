@@ -15,11 +15,12 @@ import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticia
 import { getAllContactEmailConfigs, createContactEmailConfig, updateContactEmailConfig, deleteContactEmailConfig, toggleContactEmailConfigStatus } from '../lib/contactEmail'
 import { testEmailConfig } from '../lib/emailService'
 import { useAuth } from '../contexts/AuthContext'
+import { useRHNovaVagaAccess } from '../hooks/useSystemConfig'
 import { ThemeSelector } from './ThemeSelector'
 import CacheMetricsDisplay from './CacheMetricsDisplay'
 import Header from './Header'
 import { Badge } from './ui/badge'
-import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash, RefreshCw } from 'lucide-react'
+import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash, RefreshCw, UserPlus } from 'lucide-react'
 
 export default function Configuracoes() {
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
@@ -58,6 +59,7 @@ export default function Configuracoes() {
     ativo: true
   })
   const { user } = useAuth()
+  const { isEnabled: rhNovaVagaEnabled, toggleAccess: toggleRHNovaVagaAccess, loading: rhAccessLoading } = useRHNovaVagaAccess()
 
   useEffect(() => {
     let isMounted = true
@@ -215,6 +217,20 @@ export default function Configuracoes() {
       setMessage(`Erro ao atualizar email de contato: ${error.message}`)
     } finally {
       setContactEmailLoading(false)
+    }
+  }
+
+  const handleRHNovaVagaToggle = async (enabled: boolean) => {
+    try {
+      const success = await toggleRHNovaVagaAccess(enabled)
+      if (success) {
+        setMessage(`Acesso à página Nova Oportunidade ${enabled ? 'habilitado' : 'desabilitado'} para usuários RH`)
+      } else {
+        setMessage('Erro ao atualizar configuração')
+      }
+    } catch (error: any) {
+      console.error('Erro ao atualizar configuração RH:', error)
+      setMessage(`Erro ao atualizar configuração: ${error.message}`)
     }
   }
 
@@ -527,10 +543,11 @@ export default function Configuracoes() {
       )}
 
       <Tabs defaultValue="backup" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="backup">Configuração Geral</TabsTrigger>
           <TabsTrigger value="noticias">Gerenciar Notícias</TabsTrigger>
           <TabsTrigger value="personalizacao">Personalização Visual</TabsTrigger>
+          <TabsTrigger value="acesso">Controle de Acesso</TabsTrigger>
         </TabsList>
 
         <TabsContent value="backup" className="space-y-6">
@@ -1128,6 +1145,76 @@ export default function Configuracoes() {
             {user?.role === 'ADMIN' && (
               <CacheMetricsDisplay className="mt-6" />
             )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="acesso" className="space-y-6">
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Controle de Acesso por Perfil
+              </h2>
+              <p className="text-muted-foreground mt-2">
+                Configure quais funcionalidades estão disponíveis para cada tipo de usuário
+              </p>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlus className="h-5 w-5" />
+                  Acesso à Página Nova Oportunidade
+                </CardTitle>
+                <CardDescription>
+                  Controle se usuários RH podem acessar a funcionalidade de criar novas oportunidades
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Usuários RH</span>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        RH
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Permitir acesso à página Nova Oportunidade para usuários com perfil RH
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {rhAccessLoading ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
+                    ) : (
+                      <Switch
+                        checked={rhNovaVagaEnabled}
+                        onCheckedChange={handleRHNovaVagaToggle}
+                        disabled={rhAccessLoading}
+                      />
+                    )}
+                    <span className="text-sm font-medium">
+                      {rhNovaVagaEnabled ? 'Habilitado' : 'Desabilitado'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground mb-1">Informações importantes:</p>
+                      <ul className="space-y-1 text-xs">
+                        <li>• Usuários ADMIN sempre têm acesso completo a todas as funcionalidades</li>
+                        <li>• Esta configuração afeta apenas usuários com perfil RH</li>
+                        <li>• As alterações são aplicadas imediatamente para todos os usuários RH</li>
+                        <li>• Usuários RH sem acesso serão redirecionados para o dashboard principal</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>

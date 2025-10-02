@@ -19,8 +19,7 @@ import GerenciarUsuarios from './components/GerenciarUsuarios'
 import Contato from './components/Contato'
 import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
-import { PWAInstallPrompt } from './components/PWAInstallPrompt'
-import { OfflineIndicator } from './components/OfflineIndicator'
+import RHProtectedRoute from './components/RHProtectedRoute'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
@@ -83,18 +82,18 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       <Route path="/dashboard/nova-vaga" element={
-        <ProtectedRoute>
+        <RHProtectedRoute>
           <DashboardLayout>
             <NovaVagaFormWithScraping />
           </DashboardLayout>
-        </ProtectedRoute>
+        </RHProtectedRoute>
       } />
       <Route path="/dashboard/nova-vaga/:id" element={
-        <ProtectedRoute>
+        <RHProtectedRoute>
           <DashboardLayout>
             <NovaVagaFormWithScraping />
           </DashboardLayout>
-        </ProtectedRoute>
+        </RHProtectedRoute>
       } />
       <Route path="/dashboard/usuarios" element={
         <ProtectedRoute requireAdmin={true}>
@@ -143,8 +142,6 @@ function App() {
         <CacheProvider>
           <AppRoutes />
           <DebugInfo />
-          <PWAInstallPrompt />
-          <OfflineIndicator />
         </CacheProvider>
       </AuthProvider>
     </ThemeProvider>

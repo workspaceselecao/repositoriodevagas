@@ -78,6 +78,15 @@ export interface AuthUser {
   role: 'ADMIN' | 'RH';
 }
 
+export interface SystemConfig {
+  id: string;
+  config_key: string;
+  config_value: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Tipos para filtros e comparação
 export interface VagaFilter {
   cliente?: string;
