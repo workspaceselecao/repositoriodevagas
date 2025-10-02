@@ -20,14 +20,29 @@ export async function getSystemConfig(key: string): Promise<string | null> {
 
     if (error) {
       console.error('Erro ao buscar configuração:', error)
+      // Se a tabela não existe ou há erro de permissão, retornar valor padrão
+      if (error.code === 'PGRST116' || error.message.includes('relation "system_config" does not exist')) {
+        console.warn('Tabela system_config não existe. Retornando valor padrão.')
+        return getDefaultConfigValue(key)
+      }
       return null
     }
 
     return data?.config_value || null
   } catch (error) {
     console.error('Erro ao buscar configuração:', error)
-    return null
+    return getDefaultConfigValue(key)
   }
+}
+
+// Função para obter valores padrão quando a tabela não existe
+function getDefaultConfigValue(key: string): string {
+  const defaults: Record<string, string> = {
+    'rh_nova_vaga_enabled': 'false',
+    'rh_edit_enabled': 'false',
+    'rh_delete_enabled': 'false'
+  }
+  return defaults[key] || 'false'
 }
 
 // Função para obter todas as configurações
@@ -62,13 +77,18 @@ export async function updateSystemConfig(key: string, value: string): Promise<bo
 
     if (error) {
       console.error('Erro ao atualizar configuração:', error)
-      return false
+      // Se a tabela não existe, mostrar mensagem específica
+      if (error.code === 'PGRST116' || error.message.includes('relation "system_config" does not exist')) {
+        console.error('ERRO: Tabela system_config não existe. Execute a migração do banco de dados primeiro.')
+        throw new Error('Tabela system_config não existe. Execute a migração do banco de dados primeiro.')
+      }
+      throw new Error(`Erro ao atualizar configuração: ${error.message}`)
     }
 
     return true
   } catch (error) {
     console.error('Erro ao atualizar configuração:', error)
-    return false
+    throw error
   }
 }
 

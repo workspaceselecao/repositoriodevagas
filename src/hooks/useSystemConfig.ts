@@ -78,6 +78,7 @@ export function useRHNovaVagaAccess() {
       return success
     } catch (err: any) {
       setError(err.message)
+      console.error('Erro ao alternar acesso RH Nova Vaga:', err)
       return false
     }
   }
@@ -122,6 +123,7 @@ export function useRHEditAccess() {
       return success
     } catch (err: any) {
       setError(err.message)
+      console.error('Erro ao alternar acesso RH Edit:', err)
       return false
     }
   }
@@ -166,6 +168,7 @@ export function useRHDeleteAccess() {
       return success
     } catch (err: any) {
       setError(err.message)
+      console.error('Erro ao alternar acesso RH Delete:', err)
       return false
     }
   }

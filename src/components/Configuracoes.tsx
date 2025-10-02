@@ -232,7 +232,11 @@ export default function Configuracoes() {
       }
     } catch (error: any) {
       console.error('Erro ao atualizar configuração RH:', error)
-      setMessage(`Erro ao atualizar configuração: ${error.message}`)
+      if (error.message.includes('Tabela system_config não existe')) {
+        setMessage('ERRO: Tabela system_config não existe. Execute a migração do banco de dados primeiro.')
+      } else {
+        setMessage(`Erro ao atualizar configuração: ${error.message}`)
+      }
     }
   }
 
@@ -246,7 +250,11 @@ export default function Configuracoes() {
       }
     } catch (error: any) {
       console.error('Erro ao atualizar configuração RH Edit:', error)
-      setMessage(`Erro ao atualizar configuração: ${error.message}`)
+      if (error.message.includes('Tabela system_config não existe')) {
+        setMessage('ERRO: Tabela system_config não existe. Execute a migração do banco de dados primeiro.')
+      } else {
+        setMessage(`Erro ao atualizar configuração: ${error.message}`)
+      }
     }
   }
 
@@ -260,7 +268,11 @@ export default function Configuracoes() {
       }
     } catch (error: any) {
       console.error('Erro ao atualizar configuração RH Delete:', error)
-      setMessage(`Erro ao atualizar configuração: ${error.message}`)
+      if (error.message.includes('Tabela system_config não existe')) {
+        setMessage('ERRO: Tabela system_config não existe. Execute a migração do banco de dados primeiro.')
+      } else {
+        setMessage(`Erro ao atualizar configuração: ${error.message}`)
+      }
     }
   }
 
@@ -1189,6 +1201,29 @@ export default function Configuracoes() {
                 Configure quais funcionalidades estão disponíveis para cada tipo de usuário
               </p>
             </div>
+
+            {/* Aviso sobre migração do banco */}
+            {(rhAccessLoading || rhEditLoading || rhDeleteLoading) && (
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm">
+                    <p className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                      ⚠️ Migração do Banco de Dados Necessária
+                    </p>
+                    <p className="text-yellow-700 dark:text-yellow-300 mb-2">
+                      Para usar os controles de acesso, execute primeiro a migração do banco de dados:
+                    </p>
+                    <div className="bg-yellow-100 dark:bg-yellow-800 p-3 rounded border text-xs font-mono">
+                      <p className="mb-1"><strong>1.</strong> Acesse o Supabase Dashboard</p>
+                      <p className="mb-1"><strong>2.</strong> Vá para SQL Editor</p>
+                      <p className="mb-1"><strong>3.</strong> Execute o script: <code>scripts/migrate-system-config-manual.sql</code></p>
+                      <p><strong>4.</strong> Recarregue esta página</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <Card>
               <CardHeader>
