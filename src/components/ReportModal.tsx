@@ -150,7 +150,7 @@ export default function ReportModal({ isOpen, onClose, vaga }: ReportModalProps)
               onValueChange={setSelectedAdmin}
               disabled={loadingAdmins}
             >
-              <SelectTrigger>
+              <SelectTrigger aria-label="Selecionar administrador responsável">
                 <SelectValue placeholder={loadingAdmins ? "Carregando..." : "Selecione um administrador"} />
               </SelectTrigger>
               <SelectContent>
@@ -170,7 +170,7 @@ export default function ReportModal({ isOpen, onClose, vaga }: ReportModalProps)
               value={selectedField} 
               onValueChange={setSelectedField}
             >
-              <SelectTrigger>
+              <SelectTrigger aria-label="Selecionar campo a ser reportado">
                 <SelectValue placeholder="Selecione o campo que deseja reportar" />
               </SelectTrigger>
               <SelectContent>
@@ -202,6 +202,9 @@ export default function ReportModal({ isOpen, onClose, vaga }: ReportModalProps)
           {/* Sugestões de Alteração */}
           <div className="space-y-2">
             <Label htmlFor="changes">Descreva as Alterações Necessárias *</Label>
+            <p id="changes-description" className="text-sm text-gray-600">
+              Descreva detalhadamente quais informações devem ser alteradas e como devem ficar após a correção.
+            </p>
             <Textarea
               id="changes"
               value={suggestedChanges}
@@ -209,6 +212,8 @@ export default function ReportModal({ isOpen, onClose, vaga }: ReportModalProps)
               placeholder="Descreva detalhadamente quais informações devem ser alteradas e como..."
               rows={4}
               className="resize-none"
+              aria-label="Descrever alterações necessárias"
+              aria-describedby="changes-description"
             />
           </div>
 

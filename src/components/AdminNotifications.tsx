@@ -27,6 +27,8 @@ export default function AdminNotifications() {
         onClick={() => setIsExpanded(!isExpanded)}
         className="relative h-8 w-8 p-0 hover:bg-orange-100 hover:text-orange-600 transition-all duration-200"
         title="Notificações"
+        aria-label={`Notificações ${hasNotifications ? `(${notifications.length} novas)` : ''}`}
+        aria-expanded={isExpanded}
       >
         <Bell className="h-4 w-4" />
         {hasNotifications && (
