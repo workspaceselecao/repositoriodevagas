@@ -41,6 +41,7 @@ export default function NovaVagaFormWithScraping() {
   const [scrapedData, setScrapedData] = useState<ScrapingResult | null>(null)
   const [scrapingError, setScrapingError] = useState<string>('')
   const [activeTab, setActiveTab] = useState('manual')
+  const [buttonColorIndex, setButtonColorIndex] = useState(0)
   const { user } = useAuth()
   const { addVaga, updateVaga: updateVagaInCache } = useCache()
   const navigate = useNavigate()
@@ -53,6 +54,27 @@ export default function NovaVagaFormWithScraping() {
       loadVagaData()
     }
   }, [id, isEditing])
+
+  // Efeito de piscar para o botão "Aplicar" quando há dados extraídos
+  useEffect(() => {
+    if (scrapedData) {
+      const interval = setInterval(() => {
+        setButtonColorIndex(prev => (prev + 1) % 6)
+      }, 1000) // Muda a cada 1 segundo
+
+      return () => clearInterval(interval)
+    }
+  }, [scrapedData])
+
+  // Cores para o efeito de piscar
+  const buttonColors = [
+    'bg-green-600 hover:bg-green-700', // Verde padrão
+    'bg-blue-600 hover:bg-blue-700',   // Azul
+    'bg-purple-600 hover:bg-purple-700', // Roxo
+    'bg-orange-600 hover:bg-orange-700', // Laranja
+    'bg-pink-600 hover:bg-pink-700',   // Rosa
+    'bg-teal-600 hover:bg-teal-700'    // Verde-azulado
+  ]
 
   const loadVagaData = async () => {
     if (!id) return
@@ -498,7 +520,7 @@ export default function NovaVagaFormWithScraping() {
                         <Button
                           size="sm"
                           onClick={() => applyScrapedData(scrapedData)}
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className={`${buttonColors[buttonColorIndex]} text-white transition-all duration-300 animate-pulse`}
                         >
                           <Save className="h-4 w-4 mr-1" />
                           Aplicar
