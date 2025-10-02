@@ -7,6 +7,7 @@ import { useAuth } from './AuthContext'
 import { compressCacheData, decompressCacheData, shouldCompress, getDataSize } from '../lib/cache-compression'
 import { useCacheDistributor } from '../lib/cache-distributor'
 import { useCacheMetrics } from '../lib/cache-metrics'
+import { useCachePreloader } from '../lib/cache-preloader'
 
 // Tipos para o cache
 interface CacheData {
@@ -68,7 +69,7 @@ const getCacheKey = (userId?: string) => {
   return userId ? `${baseKey}_user_${userId}` : baseKey
 }
 
-const CACHE_EXPIRY = 5 * 60 * 1000 // 5 minutos
+const CACHE_EXPIRY = 30 * 60 * 1000 // 30 minutos - cache mais longo para melhor performance
 
 // Estado inicial do cache
 const initialCache: CacheData = {
@@ -100,13 +101,22 @@ export function CacheProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const cacheDistributor = useCacheDistributor()
   const cacheMetrics = useCacheMetrics()
+  const cachePreloader = useCachePreloader()
 
-  // Configurar distribuidor de cache quando usuário mudar
+  // Configurar distribuidor de cache e pré-carregador quando usuário mudar
   useEffect(() => {
     if (user?.id) {
       cacheDistributor.setUserId(user.id)
+      
+      // Configurar pré-carregamento para usuário logado
+      cachePreloader.updateConfig({
+        enabled: true,
+        interval: 15 * 60 * 1000, // 15 minutos para usuários logados
+        backgroundRefresh: true,
+        priority: 'high'
+      })
     }
-  }, [user?.id, cacheDistributor])
+  }, [user?.id, cacheDistributor, cachePreloader])
 
   // Configurar listeners para sincronização entre abas
   useEffect(() => {
@@ -155,6 +165,45 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       unsubscribeClear()
     }
   }, [cacheDistributor, cache])
+
+  // Configurar listener para dados pré-carregados
+  useEffect(() => {
+    const unsubscribePreload = cachePreloader.addListener((preloadData) => {
+      console.log('🔄 Dados pré-carregados recebidos')
+      
+      // Atualizar cache apenas se os dados pré-carregados forem mais recentes
+      if (preloadData.timestamp > cache.lastUpdated) {
+        setCache(prev => ({
+          ...prev,
+          vagas: preloadData.vagas || prev.vagas,
+          clientes: preloadData.clientes || prev.clientes,
+          sites: preloadData.sites || prev.sites,
+          categorias: preloadData.categorias || prev.categorias,
+          cargos: preloadData.cargos || prev.cargos,
+          celulas: preloadData.celulas || prev.celulas,
+          usuarios: preloadData.usuarios || prev.usuarios,
+          noticias: preloadData.noticias || prev.noticias,
+          lastUpdated: preloadData.timestamp
+        }))
+        
+        // Atualizar status do cache
+        setCacheStatus({
+          vagas: preloadData.vagas?.length > 0 || false,
+          clientes: preloadData.clientes?.length > 0 || false,
+          sites: preloadData.sites?.length > 0 || false,
+          categorias: preloadData.categorias?.length > 0 || false,
+          cargos: preloadData.cargos?.length > 0 || false,
+          celulas: preloadData.celulas?.length > 0 || false,
+          usuarios: preloadData.usuarios?.length > 0 || false,
+          noticias: preloadData.noticias?.length > 0 || false
+        })
+      }
+    })
+
+    return () => {
+      unsubscribePreload()
+    }
+  }, [cachePreloader, cache.lastUpdated])
 
   // Carregar cache do localStorage na inicialização
   useEffect(() => {
@@ -394,33 +443,53 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     }
   }, [updateCacheStatus])
 
-  // Função para atualizar tudo
+  // Função para atualizar tudo com cache inteligente
   const refreshAll = useCallback(async () => {
     if (loading) return // Evitar múltiplas execuções simultâneas
     
     try {
       setLoading(true)
-      console.log('🔄 Carregando todos os dados...')
+      console.log('🔄 Carregando todos os dados com cache inteligente...')
       
-      // Carregar dados em paralelo
-      await Promise.all([
-        refreshVagas(),
-        refreshClientes(),
-        refreshSites(),
-        refreshCategorias(),
-        refreshCargos(),
-        refreshCelulas(),
-        refreshUsuarios(),
-        refreshNoticias()
-      ])
+      // Verificar quais seções precisam ser atualizadas
+      const now = Date.now()
+      const needsRefresh = {
+        vagas: !cacheStatus.vagas || (now - cache.lastUpdated > CACHE_EXPIRY),
+        clientes: !cacheStatus.clientes || (now - cache.lastUpdated > CACHE_EXPIRY),
+        sites: !cacheStatus.sites || (now - cache.lastUpdated > CACHE_EXPIRY),
+        categorias: !cacheStatus.categorias || (now - cache.lastUpdated > CACHE_EXPIRY),
+        cargos: !cacheStatus.cargos || (now - cache.lastUpdated > CACHE_EXPIRY),
+        celulas: !cacheStatus.celulas || (now - cache.lastUpdated > CACHE_EXPIRY),
+        usuarios: !cacheStatus.usuarios || (now - cache.lastUpdated > CACHE_EXPIRY),
+        noticias: !cacheStatus.noticias || (now - cache.lastUpdated > CACHE_EXPIRY)
+      }
       
-      console.log('✅ Todos os dados carregados com sucesso')
+      // Criar array de promises apenas para seções que precisam ser atualizadas
+      const refreshPromises = []
+      
+      if (needsRefresh.vagas) refreshPromises.push(refreshVagas())
+      if (needsRefresh.clientes) refreshPromises.push(refreshClientes())
+      if (needsRefresh.sites) refreshPromises.push(refreshSites())
+      if (needsRefresh.categorias) refreshPromises.push(refreshCategorias())
+      if (needsRefresh.cargos) refreshPromises.push(refreshCargos())
+      if (needsRefresh.celulas) refreshPromises.push(refreshCelulas())
+      if (needsRefresh.usuarios) refreshPromises.push(refreshUsuarios())
+      if (needsRefresh.noticias) refreshPromises.push(refreshNoticias())
+      
+      // Executar apenas as atualizações necessárias em paralelo
+      if (refreshPromises.length > 0) {
+        await Promise.all(refreshPromises)
+        console.log(`✅ ${refreshPromises.length} seções atualizadas com sucesso`)
+      } else {
+        console.log('📦 Todos os dados estão atualizados - usando cache')
+      }
+      
     } catch (error) {
       console.error('❌ Erro ao carregar dados:', error)
     } finally {
       setLoading(false)
     }
-  }, [loading, refreshVagas, refreshClientes, refreshSites, refreshCategorias, refreshCargos, refreshCelulas, refreshUsuarios, refreshNoticias])
+  }, [loading, refreshVagas, refreshClientes, refreshSites, refreshCategorias, refreshCargos, refreshCelulas, refreshUsuarios, refreshNoticias, cacheStatus, cache.lastUpdated])
 
   // Função para adicionar vaga ao cache
   const addVaga = useCallback((vaga: Vaga) => {
@@ -492,21 +561,22 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     cacheDistributor.broadcastCacheClear()
   }, [user?.id, cacheDistributor])
 
-  // Carregar dados quando o usuário fizer login
+  // Carregar dados quando o usuário fizer login com cache inteligente
   useEffect(() => {
     if (user && !loading) {
       const now = Date.now()
-      const shouldRefresh = now - cache.lastUpdated > CACHE_EXPIRY
+      const cacheAge = now - cache.lastUpdated
+      const shouldRefresh = cacheAge > CACHE_EXPIRY || !cacheStatus.vagas
       
       // Evitar múltiplas execuções simultâneas
-      if (shouldRefresh || !cacheStatus.vagas) {
-        console.log('👤 Usuário logado, carregando dados...')
+      if (shouldRefresh) {
+        console.log(`👤 Usuário logado, cache com ${Math.round(cacheAge / 1000 / 60)} minutos - carregando dados...`)
         refreshAll()
       } else {
-        console.log('📦 Usando cache existente')
+        console.log(`📦 Usando cache existente (${Math.round(cacheAge / 1000 / 60)} minutos)`)
       }
     }
-  }, [user, loading, cache.lastUpdated, cacheStatus.vagas])
+  }, [user, loading, cache.lastUpdated, cacheStatus.vagas, refreshAll])
 
   // Escutar eventos de atualização de vagas
   useEffect(() => {

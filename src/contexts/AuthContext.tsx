@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Inicializar sistema de versão
     initializeVersionSystem()
 
-    // Timeout de segurança para evitar travamento
+    // Timeout de segurança otimizado para evitar travamento
     const safetyTimeout = setTimeout(() => {
       if (isMounted && !hasInitialized) {
         console.warn('⚠️ Timeout de segurança - forçando inicialização')
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsInitializing(false)
         hasInitialized = true
       }
-    }, 15000) // Aumentado para 15 segundos
+    }, 8000) // Reduzido para 8 segundos para melhor UX
 
     // Verificar sessão atual do Supabase de forma rápida
     const checkUser = async (retryCount = 0) => {
@@ -59,10 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       try {
-        // Verificar sessão com timeout mais generoso e melhor tratamento
+        // Verificar sessão com timeout otimizado
         const sessionPromise = supabase.auth.getSession()
         const timeoutPromise = new Promise<never>((_, reject) => {
-          timeoutId = setTimeout(() => reject(new Error('Session timeout - operação demorou mais que 15 segundos')), 15000) // Aumentado para 15 segundos
+          timeoutId = setTimeout(() => reject(new Error('Session timeout - operação demorou mais que 5 segundos')), 5000) // Reduzido para 5 segundos
         })
 
         const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any

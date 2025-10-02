@@ -124,12 +124,12 @@ export function decompressCacheData(compressedData: string): { data: any, stats:
   }
 }
 
-// Função para verificar se os dados devem ser comprimidos
-export function shouldCompress(data: any, threshold: number = 50000): boolean {
+// Função para verificar se os dados devem ser comprimidos (threshold otimizado)
+export function shouldCompress(data: any, threshold: number = 100000): boolean {
   try {
     const jsonString = JSON.stringify(data)
     const size = new Blob([jsonString]).size
-    return size > threshold // Comprimir se maior que 50KB
+    return size > threshold // Comprimir apenas se maior que 100KB (aumentado de 50KB)
   } catch (error) {
     return false
   }

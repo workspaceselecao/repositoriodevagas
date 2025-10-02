@@ -58,7 +58,7 @@ export default function Dashboard() {
     setExpandedCards(newExpanded)
   }
 
-  // Função para atualizar com animação e feedback tátil
+  // Função para atualizar com animação e feedback tátil otimizada
   const handleRefresh = async () => {
     // Feedback tátil (vibração) se suportado
     if ('vibrate' in navigator) {
@@ -69,8 +69,13 @@ export default function Dashboard() {
     setIsRefreshing(true)
     
     try {
-      // Executar atualização
-      await refreshAll()
+      // Executar atualização com timeout para evitar travamento
+      const refreshPromise = refreshAll()
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Refresh timeout')), 10000) // 10 segundos timeout
+      })
+      
+      await Promise.race([refreshPromise, timeoutPromise])
       
       // Feedback tátil de sucesso
       if ('vibrate' in navigator) {
