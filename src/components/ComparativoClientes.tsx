@@ -6,11 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion'
 import { Vaga, VagaFilter, ComparisonData } from '../types/database'
 import { getVagas, getClientes, getSites, getCategorias, getCargos, getCelulas } from '../lib/vagas'
-import { X, Filter, RotateCcw, ChevronDown, ChevronUp, Edit } from 'lucide-react'
+import { X, Filter, RotateCcw, ChevronDown, ChevronUp, Edit, AlertTriangle } from 'lucide-react'
 import { useThemeClasses } from '../hooks/useThemeClasses'
+import { useAuth } from '../contexts/AuthContext'
+import ReportModal from './ReportModal'
 
 export default function ComparativoClientes() {
   const { textClasses } = useThemeClasses()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [clientes, setClientes] = useState<string[]>([])
   const [allVagas, setAllVagas] = useState<Vaga[]>([])
@@ -20,6 +23,10 @@ export default function ComparativoClientes() {
   const [expandedFilters, setExpandedFilters] = useState<{[cliente: string]: boolean}>({})
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const [isReloading, setIsReloading] = useState(false)
+  
+  // Estados para o modal de reporte
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+  const [selectedVagaForReport, setSelectedVagaForReport] = useState<Vaga | null>(null)
   
   // Refs para controle de rolagem
   const comparativoRef = useRef<HTMLDivElement>(null)
@@ -248,6 +255,19 @@ export default function ComparativoClientes() {
     if (vagasCliente.length > 0) {
       handleEditVaga(vagasCliente[0])
     }
+  }
+
+  const handleReportFirstVaga = (cliente: string) => {
+    const vagasCliente = getVagasByCliente(cliente)
+    if (vagasCliente.length > 0) {
+      setSelectedVagaForReport(vagasCliente[0])
+      setIsReportModalOpen(true)
+    }
+  }
+
+  const handleCloseReportModal = () => {
+    setIsReportModalOpen(false)
+    setSelectedVagaForReport(null)
   }
 
   const getVagasByCliente = (cliente: string) => {
@@ -626,15 +646,28 @@ export default function ComparativoClientes() {
                       <div className="flex items-center justify-center gap-2">
                         <CardTitle className="text-center text-base font-semibold text-foreground">{cliente}</CardTitle>
                         {vagasCliente.length > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditFirstVaga(cliente)}
-                            className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-md"
-                            title="Editar oportunidade"
-                          >
-                            <Edit className="h-3 w-3 transition-transform duration-200 hover:rotate-12" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditFirstVaga(cliente)}
+                              className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-md"
+                              title="Editar oportunidade"
+                            >
+                              <Edit className="h-3 w-3 transition-transform duration-200 hover:rotate-12" />
+                            </Button>
+                            {user?.role === 'RH' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleReportFirstVaga(cliente)}
+                                className="h-6 w-6 p-0 hover:bg-orange-100 hover:text-orange-600 transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-md"
+                                title="Reportar problema"
+                              >
+                                <AlertTriangle className="h-3 w-3 transition-transform duration-200 hover:rotate-12" />
+                              </Button>
+                            )}
+                          </div>
                         )}
                       </div>
                       <CardDescription className="text-center text-sm text-muted-foreground">
@@ -728,6 +761,13 @@ export default function ComparativoClientes() {
           </div>
         </div>
       )}
+
+      {/* Modal de Reporte */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={handleCloseReportModal}
+        vaga={selectedVagaForReport}
+      />
     </div>
   )
 }

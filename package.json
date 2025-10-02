@@ -33,7 +33,8 @@
     "release:major": "tsx scripts/release-manager.ts major",
     "release:last": "tsx scripts/release-manager.ts --last",
     "test-resend": "node scripts/test-resend-config.js",
-    "test-server": "node test-server.js"
+    "test-server": "node test-server.js",
+    "migrate-reports": "tsx scripts/migrate-reports.ts"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

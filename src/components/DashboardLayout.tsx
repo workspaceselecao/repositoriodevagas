@@ -16,6 +16,7 @@ import SobreModal from './SobreModal'
 import UpdateModal from './UpdateModal'
 import UpdateNotification from './UpdateNotification'
 import ChangePasswordModal from './ChangePasswordModal'
+import AdminNotifications from './AdminNotifications'
 import { 
   Home, 
   Users, 
@@ -30,6 +31,7 @@ import {
   Info,
   Key,
   Mail,
+  AlertTriangle,
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -113,6 +115,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       icon: Mail,
       label: 'Contato',
       href: '/dashboard/contato',
+      show: true
+    },
+    {
+      icon: AlertTriangle,
+      label: 'Reports',
+      href: '/dashboard/reports',
       show: true
     },
     {
@@ -397,8 +405,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           )}
 
-          {/* Theme Toggle - Fixed Position */}
-          <div className="fixed top-4 right-4 z-50">
+          {/* Theme Toggle e Notificações - Fixed Position */}
+          <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+            <AdminNotifications />
             <ThemeToggle />
           </div>
 

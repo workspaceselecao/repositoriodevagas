@@ -169,3 +169,36 @@ export interface EmailJSFormData {
   public_key: string;
   ativo?: boolean;
 }
+
+// Tipos para sistema de reports
+export interface Report {
+  id: string;
+  vaga_id: string;
+  reported_by: string;
+  assigned_to: string;
+  field_name: string;
+  current_value?: string;
+  suggested_changes: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'rejected';
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  // Relacionamentos
+  vaga?: Vaga;
+  reporter?: User;
+  assignee?: User;
+}
+
+export interface ReportFormData {
+  vaga_id: string;
+  assigned_to: string;
+  field_name: string;
+  suggested_changes: string;
+}
+
+export interface ReportField {
+  key: string;
+  label: string;
+  value: string;
+}

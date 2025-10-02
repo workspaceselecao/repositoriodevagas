@@ -19,6 +19,8 @@ import GerenciarUsuarios from './components/GerenciarUsuarios'
 import Contato from './components/Contato'
 import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
+import EditarVagaFromReport from './components/EditarVagaFromReport'
+import ReportsList from './components/ReportsList'
 import RHProtectedRoute from './components/RHProtectedRoute'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
@@ -124,6 +126,20 @@ function AppRoutes() {
       <Route path="/dashboard/editar-vaga/:id" element={
         <ProtectedRoute>
           <EditarVagaForm />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/editar-report/:id" element={
+        <ProtectedRoute requireAdmin={true}>
+          <DashboardLayout>
+            <EditarVagaFromReport />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/reports" element={
+        <ProtectedRoute>
+          <DashboardLayout>
+            <ReportsList />
+          </DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
