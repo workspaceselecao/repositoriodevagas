@@ -54,10 +54,12 @@ export default function ReportModal({ isOpen, onClose, vaga }: ReportModalProps)
   const loadAdmins = async () => {
     setLoadingAdmins(true)
     try {
+      console.log('👥 Carregando lista de admins...')
       const adminsData = await getAllAdmins()
+      console.log('✅ Admins carregados:', adminsData)
       setAdmins(adminsData)
     } catch (error) {
-      console.error('Erro ao carregar admins:', error)
+      console.error('❌ Erro ao carregar admins:', error)
       setMessage('Erro ao carregar lista de administradores')
     } finally {
       setLoadingAdmins(false)
@@ -68,14 +70,32 @@ export default function ReportModal({ isOpen, onClose, vaga }: ReportModalProps)
     e.preventDefault()
     
     if (!user || !vaga || !selectedAdmin || !selectedField || !suggestedChanges.trim()) {
+      console.log('❌ Validação falhou:', { 
+        hasUser: !!user, 
+        hasVaga: !!vaga, 
+        hasAdmin: !!selectedAdmin, 
+        hasField: !!selectedField, 
+        hasChanges: !!suggestedChanges.trim() 
+      })
       setMessage('Por favor, preencha todos os campos obrigatórios')
       return
     }
+    
+    console.log('✅ Validação passou, usuário:', user)
 
     setLoading(true)
     setMessage('')
 
+    // Timeout de segurança para evitar loop infinito
+    const timeoutId = setTimeout(() => {
+      console.log('⏰ Timeout de segurança ativado')
+      setLoading(false)
+      setMessage('Timeout: O envio está demorando muito. Tente novamente.')
+    }, 30000) // 30 segundos
+
     try {
+      console.log('🚀 Iniciando envio do report...')
+      
       const reportData: ReportFormData = {
         vaga_id: vaga.id,
         assigned_to: selectedAdmin,
@@ -83,20 +103,37 @@ export default function ReportModal({ isOpen, onClose, vaga }: ReportModalProps)
         suggested_changes: suggestedChanges.trim()
       }
 
+      console.log('📋 Dados do report:', reportData)
+      console.log('👤 Usuário atual:', user)
+
       const report = await createReport(reportData, user.id)
       
+      clearTimeout(timeoutId) // Limpar timeout se sucesso
+      
       if (report) {
+        console.log('✅ Report criado com sucesso!')
         setMessage('Report enviado com sucesso! O administrador será notificado.')
         setTimeout(() => {
           handleClose()
         }, 2000)
       } else {
-        setMessage('Erro ao enviar report')
+        console.log('❌ Report retornou null')
+        setMessage('Erro ao enviar report - resposta vazia')
       }
     } catch (error: any) {
-      console.error('Erro ao criar report:', error)
-      setMessage(`Erro ao enviar report: ${error.message}`)
+      clearTimeout(timeoutId) // Limpar timeout se erro
+      console.error('❌ Erro ao criar report:', error)
+      let errorMessage = 'Erro ao enviar report'
+      
+      if (error?.message) {
+        errorMessage = `Erro ao enviar report: ${error.message}`
+      } else if (error?.code) {
+        errorMessage = `Erro ao enviar report (código: ${error.code})`
+      }
+      
+      setMessage(errorMessage)
     } finally {
+      console.log('🏁 Finalizando envio do report...')
       setLoading(false)
     }
   }

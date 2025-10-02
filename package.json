@@ -35,7 +35,8 @@
     "test-resend": "node scripts/test-resend-config.js",
     "test-server": "node test-server.js",
     "migrate-reports": "tsx scripts/migrate-reports.ts",
-    "fix-rls": "tsx scripts/fix-rls-errors.ts"
+    "fix-rls": "tsx scripts/fix-rls-errors.ts",
+    "test-report": "tsx scripts/test-report-creation.ts"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
