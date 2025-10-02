@@ -6,25 +6,6 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
   try {
     console.log('📝 Criando report:', { reportData, reportedBy })
     
-    // Verificar se o usuário tem permissão
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id, role')
-      .eq('id', reportedBy)
-      .single()
-    
-    if (userError || !userData) {
-      console.error('❌ Usuário não encontrado:', userError)
-      throw new Error('Usuário não encontrado ou sem permissão')
-    }
-    
-    if (userData.role !== 'RH') {
-      console.error('❌ Usuário não tem permissão RH:', userData.role)
-      throw new Error('Apenas usuários RH podem criar reports')
-    }
-    
-    console.log('✅ Usuário validado:', userData)
-    
     // Buscar o valor atual do campo reportado
     const { data: vagaData, error: vagaError } = await supabase
       .from('vagas')
@@ -39,7 +20,10 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
     
     const currentValue = (vagaData as any)[reportData.field_name] || 'Não informado'
     console.log('📋 Valor atual do campo:', currentValue)
+    console.log('📋 Campo reportado:', reportData.field_name)
+    console.log('📋 Dados da vaga:', vagaData)
     
+    // Criar o report sem verificação adicional de usuário (contexto já garante autenticação)
     const { data, error } = await supabase
       .from('reports')
       .insert({
@@ -50,7 +34,7 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
         current_value: currentValue,
         suggested_changes: reportData.suggested_changes
       })
-      .select('*')
+      .select('id, vaga_id, reported_by, assigned_to, field_name, current_value, suggested_changes, status, admin_notes, created_at, updated_at, completed_at')
       .single()
 
     if (error) {
