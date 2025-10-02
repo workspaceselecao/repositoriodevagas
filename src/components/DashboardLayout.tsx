@@ -144,11 +144,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               }`}>
                 {isCollapsed ? (
                   <div className="flex items-center justify-center w-full">
-                    <Logo variant="icon" width={32} height={32} />
+                    <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">RV</span>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-3 w-full">
-                    <Logo variant="compacto" width={120} height={40} />
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">RV</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-foreground">Repo Vagas</span>
+                        <span className="text-xs text-muted-foreground">RV Repositório</span>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
@@ -266,7 +276,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Mobile Header */}
                 <div className="flex items-center justify-between py-4 px-4 border-b border-border/50">
                   <div className="flex items-center space-x-3">
-                    <Logo variant="compacto" width={120} height={40} />
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">RV</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-foreground">Repo Vagas</span>
+                        <span className="text-xs text-muted-foreground">RV Repositório</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
