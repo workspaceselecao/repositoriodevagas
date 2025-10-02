@@ -194,7 +194,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         } ${
                           isActiveItem 
                             ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90" 
-                            : "hover:bg-primary/5 hover:text-primary"
+                            : "hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary"
                         }`}
                         onClick={() => navigate(item.href)}
                       >
@@ -248,7 +248,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         </Badge>
                       )}
                     </div>
-                    <Badge variant="outline" className="text-xs w-fit bg-primary/5 text-primary border-primary/20">
+                    <Badge variant="outline" className="text-xs w-fit bg-primary/10 dark:bg-primary/20 text-primary border-primary/20">
                       {user?.role}
                     </Badge>
                   </div>
@@ -317,7 +317,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         className={`w-full justify-start px-3 py-2.5 h-11 transition-all duration-200 rounded-lg hover-modern ${
                           isActiveItem 
                             ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90" 
-                            : "hover:bg-primary/5 hover:text-primary"
+                            : "hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary"
                         }`}
                         onClick={() => {
                           navigate(item.href)
@@ -344,7 +344,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <p className="text-sm font-medium text-foreground truncate">
                         Olá, {user?.name}
                       </p>
-                      <Badge variant="outline" className="text-xs w-fit bg-primary/5 text-primary border-primary/20">
+                      <Badge variant="outline" className="text-xs w-fit bg-primary/10 dark:bg-primary/20 text-primary border-primary/20">
                         {user?.role}
                       </Badge>
                     </div>
@@ -352,7 +352,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   
                   <Button
                     variant="ghost"
-                    className="w-full justify-start px-3 py-2.5 h-11 text-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200 rounded-lg mb-2"
+                    className="w-full justify-start px-3 py-2.5 h-11 text-foreground hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200 rounded-lg mb-2"
                     onClick={() => setIsChangePasswordModalOpen(true)}
                   >
                     <Key className="h-4 w-4" />

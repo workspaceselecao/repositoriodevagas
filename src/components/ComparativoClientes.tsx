@@ -344,7 +344,7 @@ export default function ComparativoClientes() {
     return (
       <Card className="mb-4">
         <CardHeader 
-          className="cursor-pointer hover:bg-gray-50 transition-colors"
+          className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           onClick={() => toggleFilterExpansion(cliente)}
         >
           <div className="flex items-center justify-between">
@@ -620,7 +620,7 @@ export default function ComparativoClientes() {
                   <Card 
                     ref={selectedClientes.indexOf(cliente) === 0 ? clientHeadersRef : null} 
                     data-client-header={selectedClientes.indexOf(cliente) === 0 ? "true" : "false"}
-                    className="py-2 border-2 border-primary/20 bg-primary/5 shadow-sm"
+                    className="py-2 border-2 border-primary/20 bg-primary/10 dark:bg-primary/20 shadow-sm"
                   >
                     <CardHeader className="py-3">
                       <div className="flex items-center justify-center gap-2">
@@ -683,8 +683,8 @@ export default function ComparativoClientes() {
                             <CardHeader 
                               className={`cursor-pointer transition-colors py-3 ${
                                 isActive 
-                                  ? 'bg-primary/5' 
-                                  : 'hover:bg-gray-50'
+                                  ? 'bg-primary/10 dark:bg-primary/20' 
+                                  : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                               }`}
                               onClick={(e) => toggleSection(section.key, e)}
                             >
@@ -703,7 +703,7 @@ export default function ComparativoClientes() {
                             </CardHeader>
                             {isExpanded && (
                               <CardContent className={`transition-all duration-300 ${
-                                isActive ? 'bg-primary/5' : ''
+                                isActive ? 'bg-primary/10 dark:bg-primary/20' : ''
                               }`}>
                                 {vagasCliente.map((vaga, index) => (
                                   <div key={vaga.id} className="mb-4 last:mb-0">
