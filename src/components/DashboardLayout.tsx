@@ -142,32 +142,31 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
             <div className="flex flex-col h-full">
               {/* Header Section - Logo + Toggle */}
-              <div className={`flex items-center justify-between py-4 border-b border-border/50 ${
-                isCollapsed ? "px-2" : "px-4"
+              <div className={`flex flex-col py-4 border-b border-border/50 ${
+                isCollapsed ? "px-2 items-center space-y-3" : "px-4"
               }`}>
+                {/* Toggle Button - Sempre no topo */}
+                <div className={`flex w-full ${isCollapsed ? "justify-center" : "justify-end"}`}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="h-8 w-8 hover:bg-primary/10 transition-colors"
+                  >
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {/* Logo - Posicionado abaixo do botão quando colapsado */}
                 {isCollapsed ? (
                   <div className="flex items-center justify-center w-full">
-                    <Logo variant="icon" width={32} height={32} />
+                    <Logo variant="icon" width={40} height={40} />
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-3 w-full">
+                  <div className="flex items-center justify-center w-full">
                     <Logo variant="principal" width={160} height={48} />
                   </div>
                 )}
-                
-                {/* Toggle Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsCollapsed(!isCollapsed)}
-                  className="h-8 w-8 hover:bg-primary/10 transition-colors"
-                >
-                  {isCollapsed ? (
-                    <Menu className="h-4 w-4" />
-                  ) : (
-                    <Menu className="h-4 w-4" />
-                  )}
-                </Button>
               </div>
               
               {/* Menu Items */}
