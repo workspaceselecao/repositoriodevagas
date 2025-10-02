@@ -107,15 +107,15 @@ export default function ComparativoClientes() {
   }, [])
 
   useEffect(() => {
-    // Resetar filtros quando clientes selecionados mudarem
+    // Resetar filtros quando clientes selecionados mudarem - CORRIGIDO para evitar loop infinito
     const newClientFilters: {[cliente: string]: VagaFilter} = {}
     selectedClientes.forEach(cliente => {
       newClientFilters[cliente] = clientFilters[cliente] || {}
     })
     setClientFilters(newClientFilters)
-  }, [selectedClientes]) // Removido clientFilters da dependência para evitar loop
+  }, [selectedClientes.length]) // CORRIGIDO: usar apenas o length para evitar loop infinito
 
-  // Rolagem inicial quando clientes são selecionados
+  // Rolagem inicial quando clientes são selecionados - CORRIGIDO para evitar loop infinito
   useEffect(() => {
     console.log('👀 useEffect rolagem inicial - selectedClientes:', selectedClientes)
     if (selectedClientes.length > 0) {
@@ -137,7 +137,7 @@ export default function ComparativoClientes() {
         clearTimeout(scrollTimeoutRef.current)
       }
     }
-  }, [selectedClientes])
+  }, [selectedClientes.length]) // CORRIGIDO: usar apenas o length para evitar loop infinito
 
 
   const handleClienteSelect = (cliente: string) => {
@@ -172,6 +172,8 @@ export default function ComparativoClientes() {
   }
 
   const handleReload = async () => {
+    if (isReloading) return // Evitar múltiplas chamadas simultâneas
+    
     setIsReloading(true)
     try {
       console.log('🔄 Recarregando dados da página Comparativo...')
@@ -183,7 +185,7 @@ export default function ComparativoClientes() {
       setClientes(clientesData)
       setAllVagas(vagasData)
       
-      // Resetar todos os estados para uma experiência limpa
+      // Resetar todos os estados para uma experiência limpa - CORRIGIDO para evitar loop infinito
       setSelectedClientes([])
       setClientFilters({})
       setExpandedSections(new Set())
