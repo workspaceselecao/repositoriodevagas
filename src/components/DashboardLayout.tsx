@@ -149,11 +149,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Logo Principal - Sempre na primeira linha */}
                 {isCollapsed ? (
                   <div className="flex items-center justify-center w-full">
-                    <Logo variant="icon" width={40} height={40} />
+                    <Logo variant="icon" width={48} height={48} />
                   </div>
                 ) : (
                   <div className="flex items-center w-full">
-                    <Logo variant="principal" width={240} height={72} />
+                    <Logo variant="principal" width={288} height={86} />
                   </div>
                 )}
                 
@@ -290,7 +290,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Mobile Header */}
                 <div className="flex items-center justify-between py-4 px-4 border-b border-border/50">
                   <div className="flex items-center space-x-3">
-                    <Logo variant="principal" width={240} height={72} />
+                    <Logo variant="principal" width={288} height={86} />
                   </div>
                   <Button
                     variant="ghost"
