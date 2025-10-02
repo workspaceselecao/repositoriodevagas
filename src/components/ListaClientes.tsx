@@ -171,17 +171,32 @@ export default function ListaClientes() {
           </p>
         </div>
         <div className="flex flex-col tablet:flex-row gap-2 tablet:gap-3">
-          <Button onClick={() => navigate('/dashboard/nova-vaga')} size="sm" className="h-8 tablet:h-9 btn-text">
-            <Plus className="h-4 w-4 mr-2 icon-primary" />
+          <Button 
+            onClick={() => navigate('/dashboard/nova-vaga')} 
+            size="sm" 
+            className="h-8 tablet:h-9 btn-text transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-lg"
+          >
+            <Plus className="h-4 w-4 mr-2 icon-primary transition-transform duration-200 hover:rotate-90" />
             Nova Oportunidade
           </Button>
-          <Button variant="outline" onClick={handleExport} size="sm" className="h-8 tablet:h-9">
-            <Download className="h-4 w-4 mr-2" />
+          <Button 
+            variant="outline" 
+            onClick={handleExport} 
+            size="sm" 
+            className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
+          >
+            <Download className="h-4 w-4 mr-2 transition-transform duration-200 hover:scale-110" />
             <span className="hidden tablet:inline">Exportar Excel</span>
             <span className="tablet:hidden">Exportar</span>
           </Button>
-          <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} size="sm" className="h-8 tablet:h-9">
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh} 
+            disabled={isRefreshing} 
+            size="sm" 
+            className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
             Atualizar
           </Button>
         </div>

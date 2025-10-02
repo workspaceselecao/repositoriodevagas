@@ -85,8 +85,11 @@ export default function VagaView() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-contrast-primary mb-4">Oportunidade não encontrada</h1>
           <p className="text-contrast-primary mb-6">{error}</p>
-          <Button onClick={handleBack}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+          <Button 
+            onClick={handleBack}
+            className="transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-lg"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2 transition-transform duration-200 hover:-translate-x-1" />
             Voltar para Lista
           </Button>
         </div>
@@ -102,9 +105,9 @@ export default function VagaView() {
           <Button 
             variant="outline" 
             onClick={handleBack}
-            className="mb-4"
+            className="mb-4 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-2 transition-transform duration-200 hover:-translate-x-1" />
             Voltar para Lista de Oportunidades
           </Button>
         </div>

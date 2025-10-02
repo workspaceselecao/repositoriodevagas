@@ -360,8 +360,9 @@ export default function ComparativoClientes() {
                   e.stopPropagation()
                   clearClientFilters(cliente)
                 }}
+                className="transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
               >
-                <RotateCcw className="h-3 w-3 mr-1" />
+                <RotateCcw className="h-3 w-3 mr-1 transition-transform duration-200 hover:rotate-180" />
                 Limpar
               </Button>
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -554,13 +555,17 @@ export default function ComparativoClientes() {
             variant="outline" 
             onClick={handleReload}
             disabled={isReloading}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
           >
-            <RotateCcw className={`h-4 w-4 ${isReloading ? 'animate-spin' : ''}`} />
+            <RotateCcw className={`h-4 w-4 transition-transform duration-300 ${isReloading ? 'animate-spin' : 'hover:rotate-180'}`} />
             {isReloading ? 'Recarregando...' : 'Recarregar'}
           </Button>
-          <Button variant="outline" onClick={clearAllFilters}>
-            <X className="h-4 w-4 mr-2" />
+          <Button 
+            variant="outline" 
+            onClick={clearAllFilters}
+            className="transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
+          >
+            <X className="h-4 w-4 mr-2 transition-transform duration-200 hover:rotate-90" />
             Limpar Filtros
           </Button>
         </div>
@@ -582,10 +587,11 @@ export default function ComparativoClientes() {
                 variant={selectedClientes.includes(cliente) ? "default" : "outline"}
                 onClick={() => handleClienteSelect(cliente)}
                 disabled={!selectedClientes.includes(cliente) && selectedClientes.length >= 3}
+                className="transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
               >
                 {cliente}
                 {selectedClientes.includes(cliente) && (
-                  <X className="h-4 w-4 ml-2" />
+                  <X className="h-4 w-4 ml-2 transition-transform duration-200 hover:rotate-90" />
                 )}
               </Button>
             ))}
@@ -624,10 +630,10 @@ export default function ComparativoClientes() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEditFirstVaga(cliente)}
-                            className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary transition-colors"
+                            className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-md"
                             title="Editar oportunidade"
                           >
-                            <Edit className="h-3 w-3" />
+                            <Edit className="h-3 w-3 transition-transform duration-200 hover:rotate-12" />
                           </Button>
                         )}
                       </div>

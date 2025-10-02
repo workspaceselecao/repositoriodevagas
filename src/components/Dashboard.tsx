@@ -244,15 +244,20 @@ export default function Dashboard() {
             variant="outline" 
             size="sm"
             disabled={isRefreshing}
-            className="transition-all duration-200 hover:scale-105 active:scale-95"
+            className="transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
           >
             <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-500 ${
-              isRefreshing ? 'animate-spin' : ''
+              isRefreshing ? 'animate-spin' : 'hover:rotate-180'
             }`} />
             {isRefreshing ? 'Atualizando...' : 'Atualizar'}
           </Button>
-          <Button onClick={handleEmergencyRefresh} variant="destructive" size="sm">
-            <AlertTriangle className="h-4 w-4 mr-2" />
+          <Button 
+            onClick={handleEmergencyRefresh} 
+            variant="destructive" 
+            size="sm"
+            className="transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
+          >
+            <AlertTriangle className="h-4 w-4 mr-2 transition-transform duration-200 hover:rotate-12" />
             <span className="hidden tablet:inline">Recarregar Aplicação</span>
             <span className="tablet:hidden">Recarregar</span>
           </Button>
@@ -459,7 +464,7 @@ export default function Dashboard() {
                             variant="ghost"
                             size="sm"
                             onClick={() => toggleCardExpansion(index)}
-                            className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors duration-200"
+                            className="w-full text-xs text-muted-foreground hover:text-foreground transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-sm"
                           >
                             {isExpanded ? (
                               <>

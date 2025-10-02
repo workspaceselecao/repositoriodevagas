@@ -78,7 +78,7 @@ export function ThemeToggle() {
         <Button 
           variant="outline" 
           size="icon" 
-          className="relative transition-all duration-200 hover-button"
+          className="relative transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:rotate-3"
         >
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

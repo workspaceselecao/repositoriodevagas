@@ -69,9 +69,9 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                       e.stopPropagation()
                       onFocus()
                     }}
-                    className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 transition-all duration-200 hover:scale-105"
+                    className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
                   >
-                    <Eye className="h-3 w-3 md:h-4 md:w-4" />
+                    <Eye className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-200 hover:scale-110" />
                     <span className="hidden sm:inline">Focar</span>
                   </Button>
                 )}
@@ -83,9 +83,9 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                       e.stopPropagation()
                       onEdit()
                     }}
-                    className="flex items-center gap-1 transition-all duration-200 hover:scale-105"
+                    className="flex items-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
                   >
-                    <Edit className="h-3 w-3 md:h-4 md:w-4" />
+                    <Edit className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-200 hover:rotate-12" />
                     <span className="hidden sm:inline">Editar</span>
                   </Button>
                 )}
@@ -93,9 +93,9 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                   size="sm"
                   variant="outline"
                   onClick={handleDownload}
-                  className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200 transition-all duration-200 hover:scale-105"
+                  className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
                 >
-                  <Download className="h-3 w-3 md:h-4 md:w-4" />
+                  <Download className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-200 hover:scale-110" />
                   <span className="hidden sm:inline">Download</span>
                 </Button>
                 {onDelete && (
@@ -106,9 +106,9 @@ export default function VagaTemplate({ vaga, onEdit, onDelete, onFocus, showActi
                       e.stopPropagation()
                       onDelete()
                     }}
-                    className="text-red-600 hover:text-red-700 flex items-center gap-1 transition-all duration-200 hover:scale-105"
+                    className="text-red-600 hover:text-red-700 flex items-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
                   >
-                    <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
+                    <Trash2 className="h-3 w-3 md:h-4 md:w-4 transition-transform duration-200 hover:rotate-12" />
                     <span className="hidden sm:inline">Excluir</span>
                   </Button>
                 )}

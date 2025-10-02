@@ -174,9 +174,9 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-all duration-200 hover:scale-110 active:scale-95 hover:rotate-12"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-5 w-5 transition-transform duration-200" /> : <Eye className="h-5 w-5 transition-transform duration-200" />}
                 </button>
               </div>
             </div>
@@ -199,9 +199,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => navigate('/forgot-password')}
-                className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors duration-200"
+                className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-sm"
               >
-                <KeyRound className="h-3 w-3" />
+                <KeyRound className="h-3 w-3 transition-transform duration-200 hover:rotate-12" />
                 Esqueci minha senha
               </button>
             </div>
@@ -224,7 +224,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className={`w-full h-14 text-base font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+              className={`w-full h-14 text-base font-semibold transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-xl ${
                 loading ? "btn-active" : "btn-text"
               } ${
                 config.effects.gradients 
