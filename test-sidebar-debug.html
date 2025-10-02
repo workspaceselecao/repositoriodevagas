@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Sidebar - RepoVagas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                screens: {
+                    'xs': '480px',
+                    'sm': '640px',
+                    'md': '768px',
+                    'lg': '1024px',
+                    'xl': '1280px',
+                    '2xl': '1536px',
+                    'tablet': '800px',
+                    'laptop': '1024px',
+                    'laptop-lg': '1280px'
+                }
+            }
+        }
+    </script>
+    <style>
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            z-index: 1000;
+            min-width: 200px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-visible { background-color: #10b981; }
+        .status-hidden { background-color: #ef4444; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="debug-panel">
+        <h3 class="font-bold mb-2">Debug Sidebar</h3>
+        <div class="space-y-1 text-sm">
+            <div>Largura: <span id="width" class="font-mono">-</span>px</div>
+            <div>Breakpoint: <span id="breakpoint" class="font-mono">-</span></div>
+            <div>
+                <span class="status-indicator" id="sidebar-status"></span>
+                Sidebar Desktop: <span id="sidebar-text">-</span>
+            </div>
+            <div>
+                <span class="status-indicator" id="mobile-status"></span>
+                Menu Mobile: <span id="mobile-text">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar Desktop - Exatamente como no DashboardLayout -->
+        <div class="hidden tablet:flex transition-all duration-300 w-64 bg-blue-600 text-white shadow-lg">
+            <div class="flex flex-col h-full w-full">
+                <!-- Header Section -->
+                <div class="flex items-center justify-between py-4 border-b border-white/20 px-4">
+                    <div class="flex items-center w-full">
+                        <h2 class="text-xl font-bold">Sidebar Desktop</h2>
+                    </div>
+                    <button class="text-white hover:bg-white/10 p-1 rounded">
+                        ←
+                    </button>
+                </div>
+                
+                <!-- Menu Items -->
+                <div class="flex-1 p-4 space-y-1">
+                    <div class="p-3 hover:bg-white/10 rounded-lg cursor-pointer">Menu Item 1</div>
+                    <div class="p-3 hover:bg-white/10 rounded-lg cursor-pointer">Menu Item 2</div>
+                    <div class="p-3 hover:bg-white/10 rounded-lg cursor-pointer">Menu Item 3</div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="border-t border-white/20 p-4">
+                    <div class="text-sm">Usuário Logado</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Mobile Menu Button -->
+            <div class="tablet:hidden fixed top-4 left-4 z-50">
+                <button class="bg-white shadow-lg p-2 rounded hover:bg-gray-50" onclick="toggleMobileMenu()">
+                    ☰ Menu Mobile
+                </button>
+            </div>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-auto bg-white">
+                <div class="max-w-7xl mx-auto p-3 tablet:p-4 laptop:p-6">
+                    <h1 class="text-3xl font-bold mb-4">Teste de Sidebar - RepoVagas</h1>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                        <h2 class="font-bold mb-2">Status Atual:</h2>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>Sidebar Desktop deve aparecer quando largura ≥ 800px</li>
+                            <li>Menu Mobile deve aparecer quando largura < 800px</li>
+                            <li>Verifique o painel de debug no canto superior direito</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 tablet:grid-cols-2 gap-4">
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-green-800">Coluna 1</h3>
+                            <p class="text-green-700">Esta coluna deve se ajustar responsivamente.</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-purple-800">Coluna 2</h3>
+                            <p class="text-purple-700">Esta coluna deve se ajustar responsivamente.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 bg-yellow-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-yellow-800 mb-2">Instruções de Teste:</h3>
+                        <ol class="list-decimal list-inside space-y-1 text-yellow-700">
+                            <li>Redimensione a janela do navegador</li>
+                            <li>Observe o painel de debug no canto superior direito</li>
+                            <li>Verifique se a sidebar aparece em resoluções ≥ 800px</li>
+                            <li>Verifique se o menu mobile aparece em resoluções < 800px</li>
+                        </ol>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="tablet:hidden fixed inset-0 z-50 bg-black/50 hidden" onclick="closeMobileMenu()">
+        <div class="fixed left-0 top-0 h-full w-64 bg-blue-600 text-white" onclick="event.stopPropagation()">
+            <div class="flex flex-col h-full">
+                <div class="flex items-center justify-between py-4 px-4 border-b border-white/20">
+                    <h2 class="text-xl font-bold">Menu Mobile</h2>
+                    <button onclick="closeMobileMenu()" class="text-white hover:bg-white/10 p-1 rounded">✕</button>
+                </div>
+                <div class="flex-1 p-4 space-y-1">
+                    <div class="p-3 hover:bg-white/10 rounded-lg cursor-pointer">Menu Item 1</div>
+                    <div class="p-3 hover:bg-white/10 rounded-lg cursor-pointer">Menu Item 2</div>
+                    <div class="p-3 hover:bg-white/10 rounded-lg cursor-pointer">Menu Item 3</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateDebugInfo() {
+            const width = window.innerWidth;
+            document.getElementById('width').textContent = width;
+            
+            let breakpoint = 'xs';
+            if (width >= 1536) breakpoint = '2xl';
+            else if (width >= 1280) breakpoint = 'xl';
+            else if (width >= 1024) breakpoint = 'lg';
+            else if (width >= 800) breakpoint = 'tablet';
+            else if (width >= 768) breakpoint = 'md';
+            else if (width >= 640) breakpoint = 'sm';
+            
+            document.getElementById('breakpoint').textContent = breakpoint;
+            
+            // Status da Sidebar Desktop
+            const sidebarVisible = width >= 800;
+            const sidebarStatus = document.getElementById('sidebar-status');
+            const sidebarText = document.getElementById('sidebar-text');
+            
+            if (sidebarVisible) {
+                sidebarStatus.className = 'status-indicator status-visible';
+                sidebarText.textContent = 'Visível';
+            } else {
+                sidebarStatus.className = 'status-indicator status-hidden';
+                sidebarText.textContent = 'Oculta';
+            }
+            
+            // Status do Menu Mobile
+            const mobileVisible = width < 800;
+            const mobileStatus = document.getElementById('mobile-status');
+            const mobileText = document.getElementById('mobile-text');
+            
+            if (mobileVisible) {
+                mobileStatus.className = 'status-indicator status-visible';
+                mobileText.textContent = 'Ativo';
+            } else {
+                mobileStatus.className = 'status-indicator status-hidden';
+                mobileText.textContent = 'Oculto';
+            }
+        }
+
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            overlay.classList.toggle('hidden');
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('mobileOverlay').classList.add('hidden');
+        }
+
+        // Atualizar informações de debug
+        window.addEventListener('resize', updateDebugInfo);
+        updateDebugInfo();
+
+        // Fechar menu mobile ao redimensionar para >= 800px
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 800) {
+                closeMobileMenu();
+            }
+        });
+    </script>
+</body>
+</html>

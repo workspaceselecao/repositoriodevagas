@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useUpdateCheck } from '../hooks/useUpdateCheck'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { Sidebar, SidebarItem } from './ui/sidebar'
 import { Button } from './ui/button'
 import { ThemeToggle } from './ThemeToggle'
@@ -41,6 +42,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false)
   const { user, logout } = useAuth()
   const { config } = useTheme()
+  const { isTablet, isMobile } = useScreenSize()
   const navigate = useNavigate()
   const location = useLocation()
   
@@ -63,15 +65,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Fechar menu mobile ao redimensionar e garantir sidebar persistente
   useEffect(() => {
-    const handleResize = () => {
-      // Fechar menu mobile quando a tela for >= 800px (tablet)
-      if (window.innerWidth >= 800) {
-        setIsMobileMenuOpen(false)
-      }
+    if (isTablet) {
+      setIsMobileMenuOpen(false)
     }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [isTablet])
 
   const handleLogout = () => {
     // Navegar imediatamente para login (sem aguardar logout)
@@ -138,9 +135,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <TooltipProvider>
       <div className="flex h-screen bg-background">
         {/* Sidebar Desktop - Persistente a partir de 800px */}
-        <div className={`hidden tablet:flex transition-all duration-300 ${
-          isCollapsed ? 'w-16' : 'w-64'
-        }`}>
+        {isTablet && (
+          <div className={`flex transition-all duration-300 ${
+            isCollapsed ? 'w-16' : 'w-64'
+          }`}>
           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
             <div className="flex flex-col h-full">
               {/* Header Section - Logo + Toggle */}
@@ -281,11 +279,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </div>
           </Sidebar>
-        </div>
+          </div>
+        )}
 
         {/* Sidebar Mobile Overlay - Apenas para resoluções < 800px */}
-        {isMobileMenuOpen && (
-          <div className="tablet:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}>
+        {isMobileMenuOpen && isMobile && (
+          <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="fixed left-0 top-0 h-full w-64 bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <Sidebar isCollapsed={false} onToggle={() => {}}>
                 {/* Mobile Header */}
@@ -377,7 +376,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Mobile Menu Button - Apenas para resoluções < 800px */}
-          <div className="tablet:hidden fixed top-4 left-4 z-50">
+          {isMobile && (
+            <div className="fixed top-4 left-4 z-50">
             <Button
               variant="ghost"
               size="icon"
@@ -386,7 +386,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <ChevronRight className="h-5 w-5" />
             </Button>
-          </div>
+            </div>
+          )}
 
           {/* Theme Toggle - Fixed Position */}
           <div className="fixed top-4 right-4 z-50">
