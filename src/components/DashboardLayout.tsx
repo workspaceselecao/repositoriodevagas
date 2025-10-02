@@ -298,7 +298,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="h-8 w-8 hover:bg-primary/10 transition-colors"
                   >
-                    <Menu className="h-4 w-4" />
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
                 </div>
 
@@ -383,7 +383,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               className="hover-scale bg-card/80 shadow-lg"
               onClick={() => setIsMobileMenuOpen(true)}
             >
-              <Menu className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
 
