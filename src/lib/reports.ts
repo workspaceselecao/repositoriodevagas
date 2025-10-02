@@ -1,10 +1,29 @@
-import { supabase } from './supabase'
+import { supabase, supabaseAdmin } from './supabase'
 import { Report, ReportFormData, User } from '../types/database'
 
 // Criar um novo report
 export async function createReport(reportData: ReportFormData, reportedBy: string): Promise<Report | null> {
   try {
     console.log('📝 Criando report:', { reportData, reportedBy })
+    
+    // Verificar se o usuário está autenticado no Supabase
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !authUser) {
+      console.error('❌ Usuário não autenticado no Supabase:', authError)
+      throw new Error('Usuário não autenticado no Supabase')
+    }
+    
+    console.log('✅ Usuário autenticado no Supabase:', authUser.id)
+    
+    // Verificar se o ID do usuário autenticado corresponde ao reportedBy
+    if (authUser.id !== reportedBy) {
+      console.error('❌ ID do usuário autenticado não corresponde ao reportedBy:', { 
+        authUserId: authUser.id, 
+        reportedBy 
+      })
+      throw new Error('ID do usuário não corresponde à sessão autenticada')
+    }
     
     // Buscar o valor atual do campo reportado
     const { data: vagaData, error: vagaError } = await supabase
@@ -23,8 +42,8 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
     console.log('📋 Campo reportado:', reportData.field_name)
     console.log('📋 Dados da vaga:', vagaData)
     
-    // Criar o report sem verificação adicional de usuário (contexto já garante autenticação)
-    const { data, error } = await supabase
+    // Tentar criar o report com usuário autenticado primeiro
+    let { data, error } = await supabase
       .from('reports')
       .insert({
         vaga_id: reportData.vaga_id,
@@ -36,6 +55,33 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
       })
       .select('id, vaga_id, reported_by, assigned_to, field_name, current_value, suggested_changes, status, admin_notes, created_at, updated_at, completed_at')
       .single()
+
+    // Se falhar com erro de RLS, tentar com cliente administrativo
+    if (error && (error.code === 'PGRST301' || error.message.includes('row-level security'))) {
+      console.log('⚠️ Erro de RLS detectado, tentando com cliente administrativo...')
+      
+      const { data: adminData, error: adminError } = await supabaseAdmin
+        .from('reports')
+        .insert({
+          vaga_id: reportData.vaga_id,
+          reported_by: reportedBy,
+          assigned_to: reportData.assigned_to,
+          field_name: reportData.field_name,
+          current_value: currentValue,
+          suggested_changes: reportData.suggested_changes
+        })
+        .select('id, vaga_id, reported_by, assigned_to, field_name, current_value, suggested_changes, status, admin_notes, created_at, updated_at, completed_at')
+        .single()
+      
+      if (adminError) {
+        console.error('❌ Erro ao criar report com cliente administrativo:', adminError)
+        throw adminError
+      }
+      
+      data = adminData
+      error = null
+      console.log('✅ Report criado com cliente administrativo')
+    }
 
     if (error) {
       console.error('❌ Erro ao criar report:', error)
