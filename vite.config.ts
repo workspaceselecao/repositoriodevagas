@@ -21,7 +21,20 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    chunkSizeWarningLimit: 1000, // Aumenta o limite para 1MB
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separar vendor libraries em chunks menores
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-accordion'],
+          supabase: ['@supabase/supabase-js'],
+          utils: ['lucide-react', 'clsx', 'tailwind-merge']
+        }
+      }
+    }
   },
   preview: {
     headers: {
