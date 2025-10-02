@@ -149,20 +149,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Logo Principal - Sempre na primeira linha */}
                 {isCollapsed ? (
                   <div className="flex items-center justify-center w-full">
-                    <Logo variant="icon" width={36} height={36} />
+                    <Logo variant="icon" width={40} height={40} />
                   </div>
                 ) : (
                   <div className="flex items-center w-full">
-                    <Logo variant="principal" width={200} height={60} />
+                    <Logo variant="principal" width={240} height={72} />
                   </div>
                 )}
                 
-                {/* Seta de Colapso/Expansão */}
+                {/* Seta de Colapso/Expansão - Posicionada mais à direita */}
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsCollapsed(!isCollapsed)}
-                  className="h-8 w-8 hover:bg-primary/10 transition-colors flex-shrink-0"
+                  className="h-8 w-8 hover:bg-primary/10 transition-colors flex-shrink-0 ml-auto"
                 >
                   {isCollapsed ? (
                     <ChevronRight className="h-4 w-4" />
@@ -290,7 +290,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Mobile Header */}
                 <div className="flex items-center justify-between py-4 px-4 border-b border-border/50">
                   <div className="flex items-center space-x-3">
-                    <Logo variant="principal" width={160} height={48} />
+                    <Logo variant="principal" width={240} height={72} />
                   </div>
                   <Button
                     variant="ghost"
