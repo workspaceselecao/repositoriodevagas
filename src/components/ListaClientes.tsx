@@ -10,6 +10,7 @@ import { exportToExcel } from '../lib/backup'
 import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
 import { useAuth } from '../contexts/AuthContext'
+import { useRHPermissions } from '../hooks/useRHPermissions'
 import { useVagas } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
 import { useThemeClasses } from '../hooks/useThemeClasses'
@@ -25,6 +26,7 @@ export default function ListaClientes() {
   const [itemsPerPage, setItemsPerPage] = useState(10)
   
   const { user } = useAuth()
+  const { canEdit, canDelete, loading: permissionsLoading } = useRHPermissions()
   const navigate = useNavigate()
   const { vagas, loading } = useVagas()
   const { removeVaga, refreshVagas } = useCache()
@@ -272,14 +274,14 @@ export default function ListaClientes() {
             <VagaTemplate
               key={vaga.id}
               vaga={vaga}
-              showActions={user?.role === 'ADMIN'}
-              showEditAction={user?.role === 'ADMIN'}
-              showDeleteAction={user?.role === 'ADMIN'}
+              showActions={user?.role === 'ADMIN' || canEdit || canDelete}
+              showEditAction={canEdit}
+              showDeleteAction={canDelete}
               showFocusAction={true}
               showDownloadAction={true}
               variantIndex={index}
-              onEdit={user?.role === 'ADMIN' ? () => handleEdit(vaga) : undefined}
-              onDelete={user?.role === 'ADMIN' ? () => handleDelete(vaga.id) : undefined}
+              onEdit={canEdit ? () => handleEdit(vaga) : undefined}
+              onDelete={canDelete ? () => handleDelete(vaga.id) : undefined}
               onFocus={() => handleFocusVaga(vaga)}
             />
           ))}

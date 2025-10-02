@@ -15,7 +15,7 @@ import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticia
 import { getAllContactEmailConfigs, createContactEmailConfig, updateContactEmailConfig, deleteContactEmailConfig, toggleContactEmailConfigStatus } from '../lib/contactEmail'
 import { testEmailConfig } from '../lib/emailService'
 import { useAuth } from '../contexts/AuthContext'
-import { useRHNovaVagaAccess } from '../hooks/useSystemConfig'
+import { useRHNovaVagaAccess, useRHEditAccess, useRHDeleteAccess } from '../hooks/useSystemConfig'
 import { ThemeSelector } from './ThemeSelector'
 import CacheMetricsDisplay from './CacheMetricsDisplay'
 import Header from './Header'
@@ -60,6 +60,8 @@ export default function Configuracoes() {
   })
   const { user } = useAuth()
   const { isEnabled: rhNovaVagaEnabled, toggleAccess: toggleRHNovaVagaAccess, loading: rhAccessLoading } = useRHNovaVagaAccess()
+  const { isEnabled: rhEditEnabled, toggleAccess: toggleRHEditAccess, loading: rhEditLoading } = useRHEditAccess()
+  const { isEnabled: rhDeleteEnabled, toggleAccess: toggleRHDeleteAccess, loading: rhDeleteLoading } = useRHDeleteAccess()
 
   useEffect(() => {
     let isMounted = true
@@ -230,6 +232,34 @@ export default function Configuracoes() {
       }
     } catch (error: any) {
       console.error('Erro ao atualizar configuração RH:', error)
+      setMessage(`Erro ao atualizar configuração: ${error.message}`)
+    }
+  }
+
+  const handleRHEditToggle = async (enabled: boolean) => {
+    try {
+      const success = await toggleRHEditAccess(enabled)
+      if (success) {
+        setMessage(`Funcionalidade de Edição ${enabled ? 'habilitada' : 'desabilitada'} para usuários RH`)
+      } else {
+        setMessage('Erro ao atualizar configuração')
+      }
+    } catch (error: any) {
+      console.error('Erro ao atualizar configuração RH Edit:', error)
+      setMessage(`Erro ao atualizar configuração: ${error.message}`)
+    }
+  }
+
+  const handleRHDeleteToggle = async (enabled: boolean) => {
+    try {
+      const success = await toggleRHDeleteAccess(enabled)
+      if (success) {
+        setMessage(`Funcionalidade de Exclusão ${enabled ? 'habilitada' : 'desabilitada'} para usuários RH`)
+      } else {
+        setMessage('Erro ao atualizar configuração')
+      }
+    } catch (error: any) {
+      console.error('Erro ao atualizar configuração RH Delete:', error)
       setMessage(`Erro ao atualizar configuração: ${error.message}`)
     }
   }
@@ -1211,6 +1241,88 @@ export default function Configuracoes() {
                         <li>• Usuários RH sem acesso serão redirecionados para o dashboard principal</li>
                       </ul>
                     </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Edit className="h-5 w-5" />
+                  Controle de Edição de Vagas
+                </CardTitle>
+                <CardDescription>
+                  Controle se usuários RH podem editar vagas existentes
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Usuários RH</span>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        RH
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Permitir edição de vagas para usuários com perfil RH
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {rhEditLoading ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
+                    ) : (
+                      <Switch
+                        checked={rhEditEnabled}
+                        onCheckedChange={handleRHEditToggle}
+                        disabled={rhEditLoading}
+                      />
+                    )}
+                    <span className="text-sm font-medium">
+                      {rhEditEnabled ? 'Habilitado' : 'Desabilitado'}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trash2 className="h-5 w-5" />
+                  Controle de Exclusão de Vagas
+                </CardTitle>
+                <CardDescription>
+                  Controle se usuários RH podem excluir vagas existentes
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Usuários RH</span>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        RH
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Permitir exclusão de vagas para usuários com perfil RH
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {rhDeleteLoading ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
+                    ) : (
+                      <Switch
+                        checked={rhDeleteEnabled}
+                        onCheckedChange={handleRHDeleteToggle}
+                        disabled={rhDeleteLoading}
+                      />
+                    )}
+                    <span className="text-sm font-medium">
+                      {rhDeleteEnabled ? 'Habilitado' : 'Desabilitado'}
+                    </span>
                   </div>
                 </div>
               </CardContent>

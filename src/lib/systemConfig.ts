@@ -78,7 +78,29 @@ export async function isRHNovaVagaEnabled(): Promise<boolean> {
   return value === 'true'
 }
 
+// Função específica para verificar se RH pode editar vagas
+export async function isRHEditEnabled(): Promise<boolean> {
+  const value = await getSystemConfig('rh_edit_enabled')
+  return value === 'true'
+}
+
+// Função específica para verificar se RH pode deletar vagas
+export async function isRHDeleteEnabled(): Promise<boolean> {
+  const value = await getSystemConfig('rh_delete_enabled')
+  return value === 'true'
+}
+
 // Função para habilitar/desabilitar acesso RH à Nova Oportunidade
 export async function setRHNovaVagaAccess(enabled: boolean): Promise<boolean> {
   return await updateSystemConfig('rh_nova_vaga_enabled', enabled.toString())
+}
+
+// Função para habilitar/desabilitar edição RH
+export async function setRHEditAccess(enabled: boolean): Promise<boolean> {
+  return await updateSystemConfig('rh_edit_enabled', enabled.toString())
+}
+
+// Função para habilitar/desabilitar exclusão RH
+export async function setRHDeleteAccess(enabled: boolean): Promise<boolean> {
+  return await updateSystemConfig('rh_delete_enabled', enabled.toString())
 }

@@ -19,6 +19,16 @@ INSERT INTO system_config (config_key, config_value, description)
 VALUES ('rh_nova_vaga_enabled', 'false', 'Habilita acesso à página Nova Oportunidade para usuários RH')
 ON CONFLICT (config_key) DO NOTHING;
 
+-- Inserir configuração padrão para habilitação de Edição para RH
+INSERT INTO system_config (config_key, config_value, description) 
+VALUES ('rh_edit_enabled', 'false', 'Habilita funcionalidade de edição de vagas para usuários RH')
+ON CONFLICT (config_key) DO NOTHING;
+
+-- Inserir configuração padrão para habilitação de Exclusão para RH
+INSERT INTO system_config (config_key, config_value, description) 
+VALUES ('rh_delete_enabled', 'false', 'Habilita funcionalidade de exclusão de vagas para usuários RH')
+ON CONFLICT (config_key) DO NOTHING;
+
 -- 3. Criar índice para melhor performance
 CREATE INDEX IF NOT EXISTS idx_system_config_key ON system_config(config_key);
 
@@ -29,7 +39,8 @@ SELECT
   config_value,
   description
 FROM system_config 
-WHERE config_key = 'rh_nova_vaga_enabled';
+WHERE config_key IN ('rh_nova_vaga_enabled', 'rh_edit_enabled', 'rh_delete_enabled')
+ORDER BY config_key;
 
 -- =====================================================
 -- INSTRUÇÕES:

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SystemConfig, getSystemConfig, getAllSystemConfigs, updateSystemConfig, isRHNovaVagaEnabled, setRHNovaVagaAccess } from '../lib/systemConfig'
+import { SystemConfig, getSystemConfig, getAllSystemConfigs, updateSystemConfig, isRHNovaVagaEnabled, setRHNovaVagaAccess, isRHEditEnabled, setRHEditAccess, isRHDeleteEnabled, setRHDeleteAccess } from '../lib/systemConfig'
 
 export function useSystemConfig() {
   const [configs, setConfigs] = useState<SystemConfig[]>([])
@@ -72,6 +72,94 @@ export function useRHNovaVagaAccess() {
   const toggleAccess = async (enabled: boolean) => {
     try {
       const success = await setRHNovaVagaAccess(enabled)
+      if (success) {
+        setIsEnabled(enabled)
+      }
+      return success
+    } catch (err: any) {
+      setError(err.message)
+      return false
+    }
+  }
+
+  useEffect(() => {
+    loadAccessStatus()
+  }, [])
+
+  return {
+    isEnabled,
+    loading,
+    error,
+    toggleAccess,
+    loadAccessStatus
+  }
+}
+
+export function useRHEditAccess() {
+  const [isEnabled, setIsEnabled] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const loadAccessStatus = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const enabled = await isRHEditEnabled()
+      setIsEnabled(enabled)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const toggleAccess = async (enabled: boolean) => {
+    try {
+      const success = await setRHEditAccess(enabled)
+      if (success) {
+        setIsEnabled(enabled)
+      }
+      return success
+    } catch (err: any) {
+      setError(err.message)
+      return false
+    }
+  }
+
+  useEffect(() => {
+    loadAccessStatus()
+  }, [])
+
+  return {
+    isEnabled,
+    loading,
+    error,
+    toggleAccess,
+    loadAccessStatus
+  }
+}
+
+export function useRHDeleteAccess() {
+  const [isEnabled, setIsEnabled] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const loadAccessStatus = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const enabled = await isRHDeleteEnabled()
+      setIsEnabled(enabled)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const toggleAccess = async (enabled: boolean) => {
+    try {
+      const success = await setRHDeleteAccess(enabled)
       if (success) {
         setIsEnabled(enabled)
       }

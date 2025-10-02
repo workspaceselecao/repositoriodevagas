@@ -4,6 +4,7 @@ import VagaTemplate from './VagaTemplate'
 import { Vaga } from '../types/database'
 import { getVagaById, deleteVaga } from '../lib/vagas'
 import { useAuth } from '../contexts/AuthContext'
+import { useRHPermissions } from '../hooks/useRHPermissions'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from './ui/button'
 
@@ -11,6 +12,7 @@ export default function VagaView() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { canEdit, canDelete } = useRHPermissions()
   const [vaga, setVaga] = useState<Vaga | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -117,11 +119,11 @@ export default function VagaView() {
       <div className="py-8">
         <VagaTemplate 
           vaga={vaga}
-          onEdit={user?.role === 'ADMIN' ? handleEdit : undefined}
-          onDelete={user?.role === 'ADMIN' ? handleDelete : undefined}
-          showActions={user?.role === 'ADMIN'}
-          showEditAction={user?.role === 'ADMIN'}
-          showDeleteAction={user?.role === 'ADMIN'}
+          onEdit={canEdit ? handleEdit : undefined}
+          onDelete={canDelete ? handleDelete : undefined}
+          showActions={user?.role === 'ADMIN' || canEdit || canDelete}
+          showEditAction={canEdit}
+          showDeleteAction={canDelete}
           showFocusAction={true}
           showDownloadAction={true}
         />
