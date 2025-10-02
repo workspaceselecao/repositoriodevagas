@@ -226,7 +226,7 @@ export default function Dashboard() {
       <div className="flex flex-col tablet:flex-row tablet:items-center justify-between gap-3 tablet:gap-4">
         <div>
           <h1 className="text-2xl tablet:text-3xl laptop:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent page-title">
-            Dashboard
+            Repo Comunica
           </h1>
           <p className="page-subtitle text-sm tablet:text-base laptop:text-lg">
             Visão geral do sistema e notícias importantes

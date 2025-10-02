@@ -10,6 +10,15 @@ O sistema de versionamento automático permite:
 - ✅ Geração automática de changelog
 - ✅ Criação de tags git
 - ✅ Processo completo de release
+- ✅ Atualização automática de favicons e assets visuais
+
+## 🎨 Versão 1.0.6 - RepoVagas Brand Identity
+
+A versão 1.0.6 marca uma transformação completa da identidade visual:
+- **Identidade RepoVagas**: Logos exclusivos e paleta de cores profissional
+- **Linguagem Atualizada**: Transição de "Vagas" para "Oportunidades"
+- **Favicon Otimizado**: Múltiplos formatos para máxima compatibilidade
+- **PWA Integrado**: Manifest.json e ícones atualizados
 
 ## 🛠️ Arquivos Envolvidos
 

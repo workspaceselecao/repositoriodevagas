@@ -2,6 +2,41 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
+## [1.0.6] - 2024-12-27
+
+### ✨ Adicionado
+- Identidade visual completa RepoVagas
+- Logos exclusivos em múltiplas variações (principal, compacto, ícone, favicon)
+- Componente Logo React com adaptação automática de temas
+- Paleta de cores da marca (#2563EB, #10B981, #334155, #64748B, #F1F5F9)
+- Tipografia Inter com hierarquia definida
+- Metáfora visual "Repositório de Oportunidades"
+- Favicon otimizado com gradiente e elementos visuais melhorados
+- Múltiplos formatos de favicon (SVG, PNG, ICO) para máxima compatibilidade
+
+### 🔄 Alterado
+- Linguagem completa de "Vagas" para "Oportunidades" em toda a aplicação
+- Sidebar reorganizada com logo RepoVagas centralizado
+- Página de login com nova identidade visual
+- Dashboard com métricas atualizadas para "Oportunidades"
+- Formulários com campos renomeados para consistência da marca
+- Breadcrumbs e navegação atualizados
+- PWA com cores e ícones da marca RepoVagas
+- Manifest.json atualizado com nova identidade
+
+### 🎨 Melhorias Visuais
+- Logo responsivo na sidebar (compacto/ícone baseado no estado)
+- Componente Header reutilizável com logo integrado
+- Animações e transições suaves
+- Tema escuro adaptado para cores da marca
+- Gradientes e efeitos visuais modernos
+
+### 📱 PWA e Compatibilidade
+- Favicon otimizado para diferentes tamanhos
+- Ícones do manifest.json atualizados
+- Cores do tema atualizadas para a marca
+- Compatibilidade melhorada com diferentes navegadores
+
 ## [1.0.4] - 2024-12-19
 
 ### ✨ Adicionado

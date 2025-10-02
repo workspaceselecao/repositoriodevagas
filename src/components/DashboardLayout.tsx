@@ -83,7 +83,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const menuItems = [
     {
       icon: Home,
-      label: 'Dashboard',
+      label: 'Repo Comunica',
       href: '/dashboard',
       show: true
     },

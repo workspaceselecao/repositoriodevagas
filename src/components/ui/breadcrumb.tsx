@@ -19,7 +19,7 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
     const pathSegments = location.pathname.split('/').filter(Boolean)
     const breadcrumbs: BreadcrumbItem[] = [
-      { label: 'Dashboard', href: '/dashboard' }
+      { label: 'Repo Comunica', href: '/dashboard' }
     ]
     
     if (pathSegments.length > 1) {
