@@ -23,7 +23,8 @@ import {
   FileText,
   BarChart3,
   Building2,
-  Menu,
+  ChevronLeft,
+  ChevronRight,
   Info,
   Key,
   Mail,
@@ -142,31 +143,33 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>
             <div className="flex flex-col h-full">
               {/* Header Section - Logo + Toggle */}
-              <div className={`flex flex-col py-4 border-b border-border/50 ${
-                isCollapsed ? "px-2 items-center space-y-3" : "px-4"
+              <div className={`flex items-center justify-between py-4 border-b border-border/50 ${
+                isCollapsed ? "px-2" : "px-4"
               }`}>
-                {/* Toggle Button - Sempre no topo */}
-                <div className={`flex w-full ${isCollapsed ? "justify-center" : "justify-end"}`}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="h-8 w-8 hover:bg-primary/10 transition-colors"
-                  >
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                {/* Logo - Posicionado abaixo do botão quando colapsado */}
+                {/* Logo Principal - Sempre na primeira linha */}
                 {isCollapsed ? (
                   <div className="flex items-center justify-center w-full">
-                    <Logo variant="icon" width={40} height={40} />
+                    <Logo variant="icon" width={36} height={36} />
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center w-full">
-                    <Logo variant="principal" width={160} height={48} />
+                  <div className="flex items-center w-full">
+                    <Logo variant="principal" width={200} height={60} />
                   </div>
                 )}
+                
+                {/* Seta de Colapso/Expansão */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                  className="h-8 w-8 hover:bg-primary/10 transition-colors flex-shrink-0"
+                >
+                  {isCollapsed ? (
+                    <ChevronRight className="h-4 w-4" />
+                  ) : (
+                    <ChevronLeft className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
               
               {/* Menu Items */}
