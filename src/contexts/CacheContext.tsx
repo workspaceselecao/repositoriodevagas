@@ -87,6 +87,7 @@ const initialCache: CacheData = {
 export function CacheProvider({ children }: { children: ReactNode }) {
   const [cache, setCache] = useState<CacheData>(initialCache)
   const [loading, setLoading] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false) // Controle de inicialização
   const [cacheStatus, setCacheStatus] = useState({
     vagas: false,
     clientes: false,
@@ -489,7 +490,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }, [loading, refreshVagas, refreshClientes, refreshSites, refreshCategorias, refreshCargos, refreshCelulas, refreshUsuarios, refreshNoticias, cacheStatus, cache.lastUpdated])
+  }, [loading, cacheStatus, cache.lastUpdated]) // Dependências otimizadas
 
   // Função para adicionar vaga ao cache
   const addVaga = useCallback((vaga: Vaga) => {
@@ -563,7 +564,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
 
   // Carregar dados quando o usuário fizer login com cache inteligente
   useEffect(() => {
-    if (user && !loading) {
+    if (user && !loading && !isInitialized) {
       const now = Date.now()
       const cacheAge = now - cache.lastUpdated
       const shouldRefresh = cacheAge > CACHE_EXPIRY || !cacheStatus.vagas
@@ -571,12 +572,14 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       // Evitar múltiplas execuções simultâneas
       if (shouldRefresh) {
         console.log(`👤 Usuário logado, cache com ${Math.round(cacheAge / 1000 / 60)} minutos - carregando dados...`)
+        setIsInitialized(true) // Marcar como inicializado ANTES de carregar
         refreshAll()
       } else {
         console.log(`📦 Usando cache existente (${Math.round(cacheAge / 1000 / 60)} minutos)`)
+        setIsInitialized(true) // Marcar como inicializado mesmo usando cache
       }
     }
-  }, [user, loading, cache.lastUpdated, cacheStatus.vagas, refreshAll])
+  }, [user, loading, isInitialized, cache.lastUpdated, cacheStatus.vagas]) // Adicionado isInitialized
 
   // Escutar eventos de atualização de vagas
   useEffect(() => {
