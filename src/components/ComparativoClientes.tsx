@@ -240,7 +240,7 @@ export default function ComparativoClientes() {
   }
 
   const handleEditVaga = (vaga: Vaga) => {
-    navigate(`/dashboard/editar-vaga/${vaga.id}`)
+    navigate(`/dashboard/nova-vaga/${vaga.id}`)
   }
 
   const handleEditFirstVaga = (cliente: string) => {

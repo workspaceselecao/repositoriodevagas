@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Vaga } from '../types/database'
 import { deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
 import { useAuth } from '../contexts/AuthContext'
 import { useVagas } from '../hooks/useCacheData'
@@ -18,6 +18,7 @@ export default function ListaClientes() {
   const [searchTerm, setSearchTerm] = useState('')
   const [focusedVaga, setFocusedVaga] = useState<Vaga | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   
   // Estados de paginação
   const [currentPage, setCurrentPage] = useState(1)
@@ -26,7 +27,7 @@ export default function ListaClientes() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { vagas, loading } = useVagas()
-  const { removeVaga } = useCache()
+  const { removeVaga, refreshVagas } = useCache()
   const { textClasses } = useThemeClasses()
 
   // Filtrar vagas baseado no termo de busca
@@ -124,6 +125,21 @@ export default function ListaClientes() {
     }
   }
 
+  const handleRefresh = async () => {
+    if (isRefreshing) return // Evitar múltiplas chamadas simultâneas
+    
+    setIsRefreshing(true)
+    try {
+      console.log('🔄 Recarregando dados da página Oportunidades...')
+      await refreshVagas()
+      console.log('✅ Dados recarregados com sucesso')
+    } catch (error) {
+      console.error('❌ Erro ao recarregar dados:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
   const formatText = (text: string | undefined, maxLength: number = 100) => {
     if (!text) return 'Não informado'
     if (text.length <= maxLength) return text
@@ -155,14 +171,18 @@ export default function ListaClientes() {
           </p>
         </div>
         <div className="flex flex-col tablet:flex-row gap-2 tablet:gap-3">
-          <Button onClick={() => navigate('/dashboard/nova-vaga')} size="lg" className="h-10 tablet:h-12 btn-text">
-            <Plus className="h-4 w-4 tablet:h-5 tablet:w-5 mr-2 icon-primary" />
+          <Button onClick={() => navigate('/dashboard/nova-vaga')} size="sm" className="h-8 tablet:h-9 btn-text">
+            <Plus className="h-4 w-4 mr-2 icon-primary" />
             Nova Oportunidade
           </Button>
-          <Button variant="outline" onClick={handleExport} size="lg" className="h-10 tablet:h-12">
-            <Download className="h-4 w-4 tablet:h-5 tablet:w-5 mr-2" />
+          <Button variant="outline" onClick={handleExport} size="sm" className="h-8 tablet:h-9">
+            <Download className="h-4 w-4 mr-2" />
             <span className="hidden tablet:inline">Exportar Excel</span>
             <span className="tablet:hidden">Exportar</span>
+          </Button>
+          <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} size="sm" className="h-8 tablet:h-9">
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Atualizar
           </Button>
         </div>
       </div>
