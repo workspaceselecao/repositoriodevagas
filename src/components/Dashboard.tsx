@@ -8,7 +8,6 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useDashboardStats, useNoticias } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
-import CacheDebugPanel from './CacheDebugPanel'
 import { 
   Users, 
   Building2, 
@@ -503,8 +502,6 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-    {/* Painel de Debug */}
-    <CacheDebugPanel />
     </div>
   )
 }
