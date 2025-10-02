@@ -37,7 +37,8 @@
     "migrate-reports": "tsx scripts/migrate-reports.ts",
     "fix-rls": "tsx scripts/fix-rls-errors.ts",
     "test-report": "tsx scripts/test-report-creation.ts",
-    "fix-reports-rls": "tsx scripts/fix-reports-rls.ts"
+    "fix-reports-rls": "tsx scripts/fix-reports-rls.ts",
+    "fix-foreign-key": "tsx scripts/fix-foreign-key.ts"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

@@ -16,13 +16,36 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
     
     console.log('✅ Usuário autenticado no Supabase:', authUser.id)
     
-    // Verificar se o ID do usuário autenticado corresponde ao reportedBy
-    if (authUser.id !== reportedBy) {
-      console.error('❌ ID do usuário autenticado não corresponde ao reportedBy:', { 
-        authUserId: authUser.id, 
-        reportedBy 
-      })
-      throw new Error('ID do usuário não corresponde à sessão autenticada')
+    // Verificar se o usuário existe na tabela users
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id, email, name, role')
+      .eq('id', reportedBy)
+      .single()
+    
+    if (userError || !userData) {
+      console.log('⚠️ Usuário não encontrado na tabela users, criando automaticamente...')
+      
+      // Criar usuário na tabela users automaticamente
+      const { data: newUser, error: createError } = await supabase
+        .from('users')
+        .insert({
+          id: reportedBy,
+          email: authUser.email || 'usuario@exemplo.com',
+          name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Usuário',
+          role: 'RH' // Default role
+        })
+        .select()
+        .single()
+      
+      if (createError) {
+        console.error('❌ Erro ao criar usuário na tabela users:', createError)
+        throw new Error('Erro ao criar usuário na tabela users')
+      }
+      
+      console.log('✅ Usuário criado na tabela users:', newUser)
+    } else {
+      console.log('✅ Usuário encontrado na tabela users:', userData)
     }
     
     // Buscar o valor atual do campo reportado
