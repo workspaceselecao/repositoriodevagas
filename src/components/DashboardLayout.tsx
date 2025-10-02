@@ -12,6 +12,7 @@ import { Badge } from './ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import SobreModal from './SobreModal'
 import UpdateModal from './UpdateModal'
+import UpdateNotification from './UpdateNotification'
 import ChangePasswordModal from './ChangePasswordModal'
 import { 
   Home, 
@@ -45,13 +46,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Hook para verificar atualizações automaticamente
   const {
+    hasUpdate,
+    isChecking,
     showModal: showUpdateModal,
     handleUpdate: handleAppUpdate,
     handleCloseModal: handleCloseUpdateModal,
     checkForUpdates
   } = useUpdateCheck({
     checkOnMount: true, // Verificar na montagem
-    checkInterval: 0, // Desabilitar verificação automática por intervalo
+    checkInterval: 30 * 60 * 1000, // Verificar a cada 30 minutos
     showModalDelay: 2000, // 2 segundos de delay
     autoCheckOnFocus: false // Desabilitar verificação no foco para evitar loops
   })
@@ -233,9 +236,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
                 {!isCollapsed && (
                   <div className="flex flex-col min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {user?.name || 'Usuário'}
-                    </p>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {user?.name || 'Usuário'}
+                      </p>
+                      {hasUpdate && (
+                        <Badge variant="default" className="bg-blue-500 text-white text-xs animate-pulse">
+                          Atualização
+                        </Badge>
+                      )}
+                    </div>
                     <Badge variant="outline" className="text-xs w-fit bg-primary/5 text-primary border-primary/20">
                       {user?.role}
                     </Badge>
@@ -403,6 +413,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         isOpen={showUpdateModal}
         onClose={handleCloseUpdateModal}
         onUpdate={handleAppUpdate}
+      />
+
+      {/* Notificação de Atualização */}
+      <UpdateNotification
+        hasUpdate={hasUpdate}
+        isChecking={isChecking}
+        onUpdate={handleAppUpdate}
+        onCheckUpdate={checkForUpdates}
       />
       
       {/* Change Password Modal */}
