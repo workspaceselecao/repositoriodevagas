@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correção do Loop de Cache</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #28a745;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .info {
+            color: #0c5460;
+            background: #d1ecf1;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Correção do Loop Infinito de Cache</h1>
+        
+        <div class="info">
+            <h3>Problema Identificado:</h3>
+            <p>O sistema estava em um loop infinito devido a:</p>
+            <ul>
+                <li>Cache persistente salvando constantemente no localStorage</li>
+                <li>Múltiplos useEffect executando simultaneamente</li>
+                <li>Verificação de atualizações muito frequente</li>
+                <li>Fallbacks duplicados causando recarregamentos</li>
+            </ul>
+        </div>
+
+        <div class="success">
+            <h3>✅ Correções Aplicadas:</h3>
+            <ul>
+                <li>Desabilitado cache persistente problemático</li>
+                <li>Simplificado CacheContext para evitar loops</li>
+                <li>Desabilitado verificação automática de atualizações</li>
+                <li>Removido fallbacks duplicados</li>
+                <li>Criado sistema de cache mais simples e estável</li>
+            </ul>
+        </div>
+
+        <h3>🧹 Limpar Cache do Navegador:</h3>
+        <button onclick="clearCache()">Limpar Cache</button>
+        <button onclick="reloadPage()">Recarregar Página</button>
+        
+        <div id="result"></div>
+
+        <div class="code">
+            <h4>Para limpar manualmente no console:</h4>
+            <pre>
+// Limpar cache específico
+localStorage.removeItem('repositoriodevagas_cache_user_63b5dd5b-c5d1-4b28-921a-1936447da1c1');
+
+// Limpar todos os caches
+Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('repositoriodevagas_cache')) {
+        localStorage.removeItem(key);
+        console.log('Removido:', key);
+    }
+});
+
+// Recarregar página
+location.reload();
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        function clearCache() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Lista de chaves de cache a serem removidas
+                const cacheKeys = [
+                    'repositoriodevagas_cache',
+                    'repositoriodevagas_cache_user_63b5dd5b-c5d1-4b28-921a-1936447da1c1'
+                ];
+
+                let removedCount = 0;
+
+                // Remover chaves específicas
+                cacheKeys.forEach(key => {
+                    if (localStorage.getItem(key)) {
+                        localStorage.removeItem(key);
+                        removedCount++;
+                    }
+                });
+
+                // Remover todas as chaves que começam com o padrão do cache
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('repositoriodevagas_cache')) {
+                        localStorage.removeItem(key);
+                        removedCount++;
+                    }
+                });
+
+                // Limpar também sessionStorage se necessário
+                Object.keys(sessionStorage).forEach(key => {
+                    if (key.startsWith('repositoriodevagas_cache')) {
+                        sessionStorage.removeItem(key);
+                        removedCount++;
+                    }
+                });
+
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Cache limpo com sucesso!<br>
+                        ${removedCount} itens removidos do cache.<br>
+                        <strong>Recarregue a página para aplicar as mudanças.</strong>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Erro ao limpar cache: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function reloadPage() {
+            location.reload();
+        }
+
+        // Mostrar status do cache atual
+        window.onload = function() {
+            const resultDiv = document.getElementById('result');
+            const cacheItems = Object.keys(localStorage).filter(key => 
+                key.startsWith('repositoriodevagas_cache')
+            );
+            
+            if (cacheItems.length > 0) {
+                resultDiv.innerHTML = `
+                    <div class="info">
+                        📦 Cache atual encontrado:<br>
+                        ${cacheItems.map(item => `• ${item}`).join('<br>')}
+                    </div>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
