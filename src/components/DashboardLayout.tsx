@@ -153,7 +153,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </div>
                 ) : (
                   <div className="flex items-center w-full">
-                    <Logo variant="principal" width={288} height={86} />
+                    <Logo variant="principal" width={250} height={90} />
                   </div>
                 )}
                 
@@ -290,7 +290,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Mobile Header */}
                 <div className="flex items-center justify-between py-4 px-4 border-b border-border/50">
                   <div className="flex items-center space-x-3">
-                    <Logo variant="principal" width={288} height={86} />
+                    <Logo variant="principal" width={250} height={90} />
                   </div>
                   <Button
                     variant="ghost"
