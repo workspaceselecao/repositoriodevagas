@@ -67,13 +67,41 @@ export async function getAllSystemConfigs(): Promise<SystemConfig[]> {
 // Função para atualizar uma configuração
 export async function updateSystemConfig(key: string, value: string): Promise<boolean> {
   try {
-    const { error } = await supabase
+    // Primeiro, verificar se a configuração já existe
+    const { data: existingData, error: selectError } = await supabase
       .from('system_config')
-      .upsert({
-        config_key: key,
-        config_value: value,
-        updated_at: new Date().toISOString()
-      })
+      .select('id')
+      .eq('config_key', key)
+      .single()
+
+    if (selectError && selectError.code !== 'PGRST116') {
+      console.error('Erro ao verificar configuração existente:', selectError)
+    }
+
+    let error;
+    if (existingData) {
+      // Se existe, fazer UPDATE
+      const { error: updateError } = await supabase
+        .from('system_config')
+        .update({
+          config_value: value,
+          updated_at: new Date().toISOString()
+        })
+        .eq('config_key', key)
+      
+      error = updateError;
+    } else {
+      // Se não existe, fazer INSERT
+      const { error: insertError } = await supabase
+        .from('system_config')
+        .insert({
+          config_key: key,
+          config_value: value,
+          updated_at: new Date().toISOString()
+        })
+      
+      error = insertError;
+    }
 
     if (error) {
       console.error('Erro ao atualizar configuração:', error)
@@ -89,6 +117,50 @@ export async function updateSystemConfig(key: string, value: string): Promise<bo
   } catch (error) {
     console.error('Erro ao atualizar configuração:', error)
     throw error
+  }
+}
+
+// Função para criar configuração se não existir
+export async function createSystemConfigIfNotExist(key: string, defaultValue: string, description?: string): Promise<boolean> {
+  try {
+    // Verificar se já existe
+    const { data: existingData, error: selectError } = await supabase
+      .from('system_config')
+      .select('id')
+      .eq('config_key', key)
+      .single()
+
+    // Se não existe erro de "não encontrado", significa que não existe
+    if (selectError && selectError.code === 'PGRST116') {
+      // Inserir nova configuração
+      const { error: insertError } = await supabase
+        .from('system_config')
+        .insert({
+          config_key: key,
+          config_value: defaultValue,
+          description: description || '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+
+      if (insertError) {
+        console.error('Erro ao criar configuração:', insertError)
+        return false
+      }
+      
+      console.log(`Configuração ${key} criada com valor padrão: ${defaultValue}`)
+      return true
+    } else if (selectError) {
+      console.error('Erro ao verificar configuração existente:', selectError)
+      return false
+    } else {
+      // Já existe, não fazer nada
+      console.log(`Configuração ${key} já existe`)
+      return true
+    }
+  } catch (error) {
+    console.error('Erro ao criar configuração:', error)
+    return false
   }
 }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SystemConfig, getSystemConfig, getAllSystemConfigs, updateSystemConfig, isRHNovaVagaEnabled, setRHNovaVagaAccess, isRHEditEnabled, setRHEditAccess, isRHDeleteEnabled, setRHDeleteAccess } from '../lib/systemConfig'
+import { SystemConfig, getSystemConfig, getAllSystemConfigs, updateSystemConfig, createSystemConfigIfNotExist, isRHNovaVagaEnabled, setRHNovaVagaAccess, isRHEditEnabled, setRHEditAccess, isRHDeleteEnabled, setRHDeleteAccess } from '../lib/systemConfig'
 
 export function useSystemConfig() {
   const [configs, setConfigs] = useState<SystemConfig[]>([])
@@ -60,6 +60,9 @@ export function useRHNovaVagaAccess() {
     setLoading(true)
     setError(null)
     try {
+      // Garantir que a configuração existe antes de tentar ler
+      await createSystemConfigIfNotExist('rh_nova_vaga_enabled', 'false', 'Habilita acesso à página Nova Oportunidade para usuários RH')
+      
       const enabled = await isRHNovaVagaEnabled()
       setIsEnabled(enabled)
     } catch (err: any) {
@@ -105,6 +108,9 @@ export function useRHEditAccess() {
     setLoading(true)
     setError(null)
     try {
+      // Garantir que a configuração existe antes de tentar ler
+      await createSystemConfigIfNotExist('rh_edit_enabled', 'false', 'Habilita funcionalidade de edição de vagas para usuários RH')
+      
       const enabled = await isRHEditEnabled()
       setIsEnabled(enabled)
     } catch (err: any) {
@@ -150,6 +156,9 @@ export function useRHDeleteAccess() {
     setLoading(true)
     setError(null)
     try {
+      // Garantir que a configuração existe antes de tentar ler
+      await createSystemConfigIfNotExist('rh_delete_enabled', 'false', 'Habilita funcionalidade de exclusão de vagas para usuários RH')
+      
       const enabled = await isRHDeleteEnabled()
       setIsEnabled(enabled)
     } catch (err: any) {
