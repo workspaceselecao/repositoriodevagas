@@ -374,7 +374,19 @@ export function CacheProvider({ children }: { children: ReactNode }) {
         updated_at: new Date().toISOString()
       }
       unifiedCache.setCurrentUser(userForCache)
-      console.log('👤 Usuário configurado no cache unificado')
+      
+      // Configurar para desenvolvimento (desabilitar cache reativo)
+      unifiedCache.updateConfig({
+        enableReactiveCache: false, // Desabilitar SSE que está causando erros
+        enablePollingCache: true,   // Usar polling como fallback
+        enableIntelligentCache: true,
+        enablePersistentCache: true,
+        enablePermissionCache: true,
+        enableBackgroundSync: false, // Desabilitar por enquanto
+        enablePaginationCache: true
+      })
+      
+      console.log('👤 Usuário configurado no cache unificado (modo desenvolvimento)')
     }
   }, [user, unifiedCache])
 

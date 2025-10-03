@@ -41,8 +41,32 @@ class ReactiveCache {
   connect(user: any): void {
     if (this.isConnected || !user) return
 
+    // Verificar se estamos em ambiente de desenvolvimento ou se SSE não está disponível
+    if (import.meta.env.DEV || !this.isSSEAvailable()) {
+      console.log('⚠️ Cache reativo desabilitado (ambiente de desenvolvimento ou SSE não disponível)')
+      return
+    }
+
     this.currentUser = user
     this.startConnection()
+  }
+
+  // Verificar se SSE está disponível
+  private isSSEAvailable(): boolean {
+    // Verificar se o endpoint SSE existe
+    const sseUrl = `${import.meta.env.VITE_SUPABASE_URL}/realtime/v1/events?apikey=${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+    
+    // Em desenvolvimento, assumir que não está disponível
+    if (import.meta.env.DEV) {
+      return false
+    }
+
+    // Verificar se EventSource é suportado
+    if (typeof EventSource === 'undefined') {
+      return false
+    }
+
+    return true
   }
 
   private startConnection(): void {

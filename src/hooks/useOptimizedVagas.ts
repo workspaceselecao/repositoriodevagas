@@ -199,14 +199,15 @@ export function useOptimizedVagas(
     await refresh()
   }, [unifiedCache, refresh])
 
-  // Configurar cache reativo
+  // Configurar cache reativo (desabilitado por padrão em desenvolvimento)
   useEffect(() => {
-    if (enableReactiveUpdates) {
+    // Apenas conectar se não estivermos em desenvolvimento
+    if (enableReactiveUpdates && !import.meta.env.DEV) {
       unifiedCache.connectReactiveCache()
     }
 
     return () => {
-      if (enableReactiveUpdates) {
+      if (enableReactiveUpdates && !import.meta.env.DEV) {
         unifiedCache.disconnectReactiveCache()
       }
     }

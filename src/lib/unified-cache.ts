@@ -331,7 +331,7 @@ class UnifiedCache {
 
   // Conectar cache reativo
   connectReactiveCache(): void {
-    if (this.config.enableReactiveCache && this.currentUser) {
+    if (this.config.enableReactiveCache && this.currentUser && !import.meta.env.DEV) {
       this.reactiveCache.connect(this.currentUser)
     }
   }
@@ -626,8 +626,8 @@ export const cacheUtils = {
     unified.updateConfig({
       enableIntelligentCache: true,
       enablePersistentCache: false, // Desabilitar para desenvolvimento
-      enableReactiveCache: false,
-      enablePollingCache: true,
+      enableReactiveCache: false,   // Desabilitar SSE em desenvolvimento
+      enablePollingCache: false,    // Desabilitar polling também
       enablePermissionCache: false,
       enableBackgroundSync: false,
       enablePaginationCache: true
