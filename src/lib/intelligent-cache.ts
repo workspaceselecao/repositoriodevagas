@@ -2,7 +2,7 @@
 // Combina cache em memória, localStorage e IndexedDB para máxima eficiência
 
 import { Vaga, User } from '../types/database'
-import { sessionCache } from './session-cache'
+// import { sessionCache } from './session-cache' // Removido - sessionCache é apenas para sessões
 
 // Tipos para o sistema de cache
 interface CacheMetadata {
@@ -84,7 +84,7 @@ class IntelligentCache {
     size: 0,
     lastCleanup: Date.now()
   }
-  private sessionCache = sessionCache
+  // private sessionCache = sessionCache // Removido - sessionCache é apenas para sessões
   private indexedDB: IDBDatabase | null = null
   private isOnline = navigator.onLine
   private currentUser: User | null = null
@@ -297,11 +297,12 @@ class IntelligentCache {
 
   // Cache de sessão
   private getFromSession<T>(key: string): T | null {
-    return this.sessionCache.get(key)
+    // Retornar null - sessionCache é apenas para sessões
+    return null
   }
 
   private setToSession<T>(key: string, data: T, ttl: number): void {
-    this.sessionCache.set(key, data, ttl)
+    // Não fazer nada - sessionCache é apenas para sessões
   }
 
   // Cache persistente (IndexedDB)
@@ -363,8 +364,8 @@ class IntelligentCache {
     if (memoryEntry) return memoryEntry.data
 
     // Tentar sessão
-    const sessionData = this.sessionCache.get(cacheKey)
-    if (sessionData) return sessionData
+    // const sessionData = this.sessionCache.get(cacheKey) // Removido - sessionCache é apenas para sessões
+    // if (sessionData) return sessionData
 
     // Tentar IndexedDB
     if (CACHE_CONFIG[key].persist && this.indexedDB) {
@@ -399,7 +400,7 @@ class IntelligentCache {
     const cacheKey = this.generateCacheKey(key, userId)
     
     this.memoryCache.delete(cacheKey)
-    this.sessionCache.delete(cacheKey)
+    // this.sessionCache.delete(cacheKey) // Removido - sessionCache é apenas para sessões
     
     if (CACHE_CONFIG[key].persist && this.indexedDB) {
       const transaction = this.indexedDB.transaction([key], 'readwrite')
@@ -428,7 +429,7 @@ class IntelligentCache {
     
     userKeys.forEach(key => {
       this.memoryCache.delete(key)
-      this.sessionCache.delete(key)
+      // this.sessionCache.delete(key) // Removido - sessionCache é apenas para sessões
     })
   }
 
@@ -556,7 +557,7 @@ class IntelligentCache {
   // Limpar todo o cache
   clear(): void {
     this.memoryCache.clear()
-    this.sessionCache.clear()
+    // this.sessionCache.clear() // Removido - sessionCache é apenas para sessões
     
     if (this.indexedDB) {
       Object.keys(CACHE_CONFIG).forEach(key => {

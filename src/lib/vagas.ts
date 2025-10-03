@@ -81,7 +81,6 @@ export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]>
 // Função otimizada para buscar todas as vagas com cache de sessão
 export async function getVagas(filter?: VagaFilter): Promise<Vaga[]> {
   try {
-      try {
         let query = supabase
           .from('vagas')
           .select('*')
@@ -294,7 +293,6 @@ export async function deleteVaga(id: string): Promise<boolean> {
 // Função otimizada para buscar clientes únicos com cache de sessão
 export async function getClientes(): Promise<string[]> {
   try {
-      try {
         const { data, error } = await supabase
           .from('vagas')
           .select('cliente')
@@ -333,7 +331,6 @@ export async function getClientes(): Promise<string[]> {
 // Função otimizada para buscar sites únicos com cache de sessão
 export async function getSites(): Promise<string[]> {
   try {
-      try {
         const { data, error } = await supabase
           .from('vagas')
           .select('site')
@@ -362,11 +359,6 @@ export async function getSites(): Promise<string[]> {
         const sites = [...new Set(data?.map((item: any) => item.site).filter(Boolean) || [])] as string[]
         console.log(`✅ ${sites.length} sites carregados com cliente normal`)
         return sites
-      } catch (error) {
-        console.error('Erro ao buscar sites:', error)
-        return []
-      }
-    },
   } catch (error) {
     console.error('Erro ao buscar sites:', error)
     return []

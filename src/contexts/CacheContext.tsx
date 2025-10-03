@@ -110,9 +110,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       setLoading(true) // Adicionar loading durante refresh
       
       // Limpar cache de sessão para vagas antes de buscar
-      const sessionCacheInstance = sessionCache
-      sessionCache.delete('vagas')
-      console.log('🗑️ Cache de sessão limpo para vagas')
+      console.log('🗑️ Limpando cache antes do refresh...')
       
       // Usar getVagasForceRefresh para ignorar cache e buscar diretamente do DB
       const vagas = await getVagasForceRefresh()
