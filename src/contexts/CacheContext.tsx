@@ -5,6 +5,7 @@ import { getAllUsers } from '../lib/auth'
 import { getNoticias } from '../lib/noticias'
 import { useAuth } from './AuthContext'
 import { getSessionCache } from '../lib/session-cache'
+import { useUnifiedCache } from '../lib/unified-cache'
 
 // Tipos para o cache
 interface CacheData {
@@ -92,6 +93,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
   })
   
   const { user } = useAuth()
+  const unifiedCache = useUnifiedCache()
 
   // Função para atualizar status do cache
   const updateCacheStatus = useCallback((section: keyof typeof cacheStatus, hasData: boolean) => {
@@ -357,6 +359,14 @@ export function CacheProvider({ children }: { children: ReactNode }) {
     })
     console.log('🗑️ Cache limpo')
   }, [])
+
+  // Configurar usuário no cache unificado
+  useEffect(() => {
+    if (user) {
+      unifiedCache.setCurrentUser(user)
+      console.log('👤 Usuário configurado no cache unificado')
+    }
+  }, [user, unifiedCache])
 
   // Carregar dados quando o usuário fizer login
   useEffect(() => {
