@@ -34,6 +34,7 @@ import {
   Key,
   Mail,
   AlertTriangle,
+  HelpCircle,
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -127,6 +128,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       label: 'Contato',
       href: '/dashboard/contato',
       show: true
+    },
+    {
+      icon: HelpCircle,
+      label: 'Tira Dúvidas',
+      href: '/dashboard/tira-duvidas',
+      show: user?.role === 'RH'
     },
     {
       icon: AlertTriangle,

@@ -20,7 +20,8 @@ import { ThemeSelector } from './ThemeSelector'
 import CacheMetricsDisplay from './CacheMetricsDisplay'
 import Header from './Header'
 import { Badge } from './ui/badge'
-import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash, RefreshCw, UserPlus } from 'lucide-react'
+import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash, RefreshCw, UserPlus, HelpCircle } from 'lucide-react'
+import TiraDuvidas from './TiraDuvidas'
 
 export default function Configuracoes() {
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
@@ -585,11 +586,12 @@ export default function Configuracoes() {
       )}
 
       <Tabs defaultValue="backup" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="backup">Configuração Geral</TabsTrigger>
           <TabsTrigger value="noticias">Gerenciar Notícias</TabsTrigger>
           <TabsTrigger value="personalizacao">Personalização Visual</TabsTrigger>
           <TabsTrigger value="acesso">Controle de Acesso</TabsTrigger>
+          <TabsTrigger value="ajuda">Tira Dúvidas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="backup" className="space-y-6">
@@ -1360,6 +1362,26 @@ export default function Configuracoes() {
                     </span>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ajuda" className="space-y-6">
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <HelpCircle className="h-5 w-5" />
+                Tira Dúvidas
+              </h2>
+              <p className="text-muted-foreground mt-2">
+                Central de ajuda com todas as informações sobre o sistema
+              </p>
+            </div>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <TiraDuvidas />
               </CardContent>
             </Card>
           </div>

@@ -1,22 +1,44 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
+import { Badge } from './ui/badge'
 import { Vaga } from '../types/database'
 import { deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
+import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw, Filter, Clock, Hash, MapPin, DollarSign, Calendar, User, Briefcase, Globe, Tag, Star, ArrowUpDown } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
 import { useAuth } from '../contexts/AuthContext'
 import { useRHPermissions } from '../hooks/useRHPermissions'
 import { useVagas } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
 import { useThemeClasses } from '../hooks/useThemeClasses'
+// import { toast } from 'sonner' // Comentado temporariamente
+
+interface SearchFilter {
+  field: string
+  value: string
+  label: string
+}
+
+interface SearchSuggestion {
+  type: 'field' | 'value' | 'operator'
+  label: string
+  value: string
+  icon: string
+  description?: string
+}
 
 export default function ListaClientes() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [advancedSearch, setAdvancedSearch] = useState(false)
+  const [searchFilters, setSearchFilters] = useState<SearchFilter[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
+  const [searchHistory, setSearchHistory] = useState<string[]>([])
   const [focusedVaga, setFocusedVaga] = useState<Vaga | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -25,6 +47,10 @@ export default function ListaClientes() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
   
+  // Refs
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const suggestionsRef = useRef<HTMLDivElement>(null)
+  
   const { user } = useAuth()
   const { canEdit, canDelete, loading: permissionsLoading } = useRHPermissions()
   const navigate = useNavigate()
@@ -32,20 +58,140 @@ export default function ListaClientes() {
   const { removeVaga, refreshVagas } = useCache()
   const { textClasses } = useThemeClasses()
 
+  // Campos disponíveis para busca
+  const searchFields = [
+    { key: 'cliente', label: 'Cliente', icon: '🏢' },
+    { key: 'cargo', label: 'Cargo', icon: '💼' },
+    { key: 'site', label: 'Site', icon: '🌐' },
+    { key: 'celula', label: 'Célula', icon: '📊' },
+    { key: 'categoria', label: 'Categoria', icon: '📂' },
+    { key: 'titulo', label: 'Título', icon: '📝' },
+    { key: 'descricao_vaga', label: 'Descrição', icon: '📄' },
+    { key: 'responsabilidades_atribuicoes', label: 'Responsabilidades', icon: '✅' },
+    { key: 'requisitos_qualificacoes', label: 'Requisitos', icon: '🎓' },
+    { key: 'salario', label: 'Salário', icon: '💰' },
+    { key: 'horario_trabalho', label: 'Horário', icon: '⏰' },
+    { key: 'jornada_trabalho', label: 'Jornada', icon: '📅' },
+    { key: 'beneficios', label: 'Benefícios', icon: '🎁' },
+    { key: 'local_trabalho', label: 'Local', icon: '📍' },
+    { key: 'etapas_processo', label: 'Etapas', icon: '🔄' }
+  ]
+
+  // Função para buscar em todos os campos de uma vaga
+  const searchInVaga = (vaga: Vaga, searchText: string): boolean => {
+    const searchLower = searchText.toLowerCase()
+    
+    return searchFields.some(field => {
+      const fieldValue = vaga[field.key as keyof Vaga]
+      if (!fieldValue) return false
+      
+      return fieldValue.toString().toLowerCase().includes(searchLower)
+    })
+  }
+
+  // Função para busca avançada com filtros específicos
+  const advancedSearchInVaga = (vaga: Vaga, filters: SearchFilter[]): boolean => {
+    if (filters.length === 0) return true
+    
+    return filters.every(filter => {
+      const fieldValue = vaga[filter.field as keyof Vaga]
+      if (!fieldValue) return false
+      
+      return fieldValue.toString().toLowerCase().includes(filter.value.toLowerCase())
+    })
+  }
+
+  // Gerar sugestões baseadas no texto de busca
+  const generateSuggestions = (searchText: string): SearchSuggestion[] => {
+    if (!searchText.trim()) return []
+    
+    const suggestions: SearchSuggestion[] = []
+    const searchLower = searchText.toLowerCase()
+    
+    // Sugestões de campos
+    searchFields.forEach(field => {
+      if (field.label.toLowerCase().includes(searchLower) || field.key.toLowerCase().includes(searchLower)) {
+        suggestions.push({
+          type: 'field',
+          label: `Campo: ${field.label}`,
+          value: `${field.key}:`,
+          icon: field.icon,
+          description: `Buscar no campo ${field.label}`
+        })
+      }
+    })
+    
+    // Sugestões de valores únicos
+    const uniqueValues = new Set<string>()
+    vagas.forEach(vaga => {
+      searchFields.forEach(field => {
+        const value = vaga[field.key as keyof Vaga]
+        if (value && value.toString().toLowerCase().includes(searchLower)) {
+          uniqueValues.add(value.toString())
+        }
+      })
+    })
+    
+    Array.from(uniqueValues).slice(0, 10).forEach(value => {
+      suggestions.push({
+        type: 'value',
+        label: value,
+        value: value,
+        icon: '🔍',
+        description: 'Buscar por este valor'
+      })
+    })
+    
+    // Sugestões de histórico
+    searchHistory.forEach(historyItem => {
+      if (historyItem.toLowerCase().includes(searchLower)) {
+        suggestions.push({
+          type: 'value',
+          label: `Histórico: ${historyItem}`,
+          value: historyItem,
+          icon: '🕒',
+          description: 'Busca anterior'
+        })
+      }
+    })
+    
+    return suggestions.slice(0, 15)
+  }
+
   // Filtrar vagas baseado no termo de busca
   const filteredVagas = useMemo(() => {
-    if (!searchTerm) {
+    if (!searchTerm && searchFilters.length === 0) {
       return vagas
     }
 
-    return vagas.filter(vaga =>
-      vaga.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vaga.cargo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vaga.site.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vaga.celula.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (vaga.titulo && vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
-  }, [vagas, searchTerm])
+    let result = vagas
+
+    // Busca simples
+    if (searchTerm && !advancedSearch) {
+      result = result.filter(vaga => searchInVaga(vaga, searchTerm))
+    }
+
+    // Busca avançada com filtros
+    if (advancedSearch && searchFilters.length > 0) {
+      result = result.filter(vaga => advancedSearchInVaga(vaga, searchFilters))
+    }
+
+    return result
+  }, [vagas, searchTerm, searchFilters, advancedSearch])
+
+  // Estatísticas de busca
+  const searchStats = useMemo(() => {
+    const totalVagas = vagas.length
+    const filteredCount = filteredVagas.length
+    const searchPercentage = totalVagas > 0 ? ((filteredCount / totalVagas) * 100).toFixed(1) : '0'
+    
+    return {
+      total: totalVagas,
+      filtered: filteredCount,
+      percentage: searchPercentage,
+      isFiltered: searchTerm || searchFilters.length > 0
+    }
+  }, [vagas.length, filteredVagas.length, searchTerm, searchFilters])
 
   // Calcular paginação
   const totalItems = filteredVagas.length
@@ -57,7 +203,139 @@ export default function ListaClientes() {
   // Resetar página quando o filtro ou quantidade de itens mudar
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm, itemsPerPage])
+  }, [searchTerm, itemsPerPage, searchFilters])
+
+  // Atualizar sugestões quando o termo de busca muda
+  useEffect(() => {
+    const newSuggestions = generateSuggestions(searchTerm)
+    setSuggestions(newSuggestions)
+    setShowSuggestions(searchTerm.length > 0 && newSuggestions.length > 0)
+    setSelectedSuggestionIndex(-1)
+  }, [searchTerm, vagas])
+
+  // Carregar histórico de busca do localStorage
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('vagas-search-history')
+    if (savedHistory) {
+      try {
+        setSearchHistory(JSON.parse(savedHistory))
+      } catch (error) {
+        console.warn('Erro ao carregar histórico de busca:', error)
+      }
+    }
+  }, [])
+
+  // Funções de busca
+  const handleSearch = (term: string) => {
+    setSearchTerm(term)
+    
+    // Adicionar ao histórico se não estiver vazio
+    if (term.trim()) {
+      const newHistory = [term, ...searchHistory.filter(h => h !== term)].slice(0, 10)
+      setSearchHistory(newHistory)
+      localStorage.setItem('vagas-search-history', JSON.stringify(newHistory))
+    }
+    
+    setShowSuggestions(false)
+  }
+
+  const handleSuggestionSelect = (suggestion: SearchSuggestion) => {
+    if (suggestion.type === 'field') {
+      setSearchTerm(suggestion.value)
+      searchInputRef.current?.focus()
+    } else {
+      handleSearch(suggestion.value)
+    }
+    setShowSuggestions(false)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions) return
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setSelectedSuggestionIndex(prev => 
+          prev < suggestions.length - 1 ? prev + 1 : prev
+        )
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setSelectedSuggestionIndex(prev => prev > 0 ? prev - 1 : -1)
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
+          handleSuggestionSelect(suggestions[selectedSuggestionIndex])
+        } else {
+          handleSearch(searchTerm)
+        }
+        break
+      case 'Escape':
+        setShowSuggestions(false)
+        setSelectedSuggestionIndex(-1)
+        break
+    }
+  }
+
+  const clearSearch = () => {
+    setSearchTerm('')
+    setSearchFilters([])
+    setAdvancedSearch(false)
+    setShowSuggestions(false)
+    searchInputRef.current?.focus()
+  }
+
+  const toggleAdvancedSearch = () => {
+    setAdvancedSearch(!advancedSearch)
+    if (advancedSearch) {
+      setSearchFilters([])
+    }
+    setShowSuggestions(false)
+  }
+
+  const addSearchFilter = () => {
+    if (!searchTerm.trim()) return
+    
+    // Parse do termo de busca para filtros
+    const parts = searchTerm.split(':')
+    if (parts.length === 2) {
+      const field = parts[0].trim()
+      const value = parts[1].trim()
+      const fieldInfo = searchFields.find(f => f.key === field)
+      
+      if (fieldInfo && value) {
+        setSearchFilters(prev => [...prev, {
+          field,
+          value,
+          label: fieldInfo.label
+        }])
+        setSearchTerm('')
+        // toast.success(`Filtro adicionado: ${fieldInfo.label}`)
+      }
+    } else {
+      // Busca simples - adicionar como filtro geral
+      setSearchFilters(prev => [...prev, {
+        field: 'all',
+        value: searchTerm,
+        label: 'Busca Geral'
+      }])
+      setSearchTerm('')
+      // toast.success('Filtro de busca geral adicionado')
+    }
+  }
+
+  const removeSearchFilter = (index: number) => {
+    setSearchFilters(prev => prev.filter((_, i) => i !== index))
+    // toast.success('Filtro removido')
+  }
+
+  const clearAllFilters = () => {
+    setSearchFilters([])
+    setSearchTerm('')
+    setAdvancedSearch(false)
+    // toast.success('Todos os filtros foram removidos')
+  }
 
   // Funções de navegação da paginação
   const goToPage = (page: number) => {
@@ -237,16 +515,214 @@ export default function ListaClientes() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-2xl">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-        <Input
-          placeholder="Buscar por cliente, cargo, site ou célula..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-12 h-12 text-base"
-        />
-      </div>
+      {/* Advanced Search */}
+      <Card className="border-2 border-primary/20 shadow-lg">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5 text-primary" />
+                Busca Avançada
+              </CardTitle>
+              <CardDescription>
+                Busque em todas as informações das vagas com filtros inteligentes
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={advancedSearch ? "default" : "outline"}
+                size="sm"
+                onClick={toggleAdvancedSearch}
+                className="transition-all duration-200"
+              >
+                <Filter className="h-4 w-4 mr-1" />
+                {advancedSearch ? 'Modo Simples' : 'Modo Avançado'}
+              </Button>
+              {searchStats.isFiltered && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Limpar
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
+          {/* Barra de Pesquisa Principal */}
+          <div className="relative">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                <Input
+                  ref={searchInputRef}
+                  placeholder={
+                    advancedSearch 
+                      ? "Digite 'campo:valor' para filtros específicos (ex: cliente:atento, salario:5000)"
+                      : "Busque em todas as informações das vagas..."
+                  }
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setShowSuggestions(searchTerm.length > 0 && suggestions.length > 0)}
+                  className="pl-10 pr-10 h-12 text-base"
+                />
+                {searchTerm && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                    onClick={() => setSearchTerm('')}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+              
+              {advancedSearch ? (
+                <Button
+                  onClick={addSearchFilter}
+                  disabled={!searchTerm.trim()}
+                  className="px-6"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Adicionar Filtro
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => handleSearch(searchTerm)}
+                  disabled={!searchTerm.trim()}
+                  className="px-6"
+                >
+                  <Search className="h-4 w-4 mr-1" />
+                  Buscar
+                </Button>
+              )}
+            </div>
+
+            {/* Sugestões */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div
+                ref={suggestionsRef}
+                className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
+              >
+                {suggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                      selectedSuggestionIndex === index ? 'bg-blue-50 dark:bg-blue-900/30' : ''
+                    }`}
+                    onClick={() => handleSuggestionSelect(suggestion)}
+                  >
+                    <span className="text-lg">{suggestion.icon}</span>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{suggestion.label}</div>
+                      {suggestion.description && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {suggestion.description}
+                        </div>
+                      )}
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {suggestion.type === 'field' ? 'Campo' : suggestion.type === 'value' ? 'Valor' : 'Operador'}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Filtros Ativos (Modo Avançado) */}
+          {advancedSearch && searchFilters.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Filtros Ativos:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {searchFilters.map((filter, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="flex items-center gap-2 px-3 py-1"
+                  >
+                    <span className="text-xs">
+                      {filter.field === 'all' ? 'Busca Geral' : filter.label}: {filter.value}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-4 w-4 p-0 hover:bg-red-100 hover:text-red-600"
+                      onClick={() => removeSearchFilter(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Estatísticas de Busca */}
+          {searchStats.isFiltered && (
+            <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Hash className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    {searchStats.filtered} de {searchStats.total} vagas
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm text-blue-700 dark:text-blue-300">
+                    {searchStats.percentage}% dos resultados
+                  </span>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearSearch}
+                className="text-blue-600 border-blue-300 hover:bg-blue-100"
+              >
+                <X className="h-3 w-3 mr-1" />
+                Limpar Busca
+              </Button>
+            </div>
+          )}
+
+          {/* Dicas de Busca */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+            <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+              <Search className="h-3 w-3 text-gray-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">Busca Simples</div>
+                <div className="text-gray-600 dark:text-gray-400">Digite qualquer termo para buscar em todos os campos</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+              <Filter className="h-3 w-3 text-gray-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">Busca Específica</div>
+                <div className="text-gray-600 dark:text-gray-400">Use "campo:valor" para buscar em campos específicos</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+              <Clock className="h-3 w-3 text-gray-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">Histórico</div>
+                <div className="text-gray-600 dark:text-gray-400">Suas buscas anteriores aparecem como sugestões</div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats */}
       <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4 tablet:gap-6">

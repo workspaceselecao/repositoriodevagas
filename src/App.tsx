@@ -21,6 +21,7 @@ import VagaView from './components/VagaView'
 import EditarVagaForm from './components/EditarVagaForm'
 import EditarVagaFromReport from './components/EditarVagaFromReport'
 import ReportsList from './components/ReportsList'
+import TiraDuvidas from './components/TiraDuvidas'
 import RHProtectedRoute from './components/RHProtectedRoute'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
@@ -115,6 +116,13 @@ function AppRoutes() {
         <ProtectedRoute>
           <DashboardLayout>
             <Contato />
+          </DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/tira-duvidas" element={
+        <ProtectedRoute>
+          <DashboardLayout>
+            <TiraDuvidas />
           </DashboardLayout>
         </ProtectedRoute>
       } />
