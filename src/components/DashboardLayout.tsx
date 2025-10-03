@@ -17,7 +17,6 @@ import UpdateModal from './UpdateModal'
 import UpdateNotification from './UpdateNotification'
 import ChangePasswordModal from './ChangePasswordModal'
 import AdminNotifications from './AdminNotifications'
-import BellNotification from './BellNotification'
 import NotificationsList from './NotificationsList'
 import RealtimeNotifications, { useRealtimeNotifications } from './RealtimeNotifications'
 import { 
@@ -425,15 +424,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               onReportUpdate={handleReportUpdate}
             />
             
-            {/* Lista de notificações */}
+            {/* Lista de notificações (já inclui o ícone de sino) */}
             <NotificationsList 
               pendingReports={pendingReports}
               isLoading={notificationsLoading}
               onRefresh={loadPendingReports}
             />
-            
-            {/* Sino de notificação */}
-            <BellNotification />
             
             <ThemeToggle />
           </div>
