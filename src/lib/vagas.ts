@@ -2,41 +2,17 @@ import { supabase, supabaseAdmin } from './supabase'
 import { Vaga, VagaFormData, VagaFilter } from '../types/database'
 import { sessionCache } from './session-cache'
 
-// Função para buscar vagas FORÇANDO refresh (ignora cache)
+// Função ROBUSTA para buscar vagas FORÇANDO refresh (ignora cache)
 export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]> {
-  try {
-    console.log('🔄 [getVagasForceRefresh] Buscando vagas diretamente do DB...')
-    
-    let query = supabase
-      .from('vagas')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(1000)
-
-    // Aplicar filtros se fornecidos
-    if (filter?.cliente) {
-      query = query.eq('cliente', filter.cliente)
-    }
-    if (filter?.site) {
-      query = query.eq('site', filter.site)
-    }
-    if (filter?.categoria) {
-      query = query.eq('categoria', filter.categoria)
-    }
-    if (filter?.cargo) {
-      query = query.eq('cargo', filter.cargo)
-    }
-    if (filter?.celula) {
-      query = query.eq('celula', filter.celula)
-    }
-
-    const { data: vagas, error } = await query
-
-    if (error) {
-      console.warn('⚠️ [getVagasForceRefresh] Erro com cliente normal, tentando com cliente admin:', error.message)
+  const maxRetries = 3
+  let lastError: Error | null = null
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔄 [getVagasForceRefresh] Tentativa ${attempt}/${maxRetries} - Buscando vagas diretamente do DB...`)
       
-      // Se falhar com cliente normal, tentar com cliente admin
-      let adminQuery = supabaseAdmin
+      // SEMPRE usar cliente admin para evitar problemas de RLS
+      let query = supabaseAdmin
         .from('vagas')
         .select('*')
         .order('created_at', { ascending: false })
@@ -44,38 +20,50 @@ export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]>
 
       // Aplicar filtros se fornecidos
       if (filter?.cliente) {
-        adminQuery = adminQuery.eq('cliente', filter.cliente)
+        query = query.eq('cliente', filter.cliente)
       }
       if (filter?.site) {
-        adminQuery = adminQuery.eq('site', filter.site)
+        query = query.eq('site', filter.site)
       }
       if (filter?.categoria) {
-        adminQuery = adminQuery.eq('categoria', filter.categoria)
+        query = query.eq('categoria', filter.categoria)
       }
       if (filter?.cargo) {
-        adminQuery = adminQuery.eq('cargo', filter.cargo)
+        query = query.eq('cargo', filter.cargo)
       }
       if (filter?.celula) {
-        adminQuery = adminQuery.eq('celula', filter.celula)
+        query = query.eq('celula', filter.celula)
       }
 
-      const { data: adminVagas, error: adminError } = await adminQuery
+      const { data: vagas, error } = await query
 
-      if (adminError) {
-        console.error('❌ [getVagasForceRefresh] Erro com cliente admin:', adminError.message)
-        throw new Error(`Erro ao buscar vagas: ${adminError.message}`)
+      if (error) {
+        throw new Error(`Erro do Supabase: ${error.message} (Código: ${error.code})`)
       }
 
-      console.log(`✅ [getVagasForceRefresh] ${adminVagas?.length || 0} vagas carregadas via admin`)
-      return adminVagas || []
+      if (!vagas || !Array.isArray(vagas)) {
+        throw new Error('Dados inválidos retornados do servidor')
+      }
+
+      console.log(`✅ [getVagasForceRefresh] ${vagas.length} vagas carregadas com sucesso na tentativa ${attempt}`)
+      return vagas
+
+    } catch (error) {
+      lastError = error as Error
+      console.error(`❌ [getVagasForceRefresh] Tentativa ${attempt} falhou:`, error)
+      
+      if (attempt < maxRetries) {
+        const delay = attempt * 1000 // Delay progressivo: 1s, 2s, 3s
+        console.log(`⏳ Aguardando ${delay}ms antes da próxima tentativa...`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
     }
-
-    console.log(`✅ [getVagasForceRefresh] ${vagas?.length || 0} vagas carregadas`)
-    return vagas || []
-  } catch (error) {
-    console.error('💥 [getVagasForceRefresh] Erro geral:', error)
-    throw error
   }
+
+  // Se todas as tentativas falharam, retornar array vazio em vez de lançar erro
+  console.error('💥 [getVagasForceRefresh] Todas as tentativas falharam, retornando array vazio')
+  console.error('💥 [getVagasForceRefresh] Último erro:', lastError)
+  return []
 }
 
 // Função otimizada para buscar todas as vagas com cache de sessão

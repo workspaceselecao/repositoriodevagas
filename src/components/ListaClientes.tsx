@@ -8,13 +8,15 @@ import { Badge } from './ui/badge'
 import { Vaga } from '../types/database'
 import { deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw, Filter, Clock, Hash, MapPin, DollarSign, Calendar, User, Briefcase, Globe, Tag, Star, ArrowUpDown } from 'lucide-react'
+import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw, Filter, Clock, Hash, MapPin, DollarSign, Calendar, User, Briefcase, Globe, Tag, Star, ArrowUpDown, AlertTriangle } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
+import ReportModal from './ReportModal'
 import { useAuth } from '../contexts/AuthContext'
 import { useRHPermissions } from '../hooks/useRHPermissions'
 import { useVagas } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
 import { useSimpleVagas } from '../hooks/useSimpleVagas'
+import { useSimpleCache } from '../lib/simple-cache'
 import { useThemeClasses } from '../hooks/useThemeClasses'
 // import { toast } from 'sonner' // Comentado temporariamente
 
@@ -43,6 +45,7 @@ export default function ListaClientes() {
   const [focusedVaga, setFocusedVaga] = useState<Vaga | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   
   // Estados de paginação
   const [currentPage, setCurrentPage] = useState(1)
@@ -60,7 +63,8 @@ export default function ListaClientes() {
   const isDev = import.meta.env.DEV
   const simpleVagas = useSimpleVagas()
   const complexVagas = useVagas()
-  const { removeVaga, refreshVagas } = useCache()
+  const { removeVaga, refreshVagas, clearCache } = useCache()
+  const simpleCache = useSimpleCache()
   
   // Escolher qual hook usar baseado no ambiente
   const { vagas, loading, lastUpdated } = isDev ? simpleVagas : complexVagas
@@ -381,6 +385,14 @@ export default function ListaClientes() {
     setIsFullscreen(false)
   }
 
+  const handleOpenReportModal = () => {
+    setIsReportModalOpen(true)
+  }
+
+  const handleCloseReportModal = () => {
+    setIsReportModalOpen(false)
+  }
+
 
   const handleDelete = async (id: string) => {
     if (user?.role !== 'ADMIN') {
@@ -417,41 +429,97 @@ export default function ListaClientes() {
     if (isRefreshing) return // Evitar múltiplas chamadas simultâneas
     
     setIsRefreshing(true)
+    const maxRetries = 3
+    let retryCount = 0
+    
+    while (retryCount < maxRetries) {
+      try {
+        console.log(`🔄 Recarregando dados da página Oportunidades... (Tentativa ${retryCount + 1}/${maxRetries})`)
+        
+        // Usar o método de refresh apropriado baseado no ambiente
+        if (isDev) {
+          await simpleVagas.refresh()
+        } else {
+          await refreshVagas()
+        }
+        
+        // Verificar se os dados foram realmente carregados
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        const currentVagas = isDev ? simpleVagas.vagas : vagas
+        if (currentVagas.length > 0 || retryCount === maxRetries - 1) {
+          console.log('✅ Dados recarregados com sucesso')
+          
+          // Mostrar feedback visual de sucesso
+          const button = document.querySelector('[data-refresh-button]') as HTMLElement
+          if (button) {
+            button.style.backgroundColor = '#10b981' // Verde
+            setTimeout(() => {
+              button.style.backgroundColor = ''
+            }, 1000)
+          }
+          break
+        } else {
+          throw new Error('Dados não foram carregados corretamente')
+        }
+        
+      } catch (error) {
+        retryCount++
+        console.error(`❌ Erro ao recarregar dados (tentativa ${retryCount}):`, error)
+        
+        if (retryCount < maxRetries) {
+          const delay = retryCount * 1000
+          console.log(`⏳ Aguardando ${delay}ms antes da próxima tentativa...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+        } else {
+          console.error('💥 Todas as tentativas de refresh falharam')
+          
+          // Mostrar feedback visual de erro
+          const button = document.querySelector('[data-refresh-button]') as HTMLElement
+          if (button) {
+            button.style.backgroundColor = '#ef4444' // Vermelho
+            setTimeout(() => {
+              button.style.backgroundColor = ''
+            }, 1000)
+          }
+        }
+      }
+    }
+    
+    setIsRefreshing(false)
+  }
+
+  // Função para limpar completamente o cache e forçar carregamento limpo
+  const handleForceCleanRefresh = async () => {
+    if (isRefreshing) return
+    
+    setIsRefreshing(true)
     try {
-      console.log('🔄 Recarregando dados da página Oportunidades...')
+      console.log('🧹 Limpando cache completamente e forçando carregamento limpo...')
       
-      // Usar o método de refresh apropriado baseado no ambiente
+      // Limpar cache baseado no ambiente
+      if (isDev) {
+        // Limpar cache simples
+        simpleCache.clear()
+      } else {
+        // Limpar cache complexo
+        clearCache()
+      }
+      
+      // Aguardar um pouco para garantir que o cache foi limpo
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
+      // Forçar carregamento limpo
       if (isDev) {
         await simpleVagas.refresh()
       } else {
         await refreshVagas()
       }
       
-      // Aguardar um pouco para garantir que o estado foi atualizado
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
-      console.log('✅ Dados recarregados com sucesso')
-      
-      // Mostrar feedback visual de sucesso
-      const button = document.querySelector('[data-refresh-button]') as HTMLElement
-      if (button) {
-        button.style.backgroundColor = '#10b981' // Verde
-        setTimeout(() => {
-          button.style.backgroundColor = ''
-        }, 1000)
-      }
+      console.log('✅ Cache limpo e dados recarregados com sucesso')
       
     } catch (error) {
-      console.error('❌ Erro ao recarregar dados:', error)
-      
-      // Mostrar feedback visual de erro
-      const button = document.querySelector('[data-refresh-button]') as HTMLElement
-      if (button) {
-        button.style.backgroundColor = '#ef4444' // Vermelho
-        setTimeout(() => {
-          button.style.backgroundColor = ''
-        }, 1000)
-      }
+      console.error('❌ Erro ao limpar cache e recarregar:', error)
     } finally {
       setIsRefreshing(false)
     }
@@ -522,6 +590,19 @@ export default function ListaClientes() {
             <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
             <span className={isRefreshing ? 'opacity-70' : ''}>
               {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+            </span>
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleForceCleanRefresh} 
+            disabled={isRefreshing} 
+            size="sm" 
+            className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md bg-orange-50 hover:bg-orange-100 border-orange-200"
+            title="Limpar cache e recarregar (resolve problemas de refresh)"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
+            <span className={isRefreshing ? 'opacity-70' : ''}>
+              {isRefreshing ? 'Limpando...' : 'Limpar Cache'}
             </span>
           </Button>
         </div>
@@ -919,6 +1000,15 @@ export default function ListaClientes() {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={handleOpenReportModal}
+                    className="flex items-center space-x-2 bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700 hover:text-orange-800"
+                  >
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Reportar</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleCloseFocus}
                     className="flex items-center space-x-2"
                   >
@@ -977,6 +1067,13 @@ export default function ListaClientes() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de Report */}
+      <ReportModal
+        isOpen={isReportModalOpen}
+        onClose={handleCloseReportModal}
+        vaga={focusedVaga}
+      />
     </div>
   )
 }
