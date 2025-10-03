@@ -4,7 +4,7 @@ import { getVagas, getClientes, getSites, getCategorias, getCargos, getCelulas, 
 import { getAllUsers } from '../lib/auth'
 import { getNoticias } from '../lib/noticias'
 import { useAuth } from './AuthContext'
-import { getSessionCache } from '../lib/session-cache'
+import { sessionCache } from '../lib/session-cache'
 import { useUnifiedCache } from '../lib/unified-cache'
 
 // Tipos para o cache
@@ -110,7 +110,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       setLoading(true) // Adicionar loading durante refresh
       
       // Limpar cache de sessão para vagas antes de buscar
-      const sessionCache = getSessionCache()
+      const sessionCacheInstance = sessionCache
       sessionCache.delete('vagas')
       console.log('🗑️ Cache de sessão limpo para vagas')
       

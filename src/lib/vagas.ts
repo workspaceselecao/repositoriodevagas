@@ -1,6 +1,6 @@
 import { supabase, supabaseAdmin } from './supabase'
 import { Vaga, VagaFormData, VagaFilter } from '../types/database'
-import { sessionCacheUtils } from './session-cache'
+import { sessionCache } from './session-cache'
 
 // Função para buscar vagas FORÇANDO refresh (ignora cache)
 export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]> {
@@ -80,11 +80,7 @@ export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]>
 
 // Função otimizada para buscar todas as vagas com cache de sessão
 export async function getVagas(filter?: VagaFilter): Promise<Vaga[]> {
-  const cacheKey = sessionCacheUtils.generateKey('vagas', filter)
-  
-  return sessionCacheUtils.withBackgroundRefresh(
-    cacheKey,
-    async () => {
+  try {
       try {
         let query = supabase
           .from('vagas')
@@ -150,14 +146,10 @@ export async function getVagas(filter?: VagaFilter): Promise<Vaga[]> {
 
         console.log(`✅ ${vagas?.length || 0} vagas carregadas com cliente normal`)
         return vagas || []
-      } catch (error) {
-        console.error('Erro ao buscar vagas:', error)
-        return []
-      }
-    },
-    15 * 60 * 1000, // 15 minutos de cache
-    0.7 // Refresh quando 70% do TTL passou
-  )
+  } catch (error) {
+    console.error('Erro ao buscar vagas:', error)
+    return []
+  }
 }
 
 // Função para buscar uma vaga por ID
@@ -301,9 +293,7 @@ export async function deleteVaga(id: string): Promise<boolean> {
 
 // Função otimizada para buscar clientes únicos com cache de sessão
 export async function getClientes(): Promise<string[]> {
-  return sessionCacheUtils.withBackgroundRefresh(
-    'clientes',
-    async () => {
+  try {
       try {
         const { data, error } = await supabase
           .from('vagas')
@@ -334,21 +324,15 @@ export async function getClientes(): Promise<string[]> {
         const clientes = [...new Set(data?.map((item: any) => item.cliente).filter(Boolean) || [])] as string[]
         console.log(`✅ ${clientes.length} clientes carregados com cliente normal`)
         return clientes
-      } catch (error) {
-        console.error('Erro ao buscar clientes:', error)
-        return []
-      }
-    },
-    20 * 60 * 1000, // 20 minutos de cache (clientes mudam menos)
-    0.8 // Refresh quando 80% do TTL passou
-  )
+  } catch (error) {
+    console.error('Erro ao buscar clientes:', error)
+    return []
+  }
 }
 
 // Função otimizada para buscar sites únicos com cache de sessão
 export async function getSites(): Promise<string[]> {
-  return sessionCacheUtils.withBackgroundRefresh(
-    'sites',
-    async () => {
+  try {
       try {
         const { data, error } = await supabase
           .from('vagas')
@@ -383,9 +367,10 @@ export async function getSites(): Promise<string[]> {
         return []
       }
     },
-    20 * 60 * 1000, // 20 minutos de cache
-    0.8
-  )
+  } catch (error) {
+    console.error('Erro ao buscar sites:', error)
+    return []
+  }
 }
 
 // Função otimizada para buscar categorias únicas

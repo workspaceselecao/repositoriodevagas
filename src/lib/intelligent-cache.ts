@@ -2,7 +2,7 @@
 // Combina cache em memória, localStorage e IndexedDB para máxima eficiência
 
 import { Vaga, User } from '../types/database'
-import { getSessionCache } from './session-cache'
+import { sessionCache } from './session-cache'
 
 // Tipos para o sistema de cache
 interface CacheMetadata {
@@ -84,7 +84,7 @@ class IntelligentCache {
     size: 0,
     lastCleanup: Date.now()
   }
-  private sessionCache = getSessionCache()
+  private sessionCache = sessionCache
   private indexedDB: IDBDatabase | null = null
   private isOnline = navigator.onLine
   private currentUser: User | null = null
