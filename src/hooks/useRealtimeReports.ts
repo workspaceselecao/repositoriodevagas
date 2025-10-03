@@ -86,7 +86,7 @@ export function useRealtimeReports(adminId: string | null) {
           )
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         console.log('📡 Status da conexão:', status)
         setIsConnected(status === 'SUBSCRIBED')
       })
@@ -166,7 +166,7 @@ export function useRealtimeNotifications() {
           setNotifications(prev => [newNotification, ...prev.slice(0, 9)]) // Manter apenas 10 notificações
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         console.log('📡 Status das notificações:', status)
       })
 
@@ -202,7 +202,7 @@ export function useAdminLoginDetection() {
   useEffect(() => {
     // Detectar mudanças na sessão
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: any, session: any) => {
         console.log('🔐 Mudança de autenticação:', event, session?.user?.id)
         
         if (event === 'SIGNED_IN' && session?.user) {

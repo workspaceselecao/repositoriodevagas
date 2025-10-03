@@ -27,9 +27,9 @@ export default function AdminNotifications() {
       {/* Indicador de conexão */}
       <div className="flex items-center gap-1">
         {isConnected ? (
-          <Wifi className="h-4 w-4 text-green-500" title="Conectado em tempo real" />
+          <Wifi className="h-4 w-4 text-green-500" />
         ) : (
-          <WifiOff className="h-4 w-4 text-red-500" title="Desconectado" />
+          <WifiOff className="h-4 w-4 text-red-500" />
         )}
       </div>
 
