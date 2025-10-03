@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
+import { Textarea } from './ui/textarea'
+import { Label } from './ui/label'
 import { Vaga, Report } from '../types/database'
-import { getReportsByUser } from '../lib/reports'
+import { getReportsByUser, updateReportStatus } from '../lib/reports'
 import { useAuth } from '../contexts/AuthContext'
-import { AlertCircle, Eye, CheckCircle, XCircle, Clock, User, RefreshCw } from 'lucide-react'
+import { AlertCircle, Eye, CheckCircle, XCircle, Clock, User, RefreshCw, ThumbsUp, ThumbsDown } from 'lucide-react'
 
 export default function ReportsList() {
   const { user } = useAuth()
@@ -14,6 +17,10 @@ export default function ReportsList() {
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [rejectModalOpen, setRejectModalOpen] = useState(false)
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const loadReports = async (forceRefresh: boolean = false) => {
     try {
@@ -70,6 +77,101 @@ export default function ReportsList() {
       window.removeEventListener('report-created', handleReportCreated as EventListener)
     }
   }, [user])
+
+  // Função para aceitar report
+  const handleAcceptReport = async (report: Report) => {
+    if (!user || user.role !== 'ADMIN') {
+      alert('Apenas administradores podem aceitar reports')
+      return
+    }
+
+    setIsUpdating(true)
+    try {
+      console.log('✅ Aceitando report:', report.id)
+      
+      const updatedReport = await updateReportStatus(
+        report.id, 
+        'completed', 
+        'Ajustes aceitos pelo administrador'
+      )
+      
+      if (updatedReport) {
+        console.log('✅ Report aceito com sucesso')
+        // Recarregar lista de reports
+        await loadReports(true)
+        
+        // Disparar evento para notificar outros componentes
+        window.dispatchEvent(new CustomEvent('report-status-updated', { 
+          detail: { reportId: report.id, status: 'completed' } 
+        }))
+      }
+    } catch (error) {
+      console.error('❌ Erro ao aceitar report:', error)
+      alert('Erro ao aceitar report. Tente novamente.')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  // Função para abrir modal de rejeição
+  const handleRejectReport = (report: Report) => {
+    if (!user || user.role !== 'ADMIN') {
+      alert('Apenas administradores podem rejeitar reports')
+      return
+    }
+    
+    setSelectedReport(report)
+    setRejectReason('')
+    setRejectModalOpen(true)
+  }
+
+  // Função para confirmar rejeição
+  const handleConfirmRejection = async () => {
+    if (!selectedReport || !rejectReason.trim()) {
+      alert('Por favor, informe o motivo da rejeição')
+      return
+    }
+
+    setIsUpdating(true)
+    try {
+      console.log('❌ Rejeitando report:', selectedReport.id, 'Motivo:', rejectReason)
+      
+      const updatedReport = await updateReportStatus(
+        selectedReport.id, 
+        'rejected', 
+        rejectReason.trim()
+      )
+      
+      if (updatedReport) {
+        console.log('✅ Report rejeitado com sucesso')
+        
+        // Fechar modal
+        setRejectModalOpen(false)
+        setSelectedReport(null)
+        setRejectReason('')
+        
+        // Recarregar lista de reports
+        await loadReports(true)
+        
+        // Disparar evento para notificar outros componentes
+        window.dispatchEvent(new CustomEvent('report-status-updated', { 
+          detail: { reportId: selectedReport.id, status: 'rejected' } 
+        }))
+      }
+    } catch (error) {
+      console.error('❌ Erro ao rejeitar report:', error)
+      alert('Erro ao rejeitar report. Tente novamente.')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  // Função para cancelar rejeição
+  const handleCancelRejection = () => {
+    setRejectModalOpen(false)
+    setSelectedReport(null)
+    setRejectReason('')
+  }
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -277,6 +379,29 @@ export default function ReportsList() {
                   <div className="flex items-center gap-2">
                     {getStatusBadge(report.status)}
                     {user?.role === 'ADMIN' && report.status === 'pending' && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAcceptReport(report)}
+                          disabled={isUpdating}
+                          className="bg-green-500 hover:bg-green-600 text-white"
+                        >
+                          <ThumbsUp className="h-4 w-4 mr-1" />
+                          Aceitar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRejectReport(report)}
+                          disabled={isUpdating}
+                          className="bg-red-50 hover:bg-red-100 border-red-200 text-red-700 hover:text-red-800"
+                        >
+                          <ThumbsDown className="h-4 w-4 mr-1" />
+                          Rejeitar
+                        </Button>
+                      </div>
+                    )}
+                    {user?.role === 'ADMIN' && report.status === 'pending' && (
                       <Button
                         size="sm"
                         onClick={() => handleViewReport(report)}
@@ -376,6 +501,62 @@ export default function ReportsList() {
           ))}
         </div>
       )}
+
+      {/* Modal de Rejeição */}
+      <Dialog open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ThumbsDown className="h-5 w-5 text-red-500" />
+              Rejeitar Report
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {selectedReport && (
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Report: {selectedReport.vaga?.titulo || selectedReport.vaga?.cargo} - {selectedReport.vaga?.cliente}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Campo: {getFieldLabel(selectedReport.field_name)}
+                </p>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="reject-reason" className="text-sm font-medium">
+                Motivo da Rejeição *
+              </Label>
+              <Textarea
+                id="reject-reason"
+                placeholder="Explique o motivo da rejeição deste report..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={4}
+                className="resize-none"
+              />
+            </div>
+            
+            <div className="flex items-center justify-end gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={handleCancelRejection}
+                disabled={isUpdating}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleConfirmRejection}
+                disabled={isUpdating || !rejectReason.trim()}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                {isUpdating ? 'Rejeitando...' : 'Confirmar Rejeição'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
