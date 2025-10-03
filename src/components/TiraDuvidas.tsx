@@ -27,7 +27,7 @@ import {
   ExternalLink,
   Copy
 } from 'lucide-react'
-import { toast } from 'sonner'
+// import { toast } from 'sonner' // Removido para evitar dependência extra
 
 interface HelpContent {
   id: string
@@ -349,7 +349,8 @@ export default function TiraDuvidas() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('Conteúdo copiado para a área de transferência!')
+    // Feedback visual simples sem dependência externa
+    alert('Conteúdo copiado para a área de transferência!')
   }
 
   const getPriorityColor = (priority: string) => {
