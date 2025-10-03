@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Tentar renovar a sessão em background sem bloquear
             setTimeout(() => {
               console.log('🔄 Renovando sessão em background...')
-              supabase.auth.getSession().then(({ data: { session } }) => {
+              supabase.auth.getSession().then(({ data: { session } }: any) => {
                 if (session?.user) {
                   sessionCache.saveSession({
                     user: session.user,
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   })
                   console.log('✅ Sessão renovada em background')
                 }
-              }).catch(error => {
+              }).catch((error: any) => {
                 console.warn('⚠️ Erro ao renovar sessão em background:', error)
               })
             }, 1000)
