@@ -17,6 +17,9 @@ import UpdateModal from './UpdateModal'
 import UpdateNotification from './UpdateNotification'
 import ChangePasswordModal from './ChangePasswordModal'
 import AdminNotifications from './AdminNotifications'
+import BellNotification from './BellNotification'
+import NotificationsList from './NotificationsList'
+import RealtimeNotifications, { useRealtimeNotifications } from './RealtimeNotifications'
 import { 
   Home, 
   Users, 
@@ -49,6 +52,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isEnabled: rhNovaVagaEnabled } = useRHNovaVagaAccess()
   const navigate = useNavigate()
   const location = useLocation()
+  
+  // Hook para notificações em tempo real
+  const {
+    pendingReports,
+    isLoading: notificationsLoading,
+    loadPendingReports,
+    handleNewReport,
+    handleReportUpdate
+  } = useRealtimeNotifications()
   
 
   // Hook para verificar atualizações automaticamente
@@ -407,7 +419,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Theme Toggle e Notificações - Fixed Position */}
           <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-            <AdminNotifications />
+            {/* Notificações em tempo real */}
+            <RealtimeNotifications 
+              onNewReport={handleNewReport}
+              onReportUpdate={handleReportUpdate}
+            />
+            
+            {/* Lista de notificações */}
+            <NotificationsList 
+              pendingReports={pendingReports}
+              isLoading={notificationsLoading}
+              onRefresh={loadPendingReports}
+            />
+            
+            {/* Sino de notificação */}
+            <BellNotification />
+            
             <ThemeToggle />
           </div>
 
