@@ -21,9 +21,9 @@ import { Report, ReportFormData, User, Vaga } from '../types/database'
 // 1. FUNÇÃO PRINCIPAL: CRIAR REPORT
 // =============================================
 
-export async function createReport(reportData: ReportFormData, reportedBy: string): Promise<Report | null> {
+export async function createReport(reportData: ReportFormData): Promise<Report | null> {
   try {
-    console.log('📝 Criando report:', { reportData, reportedBy })
+    console.log('📝 Criando report:', { reportData })
 
     // 1. Verificar se o usuário está autenticado no Supabase Auth
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
@@ -33,10 +33,22 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
       throw new Error('Usuário não autenticado')
     }
 
-    if (authUser.id !== reportedBy) {
-      console.error('❌ ID não corresponde:', { authUserId: authUser.id, reportedBy })
-      throw new Error('ID do usuário não corresponde')
+    // 2. Buscar o ID correto na tabela users baseado no email do Auth
+    const { data: userData, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('id, email, role')
+      .eq('email', authUser.email)
+      .single()
+
+    if (userError || !userData) {
+      console.error('❌ Usuário não encontrado na tabela users:', userError)
+      throw new Error('Usuário não encontrado na tabela users')
     }
+
+    console.log('👤 Usuário encontrado na tabela users:', userData)
+
+    // Usar o ID da tabela users em vez do Auth ID
+    const correctUserId = userData.id
 
     // 2. Buscar dados da vaga usando cliente administrativo
     const { data: vagaData, error: vagaError } = await supabaseAdmin
@@ -58,7 +70,7 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
       .from('reports')
       .insert({
         vaga_id: reportData.vaga_id,
-        reported_by: reportedBy,
+        reported_by: correctUserId, // Usar o ID correto da tabela users
         assigned_to: reportData.assigned_to,
         field_name: reportData.field_name,
         current_value: currentValue,

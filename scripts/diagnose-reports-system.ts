@@ -1,7 +1,43 @@
 #!/usr/bin/env tsx
 
-import { supabase, supabaseAdmin } from '../src/lib/supabase'
-import { createReport, getAllAdmins, getPendingReportsForAdmin } from '../src/lib/reports'
+import { createClient } from '@supabase/supabase-js'
+import dotenv from 'dotenv'
+
+// Carregar variáveis de ambiente
+dotenv.config()
+
+// Configuração do Supabase para Node.js
+const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://mywaoaofatgwbbtyqfpd.supabase.co'
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15d2FvYW9mYXRnd2JidHlxZnBkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2MDAzMjQsImV4cCI6MjA3NDE3NjMyNH0._9AMjjkQnDam-ciD9r07X4IpiWG2Hl0jBrFcY-v61Wg'
+const supabaseServiceKey = process.env.VITE_SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15d2FvYW9mYXRnd2JidHlxZnBkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODYwMDMyNCwiZXhwIjoyMDc0MTc2MzI0fQ.oUhs-CNusuqxKFIwjc1zv0Nh4TJ6opnmzt8_V1Lfq7U'
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+
+// Funções auxiliares para reports
+async function getAllAdmins() {
+  const { data, error } = await supabaseAdmin
+    .from('users')
+    .select('id, name, email, role')
+    .eq('role', 'ADMIN')
+  
+  if (error) throw error
+  return data || []
+}
+
+async function createReport(reportData: any, reportedBy: string) {
+  const { data, error } = await supabaseAdmin
+    .from('reports')
+    .insert({
+      ...reportData,
+      reported_by: reportedBy
+    })
+    .select('*')
+    .single()
+  
+  if (error) throw error
+  return data
+}
 
 console.log('🔍 DIAGNÓSTICO COMPLETO DO SISTEMA DE REPORTS')
 console.log('=' .repeat(60))
@@ -86,15 +122,19 @@ async function diagnoseReportsSystem() {
     console.log('\n5️⃣ VERIFICANDO POLÍTICAS RLS...')
     
     // Verificar políticas RLS da tabela reports
-    const { data: policies, error: policiesError } = await supabaseAdmin
-      .rpc('get_table_policies', { table_name: 'reports' })
-      .catch(() => ({ data: null, error: { message: 'Função não disponível' } }))
-    
-    if (policiesError) {
-      console.log('⚠️ Não foi possível verificar políticas RLS automaticamente')
-      console.log('💡 Verifique manualmente no Supabase Dashboard')
-    } else {
-      console.log('✅ Políticas RLS verificadas')
+    try {
+      const { data: policies, error: policiesError } = await supabaseAdmin
+        .rpc('get_table_policies', { table_name: 'reports' })
+      
+      if (policiesError) {
+        console.log('⚠️ Não foi possível verificar políticas RLS automaticamente')
+        console.log('💡 Verifique manualmente no Supabase Dashboard')
+      } else {
+        console.log('✅ Políticas RLS verificadas')
+      }
+    } catch (error) {
+      console.log('⚠️ Função RPC não disponível - verificando políticas manualmente')
+      console.log('💡 Verifique manualmente no Supabase Dashboard > Authentication > Policies')
     }
 
     console.log('\n6️⃣ TESTANDO CRIAÇÃO DE REPORT (SIMULAÇÃO)...')

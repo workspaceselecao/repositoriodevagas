@@ -106,7 +106,7 @@ export default function ReportModal({ isOpen, onClose, vaga }: ReportModalProps)
       console.log('📋 Dados do report:', reportData)
       console.log('👤 Usuário atual:', user)
 
-      const report = await createReport(reportData, user.id)
+      const report = await createReport(reportData)
       
       clearTimeout(timeoutId) // Limpar timeout se sucesso
       
