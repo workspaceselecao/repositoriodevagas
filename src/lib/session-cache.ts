@@ -52,8 +52,8 @@ class SessionCache {
       // Verificar se localStorage está disponível
       if (typeof window === 'undefined' || !window.localStorage) {
         console.log('⚠️ localStorage não disponível')
-        return null
-      }
+      return null
+    }
 
       // Tentar chave principal primeiro
       let sessionData = this.getSessionFromKey(this.SESSION_KEY)
@@ -69,8 +69,9 @@ class SessionCache {
           console.log('✅ Sessão válida encontrada no cache')
           return sessionData
         } else {
-          console.log('⏰ Sessão expirada, removendo do cache')
-          this.clearSession()
+          console.log('⏰ Sessão expirada, mas mantendo para evitar deslogamento')
+          // NÃO remover sessão automaticamente - deixar para o usuário fazer logout manual
+          return sessionData
         }
       }
 
@@ -88,8 +89,8 @@ class SessionCache {
     const now = Date.now()
     const expiresAt = sessionData.expires_at || (sessionData.created_at + this.MAX_AGE)
     
-    // Dar uma margem de 1 hora para evitar expirações desnecessárias
-    const gracePeriod = 60 * 60 * 1000 // 1 hora
+    // Dar uma margem de 24 horas para evitar expirações desnecessárias
+    const gracePeriod = 24 * 60 * 60 * 1000 // 24 horas
     const isValid = now < (expiresAt + gracePeriod)
     
     if (!isValid) {
@@ -138,13 +139,42 @@ class SessionCache {
       }
 
       if (sessionData) {
-        console.log('🔍 Sessão encontrada (forçada) no cache')
+        console.log('🔍 Sessão encontrada (forçada) no cache - mantendo usuário logado')
         return sessionData
       }
 
       return null
     } catch (error) {
       console.warn('⚠️ Erro ao recuperar sessão forçada do cache:', error)
+      return null
+    }
+  }
+
+  // Método para sempre manter sessão (ultra agressivo)
+  getSessionAlways(): SessionData | null {
+    try {
+      // Verificar se localStorage está disponível
+      if (typeof window === 'undefined' || !window.localStorage) {
+        console.log('⚠️ localStorage não disponível')
+        return null
+      }
+
+      // Tentar chave principal primeiro
+      let sessionData = this.getSessionFromKey(this.SESSION_KEY)
+      
+      // Se não encontrar, tentar backup
+      if (!sessionData) {
+        sessionData = this.getSessionFromKey(this.BACKUP_KEY)
+      }
+
+      if (sessionData) {
+        console.log('🔍 Sessão encontrada (sempre) no cache - SEMPRE mantendo usuário logado')
+        return sessionData
+      }
+
+      return null
+    } catch (error) {
+      console.warn('⚠️ Erro ao recuperar sessão sempre do cache:', error)
       return null
     }
   }
@@ -196,6 +226,7 @@ export function useSessionCache() {
     saveSession: sessionCache.saveSession.bind(sessionCache),
     getSession: sessionCache.getSession.bind(sessionCache),
     getSessionForce: sessionCache.getSessionForce.bind(sessionCache),
+    getSessionAlways: sessionCache.getSessionAlways.bind(sessionCache),
     clearSession: sessionCache.clearSession.bind(sessionCache),
     hasValidSession: sessionCache.hasValidSession.bind(sessionCache),
     updateAccessToken: sessionCache.updateAccessToken.bind(sessionCache),

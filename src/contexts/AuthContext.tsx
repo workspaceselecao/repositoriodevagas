@@ -61,7 +61,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       try {
         // Primeiro, tentar verificar sessão no cache otimizado
-        const cachedSession = sessionCache.getSession()
+        let cachedSession = sessionCache.getSession()
+        
+        // Se não encontrou sessão válida, tentar forçar
+        if (!cachedSession) {
+          cachedSession = sessionCache.getSessionForce()
+        }
+        
+        // Se ainda não encontrou, tentar método ultra agressivo
+        if (!cachedSession) {
+          cachedSession = sessionCache.getSessionAlways()
+        }
         
         if (cachedSession) {
           console.log('🔍 [AuthContext] Sessão encontrada no cache, usando cache')
@@ -224,6 +234,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Se não encontrou sessão válida, tentar forçar
             if (!cachedSession) {
               cachedSession = sessionCache.getSessionForce()
+            }
+            
+            // Se ainda não encontrou, tentar método ultra agressivo
+            if (!cachedSession) {
+              cachedSession = sessionCache.getSessionAlways()
             }
             
             if (cachedSession && isMounted) {
