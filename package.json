@@ -39,7 +39,9 @@
     "test-report": "tsx scripts/test-report-creation.ts",
     "fix-reports-rls": "tsx scripts/fix-reports-rls.ts",
     "fix-foreign-key": "tsx scripts/fix-foreign-key.ts",
-    "test-new-reports": "tsx scripts/test-new-reports-system.ts"
+    "test-new-reports": "tsx scripts/test-new-reports-system.ts",
+    "diagnose-reports": "tsx scripts/diagnose-reports-system.ts",
+    "test-simple-reports": "tsx scripts/test-simple-reports.ts"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { Report } from '../types/database'
-import { getPendingReportsForAdmin } from '../lib/reports'
+import { getReportsForRealtime } from '../lib/reports'
+
+// =============================================
+// HOOK PARA NOTIFICAÇÕES EM TEMPO REAL
+// =============================================
 
 export function useRealtimeReports(adminId: string | null) {
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
   const [newReportCount, setNewReportCount] = useState(0)
+  const [isConnected, setIsConnected] = useState(false)
 
   // Carregar reports iniciais
   useEffect(() => {
@@ -17,11 +22,13 @@ export function useRealtimeReports(adminId: string | null) {
 
     const loadInitialReports = async () => {
       try {
-        const initialReports = await getPendingReportsForAdmin(adminId)
+        console.log('🔄 Carregando reports iniciais para admin:', adminId)
+        const initialReports = await getReportsForRealtime(adminId)
         setReports(initialReports)
         setNewReportCount(0)
+        console.log('✅ Reports iniciais carregados:', initialReports.length)
       } catch (error) {
-        console.error('Erro ao carregar reports iniciais:', error)
+        console.error('❌ Erro ao carregar reports iniciais:', error)
       } finally {
         setLoading(false)
       }
@@ -34,8 +41,10 @@ export function useRealtimeReports(adminId: string | null) {
   useEffect(() => {
     if (!adminId) return
 
+    console.log('🔌 Conectando ao canal de reports em tempo real...')
+
     const channel = supabase
-      .channel('reports_channel')
+      .channel(`reports_${adminId}`)
       .on(
         'postgres_changes',
         {
@@ -44,15 +53,18 @@ export function useRealtimeReports(adminId: string | null) {
           table: 'reports',
           filter: `assigned_to=eq.${adminId}`
         },
-        (payload: any) => {
+        async (payload: any) => {
+          console.log('🔔 Novo report recebido:', payload.new)
           setNewReportCount(prev => prev + 1)
           
           // Recarregar reports para ter os dados completos
-          getPendingReportsForAdmin(adminId).then(newReports => {
-            setReports(newReports)
-          }).catch(error => {
-            console.error('Erro ao recarregar reports:', error)
-          })
+          try {
+            const updatedReports = await getReportsForRealtime(adminId)
+            setReports(updatedReports)
+            console.log('✅ Reports atualizados:', updatedReports.length)
+          } catch (error) {
+            console.error('❌ Erro ao recarregar reports:', error)
+          }
         }
       )
       .on(
@@ -63,7 +75,9 @@ export function useRealtimeReports(adminId: string | null) {
           table: 'reports',
           filter: `assigned_to=eq.${adminId}`
         },
-        (payload: any) => {
+        async (payload: any) => {
+          console.log('🔄 Report atualizado:', payload.new)
+          
           // Atualizar report específico na lista
           setReports(prevReports => 
             prevReports.map(report => 
@@ -72,10 +86,15 @@ export function useRealtimeReports(adminId: string | null) {
           )
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('📡 Status da conexão:', status)
+        setIsConnected(status === 'SUBSCRIBED')
+      })
 
     return () => {
+      console.log('🔌 Desconectando do canal de reports...')
       supabase.removeChannel(channel)
+      setIsConnected(false)
     }
   }, [adminId])
 
@@ -87,10 +106,12 @@ export function useRealtimeReports(adminId: string | null) {
     if (!adminId) return
     
     try {
-      const updatedReports = await getPendingReportsForAdmin(adminId)
+      console.log('🔄 Atualizando reports manualmente...')
+      const updatedReports = await getReportsForRealtime(adminId)
       setReports(updatedReports)
+      console.log('✅ Reports atualizados:', updatedReports.length)
     } catch (error) {
-      console.error('Erro ao atualizar reports:', error)
+      console.error('❌ Erro ao atualizar reports:', error)
     }
   }
 
@@ -98,12 +119,16 @@ export function useRealtimeReports(adminId: string | null) {
     reports,
     loading,
     newReportCount,
+    isConnected,
     clearNewReportCount,
     refreshReports
   }
 }
 
-// Hook para notificações em tempo real
+// =============================================
+// HOOK PARA NOTIFICAÇÕES GERAIS
+// =============================================
+
 export function useRealtimeNotifications() {
   const [notifications, setNotifications] = useState<Array<{
     id: string
@@ -111,9 +136,12 @@ export function useRealtimeNotifications() {
     message: string
     timestamp: Date
     reportId?: string
+    adminId?: string
   }>>([])
 
   useEffect(() => {
+    console.log('🔔 Configurando notificações em tempo real...')
+
     const channel = supabase
       .channel('notifications_channel')
       .on(
@@ -124,20 +152,26 @@ export function useRealtimeNotifications() {
           table: 'reports'
         },
         (payload: any) => {
+          console.log('🔔 Nova notificação de report:', payload.new)
+          
           const newNotification = {
             id: `notification-${Date.now()}`,
             type: 'report' as const,
             message: `Novo report recebido para ${payload.new.field_name}`,
             timestamp: new Date(),
-            reportId: payload.new.id
+            reportId: payload.new.id,
+            adminId: payload.new.assigned_to
           }
           
-          setNotifications(prev => [newNotification, ...prev.slice(0, 4)]) // Manter apenas 5 notificações
+          setNotifications(prev => [newNotification, ...prev.slice(0, 9)]) // Manter apenas 10 notificações
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('📡 Status das notificações:', status)
+      })
 
     return () => {
+      console.log('🔔 Desconectando notificações...')
       supabase.removeChannel(channel)
     }
   }, [])
@@ -154,5 +188,68 @@ export function useRealtimeNotifications() {
     notifications,
     removeNotification,
     clearAllNotifications
+  }
+}
+
+// =============================================
+// HOOK PARA DETECTAR LOGIN DE ADMIN
+// =============================================
+
+export function useAdminLoginDetection() {
+  const [adminLoggedIn, setAdminLoggedIn] = useState(false)
+  const [loggedInAdmin, setLoggedInAdmin] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Detectar mudanças na sessão
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('🔐 Mudança de autenticação:', event, session?.user?.id)
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Verificar se é um admin
+          try {
+            const { data: userData, error } = await supabase
+              .from('users')
+              .select('id, role')
+              .eq('id', session.user.id)
+              .single()
+
+            if (!error && userData && userData.role === 'ADMIN') {
+              console.log('👑 Admin fez login:', userData.id)
+              setAdminLoggedIn(true)
+              setLoggedInAdmin(userData.id)
+              
+              // Verificar se há reports pendentes para este admin
+              setTimeout(async () => {
+                try {
+                  const pendingReports = await getReportsForRealtime(userData.id)
+                  if (pendingReports.length > 0) {
+                    console.log('📋 Admin tem reports pendentes:', pendingReports.length)
+                    // Aqui você pode mostrar uma notificação ou popup
+                  }
+                } catch (error) {
+                  console.error('❌ Erro ao verificar reports pendentes:', error)
+                }
+              }, 1000)
+            }
+          } catch (error) {
+            console.error('❌ Erro ao verificar role do usuário:', error)
+          }
+        } else if (event === 'SIGNED_OUT') {
+          console.log('👋 Admin fez logout')
+          setAdminLoggedIn(false)
+          setLoggedInAdmin(null)
+        }
+      }
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  return {
+    adminLoggedIn,
+    loggedInAdmin
   }
 }

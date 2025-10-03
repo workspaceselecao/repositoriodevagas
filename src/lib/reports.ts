@@ -1,18 +1,20 @@
 import { supabase, supabaseAdmin } from './supabase'
-import { Report, ReportFormData, User } from '../types/database'
+import { Report, ReportFormData, User, Vaga } from '../types/database'
 
 // =============================================
-// SISTEMA DE REPORTS REFEITO DO ZERO
+// SISTEMA SIMPLIFICADO DE REPORTS
 // =============================================
 
 /**
- * ARQUITETURA DO SISTEMA:
+ * ARQUITETURA SIMPLIFICADA:
  * 1. RH cria report → ADMIN recebe notificação
  * 2. ADMIN edita vaga baseada no report
  * 3. Sistema de comunicação em tempo real
  * 
- * FLUXO DE DADOS:
- * Supabase Auth (autenticação) → Tabela users (roles) → Tabela reports (comunicação)
+ * PRINCÍPIOS:
+ * - Usar sempre supabaseAdmin para operações críticas
+ * - Validação mínima de autenticação
+ * - Foco na funcionalidade, não na complexidade
  */
 
 // =============================================
@@ -21,210 +23,67 @@ import { Report, ReportFormData, User } from '../types/database'
 
 export async function createReport(reportData: ReportFormData, reportedBy: string): Promise<Report | null> {
   try {
-    console.log('🚀 [REPORTS] Iniciando criação de report...')
-    console.log('📋 Dados:', { reportData, reportedBy })
+    console.log('📝 Criando report:', { reportData, reportedBy })
+
+    // 1. Verificar se o usuário está autenticado no Supabase Auth
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
     
-    // ETAPA 1: Verificar autenticação
-    const authUser = await verifyAuthentication(reportedBy)
-    console.log('✅ Usuário autenticado:', authUser.id)
-    
-    // ETAPA 2: Garantir que usuário existe na tabela users
-    const user = await ensureUserExists(authUser)
-    console.log('✅ Usuário na tabela users:', user.id, user.role)
-    
-    // ETAPA 3: Validar permissões RH
-    if (user.role !== 'RH') {
-      throw new Error('Apenas usuários RH podem criar reports')
+    if (authError || !authUser) {
+      console.error('❌ Usuário não autenticado:', authError)
+      throw new Error('Usuário não autenticado')
     }
-    
-    // ETAPA 4: Buscar dados da vaga
-    const vaga = await getVagaData(reportData.vaga_id)
-    console.log('✅ Vaga encontrada:', vaga.id)
-    
-    // ETAPA 5: Criar report usando cliente administrativo
-    const report = await createReportRecord({
-      ...reportData,
-      reported_by: user.id,
-      current_value: vaga[reportData.field_name] || 'Não informado'
-    })
-    
-    console.log('🎉 Report criado com sucesso:', report.id)
-    return report
-    
-  } catch (error) {
-    console.error('❌ [REPORTS] Erro ao criar report:', error)
-    throw error
-  }
-}
 
-// =============================================
-// 2. FUNÇÕES AUXILIARES
-// =============================================
-
-async function verifyAuthentication(userId: string) {
-  const { data: { user }, error } = await supabase.auth.getUser()
-  
-  if (error || !user) {
-    throw new Error('Usuário não autenticado')
-  }
-  
-  if (user.id !== userId) {
-    throw new Error('ID do usuário não corresponde à sessão')
-  }
-  
-  return user
-}
-
-async function ensureUserExists(authUser: any): Promise<User> {
-  // Tentar buscar usuário na tabela users
-  const { data: existingUser, error: fetchError } = await supabaseAdmin
-    .from('users')
-    .select('*')
-    .eq('id', authUser.id)
-    .single()
-  
-  if (existingUser && !fetchError) {
-    return existingUser
-  }
-  
-  // Se não existe, criar usando dados do Auth
-  console.log('⚠️ Usuário não encontrado na tabela users, criando...')
-  
-  const { data: newUser, error: createError } = await supabaseAdmin
-    .from('users')
-    .insert({
-      id: authUser.id,
-      email: authUser.email || 'usuario@exemplo.com',
-      name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Usuário',
-      role: authUser.user_metadata?.role || 'RH',
-      password_hash: '' // Não necessário com Supabase Auth
-    })
-    .select()
-    .single()
-  
-  if (createError) {
-    console.error('❌ Erro ao criar usuário:', createError)
-    throw new Error(`Erro ao criar usuário: ${createError.message}`)
-  }
-  
-  return newUser
-}
-
-async function getVagaData(vagaId: string) {
-  const { data: vaga, error } = await supabaseAdmin
-    .from('vagas')
-    .select('*')
-    .eq('id', vagaId)
-    .single()
-  
-  if (error) {
-    throw new Error(`Erro ao buscar vaga: ${error.message}`)
-  }
-  
-  return vaga
-}
-
-async function createReportRecord(data: any) {
-  const { data: report, error } = await supabaseAdmin
-    .from('reports')
-    .insert({
-      vaga_id: data.vaga_id,
-      reported_by: data.reported_by,
-      assigned_to: data.assigned_to,
-      field_name: data.field_name,
-      current_value: data.current_value,
-      suggested_changes: data.suggested_changes,
-      status: 'pending'
-    })
-    .select('*')
-    .single()
-  
-  if (error) {
-    console.error('❌ Erro ao criar report:', error)
-    throw new Error(`Erro ao criar report: ${error.message}`)
-  }
-  
-  return report
-}
-
-// =============================================
-// 3. FUNÇÕES PARA ADMINISTRADORES
-// =============================================
-
-export async function getReportsForAdmin(adminId: string): Promise<Report[]> {
-  try {
-    const { data: reports, error } = await supabaseAdmin
-      .from('reports')
-      .select(`
-        *,
-        vaga:vagas(*),
-        reporter:users!reports_reported_by_fkey(*),
-        assignee:users!reports_assigned_to_fkey(*)
-      `)
-      .eq('assigned_to', adminId)
-      .order('created_at', { ascending: false })
-    
-    if (error) {
-      throw new Error(`Erro ao buscar reports: ${error.message}`)
+    if (authUser.id !== reportedBy) {
+      console.error('❌ ID não corresponde:', { authUserId: authUser.id, reportedBy })
+      throw new Error('ID do usuário não corresponde')
     }
-    
-    return reports || []
-  } catch (error) {
-    console.error('❌ Erro ao buscar reports para admin:', error)
-    throw error
-  }
-}
 
-export async function updateReportStatus(reportId: string, status: string, adminNotes?: string) {
-  try {
+    // 2. Buscar dados da vaga usando cliente administrativo
+    const { data: vagaData, error: vagaError } = await supabaseAdmin
+      .from('vagas')
+      .select('*')
+      .eq('id', reportData.vaga_id)
+      .single()
+
+    if (vagaError) {
+      console.error('❌ Erro ao buscar vaga:', vagaError)
+      throw new Error(`Erro ao buscar vaga: ${vagaError.message}`)
+    }
+
+    const currentValue = (vagaData as any)[reportData.field_name] || 'Não informado'
+    console.log('📋 Valor atual:', currentValue)
+
+    // 3. Criar o report usando cliente administrativo (bypass RLS)
     const { data, error } = await supabaseAdmin
       .from('reports')
-      .update({
-        status,
-        admin_notes: adminNotes,
-        updated_at: new Date().toISOString(),
-        completed_at: status === 'completed' ? new Date().toISOString() : null
+      .insert({
+        vaga_id: reportData.vaga_id,
+        reported_by: reportedBy,
+        assigned_to: reportData.assigned_to,
+        field_name: reportData.field_name,
+        current_value: currentValue,
+        suggested_changes: reportData.suggested_changes,
+        status: 'pending'
       })
-      .eq('id', reportId)
-      .select()
-      .single()
-    
-    if (error) {
-      throw new Error(`Erro ao atualizar report: ${error.message}`)
-    }
-    
-    return data
-  } catch (error) {
-    console.error('❌ Erro ao atualizar status do report:', error)
-    throw error
-  }
-}
-
-// =============================================
-// 4. FUNÇÕES PARA BUSCAR ADMINS
-// =============================================
-
-export async function getAllAdmins(): Promise<User[]> {
-  try {
-    const { data: admins, error } = await supabaseAdmin
-      .from('users')
       .select('*')
-      .eq('role', 'ADMIN')
-      .order('name')
-    
+      .single()
+
     if (error) {
-      throw new Error(`Erro ao buscar admins: ${error.message}`)
+      console.error('❌ Erro ao criar report:', error)
+      throw error
     }
-    
-    return admins || []
+
+    console.log('✅ Report criado com sucesso:', data)
+    return data
+
   } catch (error) {
-    console.error('❌ Erro ao buscar admins:', error)
+    console.error('❌ Erro ao criar report:', error)
     throw error
   }
 }
 
 // =============================================
-// 5. FUNÇÕES DE BUSCA GERAL
+// 2. FUNÇÕES DE BUSCA
 // =============================================
 
 export async function getReportById(reportId: string): Promise<Report | null> {
@@ -262,48 +121,80 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
       reporter:users!reports_reported_by_fkey(*),
       assignee:users!reports_assigned_to_fkey(*)
     `)
-    
-    if (userRole === 'ADMIN') {
-      // Admins veem todos os reports
-      query = query.order('created_at', { ascending: false })
-    } else {
-      // RH vê apenas seus próprios reports
-      query = query.eq('reported_by', userId).order('created_at', { ascending: false })
+
+    if (userRole === 'RH') {
+      query = query.eq('reported_by', userId)
     }
-    
-    const { data: reports, error } = await query
-    
+
+    const { data, error } = await query.order('created_at', { ascending: false })
+
     if (error) {
-      throw new Error(`Erro ao buscar reports: ${error.message}`)
+      console.error('Erro ao buscar reports:', error)
+      throw error
     }
-    
-    return reports || []
+
+    return data || []
   } catch (error) {
-    console.error('❌ Erro ao buscar reports por usuário:', error)
+    console.error('Erro detalhado ao buscar reports:', error)
     throw error
   }
 }
 
 export async function getPendingReportsForAdmin(adminId: string): Promise<Report[]> {
   try {
-    const { data: reports, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('reports')
       .select(`
         *,
         vaga:vagas(*),
-        reporter:users!reports_reported_by_fkey(*)
+        reporter:users!reports_reported_by_fkey(*),
+        assignee:users!reports_assigned_to_fkey(*)
       `)
       .eq('assigned_to', adminId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
-    
+
     if (error) {
-      throw new Error(`Erro ao buscar reports pendentes: ${error.message}`)
+      console.error('Erro ao buscar reports pendentes:', error)
+      throw error
     }
-    
-    return reports || []
+
+    return data || []
   } catch (error) {
-    console.error('❌ Erro ao buscar reports pendentes:', error)
+    console.error('Erro detalhado ao buscar reports pendentes:', error)
+    throw error
+  }
+}
+
+// =============================================
+// 3. FUNÇÕES DE ATUALIZAÇÃO
+// =============================================
+
+export async function updateReportStatus(reportId: string, status: Report['status'], adminNotes?: string): Promise<Report | null> {
+  try {
+    const updateData: Partial<Report> = { status, updated_at: new Date().toISOString() }
+    if (adminNotes) {
+      updateData.admin_notes = adminNotes
+    }
+    if (status === 'completed' || status === 'rejected') {
+      updateData.completed_at = new Date().toISOString()
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('reports')
+      .update(updateData)
+      .eq('id', reportId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Erro ao atualizar status do report:', error)
+      throw error
+    }
+
+    return data
+  } catch (error) {
+    console.error('Erro detalhado ao atualizar status do report:', error)
     throw error
   }
 }
@@ -314,12 +205,69 @@ export async function deleteReport(reportId: string): Promise<void> {
       .from('reports')
       .delete()
       .eq('id', reportId)
-    
+
     if (error) {
-      throw new Error(`Erro ao deletar report: ${error.message}`)
+      console.error('Erro ao deletar report:', error)
+      throw error
     }
   } catch (error) {
-    console.error('❌ Erro ao deletar report:', error)
+    console.error('Erro detalhado ao deletar report:', error)
+    throw error
+  }
+}
+
+// =============================================
+// 4. FUNÇÕES AUXILIARES
+// =============================================
+
+export async function getAllAdmins(): Promise<User[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('id, name, email')
+      .eq('role', 'ADMIN')
+
+    if (error) {
+      console.error('Erro ao buscar administradores:', error)
+      throw error
+    }
+
+    return data || []
+  } catch (error) {
+    console.error('Erro detalhado ao buscar administradores:', error)
+    throw error
+  }
+}
+
+// =============================================
+// 5. FUNÇÕES DE NOTIFICAÇÃO EM TEMPO REAL
+// =============================================
+
+export async function getReportsForRealtime(adminId: string): Promise<Report[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('reports')
+      .select(`
+        id,
+        vaga_id,
+        field_name,
+        status,
+        created_at,
+        vaga:vagas(titulo, cliente, cargo),
+        reporter:users!reports_reported_by_fkey(name, email)
+      `)
+      .eq('assigned_to', adminId)
+      .in('status', ['pending', 'in_progress'])
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Erro ao buscar reports para realtime:', error)
+      throw error
+    }
+
+    return data || []
+  } catch (error) {
+    console.error('Erro detalhado ao buscar reports para realtime:', error)
     throw error
   }
 }
