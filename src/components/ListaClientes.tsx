@@ -28,7 +28,7 @@ export default function ListaClientes() {
   const { user } = useAuth()
   const { canEdit, canDelete, loading: permissionsLoading } = useRHPermissions()
   const navigate = useNavigate()
-  const { vagas, loading } = useVagas()
+  const { vagas, loading, lastUpdated } = useVagas()
   const { removeVaga, refreshVagas } = useCache()
   const { textClasses } = useThemeClasses()
 
@@ -133,10 +133,35 @@ export default function ListaClientes() {
     setIsRefreshing(true)
     try {
       console.log('🔄 Recarregando dados da página Oportunidades...')
+      
+      // Forçar atualização do cache de vagas
       await refreshVagas()
+      
+      // Aguardar um pouco para garantir que o estado foi atualizado
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       console.log('✅ Dados recarregados com sucesso')
+      
+      // Mostrar feedback visual de sucesso
+      const button = document.querySelector('[data-refresh-button]') as HTMLElement
+      if (button) {
+        button.style.backgroundColor = '#10b981' // Verde
+        setTimeout(() => {
+          button.style.backgroundColor = ''
+        }, 1000)
+      }
+      
     } catch (error) {
       console.error('❌ Erro ao recarregar dados:', error)
+      
+      // Mostrar feedback visual de erro
+      const button = document.querySelector('[data-refresh-button]') as HTMLElement
+      if (button) {
+        button.style.backgroundColor = '#ef4444' // Vermelho
+        setTimeout(() => {
+          button.style.backgroundColor = ''
+        }, 1000)
+      }
     } finally {
       setIsRefreshing(false)
     }
@@ -170,6 +195,11 @@ export default function ListaClientes() {
           </h1>
           <p className="page-subtitle text-sm tablet:text-base laptop:text-lg font-body text-repovagas-text-secondary">
             Gerencie todas as oportunidades profissionais disponíveis
+            {lastUpdated && (
+              <span className="block text-xs text-muted-foreground mt-1">
+                Última atualização: {new Date(lastUpdated).toLocaleString('pt-BR')}
+              </span>
+            )}
           </p>
         </div>
         <div className="flex flex-col tablet:flex-row gap-2 tablet:gap-3">
@@ -196,10 +226,13 @@ export default function ListaClientes() {
             onClick={handleRefresh} 
             disabled={isRefreshing} 
             size="sm" 
+            data-refresh-button
             className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
           >
             <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
-            Atualizar
+            <span className={isRefreshing ? 'opacity-70' : ''}>
+              {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+            </span>
           </Button>
         </div>
       </div>

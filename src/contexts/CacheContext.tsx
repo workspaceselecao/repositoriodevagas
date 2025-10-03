@@ -104,16 +104,27 @@ export function CacheProvider({ children }: { children: ReactNode }) {
   const refreshVagas = useCallback(async () => {
     try {
       console.log('🔄 Carregando vagas...')
+      setLoading(true) // Adicionar loading durante refresh
+      
       const vagas = await getVagas()
+      
       setCache(prev => ({
         ...prev,
         vagas,
         lastUpdated: Date.now()
       }))
+      
       updateCacheStatus('vagas', vagas.length > 0)
       console.log(`✅ ${vagas.length} vagas carregadas`)
+      
+      // Forçar re-render dos componentes que usam vagas
+      setTimeout(() => {
+        setLoading(false)
+      }, 100)
+      
     } catch (error) {
       console.error('❌ Erro ao carregar vagas:', error)
+      setLoading(false)
     }
   }, [updateCacheStatus])
 

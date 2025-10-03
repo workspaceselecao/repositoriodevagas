@@ -4,7 +4,7 @@ import { Vaga, VagaFilter } from '../types/database'
 
 // Hook para acessar vagas do cache
 export function useVagas(filter?: VagaFilter) {
-  const { cache, refreshVagas, cacheStatus } = useCache()
+  const { cache, refreshVagas, cacheStatus, loading } = useCache()
 
   const vagas = useMemo(() => {
     if (!cache.vagas.length) return []
@@ -33,9 +33,10 @@ export function useVagas(filter?: VagaFilter) {
 
   return {
     vagas,
-    loading: !cacheStatus.vagas && cache.vagas.length === 0,
+    loading: loading || (!cacheStatus.vagas && cache.vagas.length === 0),
     refresh: refreshVagas,
-    hasData: cacheStatus.vagas
+    hasData: cacheStatus.vagas,
+    lastUpdated: cache.lastUpdated
   }
 }
 
