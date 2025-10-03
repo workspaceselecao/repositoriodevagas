@@ -86,6 +86,20 @@ export async function createReport(reportData: ReportFormData): Promise<Report |
     }
 
     console.log('✅ Report criado com sucesso:', data)
+    
+    // Verificar se o report foi realmente salvo
+    const { data: verification, error: verifyError } = await supabaseAdmin
+      .from('reports')
+      .select('*')
+      .eq('id', data.id)
+      .single()
+    
+    if (verifyError) {
+      console.error('⚠️ Erro ao verificar report criado:', verifyError)
+    } else {
+      console.log('✅ Report verificado no banco:', verification)
+    }
+    
     return data
 
   } catch (error) {
@@ -145,11 +159,24 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
 
     if (error) {
       console.error('❌ [getReportsByUser] Erro ao buscar reports:', error)
+      console.error('❌ [getReportsByUser] Detalhes do erro:', error.code, error.message, error.details)
       throw error
     }
 
     console.log('✅ [getReportsByUser] Reports encontrados:', data?.length || 0)
     console.log('📊 [getReportsByUser] Dados dos reports:', data)
+    
+    // Verificar se há reports na tabela geral (sem filtro)
+    const { data: allReports, error: allError } = await supabaseAdmin
+      .from('reports')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5)
+    
+    console.log('🔍 [getReportsByUser] Total de reports na tabela:', allReports?.length || 0)
+    if (allReports && allReports.length > 0) {
+      console.log('📋 [getReportsByUser] Últimos reports na tabela:', allReports)
+    }
     
     return data || []
   } catch (error) {

@@ -6,32 +6,69 @@ import { Badge } from './ui/badge'
 import { Vaga, Report } from '../types/database'
 import { getReportsByUser } from '../lib/reports'
 import { useAuth } from '../contexts/AuthContext'
-import { AlertCircle, Eye, CheckCircle, XCircle, Clock, User } from 'lucide-react'
+import { AlertCircle, Eye, CheckCircle, XCircle, Clock, User, RefreshCw } from 'lucide-react'
 
 export default function ReportsList() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const loadReports = async (forceRefresh: boolean = false) => {
+    try {
+      if (forceRefresh) {
+        setIsRefreshing(true)
+      } else {
+        setLoading(true)
+      }
+      
+      console.log('📝 [ReportsList] Carregando reports para usuário:', { id: user?.id, role: user?.role, name: user?.name })
+      const reportsData = await getReportsByUser(user!.id, user!.role)
+      console.log('📝 [ReportsList] Reports carregados:', reportsData)
+      setReports(reportsData)
+    } catch (error) {
+      console.error('❌ [ReportsList] Erro ao carregar reports:', error)
+    } finally {
+      setLoading(false)
+      setIsRefreshing(false)
+    }
+  }
+
+  const handleRefresh = async () => {
+    console.log('🔄 [ReportsList] Forçando refresh dos reports...')
+    
+    // Debug: verificar dados do usuário atual
+    console.log('🔍 [ReportsList] Dados do usuário para debug:', {
+      id: user?.id,
+      role: user?.role,
+      email: user?.email,
+      name: user?.name
+    })
+    
+    await loadReports(true)
+  }
 
   useEffect(() => {
     if (!user) return
+    loadReports()
+  }, [user])
 
-    const loadReports = async () => {
-      try {
-        setLoading(true)
-        console.log('📝 [ReportsList] Carregando reports para usuário:', { id: user.id, role: user.role, name: user.name })
-        const reportsData = await getReportsByUser(user.id, user.role)
-        console.log('📝 [ReportsList] Reports carregados:', reportsData)
-        setReports(reportsData)
-      } catch (error) {
-        console.error('❌ [ReportsList] Erro ao carregar reports:', error)
-      } finally {
-        setLoading(false)
-      }
+  // Escutar evento de report criado para atualizar automaticamente
+  useEffect(() => {
+    const handleReportCreated = (event: CustomEvent) => {
+      console.log('📢 Evento de report criado recebido:', event.detail)
+      // Recarregar reports após um pequeno delay para garantir que foi salvo
+      setTimeout(() => {
+        loadReports(true)
+      }, 1000)
     }
 
-    loadReports()
+    window.addEventListener('report-created', handleReportCreated as EventListener)
+    
+    return () => {
+      window.removeEventListener('report-created', handleReportCreated as EventListener)
+    }
   }, [user])
 
   const getStatusBadge = (status: string) => {
@@ -105,6 +142,35 @@ export default function ReportsList() {
               : 'Visualize seus reports enviados'
             }
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh} 
+            disabled={isRefreshing || loading}
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
+            <span>
+              {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+            </span>
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              console.log('🔍 [DEBUG] Informações do usuário:', user)
+              console.log('🔍 [DEBUG] Reports atuais:', reports)
+              console.log('🔍 [DEBUG] Loading state:', loading)
+              console.log('🔍 [DEBUG] IsRefreshing state:', isRefreshing)
+              alert(`Debug Info:\nUser ID: ${user?.id}\nUser Role: ${user?.role}\nReports Count: ${reports.length}\nLoading: ${loading}`)
+            }}
+            size="sm"
+            className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
+          >
+            <AlertCircle className="h-4 w-4" />
+            <span>Debug</span>
+          </Button>
         </div>
       </div>
 

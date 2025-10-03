@@ -113,6 +113,12 @@ export default function ReportModal({ isOpen, onClose, vaga }: ReportModalProps)
       if (report) {
         console.log('✅ Report criado com sucesso!')
         setMessage('Report enviado com sucesso! O administrador será notificado.')
+        
+        // Disparar evento para atualizar a lista de reports
+        window.dispatchEvent(new CustomEvent('report-created', { 
+          detail: { reportId: report.id, userId: user?.id } 
+        }))
+        
         setTimeout(() => {
           handleClose()
         }, 2000)
