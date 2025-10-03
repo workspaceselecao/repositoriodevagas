@@ -134,21 +134,26 @@ export default function ListaClientes() {
     try {
       console.log('🔄 Recarregando dados da página Oportunidades...')
       
-      // Forçar atualização do cache de vagas
+      // Forçar atualização do cache de vagas com dados frescos do banco
       await refreshVagas()
       
       // Aguardar um pouco para garantir que o estado foi atualizado
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, 200))
       
-      console.log('✅ Dados recarregados com sucesso')
+      console.log('✅ Dados recarregados com sucesso do banco de dados')
+      
+      // Forçar re-render do componente
+      window.dispatchEvent(new CustomEvent('vagas-refreshed'))
       
       // Mostrar feedback visual de sucesso
       const button = document.querySelector('[data-refresh-button]') as HTMLElement
       if (button) {
         button.style.backgroundColor = '#10b981' // Verde
+        button.style.color = 'white'
         setTimeout(() => {
           button.style.backgroundColor = ''
-        }, 1000)
+          button.style.color = ''
+        }, 1500)
       }
       
     } catch (error) {
@@ -158,9 +163,11 @@ export default function ListaClientes() {
       const button = document.querySelector('[data-refresh-button]') as HTMLElement
       if (button) {
         button.style.backgroundColor = '#ef4444' // Vermelho
+        button.style.color = 'white'
         setTimeout(() => {
           button.style.backgroundColor = ''
-        }, 1000)
+          button.style.color = ''
+        }, 1500)
       }
     } finally {
       setIsRefreshing(false)

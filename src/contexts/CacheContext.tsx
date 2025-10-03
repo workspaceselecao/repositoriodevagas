@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
 import { Vaga } from '../types/database'
-import { getVagas, getClientes, getSites, getCategorias, getCargos, getCelulas } from '../lib/vagas'
+import { getVagas, getVagasFresh, getClientes, getSites, getCategorias, getCargos, getCelulas } from '../lib/vagas'
 import { getAllUsers } from '../lib/auth'
 import { getNoticias } from '../lib/noticias'
 import { useAuth } from './AuthContext'
@@ -103,10 +103,11 @@ export function CacheProvider({ children }: { children: ReactNode }) {
   // Função para buscar vagas
   const refreshVagas = useCallback(async () => {
     try {
-      console.log('🔄 Carregando vagas...')
+      console.log('🔄 Carregando vagas frescas do banco...')
       setLoading(true) // Adicionar loading durante refresh
       
-      const vagas = await getVagas()
+      // Usar getVagasFresh para bypass do cache e buscar dados frescos
+      const vagas = await getVagasFresh()
       
       setCache(prev => ({
         ...prev,
@@ -115,7 +116,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       }))
       
       updateCacheStatus('vagas', vagas.length > 0)
-      console.log(`✅ ${vagas.length} vagas carregadas`)
+      console.log(`✅ ${vagas.length} vagas frescas carregadas do banco`)
       
       // Forçar re-render dos componentes que usam vagas
       setTimeout(() => {
@@ -123,7 +124,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       }, 100)
       
     } catch (error) {
-      console.error('❌ Erro ao carregar vagas:', error)
+      console.error('❌ Erro ao carregar vagas frescas:', error)
       setLoading(false)
     }
   }, [updateCacheStatus])
