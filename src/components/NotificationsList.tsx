@@ -1,11 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { ScrollArea } from './ui/scroll-area'
 import { Separator } from './ui/separator'
 import { Report } from '../types/database'
-import { Bell, Clock, User, FileText, Eye } from 'lucide-react'
+import { Bell, Clock, User, FileText, Eye, ArrowRight, ExternalLink } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -21,6 +22,7 @@ export default function NotificationsList({
   onRefresh 
 }: NotificationsListProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
 
   const formatTimeAgo = (dateString: string) => {
     try {
@@ -53,6 +55,16 @@ export default function NotificationsList({
     return fieldLabels[fieldName] || fieldName
   }
 
+  const handleViewAllReports = () => {
+    setIsOpen(false)
+    navigate('/dashboard/reports')
+  }
+
+  const handleReportClick = (reportId: string) => {
+    setIsOpen(false)
+    navigate(`/dashboard/reports?report=${reportId}`)
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -73,64 +85,84 @@ export default function NotificationsList({
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="max-w-2xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-orange-500" />
-            Notificações de Reports
-            {pendingReports.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {pendingReports.length} pendente{pendingReports.length > 1 ? 's' : ''}
-              </Badge>
-            )}
+      <DialogContent className="w-[90vw] max-w-4xl h-[85vh] max-h-[600px] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-orange-500" />
+              Notificações de Reports
+              {pendingReports.length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {pendingReports.length} pendente{pendingReports.length > 1 ? 's' : ''}
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onRefresh}
+                disabled={isLoading}
+                className="flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <div className="h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+                Atualizar
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleViewAllReports}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Ver Todos
+              </Button>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Botão de atualizar */}
-          <div className="flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onRefresh}
-              disabled={isLoading}
-              className="flex items-center gap-2"
-            >
-              {isLoading ? (
-                <div className="h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-              Atualizar
-            </Button>
-          </div>
-
+        <div className="flex-1 flex flex-col min-h-0">
           {/* Lista de reports */}
-          <ScrollArea className="h-[400px]">
+          <ScrollArea className="flex-1">
             {isLoading ? (
-              <div className="flex items-center justify-center py-8">
+              <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <div className="h-8 w-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">Carregando reports...</p>
                 </div>
               </div>
             ) : pendingReports.length === 0 ? (
-              <div className="text-center py-8">
-                <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Nenhum report pendente</p>
-                <p className="text-sm text-muted-foreground mt-1">
+              <div className="text-center py-12">
+                <Bell className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-lg font-medium text-muted-foreground mb-2">Nenhum report pendente</p>
+                <p className="text-sm text-muted-foreground mb-4">
                   Você será notificado quando houver novos reports
                 </p>
+                <Button
+                  variant="outline"
+                  onClick={handleViewAllReports}
+                  className="flex items-center gap-2"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Ir para Reports
+                </Button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 pr-2">
                 {pendingReports.map((report, index) => (
                   <div key={report.id}>
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div 
+                      className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
+                      onClick={() => handleReportClick(report.id)}
+                    >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
                           {/* Header do report */}
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2 mb-3">
                             <FileText className="h-4 w-4 text-blue-500" />
                             <span className="font-medium text-sm">
                               {getFieldLabel(report.field_name)}
@@ -138,11 +170,12 @@ export default function NotificationsList({
                             <Badge variant="outline" className="text-xs">
                               {report.status}
                             </Badge>
+                            <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                           </div>
 
                           {/* Informações da vaga */}
-                          <div className="mb-2">
-                            <p className="font-semibold text-sm truncate">
+                          <div className="mb-3">
+                            <p className="font-semibold text-sm mb-1 line-clamp-1">
                               {report.vaga?.titulo || report.vaga?.cargo || 'Vaga sem título'}
                             </p>
                             <p className="text-xs text-muted-foreground">
@@ -152,7 +185,7 @@ export default function NotificationsList({
 
                           {/* Sugestões */}
                           <div className="mb-3">
-                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
                               {report.suggested_changes}
                             </p>
                           </div>
@@ -169,6 +202,9 @@ export default function NotificationsList({
                                 <span>{formatTimeAgo(report.created_at)}</span>
                               </div>
                             </div>
+                            <span className="text-xs text-blue-600 group-hover:text-blue-700">
+                              Clique para ver detalhes
+                            </span>
                           </div>
                         </div>
                       </div>
