@@ -16,40 +16,19 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
     
     console.log('✅ Usuário autenticado no Supabase:', authUser.id)
     
-    // Verificar se o usuário existe na tabela users
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id, email, name, role')
-      .eq('id', reportedBy)
-      .single()
-    
-    if (userError || !userData) {
-      console.log('⚠️ Usuário não encontrado na tabela users, criando automaticamente...')
-      
-      // Criar usuário na tabela users automaticamente
-      const { data: newUser, error: createError } = await supabase
-        .from('users')
-        .insert({
-          id: reportedBy,
-          email: authUser.email || 'usuario@exemplo.com',
-          name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Usuário',
-          role: 'RH' // Default role
-        })
-        .select()
-        .single()
-      
-      if (createError) {
-        console.error('❌ Erro ao criar usuário na tabela users:', createError)
-        throw new Error('Erro ao criar usuário na tabela users')
-      }
-      
-      console.log('✅ Usuário criado na tabela users:', newUser)
-    } else {
-      console.log('✅ Usuário encontrado na tabela users:', userData)
+    // Verificar se o ID do usuário autenticado corresponde ao reportedBy
+    if (authUser.id !== reportedBy) {
+      console.error('❌ ID do usuário autenticado não corresponde ao reportedBy:', { 
+        authUserId: authUser.id, 
+        reportedBy 
+      })
+      throw new Error('ID do usuário não corresponde à sessão autenticada')
     }
     
-    // Buscar o valor atual do campo reportado
-    const { data: vagaData, error: vagaError } = await supabase
+    console.log('✅ Validação de usuário passou - usando ID autenticado:', reportedBy)
+    
+    // Buscar o valor atual do campo reportado usando cliente administrativo
+    const { data: vagaData, error: vagaError } = await supabaseAdmin
       .from('vagas')
       .select('*')
       .eq('id', reportData.vaga_id)
@@ -65,8 +44,10 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
     console.log('📋 Campo reportado:', reportData.field_name)
     console.log('📋 Dados da vaga:', vagaData)
     
-    // Tentar criar o report com usuário autenticado primeiro
-    let { data, error } = await supabase
+    // Usar cliente administrativo diretamente para evitar problemas de RLS e FK
+    console.log('🔧 Criando report com cliente administrativo para evitar problemas de RLS/FK...')
+    
+    const { data, error } = await supabaseAdmin
       .from('reports')
       .insert({
         vaga_id: reportData.vaga_id,
@@ -79,35 +60,8 @@ export async function createReport(reportData: ReportFormData, reportedBy: strin
       .select('id, vaga_id, reported_by, assigned_to, field_name, current_value, suggested_changes, status, admin_notes, created_at, updated_at, completed_at')
       .single()
 
-    // Se falhar com erro de RLS, tentar com cliente administrativo
-    if (error && (error.code === 'PGRST301' || error.message.includes('row-level security'))) {
-      console.log('⚠️ Erro de RLS detectado, tentando com cliente administrativo...')
-      
-      const { data: adminData, error: adminError } = await supabaseAdmin
-        .from('reports')
-        .insert({
-          vaga_id: reportData.vaga_id,
-          reported_by: reportedBy,
-          assigned_to: reportData.assigned_to,
-          field_name: reportData.field_name,
-          current_value: currentValue,
-          suggested_changes: reportData.suggested_changes
-        })
-        .select('id, vaga_id, reported_by, assigned_to, field_name, current_value, suggested_changes, status, admin_notes, created_at, updated_at, completed_at')
-        .single()
-      
-      if (adminError) {
-        console.error('❌ Erro ao criar report com cliente administrativo:', adminError)
-        throw adminError
-      }
-      
-      data = adminData
-      error = null
-      console.log('✅ Report criado com cliente administrativo')
-    }
-
     if (error) {
-      console.error('❌ Erro ao criar report:', error)
+      console.error('❌ Erro ao criar report com cliente administrativo:', error)
       console.log('🔍 Detalhes do erro:', {
         code: error.code,
         message: error.message,
