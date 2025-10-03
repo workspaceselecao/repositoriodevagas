@@ -3,6 +3,7 @@ import { AuthUser, LoginFormData } from '../types/database'
 import { signIn, signOut, getCurrentUser } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { initializeVersionSystem } from '../version'
+import { sessionCache } from '../lib/session-cache'
 import AuthErrorFallback from '../components/AuthErrorFallback'
 import ErrorFallback from '../components/ErrorFallback'
 
@@ -59,10 +60,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       try {
-        // Verificar sessão com timeout otimizado
+        // Primeiro, tentar verificar sessão no cache otimizado
+        const cachedSession = sessionCache.getSession()
+        
+        if (cachedSession) {
+          console.log('🔍 [AuthContext] Sessão válida encontrada no cache, usando cache')
+          if (isMounted) {
+            setUser(cachedSession.user)
+            hasInitialized = true
+            setLoading(false)
+            setInitialized(true)
+            setIsInitializing(false)
+            clearTimeout(safetyTimeout)
+            return // Sair aqui para evitar chamada desnecessária ao servidor
+          }
+        }
+
+        // Se não há sessão local válida, verificar no servidor com timeout otimizado
+        console.log('🔍 [AuthContext] Verificando sessão no servidor...')
         const sessionPromise = supabase.auth.getSession()
         const timeoutPromise = new Promise<never>((_, reject) => {
-          timeoutId = setTimeout(() => reject(new Error('Session timeout - operação demorou mais que 5 segundos')), 5000) // Reduzido para 5 segundos
+          timeoutId = setTimeout(() => reject(new Error('Session timeout - operação demorou mais que 3 segundos')), 3000) // Reduzido para 3 segundos
         })
 
         const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
@@ -103,6 +121,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               return
             }
           } else {
+            console.log('✅ Sessão válida encontrada no servidor:', session.user.email)
+            
+            // Salvar sessão no cache otimizado
+            sessionCache.saveSession({
+              user: session.user,
+              access_token: session.access_token,
+              refresh_token: session.refresh_token,
+              expires_at: session.expires_at ? session.expires_at * 1000 : Date.now() + (24 * 60 * 60 * 1000),
+              created_at: Date.now()
+            })
+            
             // Buscar dados completos do usuário na tabela users
             const authUser = session.user
             let currentUser = {
@@ -165,27 +194,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isMounted) {
           const errorMessage = (error as Error)?.message || 'Erro desconhecido'
           
-          // Se for timeout, tentar verificar sessão local
-          if (errorMessage.includes('timeout')) {
-            console.warn('⚠️ Timeout na verificação de sessão - tentando verificação local')
-            try {
-              const localSession = localStorage.getItem('sb-mywaoaofatgwbbtyqfpd-auth-token')
-              if (localSession) {
-                console.log('Sessão local encontrada, tentando restaurar...')
-                // Tentar restaurar sessão local
-                const sessionData = JSON.parse(localSession)
-                if (sessionData?.access_token) {
-                  setUser(sessionData.user)
-                  hasInitialized = true
-                  setLoading(false)
-                  setInitialized(true)
-                  setIsInitializing(false)
-                  clearTimeout(safetyTimeout)
-                  return
-                }
-              }
-            } catch (localError) {
-              console.warn('Erro ao verificar sessão local:', localError)
+          // Se for timeout ou erro de conexão, tentar usar cache de sessão
+          if (errorMessage.includes('timeout') || errorMessage.includes('fetch') || errorMessage.includes('network')) {
+            console.warn('⚠️ Problema de conexão na verificação de sessão - usando cache de sessão')
+            
+            const cachedSession = sessionCache.getSession()
+            if (cachedSession && isMounted) {
+              console.log('✅ Sessão válida encontrada no cache, restaurando...')
+              setUser(cachedSession.user)
+              hasInitialized = true
+              setLoading(false)
+              setInitialized(true)
+              setIsInitializing(false)
+              clearTimeout(safetyTimeout)
+              console.log('✅ Sessão restaurada do cache com sucesso')
+              return
+            } else {
+              console.warn('❌ Nenhuma sessão válida encontrada no cache')
             }
           }
           
@@ -292,12 +317,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null)
             setLoading(false)
             setInitialized(true)
-            // Limpar cache local
+            // Limpar cache local e cache de sessão
+            sessionCache.clearSession()
             const supabaseProjectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
             if (supabaseProjectId) {
               localStorage.removeItem(`sb-${supabaseProjectId}-auth-token`)
               localStorage.removeItem(`sb-${supabaseProjectId}-auth-token-code-verifier`)
             }
+            console.log('✅ Cache de sessão limpo após logout')
           }
         } else if (event === 'TOKEN_REFRESHED') {
           console.log('Token renovado com sucesso')
@@ -344,6 +371,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Limpar estado local
       setUser(null)
+      
+      // Limpar cache de sessão otimizado
+      sessionCache.clearSession()
       
       // Limpar cache do localStorage
       const supabaseProjectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
