@@ -127,6 +127,8 @@ export async function getReportById(reportId: string): Promise<Report | null> {
 
 export async function getReportsByUser(userId: string, userRole: string): Promise<Report[]> {
   try {
+    console.log('🔍 [getReportsByUser] Buscando reports para:', { userId, userRole })
+    
     let query = supabaseAdmin.from('reports').select(`
       *,
       vaga:vagas(*),
@@ -136,18 +138,22 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
 
     if (userRole === 'RH') {
       query = query.eq('reported_by', userId)
+      console.log('🔍 [getReportsByUser] Aplicando filtro RH para reported_by:', userId)
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Erro ao buscar reports:', error)
+      console.error('❌ [getReportsByUser] Erro ao buscar reports:', error)
       throw error
     }
 
+    console.log('✅ [getReportsByUser] Reports encontrados:', data?.length || 0)
+    console.log('📊 [getReportsByUser] Dados dos reports:', data)
+    
     return data || []
   } catch (error) {
-    console.error('Erro detalhado ao buscar reports:', error)
+    console.error('❌ [getReportsByUser] Erro detalhado ao buscar reports:', error)
     throw error
   }
 }

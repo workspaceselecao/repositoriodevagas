@@ -20,10 +20,12 @@ export default function ReportsList() {
     const loadReports = async () => {
       try {
         setLoading(true)
+        console.log('📝 [ReportsList] Carregando reports para usuário:', { id: user.id, role: user.role, name: user.name })
         const reportsData = await getReportsByUser(user.id, user.role)
+        console.log('📝 [ReportsList] Reports carregados:', reportsData)
         setReports(reportsData)
       } catch (error) {
-        console.error('Erro ao carregar reports:', error)
+        console.error('❌ [ReportsList] Erro ao carregar reports:', error)
       } finally {
         setLoading(false)
       }
@@ -107,7 +109,7 @@ export default function ReportsList() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -139,9 +141,22 @@ export default function ReportsList() {
             <div className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
               <div>
-                <p className="text-sm text-gray-600">Concluídos</p>
+                <p className="text-sm text-gray-600">Aceitos</p>
                 <p className="text-2xl font-bold text-green-600">
                   {reports.filter(r => r.status === 'completed').length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-red-500" />
+              <div>
+                <p className="text-sm text-gray-600">Rejeitados</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {reports.filter(r => r.status === 'rejected').length}
                 </p>
               </div>
             </div>
@@ -251,6 +266,43 @@ export default function ReportsList() {
                     <p className="text-sm text-green-700 dark:text-green-300">
                       {report.admin_notes}
                     </p>
+                  </div>
+                )}
+
+                {/* Status de Aprovação/Rejeição */}
+                {(report.status === 'completed' || report.status === 'rejected') && (
+                  <div className={`mt-3 p-3 rounded border ${
+                    report.status === 'completed' 
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+                      : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                  }`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      {report.status === 'completed' ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-600" />
+                      )}
+                      <p className={`text-sm font-medium ${
+                        report.status === 'completed' 
+                          ? 'text-green-800 dark:text-green-200' 
+                          : 'text-red-800 dark:text-red-200'
+                      }`}>
+                        {report.status === 'completed' 
+                          ? 'Ajustes Aceitos pelo Admin' 
+                          : 'Ajustes Rejeitados pelo Admin'
+                        }
+                      </p>
+                    </div>
+                    {report.completed_at && (
+                      <p className={`text-xs ${
+                        report.status === 'completed' 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        Processado em: {new Date(report.completed_at).toLocaleDateString('pt-BR')} às{' '}
+                        {new Date(report.completed_at).toLocaleTimeString('pt-BR')}
+                      </p>
+                    )}
                   </div>
                 )}
               </CardContent>
