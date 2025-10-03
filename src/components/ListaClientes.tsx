@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useRHPermissions } from '../hooks/useRHPermissions'
 import { useVagas } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
+import { useSimpleVagas } from '../hooks/useSimpleVagas'
 import { useThemeClasses } from '../hooks/useThemeClasses'
 // import { toast } from 'sonner' // Comentado temporariamente
 
@@ -54,8 +55,15 @@ export default function ListaClientes() {
   const { user } = useAuth()
   const { canEdit, canDelete, loading: permissionsLoading } = useRHPermissions()
   const navigate = useNavigate()
-  const { vagas, loading, lastUpdated } = useVagas()
+  
+  // Usar cache simples em desenvolvimento para evitar problemas
+  const isDev = import.meta.env.DEV
+  const simpleVagas = useSimpleVagas()
+  const complexVagas = useVagas()
   const { removeVaga, refreshVagas } = useCache()
+  
+  // Escolher qual hook usar baseado no ambiente
+  const { vagas, loading, lastUpdated } = isDev ? simpleVagas : complexVagas
   const { textClasses } = useThemeClasses()
 
   // Campos disponíveis para busca
@@ -412,8 +420,12 @@ export default function ListaClientes() {
     try {
       console.log('🔄 Recarregando dados da página Oportunidades...')
       
-      // Forçar atualização do cache de vagas
-      await refreshVagas()
+      // Usar o método de refresh apropriado baseado no ambiente
+      if (isDev) {
+        await simpleVagas.refresh()
+      } else {
+        await refreshVagas()
+      }
       
       // Aguardar um pouco para garantir que o estado foi atualizado
       await new Promise(resolve => setTimeout(resolve, 100))

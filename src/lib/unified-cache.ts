@@ -42,13 +42,16 @@ class UnifiedCache {
   private isInitialized = false
 
   constructor(config: Partial<UnifiedCacheConfig> = {}) {
+    // Configuração padrão baseada no ambiente
+    const isDev = import.meta.env.DEV
+    
     this.config = {
       enableIntelligentCache: true,
-      enablePersistentCache: true,
-      enableReactiveCache: true,
-      enablePollingCache: false, // Usar como fallback
-      enablePermissionCache: true,
-      enableBackgroundSync: true,
+      enablePersistentCache: !isDev, // Desabilitar em desenvolvimento
+      enableReactiveCache: false, // Sempre desabilitado
+      enablePollingCache: false, // Sempre desabilitado
+      enablePermissionCache: !isDev, // Desabilitar em desenvolvimento
+      enableBackgroundSync: false, // Sempre desabilitado
       enablePaginationCache: true,
       ...config
     }

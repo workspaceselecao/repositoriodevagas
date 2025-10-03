@@ -378,10 +378,10 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       // Configurar para desenvolvimento (desabilitar cache reativo)
       unifiedCache.updateConfig({
         enableReactiveCache: false, // Desabilitar SSE que está causando erros
-        enablePollingCache: true,   // Usar polling como fallback
+        enablePollingCache: false,  // Desabilitar polling também
         enableIntelligentCache: true,
-        enablePersistentCache: true,
-        enablePermissionCache: true,
+        enablePersistentCache: false, // Desabilitar IndexedDB em desenvolvimento
+        enablePermissionCache: false, // Desabilitar cache de permissões
         enableBackgroundSync: false, // Desabilitar por enquanto
         enablePaginationCache: true
       })

@@ -72,6 +72,12 @@ class ReactiveCache {
   private startConnection(): void {
     if (!this.currentUser) return
 
+    // Verificação adicional para evitar conexões em desenvolvimento
+    if (import.meta.env.DEV) {
+      console.log('⚠️ Conexão SSE bloqueada em desenvolvimento')
+      return
+    }
+
     try {
       // URL do endpoint SSE (ajustar conforme sua implementação)
       const sseUrl = `${import.meta.env.VITE_SUPABASE_URL}/realtime/v1/events?apikey=${import.meta.env.VITE_SUPABASE_ANON_KEY}`
@@ -227,6 +233,12 @@ class ReactiveCache {
 
   // Agendar reconexão
   private scheduleReconnect(): void {
+    // Não reconectar em desenvolvimento
+    if (import.meta.env.DEV) {
+      console.log('⚠️ Reconexão bloqueada em desenvolvimento')
+      return
+    }
+
     if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
       console.warn('⚠️ Máximo de tentativas de reconexão atingido')
       return
