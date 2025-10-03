@@ -266,8 +266,18 @@ export async function deleteUser(userId: string): Promise<boolean> {
 // Função para redefinir senha de usuário
 export async function resetUserPassword(userId: string, newPassword: string): Promise<boolean> {
   try {
+    // Primeiro, verificar se o usuário existe na tabela users e obter o email
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('email, name')
+      .eq('id', userId)
+      .single()
+
+    if (userError || !user) {
+      throw new Error('Usuário não encontrado na base de dados')
+    }
+
     // Usar a mesma lógica do supabase.ts para verificar Service Key
-    // Se não há variável de ambiente, usar o valor padrão (que é válido)
     const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15d2FvYW9mYXRnd2JidHlxZnBkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODYwMDMyNCwiZXhwIjoyMDc0MTc2MzI0fQ.oUhs-CNusuqxKFIwjc1zv0Nh4TJ6opnmzt8_V1Lfq7U'
     
     // Verificar se temos Service Key válida (não é o placeholder)
@@ -275,17 +285,49 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
                         supabaseServiceKey !== 'your_supabase_service_role_key_here'
 
     if (hasServiceKey) {
-      // Redefinir senha usando cliente administrativo
-      const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-        password: newPassword
-      })
+      try {
+        // Primeiro, verificar se o usuário existe no Supabase Auth
+        const { data: authUser, error: authUserError } = await supabaseAdmin.auth.admin.getUserById(userId)
+        
+        if (authUserError || !authUser.user) {
+          console.log('Usuário não existe no Supabase Auth, criando...')
+          // Se não existe no Auth, criar o usuário
+          const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+            id: userId, // Usar o mesmo ID da tabela users
+            email: user.email,
+            password: newPassword,
+            email_confirm: true,
+            user_metadata: {
+              full_name: user.name,
+              role: 'RH' // Role padrão
+            }
+          })
 
-      if (error) {
-        console.error('Erro ao redefinir senha:', error)
-        throw new Error(error.message)
+          if (createError) {
+            console.error('Erro ao criar usuário no Auth:', createError)
+            throw new Error(`Erro ao criar usuário no sistema de autenticação: ${createError.message}`)
+          }
+
+          console.log('✅ Usuário criado no Supabase Auth com sucesso')
+          return true
+        } else {
+          // Usuário existe no Auth, apenas redefinir a senha
+          const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+            password: newPassword
+          })
+
+          if (error) {
+            console.error('Erro ao redefinir senha:', error)
+            throw new Error(error.message)
+          }
+
+          console.log('✅ Senha redefinida com sucesso')
+          return true
+        }
+      } catch (authError: any) {
+        console.error('Erro no processo de autenticação:', authError)
+        throw new Error(authError.message)
       }
-
-      return true
     } else {
       // Implementar método alternativo sem Service Key
       return await resetUserPasswordWithoutAdmin(userId, newPassword)
