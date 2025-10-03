@@ -13,7 +13,7 @@ class SessionCache {
   private static instance: SessionCache
   private readonly SESSION_KEY = 'sb-mywaoaofatgwbbtyqfpd-auth-token'
   private readonly BACKUP_KEY = 'repovagas-session-backup'
-  private readonly MAX_AGE = 24 * 60 * 60 * 1000 // 24 horas
+  private readonly MAX_AGE = 7 * 24 * 60 * 60 * 1000 // 7 dias para manter logado
 
   static getInstance(): SessionCache {
     if (!SessionCache.instance) {
@@ -81,14 +81,26 @@ class SessionCache {
     }
   }
 
-  // Verificar se sessão é válida
+  // Verificar se sessão é válida (mais tolerante)
   isSessionValid(sessionData: SessionData): boolean {
     if (!sessionData) return false
     
     const now = Date.now()
     const expiresAt = sessionData.expires_at || (sessionData.created_at + this.MAX_AGE)
     
-    return now < expiresAt
+    // Dar uma margem de 1 hora para evitar expirações desnecessárias
+    const gracePeriod = 60 * 60 * 1000 // 1 hora
+    const isValid = now < (expiresAt + gracePeriod)
+    
+    if (!isValid) {
+      console.log('⏰ Sessão expirada:', {
+        now: new Date(now).toISOString(),
+        expiresAt: new Date(expiresAt).toISOString(),
+        gracePeriod: gracePeriod / (60 * 60 * 1000) + 'h'
+      })
+    }
+    
+    return isValid
   }
 
   // Limpar sessão
@@ -106,6 +118,35 @@ class SessionCache {
   hasValidSession(): boolean {
     const session = this.getSession()
     return session !== null && this.isSessionValid(session)
+  }
+
+  // Obter sessão mesmo que "expirada" (para casos de emergência)
+  getSessionForce(): SessionData | null {
+    try {
+      // Verificar se localStorage está disponível
+      if (typeof window === 'undefined' || !window.localStorage) {
+        console.log('⚠️ localStorage não disponível')
+        return null
+      }
+
+      // Tentar chave principal primeiro
+      let sessionData = this.getSessionFromKey(this.SESSION_KEY)
+      
+      // Se não encontrar, tentar backup
+      if (!sessionData) {
+        sessionData = this.getSessionFromKey(this.BACKUP_KEY)
+      }
+
+      if (sessionData) {
+        console.log('🔍 Sessão encontrada (forçada) no cache')
+        return sessionData
+      }
+
+      return null
+    } catch (error) {
+      console.warn('⚠️ Erro ao recuperar sessão forçada do cache:', error)
+      return null
+    }
   }
 
   // Obter dados da sessão de uma chave específica
@@ -154,6 +195,7 @@ export function useSessionCache() {
   return {
     saveSession: sessionCache.saveSession.bind(sessionCache),
     getSession: sessionCache.getSession.bind(sessionCache),
+    getSessionForce: sessionCache.getSessionForce.bind(sessionCache),
     clearSession: sessionCache.clearSession.bind(sessionCache),
     hasValidSession: sessionCache.hasValidSession.bind(sessionCache),
     updateAccessToken: sessionCache.updateAccessToken.bind(sessionCache),

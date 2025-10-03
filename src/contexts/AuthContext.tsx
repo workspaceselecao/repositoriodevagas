@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const cachedSession = sessionCache.getSession()
         
         if (cachedSession) {
-          console.log('🔍 [AuthContext] Sessão válida encontrada no cache, usando cache')
+          console.log('🔍 [AuthContext] Sessão encontrada no cache, usando cache')
           if (isMounted) {
             setUser(cachedSession.user)
             hasInitialized = true
@@ -72,6 +72,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setInitialized(true)
             setIsInitializing(false)
             clearTimeout(safetyTimeout)
+            
+            // Tentar renovar a sessão em background sem bloquear
+            setTimeout(() => {
+              console.log('🔄 Renovando sessão em background...')
+              supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session?.user) {
+                  sessionCache.saveSession({
+                    user: session.user,
+                    access_token: session.access_token,
+                    refresh_token: session.refresh_token,
+                    expires_at: session.expires_at ? session.expires_at * 1000 : Date.now() + (7 * 24 * 60 * 60 * 1000),
+                    created_at: Date.now()
+                  })
+                  console.log('✅ Sessão renovada em background')
+                }
+              }).catch(error => {
+                console.warn('⚠️ Erro ao renovar sessão em background:', error)
+              })
+            }, 1000)
+            
             return // Sair aqui para evitar chamada desnecessária ao servidor
           }
         }
@@ -198,9 +218,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (errorMessage.includes('timeout') || errorMessage.includes('fetch') || errorMessage.includes('network')) {
             console.warn('⚠️ Problema de conexão na verificação de sessão - usando cache de sessão')
             
-            const cachedSession = sessionCache.getSession()
+            // Tentar obter qualquer sessão do cache, mesmo que "expirada"
+            let cachedSession = sessionCache.getSession()
+            
+            // Se não encontrou sessão válida, tentar forçar
+            if (!cachedSession) {
+              cachedSession = sessionCache.getSessionForce()
+            }
+            
             if (cachedSession && isMounted) {
-              console.log('✅ Sessão válida encontrada no cache, restaurando...')
+              console.log('✅ Sessão encontrada no cache, restaurando...')
               setUser(cachedSession.user)
               hasInitialized = true
               setLoading(false)
@@ -210,7 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               console.log('✅ Sessão restaurada do cache com sucesso')
               return
             } else {
-              console.warn('❌ Nenhuma sessão válida encontrada no cache')
+              console.warn('❌ Nenhuma sessão encontrada no cache')
             }
           }
           
