@@ -25,6 +25,12 @@ class SessionCache {
   // Salvar sessão
   saveSession(sessionData: SessionData): void {
     try {
+      // Verificar se localStorage está disponível
+      if (typeof window === 'undefined' || !window.localStorage) {
+        console.log('⚠️ localStorage não disponível para salvar sessão')
+        return
+      }
+
       const session = {
         ...sessionData,
         created_at: Date.now(),
@@ -43,6 +49,12 @@ class SessionCache {
   // Recuperar sessão
   getSession(): SessionData | null {
     try {
+      // Verificar se localStorage está disponível
+      if (typeof window === 'undefined' || !window.localStorage) {
+        console.log('⚠️ localStorage não disponível')
+        return null
+      }
+
       // Tentar chave principal primeiro
       let sessionData = this.getSessionFromKey(this.SESSION_KEY)
       
