@@ -137,7 +137,7 @@ class PaginationCache<T> {
       
     } catch (error) {
       console.error(`❌ Erro ao carregar página ${page}:`, error)
-      this.updateState(page, null, false, error.message)
+      this.updateState(page, null, false, error instanceof Error ? error.message : 'Erro desconhecido')
     }
 
     return this.currentState

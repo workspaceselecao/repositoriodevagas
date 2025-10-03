@@ -110,7 +110,7 @@ class BackgroundSync {
 
     return new Promise((resolve) => {
       const transaction = this.db!.transaction(['sync_operations'], 'readonly')
-      const store = transaction.objectStore(store)
+      const store = transaction.objectStore('sync_operations')
       const index = store.index('status')
       const request = index.getAll('pending')
 
@@ -181,7 +181,7 @@ class BackgroundSync {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction(['sync_operations'], 'readwrite')
-      const store = transaction.objectStore(store)
+      const store = transaction.objectStore('sync_operations')
       const request = store.put(operation)
 
       request.onsuccess = () => resolve()
@@ -195,7 +195,7 @@ class BackgroundSync {
 
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction(['sync_operations'], 'readwrite')
-      const store = transaction.objectStore(store)
+      const store = transaction.objectStore('sync_operations')
       const request = store.delete(operationId)
 
       request.onsuccess = () => resolve()
@@ -235,7 +235,7 @@ class BackgroundSync {
       console.log('✅ Operações pendentes processadas')
       
     } catch (error) {
-      console.error('❌ Erro ao processar operações pendentes:', error)
+      console.error('❌ Erro ao processar operações pendentes:', error instanceof Error ? error.message : error)
     } finally {
       this.isProcessing = false
       this.notifyListeners()
@@ -273,7 +273,7 @@ class BackgroundSync {
 
     } catch (error) {
       operation.retryCount++
-      operation.error = error.message
+      operation.error = error instanceof Error ? error.message : 'Erro desconhecido'
       
       if (operation.retryCount >= operation.maxRetries) {
         operation.status = 'failed'
@@ -502,7 +502,7 @@ class BackgroundSync {
     
     if (this.db) {
       const transaction = this.db.transaction(['sync_operations'], 'readwrite')
-      const store = transaction.objectStore(store)
+      const store = transaction.objectStore('sync_operations')
       await new Promise<void>((resolve, reject) => {
         const request = store.clear()
         request.onsuccess = () => resolve()

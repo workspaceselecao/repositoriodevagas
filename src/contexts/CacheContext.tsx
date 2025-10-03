@@ -363,7 +363,17 @@ export function CacheProvider({ children }: { children: ReactNode }) {
   // Configurar usuário no cache unificado
   useEffect(() => {
     if (user) {
-      unifiedCache.setCurrentUser(user)
+      // Converter AuthUser para User (compatibilidade de tipos)
+      const userForCache = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        password_hash: '', // Não usado no cache
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      unifiedCache.setCurrentUser(userForCache)
       console.log('👤 Usuário configurado no cache unificado')
     }
   }, [user, unifiedCache])

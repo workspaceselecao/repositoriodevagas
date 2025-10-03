@@ -565,7 +565,19 @@ export const cacheUtils = {
   // Integrar com useVagas existente
   createVagasCache: (fetcher: () => Promise<Vaga[]>) => {
     const unified = getUnifiedCache()
-    return unified.createPaginationCache('vagas', fetcher, {
+    return unified.createPaginationCache('vagas', async (page: number, pageSize: number, filters?: Record<string, any>) => {
+      const vagas = await fetcher()
+      const startIndex = (page - 1) * pageSize
+      const endIndex = startIndex + pageSize
+      const paginatedVagas = vagas.slice(startIndex, endIndex)
+      
+      return {
+        data: paginatedVagas,
+        totalCount: vagas.length,
+        hasNextPage: endIndex < vagas.length,
+        hasPrevPage: page > 1
+      }
+    }, {
       pageSize: 10,
       preloadPages: 2,
       maxCachedPages: 20
@@ -575,7 +587,19 @@ export const cacheUtils = {
   // Integrar com sistema de usuários
   createUsersCache: (fetcher: () => Promise<User[]>) => {
     const unified = getUnifiedCache()
-    return unified.createPaginationCache('usuarios', fetcher, {
+    return unified.createPaginationCache('usuarios', async (page: number, pageSize: number, filters?: Record<string, any>) => {
+      const users = await fetcher()
+      const startIndex = (page - 1) * pageSize
+      const endIndex = startIndex + pageSize
+      const paginatedUsers = users.slice(startIndex, endIndex)
+      
+      return {
+        data: paginatedUsers,
+        totalCount: users.length,
+        hasNextPage: endIndex < users.length,
+        hasPrevPage: page > 1
+      }
+    }, {
       pageSize: 20,
       preloadPages: 1,
       maxCachedPages: 10

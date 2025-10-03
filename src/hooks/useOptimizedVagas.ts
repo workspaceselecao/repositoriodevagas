@@ -145,7 +145,7 @@ export function useOptimizedVagas(
 
     } catch (err) {
       console.error('❌ Erro ao carregar vagas:', err)
-      setError(err.message || 'Erro ao carregar vagas')
+      setError(err instanceof Error ? err.message : 'Erro ao carregar vagas')
     } finally {
       setLoading(false)
     }

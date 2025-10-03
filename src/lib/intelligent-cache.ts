@@ -474,7 +474,7 @@ class IntelligentCache {
   }
 
   // Refresh em background
-  private async backgroundRefresh(): void {
+  private backgroundRefresh(): void {
     if (!this.isOnline) return
 
     console.log('🔄 Refresh em background iniciado')
@@ -495,7 +495,7 @@ class IntelligentCache {
   }
 
   // Validar cache ao reconectar
-  private async validateCacheOnReconnect(): Promise<void> {
+  private validateCacheOnReconnect(): void {
     console.log('🔍 Validando cache após reconexão')
     
     // Verificar se dados em cache ainda são válidos
