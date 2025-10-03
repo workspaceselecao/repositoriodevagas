@@ -227,6 +227,33 @@ export async function getAllAdmins(): Promise<User[]> {
 // 5. FUNÇÕES DE BUSCA GERAL
 // =============================================
 
+export async function getReportById(reportId: string): Promise<Report | null> {
+  try {
+    const { data: report, error } = await supabaseAdmin
+      .from('reports')
+      .select(`
+        *,
+        vaga:vagas(*),
+        reporter:users!reports_reported_by_fkey(*),
+        assignee:users!reports_assigned_to_fkey(*)
+      `)
+      .eq('id', reportId)
+      .single()
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null // Report não encontrado
+      }
+      throw new Error(`Erro ao buscar report: ${error.message}`)
+    }
+    
+    return report
+  } catch (error) {
+    console.error('❌ Erro ao buscar report por ID:', error)
+    throw error
+  }
+}
+
 export async function getReportsByUser(userId: string, userRole: string): Promise<Report[]> {
   try {
     let query = supabaseAdmin.from('reports').select(`
