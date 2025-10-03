@@ -20,8 +20,9 @@ import { ThemeSelector } from './ThemeSelector'
 import CacheMetricsDisplay from './CacheMetricsDisplay'
 import Header from './Header'
 import { Badge } from './ui/badge'
-import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash, RefreshCw, UserPlus, HelpCircle } from 'lucide-react'
+import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash, RefreshCw, UserPlus, HelpCircle, Users } from 'lucide-react'
 import TiraDuvidas from './TiraDuvidas'
+import GerenciarUsuarios from './GerenciarUsuarios'
 
 export default function Configuracoes() {
   const [backupOptions, setBackupOptions] = useState<BackupOptions>({
@@ -586,8 +587,9 @@ export default function Configuracoes() {
       )}
 
       <Tabs defaultValue="backup" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="backup">Configuração Geral</TabsTrigger>
+          <TabsTrigger value="usuarios">Usuários</TabsTrigger>
           <TabsTrigger value="noticias">Gerenciar Notícias</TabsTrigger>
           <TabsTrigger value="personalizacao">Personalização Visual</TabsTrigger>
           <TabsTrigger value="acesso">Controle de Acesso</TabsTrigger>
@@ -868,6 +870,21 @@ export default function Configuracoes() {
         </CardContent>
       </Card>
     </TabsContent>
+
+        <TabsContent value="usuarios" className="space-y-6">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold flex items-center">
+                  <Users className="h-5 w-5 mr-2" />
+                  Gerenciar Usuários
+                </h2>
+                <p className="text-gray-600 text-sm">Gerencie usuários do sistema, suas permissões e configurações</p>
+              </div>
+            </div>
+            <GerenciarUsuarios />
+          </div>
+        </TabsContent>
 
         <TabsContent value="noticias" className="space-y-6">
           <div className="flex items-center justify-between">

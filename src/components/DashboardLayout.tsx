@@ -21,7 +21,6 @@ import NotificationsList from './NotificationsList'
 import RealtimeNotifications, { useRealtimeNotifications } from './RealtimeNotifications'
 import { 
   Home, 
-  Users, 
   Settings, 
   LogOut, 
   UserPlus,
@@ -140,12 +139,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       label: 'Reports',
       href: '/dashboard/reports',
       show: true
-    },
-    {
-      icon: Users,
-      label: 'Usuários',
-      href: '/dashboard/usuarios',
-      show: user?.role === 'ADMIN'
     },
     {
       icon: Settings,
