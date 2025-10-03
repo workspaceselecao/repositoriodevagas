@@ -286,42 +286,67 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
 
     if (hasServiceKey) {
       try {
-        // Primeiro, verificar se o usuário existe no Supabase Auth
-        const { data: authUser, error: authUserError } = await supabaseAdmin.auth.admin.getUserById(userId)
+        // Buscar todos os usuários no Auth para encontrar o correto
+        const { data: allUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers()
         
-        if (authUserError || !authUser.user) {
-          console.log('Usuário não existe no Supabase Auth, criando...')
-          // Se não existe no Auth, criar o usuário
-          const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-            id: userId, // Usar o mesmo ID da tabela users
-            email: user.email,
-            password: newPassword,
-            email_confirm: true,
-            user_metadata: {
-              full_name: user.name,
-              role: 'RH' // Role padrão
-            }
-          })
+        if (listError) {
+          console.error('Erro ao listar usuários do Auth:', listError)
+          throw new Error('Erro ao acessar sistema de autenticação')
+        }
 
-          if (createError) {
-            console.error('Erro ao criar usuário no Auth:', createError)
-            throw new Error(`Erro ao criar usuário no sistema de autenticação: ${createError.message}`)
-          }
-
-          console.log('✅ Usuário criado no Supabase Auth com sucesso')
-          return true
-        } else {
-          // Usuário existe no Auth, apenas redefinir a senha
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        // Procurar usuário pelo email (mais confiável que ID)
+        const authUser = allUsers.users?.find(u => u.email === user.email)
+        
+        if (authUser) {
+          // Usuário existe no Auth, redefinir senha
+          console.log('Usuário encontrado no Auth, redefinindo senha...')
+          const { error } = await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
             password: newPassword
           })
 
           if (error) {
             console.error('Erro ao redefinir senha:', error)
-            throw new Error(error.message)
+            throw new Error(`Erro ao redefinir senha: ${error.message}`)
           }
 
           console.log('✅ Senha redefinida com sucesso')
+          return true
+        } else {
+          // Usuário não existe no Auth, criar
+          console.log('Usuário não existe no Supabase Auth, criando...')
+          const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+            email: user.email,
+            password: newPassword,
+            email_confirm: true,
+            user_metadata: {
+              full_name: user.name,
+              role: 'RH'
+            }
+          })
+
+          if (createError) {
+            console.error('Erro ao criar usuário no Auth:', createError)
+            // Se o erro for de email já existente, tentar buscar novamente
+            if (createError.message.includes('already been registered')) {
+              console.log('Email já existe no Auth, tentando redefinir senha...')
+              const existingUser = allUsers.users?.find(u => u.email === user.email)
+              if (existingUser) {
+                const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+                  password: newPassword
+                })
+                
+                if (updateError) {
+                  throw new Error(`Erro ao redefinir senha: ${updateError.message}`)
+                }
+                
+                console.log('✅ Senha redefinida com sucesso (usuário existente)')
+                return true
+              }
+            }
+            throw new Error(`Erro ao criar usuário no sistema de autenticação: ${createError.message}`)
+          }
+
+          console.log('✅ Usuário criado no Supabase Auth com sucesso')
           return true
         }
       } catch (authError: any) {
