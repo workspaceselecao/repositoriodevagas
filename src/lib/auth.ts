@@ -2,6 +2,23 @@ import { supabase, supabaseAdmin } from './supabase'
 import { User, AuthUser, LoginFormData, UserFormData } from '../types/database'
 import { validatePasswordStrength, isValidPassword } from './password-utils'
 
+// Função auxiliar para verificar se email existe no sistema
+async function checkIfEmailExists(email: string): Promise<boolean> {
+  try {
+    // Verificar na tabela users
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('email')
+      .eq('email', email)
+      .single()
+    
+    return !error && !!user
+  } catch (error) {
+    // Se não encontrou na tabela users, retornar false
+    return false
+  }
+}
+
 // Função para fazer login usando Supabase Auth
 export async function signIn({ email, password }: LoginFormData): Promise<AuthUser | null> {
   try {
@@ -13,6 +30,16 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
 
     if (authError) {
       console.error('Erro de autenticação:', authError.message)
+      
+      // Verificar se é erro de email não confirmado
+      if (authError.message.includes('Email not confirmed') || 
+          authError.message.includes('email_not_confirmed') ||
+          (authError.message.includes('Invalid login credentials') && 
+           await checkIfEmailExists(email))) {
+        throw new Error('CONFIRM_EMAIL')
+      }
+      
+      // Outros erros de autenticação
       throw new Error(authError.message)
     }
 
@@ -295,7 +322,7 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
         }
 
         // Procurar usuário pelo email (mais confiável que ID)
-        const authUser = allUsers.users?.find(u => u.email === user.email)
+        const authUser = allUsers.users?.find((u: any) => u.email === user.email)
         
         if (authUser) {
           // Usuário existe no Auth, redefinir senha
@@ -329,7 +356,7 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
             // Se o erro for de email já existente, tentar buscar novamente
             if (createError.message.includes('already been registered')) {
               console.log('Email já existe no Auth, tentando redefinir senha...')
-              const existingUser = allUsers.users?.find(u => u.email === user.email)
+              const existingUser = allUsers.users?.find((u: any) => u.email === user.email)
               if (existingUser) {
                 const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
                   password: newPassword

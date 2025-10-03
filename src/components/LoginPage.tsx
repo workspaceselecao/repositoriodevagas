@@ -40,8 +40,13 @@ export default function LoginPage() {
         setShakeError(true)
         setTimeout(() => setShakeError(false), 500)
       }
-    } catch (error) {
-      setError('Erro ao fazer login. Tente novamente.')
+    } catch (error: any) {
+      // Verificar se é erro de email não confirmado
+      if (error.message === 'CONFIRM_EMAIL') {
+        setError('Seu cadastro ainda não foi confirmado. Verifique sua caixa de entrada e clique no link de confirmação enviado por email.')
+      } else {
+        setError('Erro ao fazer login. Tente novamente.')
+      }
       setShakeError(true)
       setTimeout(() => setShakeError(false), 500)
     } finally {
@@ -211,12 +216,22 @@ export default function LoginPage() {
               <div className={`flex items-center gap-2 p-4 rounded-xl border transition-all duration-300 ${
                 shakeError ? 'animate-shake' : ''
               } ${
-                config.effects.glassmorphism 
-                  ? 'bg-destructive/20 backdrop-blur-sm border-destructive/30' 
-                  : 'bg-destructive/10 border-destructive/20'
+                error.includes('confirmado') 
+                  ? (config.effects.glassmorphism 
+                      ? 'bg-blue-500/20 backdrop-blur-sm border-blue-500/30' 
+                      : 'bg-blue-500/10 border-blue-500/20')
+                  : (config.effects.glassmorphism 
+                      ? 'bg-destructive/20 backdrop-blur-sm border-destructive/30' 
+                      : 'bg-destructive/10 border-destructive/20')
               }`}>
-                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
-                <span className="text-destructive text-sm font-medium">{error}</span>
+                {error.includes('confirmado') ? (
+                  <Mail className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+                )}
+                <span className={`text-sm font-medium ${
+                  error.includes('confirmado') ? 'text-blue-700' : 'text-destructive'
+                }`}>{error}</span>
               </div>
             )}
             
