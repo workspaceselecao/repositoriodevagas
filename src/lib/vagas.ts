@@ -2,18 +2,15 @@ import { supabase, supabaseAdmin } from './supabase'
 import { Vaga, VagaFormData, VagaFilter } from '../types/database'
 import { sessionCacheUtils } from './session-cache'
 
-// Função para buscar vagas frescas do banco (bypass cache)
-export async function getVagasFresh(filter?: VagaFilter): Promise<Vaga[]> {
+// Função para buscar vagas FORÇANDO refresh (ignora cache)
+export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]> {
   try {
-    console.log('🔄 Buscando vagas frescas do banco de dados...')
-    
-    // Usar apenas campos essenciais para melhor performance
-    const selectFields = 'id, titulo, cargo, cliente, site, categoria, celula, created_at, updated_at, created_by, updated_by'
+    console.log('🔄 [getVagasForceRefresh] Buscando vagas diretamente do DB...')
     
     let query = supabase
       .from('vagas')
-      .select(selectFields)
-      .order('updated_at', { ascending: false })
+      .select('*')
+      .order('created_at', { ascending: false })
       .limit(1000)
 
     // Aplicar filtros se fornecidos
@@ -36,13 +33,13 @@ export async function getVagasFresh(filter?: VagaFilter): Promise<Vaga[]> {
     const { data: vagas, error } = await query
 
     if (error) {
-      console.warn('⚠️ Erro com cliente normal, tentando com cliente admin:', error.message)
+      console.warn('⚠️ [getVagasForceRefresh] Erro com cliente normal, tentando com cliente admin:', error.message)
       
       // Se falhar com cliente normal, tentar com cliente admin
       let adminQuery = supabaseAdmin
         .from('vagas')
-        .select(selectFields)
-        .order('updated_at', { ascending: false })
+        .select('*')
+        .order('created_at', { ascending: false })
         .limit(1000)
 
       // Aplicar filtros se fornecidos
@@ -65,18 +62,18 @@ export async function getVagasFresh(filter?: VagaFilter): Promise<Vaga[]> {
       const { data: adminVagas, error: adminError } = await adminQuery
 
       if (adminError) {
-        console.error('❌ Erro ao buscar vagas:', adminError)
-        throw new Error(adminError.message)
+        console.error('❌ [getVagasForceRefresh] Erro com cliente admin:', adminError.message)
+        throw new Error(`Erro ao buscar vagas: ${adminError.message}`)
       }
 
-      console.log(`✅ ${adminVagas?.length || 0} vagas carregadas (via admin)`)
+      console.log(`✅ [getVagasForceRefresh] ${adminVagas?.length || 0} vagas carregadas via admin`)
       return adminVagas || []
     }
 
-    console.log(`✅ ${vagas?.length || 0} vagas carregadas (via cliente normal)`)
+    console.log(`✅ [getVagasForceRefresh] ${vagas?.length || 0} vagas carregadas`)
     return vagas || []
   } catch (error) {
-    console.error('❌ Erro ao buscar vagas frescas:', error)
+    console.error('💥 [getVagasForceRefresh] Erro geral:', error)
     throw error
   }
 }

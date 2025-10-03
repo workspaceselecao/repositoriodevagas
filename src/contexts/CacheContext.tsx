@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
 import { Vaga } from '../types/database'
-import { getVagas, getVagasFresh, getClientes, getSites, getCategorias, getCargos, getCelulas } from '../lib/vagas'
+import { getVagas, getClientes, getSites, getCategorias, getCargos, getCelulas, getVagasForceRefresh } from '../lib/vagas'
 import { getAllUsers } from '../lib/auth'
 import { getNoticias } from '../lib/noticias'
 import { useAuth } from './AuthContext'
+import { getSessionCache } from '../lib/session-cache'
 
 // Tipos para o cache
 interface CacheData {
@@ -103,11 +104,16 @@ export function CacheProvider({ children }: { children: ReactNode }) {
   // Função para buscar vagas
   const refreshVagas = useCallback(async () => {
     try {
-      console.log('🔄 Carregando vagas frescas do banco...')
+      console.log('🔄 Carregando vagas (FORÇANDO refresh do DB)...')
       setLoading(true) // Adicionar loading durante refresh
       
-      // Usar getVagasFresh para bypass do cache e buscar dados frescos
-      const vagas = await getVagasFresh()
+      // Limpar cache de sessão para vagas antes de buscar
+      const sessionCache = getSessionCache()
+      sessionCache.delete('vagas')
+      console.log('🗑️ Cache de sessão limpo para vagas')
+      
+      // Usar getVagasForceRefresh para ignorar cache e buscar diretamente do DB
+      const vagas = await getVagasForceRefresh()
       
       setCache(prev => ({
         ...prev,
@@ -116,7 +122,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       }))
       
       updateCacheStatus('vagas', vagas.length > 0)
-      console.log(`✅ ${vagas.length} vagas frescas carregadas do banco`)
+      console.log(`✅ ${vagas.length} vagas carregadas diretamente do DB`)
       
       // Forçar re-render dos componentes que usam vagas
       setTimeout(() => {
@@ -124,7 +130,7 @@ export function CacheProvider({ children }: { children: ReactNode }) {
       }, 100)
       
     } catch (error) {
-      console.error('❌ Erro ao carregar vagas frescas:', error)
+      console.error('❌ Erro ao carregar vagas:', error)
       setLoading(false)
     }
   }, [updateCacheStatus])

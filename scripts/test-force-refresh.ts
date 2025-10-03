@@ -14,14 +14,14 @@ const supabaseServiceKey = process.env.VITE_SUPABASE_SERVICE_KEY || 'eyJhbGciOiJ
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
-console.log('🧪 TESTE DO REFRESH - FUNÇÃO getVagasFresh')
+console.log('🧪 TESTE DO REFRESH FORÇADO - PÁGINA OPORTUNIDADES')
 console.log('=' .repeat(60))
 
-async function testRefreshFunctionality() {
+async function testForceRefresh() {
   try {
-    console.log('\n1️⃣ TESTANDO FUNÇÃO getVagasFresh...')
+    console.log('\n1️⃣ TESTANDO FUNÇÃO getVagasForceRefresh...')
     
-    // Simular a função getVagasFresh
+    // Simular a função getVagasForceRefresh
     const startTime = Date.now()
     
     const { data: vagas, error } = await supabaseAdmin
@@ -42,7 +42,7 @@ async function testRefreshFunctionality() {
     console.log(`⏱️ Tempo de consulta: ${duration}ms`)
     
     if (vagas && vagas.length > 0) {
-      console.log('\n📋 Primeiras 3 vagas (dados frescos):')
+      console.log('\n📋 Primeiras 3 vagas:')
       vagas.slice(0, 3).forEach((vaga, index) => {
         console.log(`${index + 1}. ${vaga.titulo || vaga.cargo} - ${vaga.cliente}`)
         console.log(`   Criado: ${new Date(vaga.created_at).toLocaleString('pt-BR')}`)
@@ -53,6 +53,7 @@ async function testRefreshFunctionality() {
 
     console.log('\n2️⃣ TESTANDO MÚLTIPLAS CONSULTAS (SIMULANDO REFRESH)...')
     
+    // Simular múltiplas consultas para testar se sempre busca dados frescos
     const promises = []
     for (let i = 0; i < 3; i++) {
       promises.push(
@@ -62,34 +63,34 @@ async function testRefreshFunctionality() {
           .then(result => ({ 
             iteration: i + 1, 
             count: result.count,
-            timestamp: new Date().toLocaleTimeString('pt-BR')
+            timestamp: new Date().toISOString()
           }))
       )
     }
     
     const results = await Promise.all(promises)
-    console.log('📊 Resultados das consultas de refresh:')
+    console.log('📊 Resultados das consultas paralelas:')
     results.forEach(result => {
-      console.log(`   Iteração ${result.iteration} (${result.timestamp}): ${result.count} vagas`)
+      console.log(`   Iteração ${result.iteration}: ${result.count} vagas (${result.timestamp})`)
     })
 
     console.log('\n3️⃣ VERIFICANDO DADOS MAIS RECENTES...')
     
-    const { data: recentVagas, error: recentError } = await supabaseAdmin
+    // Buscar a vaga mais recente
+    const { data: latestVaga, error: latestError } = await supabaseAdmin
       .from('vagas')
-      .select('id, titulo, cargo, cliente, created_at, updated_at')
+      .select('*')
       .order('updated_at', { ascending: false })
-      .limit(5)
+      .limit(1)
+      .single()
     
-    if (recentError) {
-      console.error('❌ Erro ao buscar vagas recentes:', recentError)
-    } else {
-      console.log('📅 Últimas 5 vagas atualizadas:')
-      recentVagas?.forEach((vaga, index) => {
-        console.log(`${index + 1}. ${vaga.titulo || vaga.cargo} - ${vaga.cliente}`)
-        console.log(`   Última atualização: ${new Date(vaga.updated_at).toLocaleString('pt-BR')}`)
-        console.log('')
-      })
+    if (latestError) {
+      console.error('❌ Erro ao buscar vaga mais recente:', latestError)
+    } else if (latestVaga) {
+      console.log('📅 Vaga mais recente:')
+      console.log(`   Título: ${latestVaga.titulo || latestVaga.cargo}`)
+      console.log(`   Cliente: ${latestVaga.cliente}`)
+      console.log(`   Última atualização: ${new Date(latestVaga.updated_at).toLocaleString('pt-BR')}`)
     }
 
     console.log('\n4️⃣ RESUMO DO TESTE...')
@@ -97,20 +98,14 @@ async function testRefreshFunctionality() {
     console.log('🔍 DIAGNÓSTICO:')
     console.log(`   - Total de vagas: ${vagas?.length || 0}`)
     console.log(`   - Tempo de consulta: ${duration}ms`)
-    console.log(`   - Performance: ${duration < 500 ? 'Excelente' : duration < 1000 ? 'Boa' : 'Moderada'}`)
-    console.log(`   - Dados frescos: ${recentVagas?.length || 0} vagas recentes`)
+    console.log(`   - Performance: ${duration < 1000 ? 'Boa' : duration < 2000 ? 'Moderada' : 'Lenta'}`)
+    console.log(`   - Consultas paralelas: ${results.length} executadas com sucesso`)
     
-    console.log('\n💡 CONCLUSÃO:')
-    if (duration < 1000 && vagas && vagas.length > 0) {
-      console.log('✅ A função getVagasFresh está funcionando corretamente')
-      console.log('✅ Os dados estão sendo buscados frescos do banco')
-      console.log('✅ O refresh deve funcionar na interface')
-    } else {
-      console.log('⚠️ Possíveis problemas:')
-      console.log('   - Consulta muito lenta')
-      console.log('   - Problema de conectividade')
-      console.log('   - Erro na função getVagasFresh')
-    }
+    console.log('\n💡 FUNCIONALIDADE ESPERADA:')
+    console.log('   1. Botão atualizar deve buscar dados diretamente do DB')
+    console.log('   2. Cache deve ser ignorado durante refresh')
+    console.log('   3. Interface deve mostrar dados atualizados')
+    console.log('   4. Timestamp de última atualização deve ser atualizado')
 
   } catch (error) {
     console.error('❌ Erro durante teste:', error)
@@ -118,7 +113,7 @@ async function testRefreshFunctionality() {
 }
 
 // Executar teste
-testRefreshFunctionality()
+testForceRefresh()
   .then(() => {
     console.log('\n🏁 Teste concluído!')
     process.exit(0)
