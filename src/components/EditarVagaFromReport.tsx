@@ -9,7 +9,7 @@ import { Textarea } from './ui/textarea'
 import { VagaFormData, Vaga, Report } from '../types/database'
 import { getVagaById, updateVaga } from '../lib/vagas'
 import { getReportById, updateReportStatus } from '../lib/reports'
-import { ArrowLeft, Save, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, AlertCircle, CheckCircle, Edit3, Eye, Info } from 'lucide-react'
 
 export default function EditarVagaFromReport() {
   const { id } = useParams<{ id: string }>()
@@ -163,6 +163,27 @@ export default function EditarVagaFromReport() {
     return labels[fieldName] || fieldName
   }
 
+  const getFieldClassName = (fieldName: string) => {
+    if (isFieldEditable(fieldName)) {
+      return 'border-green-300 bg-green-50 dark:bg-green-900/20 focus:border-green-500 focus:ring-green-500'
+    }
+    return 'bg-gray-100 dark:bg-gray-800'
+  }
+
+  const getLabelClassName = (fieldName: string) => {
+    if (isFieldEditable(fieldName)) {
+      return 'text-green-700 font-semibold flex items-center gap-1'
+    }
+    return ''
+  }
+
+  const renderFieldLabel = (fieldName: string, labelText: string) => (
+    <Label htmlFor={fieldName} className={getLabelClassName(fieldName)}>
+      {isFieldEditable(fieldName) && <Edit3 className="h-3 w-3" />}
+      {labelText}
+    </Label>
+  )
+
   if (loadingData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -241,6 +262,44 @@ export default function EditarVagaFromReport() {
         </CardContent>
       </Card>
 
+      {/* Instruções de Edição */}
+      <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
+        <CardHeader>
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Info className="h-4 w-4 text-blue-500" />
+            Instruções de Edição
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-start gap-3">
+            <Edit3 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-sm text-green-700">Campo Editável</p>
+              <p className="text-sm text-gray-600">
+                Apenas o campo <strong>"{getFieldLabel(editableField)}"</strong> pode ser editado. 
+                Este campo está destacado em verde e permite modificações.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <Eye className="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-sm text-gray-700">Campos Somente Leitura</p>
+              <p className="text-sm text-gray-600">
+                Todos os outros campos são apenas para visualização e estão desabilitados. 
+                Eles servem como contexto para entender melhor a oportunidade.
+              </p>
+            </div>
+          </div>
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-md border border-yellow-200">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>Dica:</strong> Consulte as sugestões do RH na seção "Informações do Report" 
+              para entender melhor as alterações solicitadas.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Mensagem de Status */}
       {message && (
         <div className={`p-4 rounded-md ${
@@ -260,7 +319,18 @@ export default function EditarVagaFromReport() {
             Informações da Oportunidade
           </CardTitle>
           <CardDescription>
-            Apenas o campo reportado pode ser editado. Os demais campos são apenas para visualização.
+            <div className="flex items-center gap-2">
+              <Edit3 className="h-4 w-4 text-green-600" />
+              <span>
+                Campo editável: <strong className="text-green-700">{getFieldLabel(editableField)}</strong>
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <Eye className="h-4 w-4 text-gray-500" />
+              <span className="text-gray-600">
+                Demais campos são somente leitura para contexto
+              </span>
+            </div>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -268,69 +338,69 @@ export default function EditarVagaFromReport() {
             {/* Informações Básicas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="site">Site</Label>
+                {renderFieldLabel('site', 'Site')}
                 <Input
                   id="site"
                   name="site"
                   value={formData.site}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('site')}
-                  className={isFieldEditable('site') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('site')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="categoria">Categoria</Label>
+                {renderFieldLabel('categoria', 'Categoria')}
                 <Input
                   id="categoria"
                   name="categoria"
                   value={formData.categoria}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('categoria')}
-                  className={isFieldEditable('categoria') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('categoria')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cargo">Cargo</Label>
+                {renderFieldLabel('cargo', 'Cargo')}
                 <Input
                   id="cargo"
                   name="cargo"
                   value={formData.cargo}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('cargo')}
-                  className={isFieldEditable('cargo') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('cargo')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cliente">Cliente</Label>
+                {renderFieldLabel('cliente', 'Cliente')}
                 <Input
                   id="cliente"
                   name="cliente"
                   value={formData.cliente}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('cliente')}
-                  className={isFieldEditable('cliente') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('cliente')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="titulo">Título</Label>
+                {renderFieldLabel('titulo', 'Título')}
                 <Input
                   id="titulo"
                   name="titulo"
                   value={formData.titulo}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('titulo')}
-                  className={isFieldEditable('titulo') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('titulo')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="celula">Célula</Label>
+                {renderFieldLabel('celula', 'Célula')}
                 <Input
                   id="celula"
                   name="celula"
                   value={formData.celula}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('celula')}
-                  className={isFieldEditable('celula') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('celula')}
                 />
               </div>
             </div>
@@ -338,109 +408,109 @@ export default function EditarVagaFromReport() {
             {/* Campos de Texto */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="descricao_vaga">Descrição da Vaga</Label>
+                {renderFieldLabel('descricao_vaga', 'Descrição da Vaga')}
                 <Textarea
                   id="descricao_vaga"
                   name="descricao_vaga"
                   value={formData.descricao_vaga}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('descricao_vaga')}
-                  className={isFieldEditable('descricao_vaga') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('descricao_vaga')}
                   rows={3}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="responsabilidades_atribuicoes">Responsabilidades e Atribuições</Label>
+                {renderFieldLabel('responsabilidades_atribuicoes', 'Responsabilidades e Atribuições')}
                 <Textarea
                   id="responsabilidades_atribuicoes"
                   name="responsabilidades_atribuicoes"
                   value={formData.responsabilidades_atribuicoes}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('responsabilidades_atribuicoes')}
-                  className={isFieldEditable('responsabilidades_atribuicoes') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('responsabilidades_atribuicoes')}
                   rows={3}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="requisitos_qualificacoes">Requisitos e Qualificações</Label>
+                {renderFieldLabel('requisitos_qualificacoes', 'Requisitos e Qualificações')}
                 <Textarea
                   id="requisitos_qualificacoes"
                   name="requisitos_qualificacoes"
                   value={formData.requisitos_qualificacoes}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('requisitos_qualificacoes')}
-                  className={isFieldEditable('requisitos_qualificacoes') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('requisitos_qualificacoes')}
                   rows={3}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="salario">Salário</Label>
+                  {renderFieldLabel('salario', 'Salário')}
                   <Input
                     id="salario"
                     name="salario"
                     value={formData.salario}
                     onChange={handleInputChange}
                     disabled={!isFieldEditable('salario')}
-                    className={isFieldEditable('salario') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                    className={getFieldClassName('salario')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="horario_trabalho">Horário de Trabalho</Label>
+                  {renderFieldLabel('horario_trabalho', 'Horário de Trabalho')}
                   <Input
                     id="horario_trabalho"
                     name="horario_trabalho"
                     value={formData.horario_trabalho}
                     onChange={handleInputChange}
                     disabled={!isFieldEditable('horario_trabalho')}
-                    className={isFieldEditable('horario_trabalho') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                    className={getFieldClassName('horario_trabalho')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="jornada_trabalho">Jornada de Trabalho</Label>
+                  {renderFieldLabel('jornada_trabalho', 'Jornada de Trabalho')}
                   <Input
                     id="jornada_trabalho"
                     name="jornada_trabalho"
                     value={formData.jornada_trabalho}
                     onChange={handleInputChange}
                     disabled={!isFieldEditable('jornada_trabalho')}
-                    className={isFieldEditable('jornada_trabalho') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                    className={getFieldClassName('jornada_trabalho')}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="beneficios">Benefícios</Label>
+                {renderFieldLabel('beneficios', 'Benefícios')}
                 <Textarea
                   id="beneficios"
                   name="beneficios"
                   value={formData.beneficios}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('beneficios')}
-                  className={isFieldEditable('beneficios') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('beneficios')}
                   rows={3}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="local_trabalho">Local de Trabalho</Label>
+                {renderFieldLabel('local_trabalho', 'Local de Trabalho')}
                 <Textarea
                   id="local_trabalho"
                   name="local_trabalho"
                   value={formData.local_trabalho}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('local_trabalho')}
-                  className={isFieldEditable('local_trabalho') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('local_trabalho')}
                   rows={2}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="etapas_processo">Etapas do Processo</Label>
+                {renderFieldLabel('etapas_processo', 'Etapas do Processo')}
                 <Textarea
                   id="etapas_processo"
                   name="etapas_processo"
                   value={formData.etapas_processo}
                   onChange={handleInputChange}
                   disabled={!isFieldEditable('etapas_processo')}
-                  className={isFieldEditable('etapas_processo') ? '' : 'bg-gray-100 dark:bg-gray-800'}
+                  className={getFieldClassName('etapas_processo')}
                   rows={3}
                 />
               </div>
