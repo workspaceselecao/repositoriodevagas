@@ -143,6 +143,23 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
   try {
     console.log('🔍 [getReportsByUser] Buscando reports para:', { userId, userRole })
     
+    // Primeiro, verificar se há reports na tabela geral
+    const { data: allReports, error: allError } = await supabaseAdmin
+      .from('reports')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(10)
+    
+    console.log('🔍 [getReportsByUser] Total de reports na tabela:', allReports?.length || 0)
+    if (allReports && allReports.length > 0) {
+      console.log('📋 [getReportsByUser] Últimos reports na tabela:', allReports.map(r => ({
+        id: r.id,
+        reported_by: r.reported_by,
+        status: r.status,
+        created_at: r.created_at
+      })))
+    }
+    
     let query = supabaseAdmin.from('reports').select(`
       *,
       vaga:vagas(*),
@@ -153,6 +170,23 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
     if (userRole === 'RH') {
       query = query.eq('reported_by', userId)
       console.log('🔍 [getReportsByUser] Aplicando filtro RH para reported_by:', userId)
+      
+      // Verificar se há reports para este usuário específico
+      const { data: userReports, error: userError } = await supabaseAdmin
+        .from('reports')
+        .select('*')
+        .eq('reported_by', userId)
+        .order('created_at', { ascending: false })
+      
+      console.log('🔍 [getReportsByUser] Reports diretos para usuário:', userReports?.length || 0)
+      if (userReports && userReports.length > 0) {
+        console.log('📋 [getReportsByUser] Reports do usuário:', userReports.map(r => ({
+          id: r.id,
+          status: r.status,
+          created_at: r.created_at,
+          field_name: r.field_name
+        })))
+      }
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
@@ -165,18 +199,6 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
 
     console.log('✅ [getReportsByUser] Reports encontrados:', data?.length || 0)
     console.log('📊 [getReportsByUser] Dados dos reports:', data)
-    
-    // Verificar se há reports na tabela geral (sem filtro)
-    const { data: allReports, error: allError } = await supabaseAdmin
-      .from('reports')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(5)
-    
-    console.log('🔍 [getReportsByUser] Total de reports na tabela:', allReports?.length || 0)
-    if (allReports && allReports.length > 0) {
-      console.log('📋 [getReportsByUser] Últimos reports na tabela:', allReports)
-    }
     
     return data || []
   } catch (error) {
@@ -244,19 +266,24 @@ export async function updateReportStatus(reportId: string, status: Report['statu
   }
 }
 
-export async function deleteReport(reportId: string): Promise<void> {
+export async function deleteReport(reportId: string): Promise<boolean> {
   try {
+    console.log('🗑️ [deleteReport] Deletando report:', reportId)
+    
     const { error } = await supabaseAdmin
       .from('reports')
       .delete()
       .eq('id', reportId)
 
     if (error) {
-      console.error('Erro ao deletar report:', error)
+      console.error('❌ [deleteReport] Erro ao deletar report:', error)
       throw error
     }
+
+    console.log('✅ [deleteReport] Report deletado com sucesso')
+    return true
   } catch (error) {
-    console.error('Erro detalhado ao deletar report:', error)
+    console.error('❌ [deleteReport] Erro detalhado ao deletar report:', error)
     throw error
   }
 }

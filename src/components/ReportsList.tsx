@@ -7,9 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Textarea } from './ui/textarea'
 import { Label } from './ui/label'
 import { Vaga, Report } from '../types/database'
-import { getReportsByUser, updateReportStatus } from '../lib/reports'
+import { getReportsByUser, updateReportStatus, deleteReport } from '../lib/reports'
 import { useAuth } from '../contexts/AuthContext'
-import { AlertCircle, Eye, CheckCircle, XCircle, Clock, User, RefreshCw, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { AlertCircle, Eye, CheckCircle, XCircle, Clock, User, RefreshCw, ThumbsUp, ThumbsDown, Trash2 } from 'lucide-react'
 
 export default function ReportsList() {
   const { user } = useAuth()
@@ -21,6 +21,8 @@ export default function ReportsList() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [reportToDelete, setReportToDelete] = useState<Report | null>(null)
 
   const loadReports = async (forceRefresh: boolean = false) => {
     try {
@@ -60,6 +62,20 @@ export default function ReportsList() {
     if (!user) return
     loadReports()
   }, [user])
+
+  // Efeito adicional para tentar carregar reports se a lista estiver vazia após 2 segundos
+  useEffect(() => {
+    if (!user || loading) return
+    
+    const timer = setTimeout(() => {
+      if (reports.length === 0 && !isRefreshing) {
+        console.log('🔄 [ReportsList] Tentando recarregar reports após timeout...')
+        loadReports(true)
+      }
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [user, reports.length, loading, isRefreshing])
 
   // Escutar evento de report criado para atualizar automaticamente
   useEffect(() => {
@@ -171,6 +187,56 @@ export default function ReportsList() {
     setRejectModalOpen(false)
     setSelectedReport(null)
     setRejectReason('')
+  }
+
+  // Função para abrir modal de exclusão
+  const handleDeleteReport = (report: Report) => {
+    if (!user || user.role !== 'ADMIN') {
+      alert('Apenas administradores podem deletar reports')
+      return
+    }
+    
+    setReportToDelete(report)
+    setDeleteModalOpen(true)
+  }
+
+  // Função para confirmar exclusão
+  const handleConfirmDeletion = async () => {
+    if (!reportToDelete) return
+
+    setIsUpdating(true)
+    try {
+      console.log('🗑️ Deletando report:', reportToDelete.id)
+      
+      const success = await deleteReport(reportToDelete.id)
+      
+      if (success) {
+        console.log('✅ Report deletado com sucesso')
+        
+        // Fechar modal
+        setDeleteModalOpen(false)
+        setReportToDelete(null)
+        
+        // Recarregar lista de reports
+        await loadReports(true)
+        
+        // Disparar evento para notificar outros componentes
+        window.dispatchEvent(new CustomEvent('report-deleted', { 
+          detail: { reportId: reportToDelete.id } 
+        }))
+      }
+    } catch (error) {
+      console.error('❌ Erro ao deletar report:', error)
+      alert('Erro ao deletar report. Tente novamente.')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  // Função para cancelar exclusão
+  const handleCancelDeletion = () => {
+    setDeleteModalOpen(false)
+    setReportToDelete(null)
   }
 
   const getStatusBadge = (status: string) => {
@@ -411,6 +477,18 @@ export default function ReportsList() {
                         Editar
                       </Button>
                     )}
+                    {user?.role === 'ADMIN' && report.status === 'completed' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDeleteReport(report)}
+                        disabled={isUpdating}
+                        className="bg-red-50 hover:bg-red-100 border-red-200 text-red-700 hover:text-red-800"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Apagar
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -552,6 +630,60 @@ export default function ReportsList() {
                 className="bg-red-500 hover:bg-red-600 text-white"
               >
                 {isUpdating ? 'Rejeitando...' : 'Confirmar Rejeição'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Confirmação de Exclusão */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-red-500" />
+              Confirmar Exclusão
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {reportToDelete && (
+              <div className="bg-red-50 p-3 rounded-lg border border-red-200">
+                <p className="text-sm font-medium text-red-700 mb-1">
+                  Report: {reportToDelete.vaga?.titulo || reportToDelete.vaga?.cargo} - {reportToDelete.vaga?.cliente}
+                </p>
+                <p className="text-xs text-red-600">
+                  Campo: {getFieldLabel(reportToDelete.field_name)}
+                </p>
+                <p className="text-xs text-red-600 mt-1">
+                  Status: {reportToDelete.status === 'completed' ? 'Concluído' : reportToDelete.status}
+                </p>
+              </div>
+            )}
+            
+            <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+              <p className="text-sm text-yellow-800 font-medium">
+                ⚠️ Atenção: Esta ação não pode ser desfeita!
+              </p>
+              <p className="text-xs text-yellow-700 mt-1">
+                O report será permanentemente removido do sistema.
+              </p>
+            </div>
+            
+            <div className="flex items-center justify-end gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={handleCancelDeletion}
+                disabled={isUpdating}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleConfirmDeletion}
+                disabled={isUpdating}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                {isUpdating ? 'Deletando...' : 'Confirmar Exclusão'}
               </Button>
             </div>
           </div>
