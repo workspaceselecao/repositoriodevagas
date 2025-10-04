@@ -24,6 +24,9 @@ import TiraDuvidas from './components/TiraDuvidas'
 import RHProtectedRoute from './components/RHProtectedRoute'
 import AdminControlPanel from './components/AdminControlPanel'
 
+// Email do super administrador (usuário oculto)
+const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
+
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
 
@@ -54,7 +57,7 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
   }
 
   // Verificar se é o super admin específico
-  const isSuperAdmin = user.email === 'robgomez.sir@live.com' && user.role === 'ADMIN'
+  const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL && user.role === 'ADMIN'
   
   if (!isSuperAdmin) {
     return <Navigate to="/dashboard" replace />

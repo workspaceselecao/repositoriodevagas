@@ -7,6 +7,9 @@ import { CheckCircle, XCircle, AlertTriangle, Shield } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useAdminControl } from '../lib/admin-control'
 
+// Email do super administrador (usuário oculto)
+const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
+
 interface AdminControlPanelProps {}
 
 export default function AdminControlPanel({}: AdminControlPanelProps) {
@@ -17,7 +20,7 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
   const { state, isBlocked, updateControl, lastUpdated, updatedBy } = useAdminControl()
 
   // Verificar se é o admin autorizado
-  const isAuthorizedAdmin = user?.email === 'robgomez.sir@live.com' && user?.role === 'ADMIN'
+  const isAuthorizedAdmin = user?.email === SUPER_ADMIN_EMAIL && user?.role === 'ADMIN'
 
   // Carregar estado atual do bloqueio
   useEffect(() => {
