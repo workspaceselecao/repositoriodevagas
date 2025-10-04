@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { BackupLog, BackupOptions } from '../types/database'
+import { filterVisibleUsers, filterBackupData, filterExcelSheet, filterCSVContent } from './user-filter'
 import * as XLSX from 'xlsx'
 
 // Função para fazer backup manual
@@ -42,7 +43,8 @@ export async function createManualBackup(userId: string, options: BackupOptions)
       if (usersError) {
         throw new Error(usersError.message)
       }
-      backupData.users = users
+      // Filtrar usuários ocultos (super admin)
+      backupData.users = filterVisibleUsers(users || [])
     }
 
     if (options.data?.backup_logs) {
@@ -56,26 +58,29 @@ export async function createManualBackup(userId: string, options: BackupOptions)
       backupData.backup_logs = logs
     }
 
+    // Filtrar dados do backup para remover super admin
+    const filteredBackupData = filterBackupData(backupData)
+
     // Gerar arquivo baseado no formato
     let fileName = ''
     let fileData: any = null
 
     if (options.format === 'excel') {
       fileName = `backup_${new Date().toISOString().split('T')[0]}.xlsx`
-      fileData = await generateExcelBackup(backupData)
+      fileData = await generateExcelBackup(filteredBackupData)
     } else if (options.format === 'csv') {
       fileName = `backup_${new Date().toISOString().split('T')[0]}.csv`
-      fileData = await generateCSVBackup(backupData)
+      fileData = await generateCSVBackup(filteredBackupData)
     } else {
       fileName = `backup_${new Date().toISOString().split('T')[0]}.json`
-      fileData = JSON.stringify(backupData, null, 2)
+      fileData = JSON.stringify(filteredBackupData, null, 2)
     }
 
     // Atualizar log de backup com sucesso
     const { error: updateError } = await supabase
       .from('backup_logs')
       .update({
-        backup_data: backupData,
+        backup_data: filteredBackupData,
         file_path: fileName,
         status: 'success'
       })
@@ -87,7 +92,7 @@ export async function createManualBackup(userId: string, options: BackupOptions)
 
     return {
       ...backupLog,
-      backup_data: backupData,
+      backup_data: filteredBackupData,
       file_path: fileName,
       status: 'success'
     }
@@ -107,10 +112,13 @@ async function generateExcelBackup(data: any): Promise<Buffer> {
     XLSX.utils.book_append_sheet(workbook, vagasSheet, 'Vagas')
   }
 
-  // Adicionar planilha de usuários
+  // Adicionar planilha de usuários (já filtrada)
   if (data.users && data.users.length > 0) {
-    const usersSheet = XLSX.utils.json_to_sheet(data.users)
-    XLSX.utils.book_append_sheet(workbook, usersSheet, 'Usuários')
+    const filteredUsers = filterExcelSheet(data.users, 'Usuários')
+    if (filteredUsers.length > 0) {
+      const usersSheet = XLSX.utils.json_to_sheet(filteredUsers)
+      XLSX.utils.book_append_sheet(workbook, usersSheet, 'Usuários')
+    }
   }
 
   // Adicionar planilha de logs de backup
@@ -134,11 +142,14 @@ async function generateCSVBackup(data: any): Promise<string> {
     csvContent += '\n\n'
   }
 
-  // Adicionar usuários
+  // Adicionar usuários (filtrados)
   if (data.users && data.users.length > 0) {
-    csvContent += '=== USUÁRIOS ===\n'
-    csvContent += XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(data.users))
-    csvContent += '\n\n'
+    const filteredUsers = filterExcelSheet(data.users, 'Usuários')
+    if (filteredUsers.length > 0) {
+      csvContent += '=== USUÁRIOS ===\n'
+      csvContent += XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(filteredUsers))
+      csvContent += '\n\n'
+    }
   }
 
   // Adicionar logs de backup

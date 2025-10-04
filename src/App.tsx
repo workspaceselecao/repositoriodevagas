@@ -23,9 +23,7 @@ import ReportsList from './components/ReportsList'
 import TiraDuvidas from './components/TiraDuvidas'
 import RHProtectedRoute from './components/RHProtectedRoute'
 import AdminControlPanel from './components/AdminControlPanel'
-
-// Email do super administrador (usuário oculto)
-const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
+import { SUPER_ADMIN_EMAIL } from './lib/user-filter'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()

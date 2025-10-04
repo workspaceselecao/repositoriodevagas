@@ -9,9 +9,7 @@ import { User, UserFormData } from '../types/database'
 import { getAllUsers, createUser, updateUser, deleteUser, resetUserPassword } from '../lib/auth'
 import { useAuth } from '../contexts/AuthContext'
 import { Users, UserPlus, Edit, Trash2, Key, Search, AlertTriangle } from 'lucide-react'
-
-// Email do super administrador (usuário oculto)
-const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
+import { filterVisibleUsers, countVisibleUsers } from '../lib/user-filter'
 
 export default function GerenciarUsuarios() {
   const [users, setUsers] = useState<User[]>([])
@@ -77,9 +75,7 @@ export default function GerenciarUsuarios() {
 
   const filterUsers = () => {
     // Filtrar usuários ocultos (super admin)
-    const visibleUsers = users.filter(user => 
-      user.email !== SUPER_ADMIN_EMAIL
-    )
+    const visibleUsers = filterVisibleUsers(users)
 
     if (!searchTerm) {
       setFilteredUsers(visibleUsers)
@@ -355,7 +351,7 @@ export default function GerenciarUsuarios() {
             Lista de Usuários
           </CardTitle>
           <CardDescription>
-            {filteredUsers.length} usuário{filteredUsers.length !== 1 ? 's' : ''} visível{filteredUsers.length !== 1 ? 'is' : ''} no sistema
+            {countVisibleUsers(users)} usuário{countVisibleUsers(users) !== 1 ? 's' : ''} visível{countVisibleUsers(users) !== 1 ? 'is' : ''} no sistema
           </CardDescription>
         </CardHeader>
         <CardContent>

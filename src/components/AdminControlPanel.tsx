@@ -6,9 +6,7 @@ import { Alert, AlertDescription } from './ui/alert'
 import { CheckCircle, XCircle, AlertTriangle, Shield } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useAdminControl } from '../lib/admin-control'
-
-// Email do super administrador (usuário oculto)
-const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
+import { SUPER_ADMIN_EMAIL } from '../lib/user-filter'
 
 interface AdminControlPanelProps {}
 

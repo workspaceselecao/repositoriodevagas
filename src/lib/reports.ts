@@ -1,9 +1,27 @@
 import { supabase, supabaseAdmin } from './supabase'
 import { Report, ReportFormData, User, Vaga } from '../types/database'
+import { filterVisibleUsers } from './user-filter'
 
 // =============================================
 // SISTEMA SIMPLIFICADO DE REPORTS
 // =============================================
+
+// Função para filtrar relatórios que contenham referências ao super admin
+function filterReportsWithSuperAdmin(reports: any[]): any[] {
+  return reports.filter(report => {
+    // Verificar se o reporter é o super admin
+    if (report.reporter?.email === 'robgomez.sir@live.com') {
+      return false
+    }
+    
+    // Verificar se o assignee é o super admin
+    if (report.assignee?.email === 'robgomez.sir@live.com') {
+      return false
+    }
+    
+    return true
+  })
+}
 
 /**
  * ARQUITETURA SIMPLIFICADA:
@@ -200,7 +218,10 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
     console.log('✅ [getReportsByUser] Reports encontrados:', data?.length || 0)
     console.log('📊 [getReportsByUser] Dados dos reports:', data)
     
-    return data || []
+    // Filtrar relatórios que contenham referências ao super admin
+    const filteredReports = filterReportsWithSuperAdmin(data || [])
+    
+    return filteredReports
   } catch (error) {
     console.error('❌ [getReportsByUser] Erro detalhado ao buscar reports:', error)
     throw error
@@ -226,7 +247,10 @@ export async function getPendingReportsForAdmin(adminId: string): Promise<Report
       throw error
     }
 
-    return data || []
+    // Filtrar relatórios que contenham referências ao super admin
+    const filteredReports = filterReportsWithSuperAdmin(data || [])
+    
+    return filteredReports
   } catch (error) {
     console.error('Erro detalhado ao buscar reports pendentes:', error)
     throw error
@@ -304,7 +328,10 @@ export async function getAllAdmins(): Promise<User[]> {
       throw error
     }
 
-    return data || []
+    // Filtrar super admin da lista de administradores
+    const filteredAdmins = filterVisibleUsers(data || [])
+    
+    return filteredAdmins
   } catch (error) {
     console.error('Erro detalhado ao buscar administradores:', error)
     throw error
@@ -337,7 +364,10 @@ export async function getReportsForRealtime(adminId: string): Promise<Report[]> 
       throw error
     }
 
-    return data || []
+    // Filtrar relatórios que contenham referências ao super admin
+    const filteredReports = filterReportsWithSuperAdmin(data || [])
+    
+    return filteredReports
   } catch (error) {
     console.error('Erro detalhado ao buscar reports para realtime:', error)
     throw error
