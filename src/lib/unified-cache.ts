@@ -196,7 +196,7 @@ class UnifiedCache {
         const cached = await this.persistentCache.get('default', key)
         if (cached && !options.forceRefresh) {
           console.log(`📖 Dados recuperados do cache persistente: ${key}`)
-          return cached
+          return cached as T
         }
       } catch (error) {
         console.warn('⚠️ Cache persistente falhou:', error)
