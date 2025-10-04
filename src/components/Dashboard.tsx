@@ -97,30 +97,6 @@ export default function Dashboard() {
   }
 
 
-  // Emergency refresh
-  const handleEmergencyRefresh = () => {
-    if (confirm('⚠️ ATENÇÃO: Isso irá limpar todos os caches e recarregar a página. Continuar?')) {
-      // Limpar todos os caches
-      localStorage.clear()
-      sessionStorage.clear()
-      
-      // Limpar cache do Supabase
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => {
-            if (name.includes('supabase') || name.includes('auth')) {
-              caches.delete(name)
-            }
-          })
-        }).catch(() => {
-          // Ignorar erros de cache
-        })
-      }
-      
-      // Forçar reload da página
-      window.location.reload()
-    }
-  }
 
   const getTipoIcon = (tipo: string) => {
     switch (tipo) {
@@ -249,16 +225,6 @@ export default function Dashboard() {
               isRefreshing ? 'animate-spin' : 'hover:rotate-180'
             }`} />
             {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-          </Button>
-          <Button 
-            onClick={handleEmergencyRefresh} 
-            variant="destructive" 
-            size="sm"
-            className="transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
-          >
-            <AlertTriangle className="h-4 w-4 mr-2 transition-transform duration-200 hover:rotate-12" />
-            <span className="hidden tablet:inline">Recarregar Aplicação</span>
-            <span className="tablet:hidden">Recarregar</span>
           </Button>
         </div>
       </div>
