@@ -70,7 +70,7 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
       setMessage('')
 
       // Atualizar controle administrativo
-      await updateControl(newState, user?.email || 'admin', `Sistema ${newState ? 'bloqueado' : 'liberado'} pelo SuperUsuário`)
+      await updateControl(newState, user?.id || 'admin', `Sistema ${newState ? 'bloqueado' : 'liberado'} pelo SuperUsuário`)
       
       if (newState) {
         setMessage('✅ Sistema BLOQUEADO - Operações de escrita não são permitidas')

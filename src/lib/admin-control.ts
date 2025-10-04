@@ -78,6 +78,21 @@ function getAdminControlStateFromLocalStorage(): AdminControlState {
   }
 }
 
+// Função para obter UUID do usuário atual
+async function getCurrentUserId(): Promise<string | null> {
+  try {
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser()
+    if (error || !user) {
+      console.warn('⚠️ [getCurrentUserId] Usuário não autenticado')
+      return null
+    }
+    return user.id
+  } catch (error) {
+    console.warn('⚠️ [getCurrentUserId] Erro ao obter usuário:', error)
+    return null
+  }
+}
+
 // Função para definir o estado do controle no banco
 export async function setAdminControlState(isBlocked: boolean, updatedBy: string = 'admin', reason?: string): Promise<AdminControlState> {
   try {
@@ -85,6 +100,9 @@ export async function setAdminControlState(isBlocked: boolean, updatedBy: string
     
     const now = new Date().toISOString()
     const controlId = '00000000-0000-0000-0000-000000000001'
+    
+    // Obter UUID do usuário atual
+    const currentUserId = await getCurrentUserId()
     
     // Preparar dados para atualização
     const updateData: {
@@ -98,23 +116,18 @@ export async function setAdminControlState(isBlocked: boolean, updatedBy: string
     } = {
       is_blocked: isBlocked,
       updated_at: now,
-      reason: reason || null,
-      ...(isBlocked ? {
-        blocked_by: 'system',
-        blocked_at: now
-      } : {
-        unblocked_by: 'system',
-        unblocked_at: now
-      })
+      reason: reason || null
     }
     
     if (isBlocked) {
-      updateData.blocked_by = updatedBy
+      // Usar UUID do usuário atual ou 'system' como fallback
+      updateData.blocked_by = currentUserId || '00000000-0000-0000-0000-000000000000'
       updateData.blocked_at = now
       updateData.unblocked_by = undefined
       updateData.unblocked_at = undefined
     } else {
-      updateData.unblocked_by = updatedBy
+      // Usar UUID do usuário atual ou 'system' como fallback
+      updateData.unblocked_by = currentUserId || '00000000-0000-0000-0000-000000000000'
       updateData.unblocked_at = now
       updateData.blocked_by = undefined
       updateData.blocked_at = undefined
