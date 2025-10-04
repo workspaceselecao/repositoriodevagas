@@ -41,7 +41,8 @@
     "fix-foreign-key": "tsx scripts/fix-foreign-key.ts",
     "test-new-reports": "tsx scripts/test-new-reports-system.ts",
     "diagnose-reports": "tsx scripts/diagnose-reports-system.ts",
-    "test-simple-reports": "tsx scripts/test-simple-reports.ts"
+    "test-simple-reports": "tsx scripts/test-simple-reports.ts",
+    "create-super-admin": "tsx scripts/create-super-admin.ts"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

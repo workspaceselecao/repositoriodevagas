@@ -6,6 +6,7 @@ import { getNoticias } from '../lib/noticias'
 import { useAuth } from './AuthContext'
 import { sessionCache } from '../lib/session-cache'
 import { useUnifiedCache } from '../lib/unified-cache'
+import { isDbLoadingBlocked } from '../lib/supabase'
 
 // Tipos para o cache
 interface CacheData {
@@ -105,6 +106,18 @@ export function CacheProvider({ children }: { children: ReactNode }) {
 
   // Função para buscar vagas
   const refreshVagas = useCallback(async () => {
+    // Verificar se o carregamento está bloqueado
+    if (isDbLoadingBlocked()) {
+      console.log('🚫 Carregamento de vagas BLOQUEADO - retornando dados vazios')
+      setCache(prev => ({
+        ...prev,
+        vagas: [],
+        lastUpdated: Date.now()
+      }))
+      updateCacheStatus('vagas', false)
+      return
+    }
+
     try {
       console.log('🔄 Carregando vagas (FORÇANDO refresh do DB)...')
       setLoading(true) // Adicionar loading durante refresh
@@ -137,6 +150,13 @@ export function CacheProvider({ children }: { children: ReactNode }) {
 
   // Função para buscar clientes
   const refreshClientes = useCallback(async () => {
+    if (isDbLoadingBlocked()) {
+      console.log('🚫 Carregamento de clientes BLOQUEADO')
+      setCache(prev => ({ ...prev, clientes: [], lastUpdated: Date.now() }))
+      updateCacheStatus('clientes', false)
+      return
+    }
+
     try {
       console.log('🔄 Carregando clientes...')
       const clientes = await getClientes()

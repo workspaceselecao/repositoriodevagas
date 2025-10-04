@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { AuthUser, LoginFormData } from '../types/database'
 import { signIn, signOut, getCurrentUser } from '../lib/auth'
-import { supabase } from '../lib/supabase'
+import { supabase, isDbLoadingBlocked } from '../lib/supabase'
 import { initializeVersionSystem } from '../version'
 import { sessionCache } from '../lib/session-cache'
 import AuthErrorFallback from '../components/AuthErrorFallback'
@@ -51,6 +51,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (hasInitialized || isInitializing) return
       
       setIsInitializing(true)
+      
+      // Verificar se o carregamento está bloqueado
+      if (isDbLoadingBlocked()) {
+        console.log('🚫 Carregamento de autenticação BLOQUEADO - permitindo acesso sem login')
+        if (isMounted) {
+          setUser(null)
+          hasInitialized = true
+          setLoading(false)
+          setInitialized(true)
+          setIsInitializing(false)
+          clearTimeout(safetyTimeout)
+        }
+        return
+      }
       
       // Verificar conectividade antes de tentar autenticação
       if (!navigator.onLine) {

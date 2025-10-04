@@ -22,6 +22,7 @@ import EditarVagaFromReport from './components/EditarVagaFromReport'
 import ReportsList from './components/ReportsList'
 import TiraDuvidas from './components/TiraDuvidas'
 import RHProtectedRoute from './components/RHProtectedRoute'
+import AdminControlPanel from './components/AdminControlPanel'
 
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
@@ -35,6 +36,27 @@ function ProtectedRoute({ children, requireAdmin = false }: { children: React.Re
   }
 
   if (requireAdmin && user.role !== 'ADMIN') {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return <>{children}</>
+}
+
+function SuperAdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return <LoadingScreen message="Verificando permissões..." />
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  // Verificar se é o super admin específico
+  const isSuperAdmin = user.email === 'robgomez.sir@live.com' && user.role === 'ADMIN'
+  
+  if (!isSuperAdmin) {
     return <Navigate to="/dashboard" replace />
   }
 
@@ -141,6 +163,11 @@ function AppRoutes() {
             <ReportsList />
           </DashboardLayout>
         </ProtectedRoute>
+      } />
+      <Route path="/admin/control-panel" element={
+        <SuperAdminRoute>
+          <AdminControlPanel />
+        </SuperAdminRoute>
       } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
