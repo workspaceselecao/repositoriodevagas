@@ -43,7 +43,7 @@ function ProtectedRoute({ children, requireAdmin = false }: { children: React.Re
   return <>{children}</>
 }
 
-function SuperAdminRoute({ children }: { children: React.ReactNode }) {
+function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
 
   if (loading) {
@@ -54,10 +54,10 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />
   }
 
-  // Verificar se é o super admin específico
-  const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL && user.role === 'ADMIN'
+  // Verificar se é o administrador autorizado
+  const isAuthorizedAdmin = user.email === SUPER_ADMIN_EMAIL && user.role === 'ADMIN'
   
-  if (!isSuperAdmin) {
+  if (!isAuthorizedAdmin) {
     return <Navigate to="/dashboard" replace />
   }
 
@@ -166,9 +166,9 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       <Route path="/admin/control-panel" element={
-        <SuperAdminRoute>
+        <AdminRoute>
           <AdminControlPanel />
-        </SuperAdminRoute>
+        </AdminRoute>
       } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

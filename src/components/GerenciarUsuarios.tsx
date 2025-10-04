@@ -74,7 +74,7 @@ export default function GerenciarUsuarios() {
   }
 
   const filterUsers = () => {
-    // Filtrar usuários ocultos (super admin)
+    // Filtrar usuários ocultos
     const visibleUsers = filterVisibleUsers(users)
 
     if (!searchTerm) {

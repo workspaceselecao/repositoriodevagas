@@ -43,7 +43,7 @@ export async function createManualBackup(userId: string, options: BackupOptions)
       if (usersError) {
         throw new Error(usersError.message)
       }
-      // Filtrar usuários ocultos (super admin)
+      // Filtrar usuários ocultos
       backupData.users = filterVisibleUsers(users || [])
     }
 
@@ -58,7 +58,7 @@ export async function createManualBackup(userId: string, options: BackupOptions)
       backupData.backup_logs = logs
     }
 
-    // Filtrar dados do backup para remover super admin
+    // Filtrar dados do backup para remover administrador oculto
     const filteredBackupData = filterBackupData(backupData)
 
     // Gerar arquivo baseado no formato

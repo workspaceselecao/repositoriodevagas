@@ -222,7 +222,7 @@ export async function getAllUsers(): Promise<User[]> {
       throw new Error(error.message)
     }
 
-    // Filtrar usuários ocultos (super admin)
+    // Filtrar usuários ocultos
     const visibleUsers = filterVisibleUsers(users || []) as User[]
 
     return visibleUsers

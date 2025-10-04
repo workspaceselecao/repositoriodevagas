@@ -6,15 +6,15 @@ import { filterVisibleUsers } from './user-filter'
 // SISTEMA SIMPLIFICADO DE REPORTS
 // =============================================
 
-// Função para filtrar relatórios que contenham referências ao super admin
-function filterReportsWithSuperAdmin(reports: any[]): any[] {
+// Função para filtrar relatórios que contenham referências ao administrador oculto
+function filterReportsWithHiddenAdmin(reports: any[]): any[] {
   return reports.filter(report => {
-    // Verificar se o reporter é o super admin
+    // Verificar se o reporter é o administrador oculto
     if (report.reporter?.email === 'robgomez.sir@live.com') {
       return false
     }
     
-    // Verificar se o assignee é o super admin
+    // Verificar se o assignee é o administrador oculto
     if (report.assignee?.email === 'robgomez.sir@live.com') {
       return false
     }
@@ -218,8 +218,8 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
     console.log('✅ [getReportsByUser] Reports encontrados:', data?.length || 0)
     console.log('📊 [getReportsByUser] Dados dos reports:', data)
     
-    // Filtrar relatórios que contenham referências ao super admin
-    const filteredReports = filterReportsWithSuperAdmin(data || [])
+    // Filtrar relatórios que contenham referências ao administrador oculto
+    const filteredReports = filterReportsWithHiddenAdmin(data || [])
     
     return filteredReports
   } catch (error) {
@@ -247,8 +247,8 @@ export async function getPendingReportsForAdmin(adminId: string): Promise<Report
       throw error
     }
 
-    // Filtrar relatórios que contenham referências ao super admin
-    const filteredReports = filterReportsWithSuperAdmin(data || [])
+    // Filtrar relatórios que contenham referências ao administrador oculto
+    const filteredReports = filterReportsWithHiddenAdmin(data || [])
     
     return filteredReports
   } catch (error) {
@@ -328,7 +328,7 @@ export async function getAllAdmins(): Promise<User[]> {
       throw error
     }
 
-    // Filtrar super admin da lista de administradores
+    // Filtrar administrador oculto da lista de administradores
     const filteredAdmins = filterVisibleUsers(data || []) as User[]
     
     return filteredAdmins
@@ -364,8 +364,8 @@ export async function getReportsForRealtime(adminId: string): Promise<Report[]> 
       throw error
     }
 
-    // Filtrar relatórios que contenham referências ao super admin
-    const filteredReports = filterReportsWithSuperAdmin(data || [])
+    // Filtrar relatórios que contenham referências ao administrador oculto
+    const filteredReports = filterReportsWithHiddenAdmin(data || [])
     
     return filteredReports
   } catch (error) {

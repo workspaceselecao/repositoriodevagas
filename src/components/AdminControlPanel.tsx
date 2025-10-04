@@ -40,7 +40,7 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
     logAdminAction
   } = useAdminBypass()
 
-  // Verificar se é o super admin autorizado
+  // Verificar se é o administrador autorizado
   const isAuthorizedAdmin = user?.email === SUPER_ADMIN_EMAIL && user?.role === 'ADMIN'
 
   // Carregar estado atual do bloqueio
@@ -70,7 +70,7 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
       setMessage('')
 
       // Atualizar controle administrativo
-      await updateControl(newState, user?.id || 'admin', `Sistema ${newState ? 'bloqueado' : 'liberado'} pelo SuperUsuário`)
+      await updateControl(newState, user?.id || 'admin', `Sistema ${newState ? 'bloqueado' : 'liberado'} pelo administrador`)
       
       if (newState) {
         setMessage('✅ Sistema BLOQUEADO - Operações de escrita não são permitidas')

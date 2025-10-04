@@ -379,6 +379,6 @@ export async function checkWriteBlocked(): Promise<boolean> {
 export async function assertWriteAllowed(): Promise<void> {
   const isBlocked = await checkWriteBlocked()
   if (isBlocked) {
-    throw new Error('SISTEMA BLOQUEADO: Operações de escrita não são permitidas enquanto o sistema estiver bloqueado pelo SuperUsuário')
+    throw new Error('SISTEMA BLOQUEADO: Operações de escrita não são permitidas enquanto o sistema estiver bloqueado pelo administrador')
   }
 }
