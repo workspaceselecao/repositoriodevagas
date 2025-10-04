@@ -189,12 +189,12 @@ export default function ReportsList() {
 
     setIsUpdating(true)
     try {
-      console.log('🗑️ Deletando report:', reportToDelete.id)
+      console.log('🗑️ Limpando registro do report:', reportToDelete.id)
       
       const success = await deleteReport(reportToDelete.id)
       
       if (success) {
-        console.log('✅ Report deletado com sucesso')
+        console.log('✅ Registro do report limpo com sucesso')
         
         // Fechar modal
         setDeleteModalOpen(false)
@@ -609,7 +609,7 @@ export default function ReportsList() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trash2 className="h-5 w-5 text-red-500" />
-              Confirmar Exclusão
+              Limpar Registro do Histórico
             </DialogTitle>
           </DialogHeader>
           
@@ -630,10 +630,10 @@ export default function ReportsList() {
             
             <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
               <p className="text-sm text-yellow-800 font-medium">
-                ⚠️ Atenção: Esta ação não pode ser desfeita!
+                ⚠️ Esta ação vai limpar este registro do histórico de Reports
               </p>
               <p className="text-xs text-yellow-700 mt-1">
-                O report será permanentemente removido do sistema.
+                O registro do report será permanentemente removido do banco de dados.
               </p>
             </div>
             
@@ -650,7 +650,7 @@ export default function ReportsList() {
                 disabled={isUpdating}
                 className="bg-red-500 hover:bg-red-600 text-white"
               >
-                {isUpdating ? 'Deletando...' : 'Confirmar Exclusão'}
+                {isUpdating ? 'Limpando...' : 'Limpar Registro'}
               </Button>
             </div>
           </div>
