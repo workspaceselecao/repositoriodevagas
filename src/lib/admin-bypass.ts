@@ -72,11 +72,11 @@ export class AdminBypass {
     userId?: string
   ): Promise<BypassResult<T>> {
     if (!this.isAdmin()) {
-      return { success: false, error: 'Acesso negado: não é administrador' }
+      return { success: false, error: 'Acesso negado: não é administrador', logged: false }
     }
 
     if (!this.hasPower('user_management')) {
-      return { success: false, error: 'Acesso negado: sem poder de gerenciamento de usuários' }
+      return { success: false, error: 'Acesso negado: sem poder de gerenciamento de usuários', logged: false }
     }
 
     try {
@@ -96,11 +96,11 @@ export class AdminBypass {
     vagaId?: string
   ): Promise<BypassResult<T>> {
     if (!this.isAdmin()) {
-      return { success: false, error: 'Acesso negado: não é administrador' }
+      return { success: false, error: 'Acesso negado: não é administrador', logged: false }
     }
 
     if (!this.hasPower('data_management')) {
-      return { success: false, error: 'Acesso negado: sem poder de gerenciamento de dados' }
+      return { success: false, error: 'Acesso negado: sem poder de gerenciamento de dados', logged: false }
     }
 
     try {
@@ -120,11 +120,11 @@ export class AdminBypass {
     systemId?: string
   ): Promise<BypassResult<T>> {
     if (!this.isAdmin()) {
-      return { success: false, error: 'Acesso negado: não é administrador' }
+      return { success: false, error: 'Acesso negado: não é administrador', logged: false }
     }
 
     if (!this.hasPower('system_control')) {
-      return { success: false, error: 'Acesso negado: sem poder de controle do sistema' }
+      return { success: false, error: 'Acesso negado: sem poder de controle do sistema', logged: false }
     }
 
     try {
@@ -146,11 +146,11 @@ export class AdminBypass {
     resourceId?: string
   ): Promise<BypassResult<T>> {
     if (!this.isAdmin()) {
-      return { success: false, error: 'Acesso negado: não é administrador' }
+      return { success: false, error: 'Acesso negado: não é administrador', logged: false }
     }
 
     if (!this.hasPower('emergency_override')) {
-      return { success: false, error: 'Acesso negado: sem poder de sobrescrita de emergência' }
+      return { success: false, error: 'Acesso negado: sem poder de sobrescrita de emergência', logged: false }
     }
 
     try {
@@ -293,11 +293,11 @@ export class AdminBypass {
   // Operações de auditoria
   async getAuditLogsWithBypass(limit = 100): Promise<BypassResult> {
     if (!this.isAdmin()) {
-      return { success: false, error: 'Acesso negado: não é administrador' }
+      return { success: false, error: 'Acesso negado: não é administrador', logged: false }
     }
 
     if (!this.hasPower('audit_access')) {
-      return { success: false, error: 'Acesso negado: sem poder de acesso à auditoria' }
+      return { success: false, error: 'Acesso negado: sem poder de acesso à auditoria', logged: false }
     }
 
     try {
