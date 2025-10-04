@@ -152,7 +152,7 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
     
     console.log('🔍 [getReportsByUser] Total de reports na tabela:', allReports?.length || 0)
     if (allReports && allReports.length > 0) {
-      console.log('📋 [getReportsByUser] Últimos reports na tabela:', allReports.map(r => ({
+      console.log('📋 [getReportsByUser] Últimos reports na tabela:', allReports.map((r: any) => ({
         id: r.id,
         reported_by: r.reported_by,
         status: r.status,
@@ -180,7 +180,7 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
       
       console.log('🔍 [getReportsByUser] Reports diretos para usuário:', userReports?.length || 0)
       if (userReports && userReports.length > 0) {
-        console.log('📋 [getReportsByUser] Reports do usuário:', userReports.map(r => ({
+        console.log('📋 [getReportsByUser] Reports do usuário:', userReports.map((r: any) => ({
           id: r.id,
           status: r.status,
           created_at: r.created_at,
