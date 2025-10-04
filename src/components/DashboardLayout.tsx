@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useRHNovaVagaAccess } from '../hooks/useSystemConfig'
+import { SUPER_ADMIN_EMAIL } from '../lib/user-filter'
 import { useTheme } from '../contexts/ThemeContext'
 import { useUpdateCheck } from '../hooks/useUpdateCheck'
 import { useScreenSize } from '../hooks/useScreenSize'
@@ -34,6 +35,7 @@ import {
   Mail,
   AlertTriangle,
   HelpCircle,
+  Shield,
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -170,6 +172,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       label: 'Configurações',
       href: '/dashboard/configuracoes',
       show: user?.role === 'ADMIN'
+    },
+    {
+      icon: Shield,
+      label: 'Painel de Controle',
+      href: '/admin/control-panel',
+      show: user?.email === SUPER_ADMIN_EMAIL && user?.role === 'ADMIN'
     },
   ]
 
