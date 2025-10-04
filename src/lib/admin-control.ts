@@ -120,14 +120,14 @@ export async function setAdminControlState(isBlocked: boolean, updatedBy: string
     }
     
     if (isBlocked) {
-      // Usar UUID do usuário atual ou 'system' como fallback
-      updateData.blocked_by = currentUserId || '00000000-0000-0000-0000-000000000000'
+      // Usar UUID do usuário atual ou NULL se não autenticado
+      updateData.blocked_by = currentUserId || null
       updateData.blocked_at = now
       updateData.unblocked_by = undefined
       updateData.unblocked_at = undefined
     } else {
-      // Usar UUID do usuário atual ou 'system' como fallback
-      updateData.unblocked_by = currentUserId || '00000000-0000-0000-0000-000000000000'
+      // Usar UUID do usuário atual ou NULL se não autenticado
+      updateData.unblocked_by = currentUserId || null
       updateData.unblocked_at = now
       updateData.blocked_by = undefined
       updateData.blocked_at = undefined

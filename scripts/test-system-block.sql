@@ -18,7 +18,7 @@ SELECT 'Testando bloqueio do sistema...' as status;
 UPDATE system_control 
 SET 
   is_blocked = true,
-  blocked_by = '00000000-0000-0000-0000-000000000000',
+  blocked_by = NULL,
   blocked_at = NOW(),
   updated_at = NOW(),
   reason = 'Teste de bloqueio'
@@ -34,7 +34,7 @@ SELECT 'Testando desbloqueio do sistema...' as status;
 UPDATE system_control 
 SET 
   is_blocked = false,
-  unblocked_by = '00000000-0000-0000-0000-000000000000',
+  unblocked_by = NULL,
   unblocked_at = NOW(),
   updated_at = NOW(),
   reason = 'Teste de desbloqueio'
@@ -67,11 +67,11 @@ SELECT 'Testando com UUID de usuário válido...' as status;
 SELECT id, email, role FROM users LIMIT 1;
 
 -- Se existir um usuário, usar seu UUID para o teste
--- Caso contrário, usar o UUID de teste
+-- Caso contrário, usar NULL
 UPDATE system_control 
 SET 
   is_blocked = true,
-  blocked_by = COALESCE((SELECT id FROM users LIMIT 1), '00000000-0000-0000-0000-000000000000'),
+  blocked_by = (SELECT id FROM users LIMIT 1),
   blocked_at = NOW(),
   updated_at = NOW(),
   reason = 'Teste com UUID de usuário'
