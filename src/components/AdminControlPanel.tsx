@@ -40,8 +40,8 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
     logAdminAction
   } = useAdminBypass()
 
-  // Verificar se é o admin autorizado
-  const isAuthorizedAdmin = user?.role === 'ADMIN'
+  // Verificar se é o super admin autorizado
+  const isAuthorizedAdmin = user?.email === SUPER_ADMIN_EMAIL && user?.role === 'ADMIN'
 
   // Carregar estado atual do bloqueio
   useEffect(() => {

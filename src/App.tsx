@@ -166,9 +166,9 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       <Route path="/admin/control-panel" element={
-        <ProtectedRoute requireAdmin={true}>
+        <SuperAdminRoute>
           <AdminControlPanel />
-        </ProtectedRoute>
+        </SuperAdminRoute>
       } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
