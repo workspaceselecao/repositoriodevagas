@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
-import { Vaga } from '../types/database'
+import { Vaga, User, Noticia } from '../types/database'
 import { getVagas, getClientes, getSites, getCategorias, getCargos, getCelulas, getVagasForceRefresh } from '../lib/vagas'
 import { getAllUsers } from '../lib/auth'
 import { getNoticias } from '../lib/noticias'

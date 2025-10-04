@@ -248,11 +248,11 @@ export async function createVaga(vagaData: VagaFormData, userId: string): Promis
 
       return vaga
     } catch (error: unknown) {
-      lastError = error
+      lastError = error instanceof Error ? error : new Error(String(error))
       console.error(`💥 [createVaga] Erro na tentativa ${attempt}:`, error)
       
       // Se for erro de timeout, tentar novamente
-      if (error.message.includes('timeout') || error.message.includes('Timeout')) {
+      if (error instanceof Error && (error.message.includes('timeout') || error.message.includes('Timeout'))) {
         if (attempt < maxRetries) {
           console.log(`🔄 [createVaga] Timeout detectado, tentando novamente (${attempt + 1}/${maxRetries})...`)
           await new Promise(resolve => setTimeout(resolve, 1000 * attempt)) // Delay progressivo
@@ -364,13 +364,13 @@ export async function getClientes(): Promise<string[]> {
             throw new Error(`Erro com cliente admin: ${adminError.message}`)
           }
 
-          const clientes = [...new Set(adminData?.map((item: Vaga) => item.cliente).filter(Boolean) || [])] as string[]
+          const clientes = [...new Set(adminData?.map((item: any) => item.cliente).filter(Boolean) || [])] as string[]
           console.log(`✅ ${clientes.length} clientes carregados com cliente admin`)
           return clientes
         }
 
         // Remover duplicatas e valores nulos de forma mais eficiente
-        const clientes = [...new Set(data?.map((item: Vaga) => item.cliente).filter(Boolean) || [])] as string[]
+        const clientes = [...new Set(data?.map((item: any) => item.cliente).filter(Boolean) || [])] as string[]
         console.log(`✅ ${clientes.length} clientes carregados com cliente normal`)
         return clientes
   } catch (error) {
@@ -402,12 +402,12 @@ export async function getSites(): Promise<string[]> {
             throw new Error(`Erro com cliente admin: ${adminError.message}`)
           }
 
-          const sites = [...new Set(adminData?.map((item: Vaga) => item.site).filter(Boolean) || [])] as string[]
+          const sites = [...new Set(adminData?.map((item: any) => item.site).filter(Boolean) || [])] as string[]
           console.log(`✅ ${sites.length} sites carregados com cliente admin`)
           return sites
         }
 
-        const sites = [...new Set(data?.map((item: Vaga) => item.site).filter(Boolean) || [])] as string[]
+        const sites = [...new Set(data?.map((item: any) => item.site).filter(Boolean) || [])] as string[]
         console.log(`✅ ${sites.length} sites carregados com cliente normal`)
         return sites
   } catch (error) {
@@ -429,7 +429,7 @@ export async function getCategorias(): Promise<string[]> {
       throw new Error(error.message)
     }
 
-    const categorias = [...new Set(data?.map((item: Vaga) => item.categoria).filter(Boolean) || [])] as string[]
+    const categorias = [...new Set(data?.map((item: any) => item.categoria).filter(Boolean) || [])] as string[]
     return categorias
   } catch (error) {
     console.error('Erro ao buscar categorias:', error)
@@ -450,7 +450,7 @@ export async function getCargos(): Promise<string[]> {
       throw new Error(error.message)
     }
 
-    const cargos = [...new Set(data?.map((item: Vaga) => item.cargo).filter(Boolean) || [])] as string[]
+    const cargos = [...new Set(data?.map((item: any) => item.cargo).filter(Boolean) || [])] as string[]
     return cargos
   } catch (error) {
     console.error('Erro ao buscar cargos:', error)
@@ -471,7 +471,7 @@ export async function getCelulas(): Promise<string[]> {
       throw new Error(error.message)
     }
 
-    const celulas = [...new Set(data?.map((item: Vaga) => item.celula).filter(Boolean) || [])] as string[]
+    const celulas = [...new Set(data?.map((item: any) => item.celula).filter(Boolean) || [])] as string[]
     return celulas
   } catch (error) {
     console.error('Erro ao buscar células:', error)

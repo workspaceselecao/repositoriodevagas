@@ -87,7 +87,7 @@ export function useOptimizedVagas(
       },
       {
         pageSize,
-        preloadPages,
+        preloadPages: preloadPages || 2,
         maxCachedPages: 20,
         ttl: 15 * 60 * 1000 // 15 minutos
       }

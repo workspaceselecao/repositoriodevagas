@@ -91,10 +91,21 @@ export async function setAdminControlState(isBlocked: boolean, updatedBy: string
       is_blocked: boolean;
       updated_at: string;
       reason: string | null;
+      blocked_by?: string;
+      blocked_at?: string;
+      unblocked_by?: string;
+      unblocked_at?: string;
     } = {
       is_blocked: isBlocked,
       updated_at: now,
-      reason: reason || null
+      reason: reason || null,
+      ...(isBlocked ? {
+        blocked_by: 'system',
+        blocked_at: now
+      } : {
+        unblocked_by: 'system',
+        unblocked_at: now
+      })
     }
     
     if (isBlocked) {

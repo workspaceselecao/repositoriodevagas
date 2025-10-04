@@ -53,13 +53,13 @@ interface CacheStats {
 
 class UnifiedCache {
   private config: UnifiedCacheConfig
-  private intelligentCache: ReturnType<typeof getIntelligentCache>
-  private persistentCache: ReturnType<typeof getPersistentCache>
-  private reactiveCache: ReturnType<typeof getReactiveCache>
-  private pollingCache: ReturnType<typeof getPollingCache>
-  private permissionCache: ReturnType<typeof getPermissionCache>
-  private backgroundSync: ReturnType<typeof getBackgroundSync>
-  private paginationCaches = new Map<string, PaginationCache<Vaga>>()
+  private intelligentCache!: ReturnType<typeof getIntelligentCache>
+  private persistentCache!: ReturnType<typeof getPersistentCache>
+  private reactiveCache!: ReturnType<typeof getReactiveCache>
+  private pollingCache!: ReturnType<typeof getPollingCache>
+  private permissionCache!: ReturnType<typeof getPermissionCache>
+  private backgroundSync!: ReturnType<typeof getBackgroundSync>
+  private paginationCaches = new Map<string, PaginationCache<any>>()
   private currentUser: User | null = null
   private isInitialized = false
 
@@ -273,8 +273,9 @@ class UnifiedCache {
       pageSize?: number
       maxPages?: number
       ttl?: number
+      preloadPages?: number
     }
-  ): PaginationCache<T> {
+  ): PaginationCache<any> {
     if (!this.config.enablePaginationCache) {
       throw new Error('Cache de paginação não habilitado')
     }
@@ -283,12 +284,12 @@ class UnifiedCache {
     this.paginationCaches.set(name, paginationCache)
     
     console.log(`📄 Cache de paginação criado: ${name}`)
-    return paginationCache
+    return paginationCache as PaginationCache<T>
   }
 
   // Obter cache de paginação
   getPaginationCache<T>(name: string): PaginationCache<T> | null {
-    return this.paginationCaches.get(name) || null
+    return this.paginationCaches.get(name) as PaginationCache<T> | null
   }
 
   // Invalidar cache
@@ -395,33 +396,61 @@ class UnifiedCache {
     const stats: CacheStats = {} as CacheStats
 
     if (this.config.enableIntelligentCache) {
-      stats.intelligent = this.intelligentCache.getStats()
+      const intelligentStats = this.intelligentCache.getStats()
+      stats.intelligent = {
+        hitRate: intelligentStats.hitRate || 0,
+        missRate: 1 - (intelligentStats.hitRate || 0),
+        size: intelligentStats.size || 0
+      }
     }
 
     if (this.config.enablePersistentCache) {
-      stats.persistent = this.persistentCache.getMetrics()
+      const persistentMetrics = this.persistentCache.getMetrics()
+      stats.persistent = {
+        size: persistentMetrics.totalSize || 0,
+        lastUpdated: persistentMetrics.lastUpdated || 0
+      }
     }
 
     if (this.config.enableReactiveCache) {
-      stats.reactive = this.reactiveCache.getStatus()
+      const reactiveStatus = this.reactiveCache.getStatus()
+      stats.reactive = {
+        subscriptions: reactiveStatus.listeners || 0,
+        updates: reactiveStatus.bufferedEvents || 0
+      }
     }
 
     if (this.config.enablePollingCache) {
-      stats.polling = this.pollingCache.getStatus()
+      const pollingStatus = this.pollingCache.getStatus()
+      stats.polling = {
+        interval: 5000, // Default interval
+        lastPoll: Date.now()
+      }
     }
 
     if (this.config.enablePermissionCache) {
-      stats.permission = this.permissionCache.getStats()
+      const permissionStats = this.permissionCache.getStats()
+      stats.permission = {
+        cacheSize: permissionStats.totalEntries || 0,
+        lastCheck: Date.now()
+      }
     }
 
     if (this.config.enableBackgroundSync) {
-      stats.backgroundSync = this.backgroundSync.getStats()
+      const syncStats = this.backgroundSync.getStats()
+      stats.backgroundSync = {
+        isRunning: syncStats.isActive || false,
+        lastSync: syncStats.lastSyncTime || 0
+      }
     }
 
     if (this.config.enablePaginationCache) {
-      stats.pagination = {}
-      this.paginationCaches.forEach((cache, name) => {
-        stats.pagination[name] = cache.getStats()
+      stats.pagination = {
+        cachedPages: this.paginationCaches.size,
+        totalPages: 0
+      }
+      this.paginationCaches.forEach((cache) => {
+        stats.pagination.totalPages += cache.getTotalPagesCount()
       })
     }
 
