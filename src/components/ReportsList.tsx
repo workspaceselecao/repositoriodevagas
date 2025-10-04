@@ -6,8 +6,10 @@ import { Badge } from './ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Textarea } from './ui/textarea'
 import { Label } from './ui/label'
+import { Input } from './ui/input'
 import { Vaga, Report } from '../types/database'
 import { getReportsByUser, updateReportStatus, deleteReport } from '../lib/reports'
+import { updateVaga } from '../lib/vagas'
 import { useAuth } from '../contexts/AuthContext'
 import { AlertCircle, Eye, CheckCircle, XCircle, Clock, User, RefreshCw, ThumbsUp, ThumbsDown, Trash2 } from 'lucide-react'
 
@@ -23,6 +25,8 @@ export default function ReportsList() {
   const [isUpdating, setIsUpdating] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [reportToDelete, setReportToDelete] = useState<Report | null>(null)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editFormData, setEditFormData] = useState<any>({})
 
   const loadReports = async (forceRefresh: boolean = false) => {
     try {
@@ -94,18 +98,19 @@ export default function ReportsList() {
     }
   }, [user])
 
-  // Função para aceitar report (navega para edição da vaga)
+  // Função para aceitar report (abre modal de edição focada)
   const handleAcceptReport = (report: Report) => {
     if (!user || user.role !== 'ADMIN') {
       alert('Apenas administradores podem aceitar reports')
       return
     }
 
-    console.log('✅ Aceitando report e navegando para edição:', report.id)
+    console.log('✅ Aceitando report e abrindo modal de edição:', report.id)
     
-    // Navegar para a página de edição da vaga
+    // Abrir modal de edição focada no campo reportado
     if (report.vaga?.id) {
-      navigate(`/dashboard/editar-vaga/${report.vaga.id}?reportId=${report.id}`)
+      setSelectedReport(report)
+      setEditModalOpen(true)
     } else {
       console.error('❌ ID da vaga não encontrado no report')
       alert('Erro: ID da vaga não encontrado')
@@ -220,6 +225,74 @@ export default function ReportsList() {
   const handleCancelDeletion = () => {
     setDeleteModalOpen(false)
     setReportToDelete(null)
+  }
+
+  // Função para fechar modal de edição
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false)
+    setSelectedReport(null)
+    setEditFormData({})
+  }
+
+  // Função para salvar alterações da vaga
+  const handleSaveVagaChanges = async () => {
+    if (!selectedReport || !selectedReport.vaga || !user) return
+
+    setIsUpdating(true)
+    try {
+      console.log('💾 Salvando alterações da vaga:', selectedReport.vaga.id)
+      
+      // Preparar dados da vaga com as alterações
+      const vagaData = {
+        ...selectedReport.vaga,
+        ...editFormData
+      }
+      
+      // Atualizar a vaga no banco de dados
+      const updatedVaga = await updateVaga(selectedReport.vaga.id, vagaData, user.id)
+      
+      if (updatedVaga) {
+        // Marcar o report como concluído
+        await updateReportStatus(
+          selectedReport.id, 
+          'completed', 
+          'Ajustes realizados pelo administrador através do modal de edição'
+        )
+        
+        console.log('✅ Vaga atualizada e report marcado como concluído')
+        
+        // Fechar modal
+        handleCloseEditModal()
+        
+        // Recarregar lista de reports
+        await loadReports(true)
+        
+        // Disparar evento para notificar outros componentes
+        window.dispatchEvent(new CustomEvent('report-status-updated', { 
+          detail: { reportId: selectedReport.id, status: 'completed' } 
+        }))
+        
+        // Disparar evento para atualizar vagas em outras páginas
+        window.dispatchEvent(new CustomEvent('vaga-updated', { 
+          detail: { vagaId: selectedReport.vaga.id, updatedVaga } 
+        }))
+      } else {
+        alert('Erro ao atualizar vaga')
+      }
+    } catch (error) {
+      console.error('❌ Erro ao salvar alterações:', error)
+      alert('Erro ao salvar alterações. Tente novamente.')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  // Função para atualizar dados do formulário
+  const handleEditFormChange = (field: string, value: string) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   const getStatusBadge = (status: string) => {
@@ -599,6 +672,130 @@ export default function ReportsList() {
                 {isUpdating ? 'Rejeitando...' : 'Confirmar Rejeição'}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Edição Focada */}
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ThumbsUp className="h-5 w-5 text-green-500" />
+              Editar Vaga - Campo Reportado
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {selectedReport && selectedReport.vaga && (
+              <>
+                {/* Informações do Report */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h3 className="font-medium text-blue-800 mb-2">Informações do Report</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="font-medium text-blue-700">Vaga:</span>
+                      <p className="text-blue-600">{selectedReport.vaga.titulo || selectedReport.vaga.cargo} - {selectedReport.vaga.cliente}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-blue-700">Campo Reportado:</span>
+                      <p className="text-blue-600">{getFieldLabel(selectedReport.field_name)}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-blue-700">Valor Atual:</span>
+                      <p className="text-blue-600 bg-white p-2 rounded border text-xs">{selectedReport.current_value || 'Não informado'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-blue-700">Sugestão:</span>
+                      <p className="text-blue-600 bg-white p-2 rounded border text-xs">{selectedReport.suggested_changes || 'Não informado'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Instruções */}
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <h3 className="font-medium text-yellow-800 mb-2">📋 Instruções</h3>
+                  <ul className="text-sm text-yellow-700 space-y-1">
+                    <li>• Apenas o campo reportado está ativo para edição</li>
+                    <li>• Os demais campos estão desabilitados para manter a integridade</li>
+                    <li>• Revise o valor atual e a sugestão antes de fazer alterações</li>
+                    <li>• Após salvar, o report será marcado como concluído automaticamente</li>
+                  </ul>
+                </div>
+
+                {/* Formulário de Edição */}
+                <div className="space-y-4">
+                  <h3 className="font-medium text-gray-800">Editar Campo: {getFieldLabel(selectedReport.field_name)}</h3>
+                  
+                  {/* Campo Reportado - Ativo */}
+                  <div className="space-y-2">
+                    <Label htmlFor={`edit-${selectedReport.field_name}`} className="text-sm font-medium">
+                      {getFieldLabel(selectedReport.field_name)} *
+                    </Label>
+                    {selectedReport.field_name.includes('descricao') || 
+                     selectedReport.field_name.includes('responsabilidades') || 
+                     selectedReport.field_name.includes('requisitos') || 
+                     selectedReport.field_name.includes('beneficios') ? (
+                      <Textarea
+                        id={`edit-${selectedReport.field_name}`}
+                        value={editFormData[selectedReport.field_name] || selectedReport.vaga[selectedReport.field_name as keyof Vaga] || ''}
+                        onChange={(e) => handleEditFormChange(selectedReport.field_name, e.target.value)}
+                        rows={4}
+                        className="border-green-300 focus:border-green-500 focus:ring-green-500"
+                        placeholder="Digite o novo valor..."
+                      />
+                    ) : (
+                      <Input
+                        id={`edit-${selectedReport.field_name}`}
+                        value={editFormData[selectedReport.field_name] || selectedReport.vaga[selectedReport.field_name as keyof Vaga] || ''}
+                        onChange={(e) => handleEditFormChange(selectedReport.field_name, e.target.value)}
+                        className="border-green-300 focus:border-green-500 focus:ring-green-500"
+                        placeholder="Digite o novo valor..."
+                      />
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Valor atual: {selectedReport.current_value || 'Não informado'}
+                    </p>
+                  </div>
+
+                  {/* Campos Desabilitados - Apenas para visualização */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(selectedReport.vaga).map(([key, value]) => {
+                      if (key === selectedReport.field_name || key === 'id' || key === 'created_at' || key === 'updated_at') return null
+                      
+                      return (
+                        <div key={key} className="space-y-1">
+                          <Label className="text-xs text-gray-500">{getFieldLabel(key)}</Label>
+                          <Input
+                            value={value || ''}
+                            disabled
+                            className="bg-gray-50 text-gray-500"
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Botões de Ação */}
+                <div className="flex items-center justify-end gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={handleCloseEditModal}
+                    disabled={isUpdating}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleSaveVagaChanges}
+                    disabled={isUpdating}
+                    className="bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    {isUpdating ? 'Salvando...' : 'Salvar e Concluir Report'}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
