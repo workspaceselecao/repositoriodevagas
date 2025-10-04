@@ -411,21 +411,6 @@ export default function NovaVagaFormWithScraping() {
         </p>
       </div>
 
-      {/* Mensagem principal - sempre visível no topo */}
-      <div className={`mb-6 p-4 rounded-lg shadow-sm border-l-4 ${
-        message.includes('✅') || message.includes('sucesso')
-          ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-400 dark:border-green-600 border-l-green-500 dark:border-l-green-400' 
-          : message.includes('❌') || message.includes('erro')
-          ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border-red-400 dark:border-red-600 border-l-red-500 dark:border-l-red-400'
-          : message.includes('⏳') || message.includes('Testando')
-          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border-blue-400 dark:border-blue-600 border-l-blue-500 dark:border-l-blue-400'
-          : 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-400 dark:border-gray-600 border-l-gray-500 dark:border-l-gray-400'
-      }`}>
-        {message || (isEditing 
-          ? '💡 Edite os campos necessários e clique em "Atualizar Oportunidade" para salvar as alterações.'
-          : '💡 Preencha os campos obrigatórios e clique em "Salvar Oportunidade" para criar uma nova oportunidade.'
-        )}
-      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
@@ -675,6 +660,21 @@ export default function NovaVagaFormWithScraping() {
                     <Trash2 className="h-4 w-4 mr-2" />
                     Limpar Formulário
                   </Button>
+                  {/* Mensagem de status - próximo aos botões */}
+                  {message && (
+                    <div className={`mb-4 p-4 rounded-lg shadow-sm border-l-4 ${
+                      message.includes('✅') || message.includes('sucesso')
+                        ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-400 dark:border-green-600 border-l-green-500 dark:border-l-green-400' 
+                        : message.includes('❌') || message.includes('erro')
+                        ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border-red-400 dark:border-red-600 border-l-red-500 dark:border-l-red-400'
+                        : message.includes('⏳') || message.includes('Testando')
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border-blue-400 dark:border-blue-600 border-l-blue-500 dark:border-l-blue-400'
+                        : 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-400 dark:border-gray-600 border-l-gray-500 dark:border-l-gray-400'
+                    }`}>
+                      {message}
+                    </div>
+                  )}
+
                   <div className="flex flex-col tablet:flex-row gap-2 w-full tablet:w-auto">
                     <Button
                       type="button"
