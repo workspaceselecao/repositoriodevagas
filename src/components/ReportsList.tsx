@@ -105,11 +105,19 @@ export default function ReportsList() {
       return
     }
 
-    console.log('✅ Aceitando report e abrindo modal de edição:', report.id)
+    console.log('✅ Abrindo modal de edição para report:', report.id)
     
     // Abrir modal de edição focada no campo reportado
     if (report.vaga?.id) {
       setSelectedReport(report)
+      
+      // Pré-preencher o campo com a sugestão do report
+      const initialFormData: any = {}
+      if (report.suggested_changes) {
+        initialFormData[report.field_name] = report.suggested_changes
+      }
+      setEditFormData(initialFormData)
+      
       setEditModalOpen(true)
     } else {
       console.error('❌ ID da vaga não encontrado no report')
@@ -234,13 +242,13 @@ export default function ReportsList() {
     setEditFormData({})
   }
 
-  // Função para salvar alterações da vaga
-  const handleSaveVagaChanges = async () => {
+  // Função para aceitar alterações (salvar mudanças)
+  const handleAcceptChanges = async () => {
     if (!selectedReport || !selectedReport.vaga || !user) return
 
     setIsUpdating(true)
     try {
-      console.log('💾 Salvando alterações da vaga:', selectedReport.vaga.id)
+      console.log('✅ Aceitando alterações da vaga:', selectedReport.vaga.id)
       
       // Preparar dados da vaga com as alterações
       const vagaData = {
@@ -256,7 +264,7 @@ export default function ReportsList() {
         await updateReportStatus(
           selectedReport.id, 
           'completed', 
-          'Ajustes realizados pelo administrador através do modal de edição'
+          'Ajustes aceitos e implementados pelo administrador'
         )
         
         console.log('✅ Vaga atualizada e report marcado como concluído')
@@ -280,8 +288,43 @@ export default function ReportsList() {
         alert('Erro ao atualizar vaga')
       }
     } catch (error) {
-      console.error('❌ Erro ao salvar alterações:', error)
-      alert('Erro ao salvar alterações. Tente novamente.')
+      console.error('❌ Erro ao aceitar alterações:', error)
+      alert('Erro ao aceitar alterações. Tente novamente.')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  // Função para rejeitar alterações (manter informações originais)
+  const handleRejectChanges = async () => {
+    if (!selectedReport || !user) return
+
+    setIsUpdating(true)
+    try {
+      console.log('❌ Rejeitando alterações do report:', selectedReport.id)
+      
+      // Marcar o report como rejeitado sem fazer alterações na vaga
+      await updateReportStatus(
+        selectedReport.id, 
+        'rejected', 
+        'Ajustes rejeitados pelo administrador - mantidas informações originais'
+      )
+      
+      console.log('✅ Report marcado como rejeitado')
+      
+      // Fechar modal
+      handleCloseEditModal()
+      
+      // Recarregar lista de reports
+      await loadReports(true)
+      
+      // Disparar evento para notificar outros componentes
+      window.dispatchEvent(new CustomEvent('report-status-updated', { 
+        detail: { reportId: selectedReport.id, status: 'rejected' } 
+      }))
+    } catch (error) {
+      console.error('❌ Erro ao rejeitar alterações:', error)
+      alert('Erro ao rejeitar alterações. Tente novamente.')
     } finally {
       setIsUpdating(false)
     }
@@ -713,13 +756,13 @@ export default function ReportsList() {
                 </div>
 
                 {/* Instruções */}
-                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                  <h3 className="font-medium text-yellow-800 mb-2">📋 Instruções</h3>
-                  <ul className="text-sm text-yellow-700 space-y-1">
-                    <li>• Apenas o campo reportado está ativo para edição</li>
-                    <li>• Os demais campos estão desabilitados para manter a integridade</li>
-                    <li>• Revise o valor atual e a sugestão antes de fazer alterações</li>
-                    <li>• Após salvar, o report será marcado como concluído automaticamente</li>
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h3 className="font-medium text-green-800 mb-2">📋 Instruções</h3>
+                  <ul className="text-sm text-green-700 space-y-1">
+                    <li>• O campo foi pré-preenchido com a sugestão do RH</li>
+                    <li>• Você pode editar o valor antes de aceitar ou rejeitar</li>
+                    <li>• <strong>Aceitar</strong>: Aplica as alterações na vaga e conclui o report</li>
+                    <li>• <strong>Rejeitar</strong>: Mantém a vaga como está e marca o report como rejeitado</li>
                   </ul>
                 </div>
 
@@ -753,9 +796,14 @@ export default function ReportsList() {
                         placeholder="Digite o novo valor..."
                       />
                     )}
-                    <p className="text-xs text-gray-500">
-                      Valor atual: {selectedReport.current_value || 'Não informado'}
-                    </p>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-xs text-gray-500">
+                        <span className="font-medium">Valor atual:</span> {selectedReport.current_value || 'Não informado'}
+                      </p>
+                      <p className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded border">
+                        <span className="font-medium">✅ Pré-preenchido com sugestão:</span> {selectedReport.suggested_changes || 'Não informado'}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Campos Desabilitados - Apenas para visualização */}
@@ -787,11 +835,18 @@ export default function ReportsList() {
                     Cancelar
                   </Button>
                   <Button
-                    onClick={handleSaveVagaChanges}
+                    onClick={handleRejectChanges}
+                    disabled={isUpdating}
+                    className="bg-red-500 hover:bg-red-600 text-white"
+                  >
+                    {isUpdating ? 'Rejeitando...' : 'Rejeitar'}
+                  </Button>
+                  <Button
+                    onClick={handleAcceptChanges}
                     disabled={isUpdating}
                     className="bg-green-500 hover:bg-green-600 text-white"
                   >
-                    {isUpdating ? 'Salvando...' : 'Salvar e Concluir Report'}
+                    {isUpdating ? 'Aceitando...' : 'Aceitar'}
                   </Button>
                 </div>
               </>
