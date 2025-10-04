@@ -163,7 +163,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       icon: AlertTriangle,
       label: 'Reports',
       href: '/dashboard/reports',
-      show: true
+      show: user?.role === 'ADMIN'
     },
     {
       icon: Settings,
