@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Switch } from './ui/switch'
 import { Button } from './ui/button'
-import { CheckCircle, XCircle, AlertTriangle, Shield } from 'lucide-react'
+import { CheckCircle, XCircle, AlertTriangle, Shield, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useAdminControl } from '../lib/admin-control'
 import { SUPER_ADMIN_EMAIL } from '../lib/user-filter'
@@ -10,6 +11,7 @@ import { SUPER_ADMIN_EMAIL } from '../lib/user-filter'
 interface AdminControlPanelProps {}
 
 export default function AdminControlPanel({}: AdminControlPanelProps) {
+  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [message, setMessage] = useState<string>('')
   const [messageType, setMessageType] = useState<'success' | 'error' | 'warning' | 'info'>('info')
@@ -120,9 +122,19 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Painel de Controle Administrativo
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-6">
             Controle o carregamento de dados do sistema
           </p>
+          
+          {/* Botão Voltar */}
+          <Button
+            variant="outline"
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar ao Dashboard
+          </Button>
         </div>
 
         {/* Status Card */}
