@@ -202,3 +202,41 @@ export interface ReportField {
   label: string;
   value: string;
 }
+
+// Tipos para controle administrativo soberano
+export interface SystemControl {
+  id: string;
+  is_blocked: boolean;
+  blocked_by?: string;
+  blocked_at?: string;
+  unblocked_by?: string;
+  unblocked_at?: string;
+  reason?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminSovereignty {
+  id: string;
+  admin_id: string;
+  action_type: string;
+  target_resource?: string;
+  action_details: any;
+  is_active: boolean;
+  expires_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminAuditLog {
+  id: string;
+  admin_id: string;
+  action: string;
+  resource_type?: string;
+  resource_id?: string;
+  old_values?: any;
+  new_values?: any;
+  ip_address?: string;
+  user_agent?: string;
+  timestamp: string;
+}

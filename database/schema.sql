@@ -83,6 +83,33 @@ CREATE TABLE IF NOT EXISTS system_control (
   CONSTRAINT single_control_record CHECK (id = '00000000-0000-0000-0000-000000000001'::uuid)
 );
 
+-- Tabela para controle administrativo soberano
+CREATE TABLE IF NOT EXISTS admin_sovereignty (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  admin_id UUID REFERENCES users(id) NOT NULL,
+  action_type VARCHAR(100) NOT NULL, -- 'bypass_rls', 'override_permissions', 'system_control', etc.
+  target_resource VARCHAR(100), -- 'users', 'vagas', 'backup_logs', etc.
+  action_details JSONB, -- Detalhes específicos da ação
+  is_active BOOLEAN DEFAULT true,
+  expires_at TIMESTAMP WITH TIME ZONE, -- Opcional: expiração do poder
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Tabela para auditoria de ações administrativas
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  admin_id UUID REFERENCES users(id) NOT NULL,
+  action VARCHAR(100) NOT NULL,
+  resource_type VARCHAR(100),
+  resource_id UUID,
+  old_values JSONB,
+  new_values JSONB,
+  ip_address INET,
+  user_agent TEXT,
+  timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Índices para melhor performance
 CREATE INDEX IF NOT EXISTS idx_vagas_cliente ON vagas(cliente);
 CREATE INDEX IF NOT EXISTS idx_vagas_site ON vagas(site);
@@ -92,6 +119,10 @@ CREATE INDEX IF NOT EXISTS idx_vagas_celula ON vagas(celula);
 CREATE INDEX IF NOT EXISTS idx_vagas_titulo ON vagas(titulo);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_admin_sovereignty_admin_id ON admin_sovereignty(admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_sovereignty_active ON admin_sovereignty(is_active);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_log_admin_id ON admin_audit_log(admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_log_timestamp ON admin_audit_log(timestamp);
 
 -- Função para atualizar updated_at automaticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -139,6 +170,8 @@ ALTER TABLE backup_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contact_email_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE emailjs_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_control ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_sovereignty ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_audit_log ENABLE ROW LEVEL SECURITY;
 
 -- Políticas RLS para users (com verificação de existência)
 DO $$
@@ -162,6 +195,117 @@ BEGIN
     ) THEN
         CREATE POLICY "Admins can view all users" ON users
           FOR SELECT USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+-- POLÍTICAS SOBERANAS PARA ADMINISTRADORES
+-- Administradores têm controle total sobre todos os dados
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'users' 
+        AND policyname = 'Admins have full control over users'
+    ) THEN
+        CREATE POLICY "Admins have full control over users" ON users
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'vagas' 
+        AND policyname = 'Admins have full control over vagas'
+    ) THEN
+        CREATE POLICY "Admins have full control over vagas" ON vagas
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'backup_logs' 
+        AND policyname = 'Admins have full control over backup_logs'
+    ) THEN
+        CREATE POLICY "Admins have full control over backup_logs" ON backup_logs
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'contact_email_config' 
+        AND policyname = 'Admins have full control over contact_email_config'
+    ) THEN
+        CREATE POLICY "Admins have full control over contact_email_config" ON contact_email_config
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'emailjs_config' 
+        AND policyname = 'Admins have full control over emailjs_config'
+    ) THEN
+        CREATE POLICY "Admins have full control over emailjs_config" ON emailjs_config
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'system_control' 
+        AND policyname = 'Admins have full control over system_control'
+    ) THEN
+        CREATE POLICY "Admins have full control over system_control" ON system_control
+          FOR ALL USING (
             EXISTS (
               SELECT 1 FROM users 
               WHERE id::text = auth.uid()::text 
@@ -304,6 +448,44 @@ BEGIN
         AND policyname = 'Admin can manage system control'
     ) THEN
         CREATE POLICY "Admin can manage system control" ON system_control
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+-- Políticas RLS para admin_sovereignty (com verificação de existência)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'admin_sovereignty' 
+        AND policyname = 'Admins have full control over admin_sovereignty'
+    ) THEN
+        CREATE POLICY "Admins have full control over admin_sovereignty" ON admin_sovereignty
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+-- Políticas RLS para admin_audit_log (com verificação de existência)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'admin_audit_log' 
+        AND policyname = 'Admins have full control over admin_audit_log'
+    ) THEN
+        CREATE POLICY "Admins have full control over admin_audit_log" ON admin_audit_log
           FOR ALL USING (
             EXISTS (
               SELECT 1 FROM users 

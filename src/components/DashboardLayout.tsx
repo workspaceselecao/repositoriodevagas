@@ -177,7 +177,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       icon: Shield,
       label: 'Painel de Controle',
       href: '/admin/control-panel',
-      show: user?.email === SUPER_ADMIN_EMAIL && user?.role === 'ADMIN'
+      show: user?.role === 'ADMIN'
     },
   ]
 
