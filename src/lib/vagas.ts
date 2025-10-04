@@ -1,6 +1,7 @@
 import { supabase, supabaseAdmin } from './supabase'
 import { Vaga, VagaFormData, VagaFilter } from '../types/database'
 import { sessionCache } from './session-cache'
+import { assertWriteAllowed } from './admin-control'
 
 // Função ROBUSTA para buscar vagas FORÇANDO refresh (ignora cache)
 export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]> {
@@ -161,6 +162,9 @@ export async function getVagaById(id: string): Promise<Vaga | null> {
 
 // Função para criar uma nova vaga
 export async function createVaga(vagaData: VagaFormData, userId: string): Promise<Vaga | null> {
+  // Verificar se o sistema está bloqueado
+  await assertWriteAllowed()
+  
   const maxRetries = 3
   let lastError: Error | null = null
   
@@ -290,6 +294,9 @@ export async function refreshVagasList(): Promise<Vaga[]> {
 
 // Função para atualizar uma vaga
 export async function updateVaga(id: string, vagaData: Partial<VagaFormData>, userId: string): Promise<Vaga | null> {
+  // Verificar se o sistema está bloqueado
+  await assertWriteAllowed()
+  
   try {
     const { data: vaga, error } = await supabase
       .from('vagas')
@@ -314,6 +321,9 @@ export async function updateVaga(id: string, vagaData: Partial<VagaFormData>, us
 
 // Função para excluir uma vaga
 export async function deleteVaga(id: string): Promise<boolean> {
+  // Verificar se o sistema está bloqueado
+  await assertWriteAllowed()
+  
   try {
     const { error } = await supabase
       .from('vagas')

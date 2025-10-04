@@ -69,6 +69,20 @@ CREATE TABLE IF NOT EXISTS emailjs_config (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Tabela para controle de bloqueio do sistema
+CREATE TABLE IF NOT EXISTS system_control (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  is_blocked BOOLEAN DEFAULT false NOT NULL,
+  blocked_by UUID REFERENCES users(id),
+  blocked_at TIMESTAMP WITH TIME ZONE,
+  unblocked_by UUID REFERENCES users(id),
+  unblocked_at TIMESTAMP WITH TIME ZONE,
+  reason TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT single_control_record CHECK (id = '00000000-0000-0000-0000-000000000001'::uuid)
+);
+
 -- Índices para melhor performance
 CREATE INDEX IF NOT EXISTS idx_vagas_cliente ON vagas(cliente);
 CREATE INDEX IF NOT EXISTS idx_vagas_site ON vagas(site);
@@ -124,6 +138,7 @@ ALTER TABLE vagas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE backup_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contact_email_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE emailjs_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE system_control ENABLE ROW LEVEL SECURITY;
 
 -- Políticas RLS para users (com verificação de existência)
 DO $$
@@ -279,6 +294,30 @@ BEGIN
           );
     END IF;
 END $$;
+
+-- Políticas RLS para system_control (com verificação de existência)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies 
+        WHERE tablename = 'system_control' 
+        AND policyname = 'Admin can manage system control'
+    ) THEN
+        CREATE POLICY "Admin can manage system control" ON system_control
+          FOR ALL USING (
+            EXISTS (
+              SELECT 1 FROM users 
+              WHERE id::text = auth.uid()::text 
+              AND role = 'ADMIN'
+            )
+          );
+    END IF;
+END $$;
+
+-- Inserir registro inicial de controle do sistema
+INSERT INTO system_control (id, is_blocked, created_at, updated_at) 
+VALUES ('00000000-0000-0000-0000-000000000001'::uuid, false, NOW(), NOW())
+ON CONFLICT (id) DO NOTHING;
 
 -- ========================================
 -- INSTRUÇÕES DE USO:

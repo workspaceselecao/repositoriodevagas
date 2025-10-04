@@ -16,7 +16,7 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
   const [message, setMessage] = useState<string>('')
   const [messageType, setMessageType] = useState<'success' | 'error' | 'warning' | 'info'>('info')
   const { user } = useAuth()
-  const { state, isBlocked, updateControl, lastUpdated, updatedBy } = useAdminControl()
+  const { state, isBlocked, updateControl, lastUpdated, updatedBy, loading } = useAdminControl()
 
   // Verificar se é o admin autorizado
   const isAuthorizedAdmin = user?.email === SUPER_ADMIN_EMAIL && user?.role === 'ADMIN'
@@ -47,17 +47,14 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
       setIsLoading(true)
       setMessage('')
 
-      // Simular delay de processamento
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
       // Atualizar controle administrativo
-      updateControl(newState, user?.email || 'admin')
+      await updateControl(newState, user?.email || 'admin', `Sistema ${newState ? 'bloqueado' : 'liberado'} pelo SuperUsuário`)
       
       if (newState) {
-        setMessage('✅ Sistema BLOQUEADO - Dados do banco não serão carregados')
+        setMessage('✅ Sistema BLOQUEADO - Operações de escrita não são permitidas')
         setMessageType('success')
       } else {
-        setMessage('🔓 Sistema LIBERADO - Dados do banco serão carregados normalmente')
+        setMessage('🔓 Sistema LIBERADO - Operações de escrita são permitidas normalmente')
         setMessageType('success')
       }
       
@@ -68,7 +65,7 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
       
     } catch (error) {
       console.error('Erro ao alterar estado:', error)
-      setMessage('Erro ao alterar estado do sistema')
+      setMessage(`Erro ao alterar estado do sistema: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
       setMessageType('error')
     } finally {
       setIsLoading(false)
@@ -154,8 +151,8 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
                   </p>
                   <p className="text-sm text-gray-600 mt-1">
                     {isBlocked 
-                      ? 'Dados do banco não estão sendo carregados' 
-                      : 'Dados do banco estão sendo carregados normalmente'
+                      ? 'Operações de escrita estão bloqueadas' 
+                      : 'Operações de escrita estão liberadas'
                     }
                   </p>
                 </div>
@@ -182,8 +179,8 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
                   </h3>
                   <p className="text-sm text-gray-600 mb-4">
                     {isBlocked 
-                      ? 'Sistema BLOQUEADO - Desative para liberar o carregamento de dados do banco'
-                      : 'Sistema LIBERADO - Ative para bloquear o carregamento de dados do banco'
+                      ? 'Sistema BLOQUEADO - Desative para liberar operações de escrita'
+                      : 'Sistema LIBERADO - Ative para bloquear operações de escrita'
                     }
                   </p>
                 </div>
@@ -244,11 +241,11 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
               </div>
 
               {/* Loading State */}
-              {isLoading && (
+              {(isLoading || loading) && (
                 <div className="text-center">
                   <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                    Processando...
+                    {loading ? 'Carregando estado...' : 'Processando...'}
                   </div>
                 </div>
               )}
@@ -274,9 +271,10 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h4 className="font-semibold text-blue-900 mb-2">Instruções:</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• <strong>BLOQUEADO:</strong> Impede o carregamento de dados do banco</li>
-                  <li>• <strong>LIBERADO:</strong> Permite o carregamento normal de dados</li>
-                  <li>• As mudanças são aplicadas imediatamente</li>
+                  <li>• <strong>BLOQUEADO:</strong> Impede operações de escrita (criar, editar, excluir vagas)</li>
+                  <li>• <strong>LIBERADO:</strong> Permite operações de escrita normalmente</li>
+                  <li>• As mudanças são aplicadas imediatamente e persistem entre sessões</li>
+                  <li>• O bloqueio é verificado antes de cada operação de escrita</li>
                   <li>• Use com cuidado em ambiente de produção</li>
                 </ul>
               </div>
