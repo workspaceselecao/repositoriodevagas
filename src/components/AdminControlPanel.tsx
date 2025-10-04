@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Switch } from './ui/switch'
 import { Button } from './ui/button'
-import { Alert, AlertDescription } from './ui/alert'
 import { CheckCircle, XCircle, AlertTriangle, Shield } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useAdminControl } from '../lib/admin-control'
@@ -244,17 +243,19 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
 
               {/* Message Display */}
               {message && (
-                <Alert className={messageType === 'error' ? 'border-red-200 bg-red-50' : 
+                <Card className={messageType === 'error' ? 'border-red-200 bg-red-50' : 
                                 messageType === 'success' ? 'border-green-200 bg-green-50' : 
                                 messageType === 'warning' ? 'border-yellow-200 bg-yellow-50' : 
                                 'border-blue-200 bg-blue-50'}>
-                  <AlertDescription className={messageType === 'error' ? 'text-red-800' : 
-                                            messageType === 'success' ? 'text-green-800' : 
-                                            messageType === 'warning' ? 'text-yellow-800' : 
-                                            'text-blue-800'}>
-                    {message}
-                  </AlertDescription>
-                </Alert>
+                  <CardContent className="pt-4">
+                    <p className={messageType === 'error' ? 'text-red-800' : 
+                                  messageType === 'success' ? 'text-green-800' : 
+                                  messageType === 'warning' ? 'text-yellow-800' : 
+                                  'text-blue-800'}>
+                      {message}
+                    </p>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Instructions */}

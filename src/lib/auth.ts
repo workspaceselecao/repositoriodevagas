@@ -223,7 +223,7 @@ export async function getAllUsers(): Promise<User[]> {
     }
 
     // Filtrar usuários ocultos (super admin)
-    const visibleUsers = filterVisibleUsers(users || [])
+    const visibleUsers = filterVisibleUsers(users || []) as User[]
 
     return visibleUsers
   } catch (error) {

@@ -329,7 +329,7 @@ export async function getAllAdmins(): Promise<User[]> {
     }
 
     // Filtrar super admin da lista de administradores
-    const filteredAdmins = filterVisibleUsers(data || [])
+    const filteredAdmins = filterVisibleUsers(data || []) as User[]
     
     return filteredAdmins
   } catch (error) {
