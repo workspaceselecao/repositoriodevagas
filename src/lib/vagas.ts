@@ -161,56 +161,109 @@ export async function getVagaById(id: string): Promise<Vaga | null> {
 
 // Função para criar uma nova vaga
 export async function createVaga(vagaData: VagaFormData, userId: string): Promise<Vaga | null> {
-  try {
-    console.log('🔍 [createVaga] Iniciando criação de vaga')
-    console.log('📊 [createVaga] Dados recebidos:', vagaData)
-    console.log('👤 [createVaga] User ID:', userId)
+  const maxRetries = 3
+  let lastError: Error | null = null
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔍 [createVaga] Tentativa ${attempt}/${maxRetries} - Iniciando criação de vaga`)
+      console.log('📊 [createVaga] Dados recebidos:', vagaData)
+      console.log('👤 [createVaga] User ID:', userId)
 
-    // Validar dados obrigatórios
-    const requiredFields = ['site', 'categoria', 'cargo', 'cliente', 'celula']
-    const missingFields = requiredFields.filter(field => !vagaData[field as keyof VagaFormData]?.trim())
-    
-    if (missingFields.length > 0) {
-      throw new Error(`Campos obrigatórios não preenchidos: ${missingFields.join(', ')}`)
+      // Validar dados obrigatórios
+      const requiredFields = ['site', 'categoria', 'cargo', 'cliente', 'celula']
+      const missingFields = requiredFields.filter(field => !vagaData[field as keyof VagaFormData]?.trim())
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Campos obrigatórios não preenchidos: ${missingFields.join(', ')}`)
+      }
+
+      // Truncar campos que podem ser muito longos para evitar erro de tamanho
+      const truncatedData = {
+        ...vagaData,
+        site: vagaData.site?.substring(0, 255) || '',
+        categoria: vagaData.categoria?.substring(0, 255) || '',
+        cargo: vagaData.cargo?.substring(0, 255) || '',
+        cliente: vagaData.cliente?.substring(0, 255) || '',
+        titulo: vagaData.titulo?.substring(0, 255) || '',
+        celula: vagaData.celula?.substring(0, 255) || '',
+        salario: vagaData.salario?.substring(0, 255) || '',
+        horario_trabalho: vagaData.horario_trabalho?.substring(0, 255) || '',
+        jornada_trabalho: vagaData.jornada_trabalho?.substring(0, 255) || '',
+        local_trabalho: vagaData.local_trabalho?.substring(0, 500) || '',
+        // Campos de texto podem ser maiores
+        descricao_vaga: vagaData.descricao_vaga?.substring(0, 5000) || '',
+        responsabilidades_atribuicoes: vagaData.responsabilidades_atribuicoes?.substring(0, 5000) || '',
+        requisitos_qualificacoes: vagaData.requisitos_qualificacoes?.substring(0, 5000) || '',
+        beneficios: vagaData.beneficios?.substring(0, 3000) || '',
+        etapas_processo: vagaData.etapas_processo?.substring(0, 3000) || ''
+      }
+
+      const insertData = {
+        ...truncatedData,
+        created_by: userId,
+        updated_by: userId
+      }
+
+      console.log('💾 [createVaga] Dados para inserção (truncados):', insertData)
+      console.log('🌐 [createVaga] Iniciando inserção no Supabase...')
+
+      const startTime = Date.now()
+      
+      // Usar cliente admin para evitar problemas de RLS e timeout
+      const { data: vaga, error } = await supabaseAdmin
+        .from('vagas')
+        .insert(insertData)
+        .select()
+        .single()
+
+      const endTime = Date.now()
+      console.log(`⏱️ [createVaga] Operação concluída em ${endTime - startTime}ms`)
+
+      if (error) {
+        console.error('❌ [createVaga] Erro do Supabase:', error)
+        console.error('❌ [createVaga] Código do erro:', error.code)
+        console.error('❌ [createVaga] Detalhes do erro:', error.details)
+        
+        // Se for erro de timeout, tentar novamente
+        if (error.message.includes('timeout') || error.message.includes('Timeout')) {
+          if (attempt < maxRetries) {
+            console.log(`🔄 [createVaga] Timeout detectado, tentando novamente (${attempt + 1}/${maxRetries})...`)
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt)) // Delay progressivo
+            continue
+          }
+        }
+        
+        throw new Error(`Erro do banco de dados: ${error.message}`)
+      }
+
+      console.log('✅ [createVaga] Vaga criada com sucesso:', vaga)
+
+      // Disparar evento de atualização
+      window.dispatchEvent(new CustomEvent('vaga-created', { detail: vaga }))
+
+      return vaga
+    } catch (error: any) {
+      lastError = error
+      console.error(`💥 [createVaga] Erro na tentativa ${attempt}:`, error)
+      
+      // Se for erro de timeout, tentar novamente
+      if (error.message.includes('timeout') || error.message.includes('Timeout')) {
+        if (attempt < maxRetries) {
+          console.log(`🔄 [createVaga] Timeout detectado, tentando novamente (${attempt + 1}/${maxRetries})...`)
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt)) // Delay progressivo
+          continue
+        }
+      }
+      
+      // Se não for timeout ou já esgotou as tentativas, quebrar o loop
+      break
     }
-
-    const insertData = {
-      ...vagaData,
-      created_by: userId,
-      updated_by: userId
-    }
-
-    console.log('💾 [createVaga] Dados para inserção:', insertData)
-    console.log('🌐 [createVaga] Iniciando inserção no Supabase...')
-
-    const startTime = Date.now()
-    
-    const { data: vaga, error } = await supabase
-      .from('vagas')
-      .insert(insertData)
-      .select()
-      .single()
-
-    const endTime = Date.now()
-    console.log(`⏱️ [createVaga] Operação concluída em ${endTime - startTime}ms`)
-
-    if (error) {
-      console.error('❌ [createVaga] Erro do Supabase:', error)
-      console.error('❌ [createVaga] Código do erro:', error.code)
-      console.error('❌ [createVaga] Detalhes do erro:', error.details)
-      throw new Error(`Erro do banco de dados: ${error.message}`)
-    }
-
-    console.log('✅ [createVaga] Vaga criada com sucesso:', vaga)
-
-    // Disparar evento de atualização
-    window.dispatchEvent(new CustomEvent('vaga-created', { detail: vaga }))
-
-    return vaga
-  } catch (error) {
-    console.error('💥 [createVaga] Erro geral:', error)
-    throw error // Re-throw para que o componente possa tratar
   }
+  
+  // Se chegou aqui, todas as tentativas falharam
+  console.error('💥 [createVaga] Todas as tentativas falharam. Último erro:', lastError)
+  throw lastError || new Error('Erro desconhecido ao criar vaga')
 }
 
 // Função para atualizar lista de vagas

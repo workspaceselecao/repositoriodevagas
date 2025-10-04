@@ -209,8 +209,8 @@ export default function NovaVagaFormWithScraping() {
       if (error?.message) {
         console.log('📝 [handleSubmit] Mensagem do erro:', error.message)
         
-        if (error.message.includes('Timeout')) {
-          errorMessage = '⏰ Timeout: A operação demorou muito. Verifique sua conexão e tente novamente.'
+        if (error.message.includes('Timeout') || error.message.includes('timeout')) {
+          errorMessage = '⏰ Timeout: A operação demorou muito. O sistema tentará novamente automaticamente. Se o problema persistir, verifique sua conexão.'
         } else if (error.message.includes('null value in column "produto"')) {
           errorMessage = '❌ MIGRAÇÃO NECESSÁRIA: O banco ainda usa coluna "produto". Execute o script "migrate-produto-to-celula.sql" no Supabase SQL Editor.'
         } else if (error.message.includes('null value in column "celula"')) {

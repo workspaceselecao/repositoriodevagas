@@ -28,6 +28,14 @@ const commonConfig = {
     headers: {
       'Cache-Control': 'no-store, max-age=0, must-revalidate'
     }
+  },
+  db: {
+    schema: 'public'
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
   }
 }
 
@@ -47,6 +55,19 @@ export const supabaseAdmin = (() => {
         autoRefreshToken: false,
         persistSession: false,
         detectSessionInUrl: false
+      },
+      global: {
+        headers: {
+          'Cache-Control': 'no-store, max-age=0, must-revalidate'
+        }
+      },
+      db: {
+        schema: 'public'
+      },
+      realtime: {
+        params: {
+          eventsPerSecond: 10
+        }
       }
     })
   }
