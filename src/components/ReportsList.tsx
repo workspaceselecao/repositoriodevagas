@@ -289,7 +289,7 @@ export default function ReportsList() {
 
   // Função para atualizar dados do formulário
   const handleEditFormChange = (field: string, value: string) => {
-    setEditFormData(prev => ({
+    setEditFormData((prev: any) => ({
       ...prev,
       [field]: value
     }))
