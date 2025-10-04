@@ -111,13 +111,13 @@ export async function setAdminControlState(isBlocked: boolean, updatedBy: string
     if (isBlocked) {
       updateData.blocked_by = updatedBy
       updateData.blocked_at = now
-      updateData.unblocked_by = null
-      updateData.unblocked_at = null
+      updateData.unblocked_by = undefined
+      updateData.unblocked_at = undefined
     } else {
       updateData.unblocked_by = updatedBy
       updateData.unblocked_at = now
-      updateData.blocked_by = null
-      updateData.blocked_at = null
+      updateData.blocked_by = undefined
+      updateData.blocked_at = undefined
     }
     
     // Atualizar no banco
