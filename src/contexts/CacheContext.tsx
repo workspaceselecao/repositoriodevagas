@@ -16,8 +16,8 @@ interface CacheData {
   categorias: string[]
   cargos: string[]
   celulas: string[]
-  usuarios: any[]
-  noticias: any[]
+  usuarios: User[]
+  noticias: Noticia[]
   lastUpdated: number
 }
 

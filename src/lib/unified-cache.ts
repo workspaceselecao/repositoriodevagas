@@ -20,24 +20,46 @@ interface UnifiedCacheConfig {
 }
 
 interface CacheStats {
-  intelligent: any
-  persistent: any
-  reactive: any
-  polling: any
-  permission: any
-  backgroundSync: any
-  pagination: any
+  intelligent: {
+    hitRate: number
+    missRate: number
+    size: number
+  }
+  persistent: {
+    size: number
+    lastUpdated: number
+  }
+  reactive: {
+    subscriptions: number
+    updates: number
+  }
+  polling: {
+    interval: number
+    lastPoll: number
+  }
+  permission: {
+    cacheSize: number
+    lastCheck: number
+  }
+  backgroundSync: {
+    isRunning: boolean
+    lastSync: number
+  }
+  pagination: {
+    cachedPages: number
+    totalPages: number
+  }
 }
 
 class UnifiedCache {
   private config: UnifiedCacheConfig
-  private intelligentCache: any
-  private persistentCache: any
-  private reactiveCache: any
-  private pollingCache: any
-  private permissionCache: any
-  private backgroundSync: any
-  private paginationCaches = new Map<string, PaginationCache<any>>()
+  private intelligentCache: ReturnType<typeof getIntelligentCache>
+  private persistentCache: ReturnType<typeof getPersistentCache>
+  private reactiveCache: ReturnType<typeof getReactiveCache>
+  private pollingCache: ReturnType<typeof getPollingCache>
+  private permissionCache: ReturnType<typeof getPermissionCache>
+  private backgroundSync: ReturnType<typeof getBackgroundSync>
+  private paginationCaches = new Map<string, PaginationCache<Vaga>>()
   private currentUser: User | null = null
   private isInitialized = false
 
@@ -247,7 +269,11 @@ class UnifiedCache {
       hasNextPage: boolean
       hasPrevPage: boolean
     }>,
-    config?: any
+    config?: {
+      pageSize?: number
+      maxPages?: number
+      ttl?: number
+    }
   ): PaginationCache<T> {
     if (!this.config.enablePaginationCache) {
       throw new Error('Cache de paginação não habilitado')
@@ -320,7 +346,7 @@ class UnifiedCache {
   async addSyncOperation(
     type: 'CREATE' | 'UPDATE' | 'DELETE',
     table: string,
-    data: any,
+    data: Record<string, unknown>,
     options: {
       priority?: 'high' | 'medium' | 'low'
     } = {}

@@ -1,125 +1,0 @@
-[1mdiff --git a/src/components/Dashboard.tsx b/src/components/Dashboard.tsx[m
-[1mindex f100113..6190dbc 100644[m
-[1m--- a/src/components/Dashboard.tsx[m
-[1m+++ b/src/components/Dashboard.tsx[m
-[36m@@ -7,7 +7,7 @@[m [mimport { useAuth } from '../contexts/AuthContext'[m
- import { useTheme } from '../contexts/ThemeContext'[m
- import { useDashboardStats, useNoticias } from '../hooks/useCacheData'[m
- import { useCache } from '../contexts/CacheContext'[m
-[31m-import { APP_VERSION, checkForUpdates, forceReload } from '../version'[m
-[32m+[m[32mimport { checkForUpdates, forceReload } from '../version'[m[41m[m
- import { [m
-   Users, [m
-   Building2, [m
-[36m@@ -413,10 +413,6 @@[m [mexport default function Dashboard() {[m
-         </CardContent>[m
-       </Card>[m
- [m
-[31m-      {/* Rodapé com versão */}[m
-[31m-      <div className="text-center text-sm text-gray-500 mt-8">[m
-[31m-        <p>Repositório de Vagas v{APP_VERSION}</p>[m
-[31m-      </div>[m
- [m
-     </div>[m
-   )[m
-[1mdiff --git a/src/components/DashboardLayout.tsx b/src/components/DashboardLayout.tsx[m
-[1mindex 683e5e6..d644201 100644[m
-[1m--- a/src/components/DashboardLayout.tsx[m
-[1m+++ b/src/components/DashboardLayout.tsx[m
-[36m@@ -110,11 +110,11 @@[m [mexport default function DashboardLayout({ children }: DashboardLayoutProps) {[m
-           isCollapsed ? 'w-16' : 'w-64'[m
-         }`}>[m
-           <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)}>[m
-[31m-[m
-[31m-            {/* Menu Items */}[m
-[31m-            <div className={`flex-1 space-y-2 ${[m
-[31m-              isCollapsed ? "p-2 flex flex-col items-center" : "p-4"[m
-[31m-            }`}>[m
-[32m+[m[32m            <div className="flex flex-col h-full">[m[41m[m
-[32m+[m[32m              {/* Menu Items */}[m[41m[m
-[32m+[m[32m              <div className={`flex-1 space-y-2 ${[m[41m[m
-[32m+[m[32m                isCollapsed ? "p-2 flex flex-col items-center" : "p-4"[m[41m[m
-[32m+[m[32m              }`}>[m[41m[m
-               {menuItems.map((item, index) => {[m
-                 if (!item.show) return null[m
-                 [m
-[36m@@ -149,39 +149,39 @@[m [mexport default function DashboardLayout({ children }: DashboardLayoutProps) {[m
-                   </Tooltip>[m
-                 )[m
-               })}[m
-[31m-            </div>[m
-[31m-            [m
-[31m-            {/* Botão Sobre */}[m
-[31m-            <div className={`border-t ${[m
-[31m-              isCollapsed ? "p-2 flex flex-col items-center" : "p-4"[m
-[31m-            }`}>[m
-[31m-              <DropdownMenu>[m
-[31m-                <DropdownMenuTrigger asChild>[m
-[31m-                  <Button[m
-[31m-                    variant="ghost"[m
-[31m-                    className={`w-full transition-all duration-200 rounded-xl hover-modern ${[m
-[31m-                      isCollapsed [m
-[31m-                        ? "justify-center p-3 h-12 w-12" [m
-[31m-                        : "justify-start px-3 py-2"[m
-[31m-                    }`}[m
-[31m-                  >[m
-[31m-                    <Info className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />[m
-[31m-                    {!isCollapsed && <span className="ml-3 text-sm font-medium">Sobre</span>}[m
-[31m-                  </Button>[m
-[31m-                </DropdownMenuTrigger>[m
-[31m-                <DropdownMenuContent align="end" className="w-56">[m
-[31m-                  <DropdownMenuItem onClick={() => setIsSobreModalOpen(true)}>[m
-[31m-                    <Info className="mr-2 h-4 w-4" />[m
-[31m-                    Informações da Aplicação[m
-[31m-                  </DropdownMenuItem>[m
-[31m-                </DropdownMenuContent>[m
-[31m-              </DropdownMenu>[m
-[31m-            </div>[m
-[32m+[m[32m              </div>[m[41m[m
-[32m+[m[41m              [m
-[32m+[m[32m              {/* Botão Sobre */}[m[41m[m
-[32m+[m[32m              <div className={`border-t ${[m[41m[m
-[32m+[m[32m                isCollapsed ? "p-2 flex flex-col items-center" : "p-4"[m[41m[m
-[32m+[m[32m              }`}>[m[41m[m
-[32m+[m[32m                <DropdownMenu>[m[41m[m
-[32m+[m[32m                  <DropdownMenuTrigger asChild>[m[41m[m
-[32m+[m[32m                    <Button[m[41m[m
-[32m+[m[32m                      variant="ghost"[m[41m[m
-[32m+[m[32m                      className={`w-full transition-all duration-200 rounded-xl hover-modern ${[m[41m[m
-[32m+[m[32m                        isCollapsed[m[41m [m
-[32m+[m[32m                          ? "justify-center p-3 h-12 w-12"[m[41m [m
-[32m+[m[32m                          : "justify-start px-3 py-2"[m[41m[m
-[32m+[m[32m                      }`}[m[41m[m
-[32m+[m[32m                    >[m[41m[m
-[32m+[m[32m                      <Info className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />[m[41m[m
-[32m+[m[32m                      {!isCollapsed && <span className="ml-3 text-sm font-medium">Sobre</span>}[m[41m[m
-[32m+[m[32m                    </Button>[m[41m[m
-[32m+[m[32m                  </DropdownMenuTrigger>[m[41m[m
-[32m+[m[32m                  <DropdownMenuContent align="end" className="w-56">[m[41m[m
-[32m+[m[32m                    <DropdownMenuItem onClick={() => setIsSobreModalOpen(true)}>[m[41m[m
-[32m+[m[32m                      <Info className="mr-2 h-4 w-4" />[m[41m[m
-[32m+[m[32m                      Informações da Aplicação[m[41m[m
-[32m+[m[32m                    </DropdownMenuItem>[m[41m[m
-[32m+[m[32m                  </DropdownMenuContent>[m[41m[m
-[32m+[m[32m                </DropdownMenu>[m[41m[m
-[32m+[m[32m              </div>[m[41m[m
- [m
-[31m-            {/* Rodapé - Informações do Usuário */}[m
-[31m-            <div className={`border-t mt-auto ${[m
-[31m-              isCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-4 space-y-3"[m
-[31m-            }`}>[m
-[32m+[m[32m              {/* Rodapé - Informações do Usuário */}[m[41m[m
-[32m+[m[32m              <div className={`border-t mt-auto ${[m[41m[m
-[32m+[m[32m                isCollapsed ? "p-2 space-y-2 flex flex-col items-center" : "p-4 space-y-3"[m[41m[m
-[32m+[m[32m              }`}>[m[41m[m
-               {/* Informações do Usuário */}[m
-               <Tooltip>[m
-                 <TooltipTrigger asChild>[m
-[36m@@ -237,6 +237,7 @@[m [mexport default function DashboardLayout({ children }: DashboardLayoutProps) {[m
-                   </TooltipContent>[m
-                 )}[m
-               </Tooltip>[m
-[32m+[m[32m              </div>[m[41m[m
-             </div>[m
-           </Sidebar>[m
-         </div>[m

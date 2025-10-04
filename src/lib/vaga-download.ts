@@ -81,7 +81,15 @@ function generateTextContent(vaga: Vaga, options: DownloadOptions, timestamp: st
   if (vaga.beneficios) {
     content += `BENEFÍCIOS:\n`
     content += '-'.repeat(30) + '\n'
-    content += `${vaga.beneficios}\n\n`
+    const beneficios = vaga.beneficios
+      .split(/[;\n]/) // Separar por ponto e vírgula ou quebra de linha
+      .map(beneficio => beneficio.trim())
+      .filter(beneficio => beneficio.length > 0) // Remover strings vazias
+    
+    beneficios.forEach(beneficio => {
+      content += `• ${beneficio}\n`
+    })
+    content += '\n'
   }
   
   // Local de trabalho

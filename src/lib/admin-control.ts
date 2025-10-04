@@ -87,7 +87,11 @@ export async function setAdminControlState(isBlocked: boolean, updatedBy: string
     const controlId = '00000000-0000-0000-0000-000000000001'
     
     // Preparar dados para atualização
-    const updateData: any = {
+    const updateData: {
+      is_blocked: boolean;
+      updated_at: string;
+      reason: string | null;
+    } = {
       is_blocked: isBlocked,
       updated_at: now,
       reason: reason || null

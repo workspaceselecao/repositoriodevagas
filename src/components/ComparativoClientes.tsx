@@ -335,6 +335,25 @@ export default function ComparativoClientes() {
     const content = sections[section as keyof typeof sections]
     if (!content) return <span className={textClasses.primary}>Não informado</span>
 
+    // Tratamento especial para benefícios
+    if (section === 'beneficios') {
+      const beneficios = content
+        .split(/[;\n]/) // Separar por ponto e vírgula ou quebra de linha
+        .map(beneficio => beneficio.trim())
+        .filter(beneficio => beneficio.length > 0) // Remover strings vazias
+      
+      return (
+        <div className={`text-sm ${textClasses.primary}`}>
+          {beneficios.map((beneficio, index) => (
+            <div key={index} className="flex items-start mb-1">
+              <span className="mr-2 mt-1 flex-shrink-0">•</span>
+              <span>{beneficio}</span>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
     return (
       <div className={`text-sm ${textClasses.primary} whitespace-pre-wrap`}>
         {content}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from './ui/button'
 import { X, Download, Smartphone } from 'lucide-react'
-import { usePWA } from '@/hooks/usePWA'
+import { usePWA } from '../hooks/usePWA'
 
 export const PWAInstallPrompt: React.FC = () => {
   const { isInstallable, isInstalled, installPWA } = usePWA()

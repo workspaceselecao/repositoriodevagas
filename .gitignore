@@ -38,3 +38,51 @@ next-env.d.ts
 
 # TestSprite tests
 testsprite_tests/
+
+# Temporary files
+*.tmp
+*.temp
+*.backup
+*.bak
+*.old
+*.orig
+
+# Test files
+test-*.html
+test-*.js
+test-*.ts
+
+# Deployment scripts
+deploy-*.bat
+deploy-*.ps1
+deploy-*.js
+push-*.bat
+check-*.bat
+
+# Documentation temporary files
+*-temp.md
+*-backup.md
+*-old.md
+*_TEMP.md
+*_BACKUP.md
+*_OLD.md
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Logs
+*.log
+logs/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -168,12 +168,16 @@ export default function VagaTemplate({
         <VagaSection title="Benefícios">
           {vaga.beneficios ? (
             <div className="space-y-2">
-              {vaga.beneficios.split(';').map((beneficio, index) => (
-                <div key={index} className="flex items-start">
-                  <span className={`${textClasses.primary} mr-2 mt-1`}>•</span>
-                  <span className={`${textClasses.primary}`}>{beneficio.trim()}</span>
-                </div>
-              ))}
+              {vaga.beneficios
+                .split(/[;\n]/) // Separar por ponto e vírgula ou quebra de linha
+                .map(beneficio => beneficio.trim())
+                .filter(beneficio => beneficio.length > 0) // Remover strings vazias
+                .map((beneficio, index) => (
+                  <div key={index} className="flex items-start">
+                    <span className={`${textClasses.primary} mr-2 mt-1 flex-shrink-0`}>•</span>
+                    <span className={`${textClasses.primary}`}>{beneficio}</span>
+                  </div>
+                ))}
             </div>
           ) : null}
         </VagaSection>

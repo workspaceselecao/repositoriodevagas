@@ -1,4 +1,4 @@
-import { createClient, AuthFlowType } from '@supabase/supabase-js'
+import { createClient, AuthFlowType, SupabaseClient } from '@supabase/supabase-js'
 import { isDbLoadingBlocked as checkDbLoadingBlocked } from './admin-control'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://mywaoaofatgwbbtyqfpd.supabase.co'
@@ -11,8 +11,8 @@ export function isDbLoadingBlocked(): boolean {
 }
 
 // Singleton para evitar múltiplas instâncias
-let supabaseInstance: any = null
-let supabaseAdminInstance: any = null
+let supabaseInstance: SupabaseClient | null = null
+let supabaseAdminInstance: SupabaseClient | null = null
 
 // Configuração comum para evitar múltiplas instâncias
 const commonConfig = {
@@ -42,7 +42,7 @@ const commonConfig = {
 // Cliente padrão (para operações do usuário) - Singleton
 export const supabase = (() => {
   if (!supabaseInstance) {
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, commonConfig)
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, commonConfig) as SupabaseClient
   }
   return supabaseInstance
 })()
@@ -69,7 +69,7 @@ export const supabaseAdmin = (() => {
           eventsPerSecond: 10
         }
       }
-    })
+    }) as SupabaseClient
   }
   return supabaseAdminInstance
 })()
