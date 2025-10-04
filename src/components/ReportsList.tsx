@@ -94,38 +94,21 @@ export default function ReportsList() {
     }
   }, [user])
 
-  // Função para aceitar report
-  const handleAcceptReport = async (report: Report) => {
+  // Função para aceitar report (navega para edição da vaga)
+  const handleAcceptReport = (report: Report) => {
     if (!user || user.role !== 'ADMIN') {
       alert('Apenas administradores podem aceitar reports')
       return
     }
 
-    setIsUpdating(true)
-    try {
-      console.log('✅ Aceitando report:', report.id)
-      
-      const updatedReport = await updateReportStatus(
-        report.id, 
-        'completed', 
-        'Ajustes aceitos pelo administrador'
-      )
-      
-      if (updatedReport) {
-        console.log('✅ Report aceito com sucesso')
-        // Recarregar lista de reports
-        await loadReports(true)
-        
-        // Disparar evento para notificar outros componentes
-        window.dispatchEvent(new CustomEvent('report-status-updated', { 
-          detail: { reportId: report.id, status: 'completed' } 
-        }))
-      }
-    } catch (error) {
-      console.error('❌ Erro ao aceitar report:', error)
-      alert('Erro ao aceitar report. Tente novamente.')
-    } finally {
-      setIsUpdating(false)
+    console.log('✅ Aceitando report e navegando para edição:', report.id)
+    
+    // Navegar para a página de edição da vaga
+    if (report.vaga?.id) {
+      navigate(`/dashboard/editar-vaga/${report.vaga.id}?reportId=${report.id}`)
+    } else {
+      console.error('❌ ID da vaga não encontrado no report')
+      alert('Erro: ID da vaga não encontrado')
     }
   }
 
@@ -280,11 +263,6 @@ export default function ReportsList() {
     return labels[fieldName] || fieldName
   }
 
-  const handleViewReport = (report: Report) => {
-    if (user?.role === 'ADMIN' && report.status === 'pending') {
-      navigate(`/dashboard/editar-report/${report.id}`)
-    }
-  }
 
   if (loading) {
     return (
@@ -449,7 +427,6 @@ export default function ReportsList() {
                         <Button
                           size="sm"
                           onClick={() => handleAcceptReport(report)}
-                          disabled={isUpdating}
                           className="bg-green-500 hover:bg-green-600 text-white"
                         >
                           <ThumbsUp className="h-4 w-4 mr-1" />
@@ -466,16 +443,6 @@ export default function ReportsList() {
                           Rejeitar
                         </Button>
                       </div>
-                    )}
-                    {user?.role === 'ADMIN' && report.status === 'pending' && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleViewReport(report)}
-                        className="bg-orange-500 hover:bg-orange-600"
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Editar
-                      </Button>
                     )}
                     {user?.role === 'ADMIN' && report.status === 'completed' && (
                       <Button

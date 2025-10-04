@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
@@ -7,12 +7,15 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { VagaFormData, Vaga } from '../types/database'
 import { getVagaById, updateVaga } from '../lib/vagas'
+import { updateReportStatus } from '../lib/reports'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 
 export default function EditarVagaForm() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const [searchParams] = useSearchParams()
+  const reportId = searchParams.get('reportId')
   const [formData, setFormData] = useState<VagaFormData>({
     site: '',
     categoria: '',
@@ -88,6 +91,28 @@ export default function EditarVagaForm() {
       const vagaAtualizada = await updateVaga(id, formData, user.id)
       if (vagaAtualizada) {
         setMessage('Vaga atualizada com sucesso!')
+        
+        // Se há um reportId, marcar o report como concluído
+        if (reportId) {
+          try {
+            console.log('✅ Marcando report como concluído:', reportId)
+            await updateReportStatus(
+              reportId, 
+              'completed', 
+              'Ajustes realizados pelo administrador através da edição da vaga'
+            )
+            console.log('✅ Report marcado como concluído com sucesso')
+            
+            // Disparar evento para notificar outros componentes
+            window.dispatchEvent(new CustomEvent('report-status-updated', { 
+              detail: { reportId: reportId, status: 'completed' } 
+            }))
+          } catch (reportError) {
+            console.error('❌ Erro ao marcar report como concluído:', reportError)
+            // Não impedir o sucesso da atualização da vaga por causa do report
+          }
+        }
+        
         setTimeout(() => {
           navigate('/dashboard')
         }, 2000)
@@ -148,6 +173,26 @@ export default function EditarVagaForm() {
           </p>
         </div>
       </div>
+
+      {reportId && (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">
+                Editando vaga devido a report
+              </h3>
+              <p className="text-sm text-blue-700 mt-1">
+                Esta vaga será marcada como concluída automaticamente após salvar as alterações.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {message && (
         <div className={`p-4 rounded-md ${
