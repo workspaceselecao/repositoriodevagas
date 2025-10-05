@@ -1,0 +1,5 @@
+[33mc2dbbc4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m fix: implementar correções para timeout e estabilidade
+[33ma401ac7[m fix: Remove placeholders redundantes na pÃ¡gina de login
+[33me75ed71[m fix: Remove aviso 'Aguardando' e adiciona texto ao botÃ£o 'Atualizar Dados'
+[33m7974455[m feat: Implementa login rÃ¡pido, redirecionamento automÃ¡tico e dados instantÃ¢neos
+[33md4f23db[m fix: Corrige loop de login e otimiza autenticaÃ§Ã£o para redirecionamento rÃ¡pido
