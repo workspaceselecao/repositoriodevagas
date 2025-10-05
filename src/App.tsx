@@ -184,10 +184,12 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <OptimizedDataProvider>
-          <AppRoutes />
-          <DebugInfo />
-        </OptimizedDataProvider>
+        <CacheProvider>
+          <OptimizedDataProvider>
+            <AppRoutes />
+            <DebugInfo />
+          </OptimizedDataProvider>
+        </CacheProvider>
       </AuthProvider>
     </ThemeProvider>
   )
