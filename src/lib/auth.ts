@@ -447,30 +447,8 @@ export async function signOut(): Promise<void> {
     
     // Limpar cache local imediatamente
     if (typeof window !== 'undefined') {
-      // Limpar localStorage
-      localStorage.removeItem('supabase.auth.token')
-      // Limpar chaves do Supabase
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('sb-') && key.includes('auth-token')) {
-          localStorage.removeItem(key)
-        }
-      })
-      
-      // Limpar sessionStorage
-      sessionStorage.clear()
-      
-      // Limpar cache do navegador se possível
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => {
-            if (name.includes('supabase') || name.includes('auth')) {
-              caches.delete(name)
-            }
-          })
-        }).catch(() => {
-          // Ignorar erros de cache
-        })
-      }
+      // Limpeza controlada apenas no logout explícito
+      // Preservar sessão para evitar deslogamentos indesejados
     }
   } catch (error) {
     console.warn('Erro durante logout (não crítico):', error)

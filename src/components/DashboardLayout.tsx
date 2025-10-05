@@ -9,6 +9,7 @@ import { useScreenSize } from '../hooks/useScreenSize'
 import { Sidebar, SidebarItem } from './ui/sidebar'
 import { Button } from './ui/button'
 import { ThemeToggle } from './ThemeToggle'
+import RefreshButton from './RefreshButton'
 import Logo from './Logo'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { Badge } from './ui/badge'
@@ -100,29 +101,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }, 100)
   }
 
-  // Emergency refresh - recarregar aplicação
-  const handleEmergencyRefresh = () => {
-    if (confirm('⚠️ ATENÇÃO: Isso irá limpar todos os caches e recarregar a página. Continuar?')) {
-      // Limpar todos os caches
-      localStorage.clear()
-      sessionStorage.clear()
-      
-      // Limpar cache do Supabase
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => {
-            if (name.includes('supabase') || name.includes('auth')) {
-              caches.delete(name)
-            }
-          })
-        }).catch(() => {
-          // Ignorar erros de cache
-        })
-      }
-      
-      // Forçar reload da página
-      window.location.reload()
-    }
+  // Refresh suave - recarregar apenas dados sem afetar autenticação
+  const handleSoftRefresh = () => {
+    // Apenas recarregar a página sem limpar caches
+    window.location.reload()
   }
 
   const menuItems = [
@@ -315,25 +297,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 )}
               </div>
               
-              {/* Botão de Recarregar Aplicação */}
+              {/* Botão de Refresh Intuitivo */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className={`w-full text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg hover-button ${
-                      isCollapsed 
-                        ? "justify-center p-3 h-11 w-11" 
-                        : "justify-start px-3 py-2.5 h-11"
-                    }`}
-                    onClick={handleEmergencyRefresh}
-                  >
-                    <AlertTriangle className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"}`} />
-                    {!isCollapsed && <span className="ml-3 text-sm font-medium">Recarregar</span>}
-                  </Button>
+                  <div className={`w-full ${isCollapsed ? "justify-center p-3 h-11 w-11" : "justify-start px-3 py-2.5 h-11"}`}>
+                    <RefreshButton
+                      variant="ghost"
+                      size="sm"
+                      className={`w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 rounded-lg hover-button ${
+                        isCollapsed 
+                          ? "justify-center p-3 h-11 w-11" 
+                          : "justify-start px-3 py-2.5 h-11"
+                      }`}
+                    />
+                  </div>
                 </TooltipTrigger>
                 {isCollapsed && (
                   <TooltipContent side="right" className="ml-2">
-                    <p>Recarregar Aplicação</p>
+                    <p>Atualizar Dados</p>
                   </TooltipContent>
                 )}
               </Tooltip>
@@ -443,14 +424,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <span className="ml-3 text-sm font-medium">Alterar Senha</span>
                   </Button>
 
-                  <Button
+                  <RefreshButton
                     variant="ghost"
-                    className="w-full justify-start px-3 py-2.5 h-11 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 rounded-lg mb-2"
-                    onClick={handleEmergencyRefresh}
-                  >
-                    <AlertTriangle className="h-4 w-4" />
-                    <span className="ml-3 text-sm font-medium">Recarregar Aplicação</span>
-                  </Button>
+                    className="w-full justify-start px-3 py-2.5 h-11 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 rounded-lg mb-2"
+                  />
                   
                   <Button
                     variant="ghost"

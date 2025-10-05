@@ -156,8 +156,8 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
               window.location.reload()
               break
             case 'clear_cache':
-              localStorage.clear()
-              sessionStorage.clear()
+              // Removido limpeza agressiva que causava deslogamento
+              console.log('Limpeza de cache desabilitada para preservar autenticação')
               break
             case 'reset_system':
               await bypass.updateSystemControlWithBypass({ is_blocked: false })
