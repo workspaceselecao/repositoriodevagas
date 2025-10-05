@@ -47,9 +47,11 @@ export function DataCacheProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Tentar carregar do cache
-      const cachedVagas = await cacheManager.getTable('vagas');
-      const cachedClientes = await cacheManager.getTable('clientes');
+      // Tentar carregar do cache em paralelo
+      const [cachedVagas, cachedClientes] = await Promise.all([
+        cacheManager.getTable('vagas'),
+        cacheManager.getTable('clientes')
+      ]);
 
       if (cachedVagas && cachedClientes) {
         console.log('[DataCache] Loading from cache');
@@ -58,8 +60,8 @@ export function DataCacheProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         setSyncStatus('synced');
 
-        // Validar versão em background
-        validateCacheInBackground();
+        // Validar versão em background (sem bloquear)
+        setTimeout(() => validateCacheInBackground(), 100);
       } else {
         console.log('[DataCache] Cache miss, loading from DB');
         await fullSync();
@@ -105,26 +107,26 @@ export function DataCacheProvider({ children }: { children: ReactNode }) {
 
       console.log(`[DataCache] Fetched ${vagasData.length} vagas and ${clientesData.length} clientes`);
 
-      // Atualizar estado
+      // Atualizar estado imediatamente
       setVagas(vagasData);
       setClientes(clientesData);
-
-      // Salvar no cache apenas se suportado
-      if (cacheManager.isSupported()) {
-        try {
-          await Promise.all([
-            cacheManager.saveTable('vagas', vagasData),
-            cacheManager.saveTable('clientes', clientesData),
-          ]);
-          console.log('[DataCache] Data saved to cache successfully');
-        } catch (cacheError) {
-          console.warn('[DataCache] Cache save error:', cacheError);
-          // Não falhar o sync por erro no cache
-        }
-      }
-
       setLoading(false);
       setSyncStatus('synced');
+
+      // Salvar no cache em background (não bloquear)
+      if (cacheManager.isSupported()) {
+        setTimeout(async () => {
+          try {
+            await Promise.all([
+              cacheManager.saveTable('vagas', vagasData),
+              cacheManager.saveTable('clientes', clientesData),
+            ]);
+            console.log('[DataCache] Data saved to cache successfully');
+          } catch (cacheError) {
+            console.warn('[DataCache] Cache save error:', cacheError);
+          }
+        }, 100);
+      }
       console.log('[DataCache] Full sync completed successfully');
     } catch (error) {
       console.error('[DataCache] Full sync error:', error);

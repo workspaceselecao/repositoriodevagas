@@ -72,6 +72,11 @@ function AppRoutes() {
     return <ErrorFallback error={error} onRetry={retry} />
   }
 
+  // Redirecionamento automático se usuário já está logado
+  if (user && (window.location.pathname === '/login' || window.location.pathname === '/')) {
+    return <Navigate to="/dashboard" replace />
+  }
+
   if (loading) {
     return (
       <LoadingScreen 
@@ -82,6 +87,7 @@ function AppRoutes() {
 
   return (
     <Routes>
+      <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
       <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
       <Route path="/forgot-password" element={!user ? <ForgotPasswordPage /> : <Navigate to="/dashboard" replace />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />

@@ -25,18 +25,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true
 
-    // Inicializar sistema de versão
+    // Inicializar sistema de versão em background
     initializeVersionSystem()
 
-    // Timeout de segurança reduzido para 1 segundo
-    const safetyTimeout = setTimeout(() => {
-      if (isMounted) {
-        console.warn('⚠️ Timeout de segurança - finalizando inicialização')
-        setLoading(false)
-      }
-    }, 1000)
-
-    // Verificação otimizada de sessão
+    // Verificação imediata de sessão - SEM timeout
     const checkUser = async () => {
       if (!isMounted) return
       
@@ -46,11 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log('🚫 Carregamento bloqueado - permitindo acesso sem login')
           setUser(null)
           setLoading(false)
-          clearTimeout(safetyTimeout)
           return
         }
         
-        // Verificação rápida de sessão
+        // Verificação imediata de sessão
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -58,7 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (isMounted) {
             setUser(null)
             setLoading(false)
-            clearTimeout(safetyTimeout)
           }
           return
         }
@@ -70,21 +60,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (isMounted) {
               setUser(userData)
               setLoading(false)
-              clearTimeout(safetyTimeout)
+              console.log('✅ Usuário autenticado automaticamente')
             }
           } catch (userError) {
             console.error('❌ Erro ao carregar dados do usuário:', userError)
             if (isMounted) {
               setUser(null)
               setLoading(false)
-              clearTimeout(safetyTimeout)
             }
           }
         } else if (isMounted) {
           console.log('❌ Nenhuma sessão encontrada')
           setUser(null)
           setLoading(false)
-          clearTimeout(safetyTimeout)
         }
 
       } catch (error) {
@@ -92,7 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isMounted) {
           setUser(null)
           setLoading(false)
-          clearTimeout(safetyTimeout)
         }
       }
     }
@@ -103,25 +90,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Cleanup
     return () => {
       isMounted = false
-      clearTimeout(safetyTimeout)
     }
   }, [])
 
-  // Listener para mudanças de autenticação otimizado
+  // Listener para mudanças de autenticação simplificado
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.email)
       
       if (event === 'SIGNED_IN' && session?.user) {
         try {
-          console.log('🔄 Carregando dados do usuário após login...')
+          console.log('✅ Usuário logado, carregando dados...')
           const userData = await getCurrentUser()
           setUser(userData)
           setError(null)
           setLoading(false)
-          console.log('✅ Login concluído com sucesso')
         } catch (error) {
-          console.error('❌ Erro ao buscar dados do usuário:', error)
+          console.error('❌ Erro ao carregar dados do usuário:', error)
           setError(error as Error)
           setLoading(false)
         }
@@ -130,9 +115,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null)
         setError(null)
         setLoading(false)
-      } else if (event === 'TOKEN_REFRESHED') {
-        console.log('🔄 Token renovado')
-        // Não fazer nada, apenas log
       }
     })
 
@@ -143,20 +125,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (credentials: LoginFormData): Promise<boolean> => {
     try {
-      console.log('🔐 Iniciando autenticação...')
       setError(null)
       setLoading(true)
       
       const userData = await signIn(credentials)
       
       if (userData) {
-        console.log('✅ Autenticação bem-sucedida')
         setUser(userData)
         setLoading(false)
         return true
       }
       
-      console.log('❌ Falha na autenticação')
       setLoading(false)
       return false
     } catch (error) {
