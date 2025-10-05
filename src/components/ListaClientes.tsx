@@ -523,11 +523,6 @@ export default function ListaClientes() {
           </h1>
           <p className="page-subtitle text-sm tablet:text-base laptop:text-lg font-body text-repovagas-text-secondary">
             Gerencie todas as oportunidades profissionais disponíveis
-            {lastUpdated && (
-              <span className="block text-xs text-muted-foreground mt-1">
-                Última atualização: {new Date(lastUpdated).toLocaleString('pt-BR')}
-              </span>
-            )}
           </p>
         </div>
         <div className="flex flex-col tablet:flex-row gap-2 tablet:gap-3">
