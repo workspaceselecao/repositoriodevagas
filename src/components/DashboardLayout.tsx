@@ -6,6 +6,7 @@ import { SUPER_ADMIN_EMAIL } from '../lib/user-filter'
 import { useTheme } from '../contexts/ThemeContext'
 import { useUpdateCheck } from '../hooks/useUpdateCheck'
 import { useScreenSize } from '../hooks/useScreenSize'
+import { SyncIndicator } from './SyncIndicator'
 import { Sidebar, SidebarItem } from './ui/sidebar'
 import { Button } from './ui/button'
 import { ThemeToggle } from './ThemeToggle'
@@ -460,6 +461,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Theme Toggle e Notificações - Fixed Position */}
           <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+            {/* Indicador de Sincronização */}
+            <SyncIndicator />
+            
             {/* Notificações em tempo real */}
             <RealtimeNotifications 
               onNewReport={handleNewReport}

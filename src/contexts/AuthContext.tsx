@@ -4,6 +4,7 @@ import { signIn, signOut, getCurrentUser } from '../lib/auth'
 import { supabase, isDbLoadingBlocked } from '../lib/supabase'
 import { initializeVersionSystem } from '../version'
 import AuthErrorFallback from '../components/AuthErrorFallback'
+import { cacheManager } from '../lib/cacheManager'
 
 interface AuthContextType {
   user: AuthUser | null
@@ -135,15 +136,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async (): Promise<void> => {
     try {
+      console.log('[Auth] Logging out...')
       setError(null)
       
+      // 1. Limpar cache antes de fazer logout
+      try {
+        if (cacheManager.isSupported()) {
+          await cacheManager.clear()
+          console.log('[Auth] Cache cleared successfully')
+        }
+      } catch (cacheError) {
+        console.warn('[Auth] Error clearing cache:', cacheError)
+        // Não falhar o logout por erro no cache
+      }
       
+      // 2. Logout do Supabase
       await signOut()
+      
+      // 3. Limpar estado local
       setUser(null)
-      console.log('Logout realizado com sucesso')
+      
+      console.log('[Auth] Logout successful')
     } catch (error) {
-      console.error('Erro no logout:', error)
+      console.error('[Auth] Logout error:', error)
       setError(error as Error)
+      
+      // Mesmo com erro, limpar dados locais e cache
+      try {
+        if (cacheManager.isSupported()) {
+          await cacheManager.clear()
+        }
+        setUser(null)
+      } catch (cleanupError) {
+        console.error('[Auth] Error during cleanup:', cleanupError)
+      }
     }
   }
 
