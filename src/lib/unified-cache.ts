@@ -179,9 +179,9 @@ class UnifiedCache {
         const cacheKey = `${options.resource}:${this.currentUser?.id || 'anonymous'}`
         
         if (!options.forceRefresh) {
-          const cachedData = this.intelligentCache.get(cacheKey)
-          if (cachedData && cachedData !== null) {
-            return cachedData as T
+          const cachedData = this.intelligentCache.get<T>(cacheKey)
+          if (cachedData) {
+            return cachedData
           }
         }
         
