@@ -25,9 +25,6 @@ const commonConfig = {
     debug: process.env.NODE_ENV === 'development'
   },
   global: {
-    headers: {
-      'Cache-Control': 'no-store, max-age=0, must-revalidate'
-    }
   },
   db: {
     schema: 'public'
@@ -57,9 +54,6 @@ export const supabaseAdmin = (() => {
         detectSessionInUrl: false
       },
       global: {
-        headers: {
-          'Cache-Control': 'no-store, max-age=0, must-revalidate'
-        }
       },
       db: {
         schema: 'public'

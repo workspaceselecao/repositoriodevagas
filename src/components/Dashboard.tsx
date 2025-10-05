@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
@@ -6,10 +6,7 @@ import { LoadingGrid } from './ui/loading-card'
 import { EmptyState } from './ui/empty-state'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
-import { useDashboardStats, useNoticias } from '../hooks/useCacheData'
-import { useCache } from '../contexts/CacheContext'
-import { useOptimizedDashboardStats, useOptimizedNoticias } from '../contexts/OptimizedDataContext'
-import CacheMigrationToggle from './CacheMigrationToggle'
+import { supabase } from '../lib/supabase'
 import { 
   Users, 
   Building2, 
@@ -33,37 +30,135 @@ import {
   ChevronUp
 } from 'lucide-react'
 
+// Interfaces para os dados do dashboard
+interface DashboardStats {
+  totalVagas: number
+  vagasRecentes: number
+  totalClientes: number
+  totalSites: number
+  totalUsuarios: number
+}
+
+interface Noticia {
+  id: string
+  titulo: string
+  conteudo: string
+  tipo: string
+  prioridade: string
+  created_at: string
+}
+
 export default function Dashboard() {
   const { user } = useAuth()
   const { config } = useTheme()
   
-  // Usar sistema otimizado se disponível
-  const useOptimized = localStorage.getItem('use-optimized-cache') === 'true'
-  
-  const { stats: legacyStats, loading: legacyLoading } = useDashboardStats()
-  const { noticias: legacyNoticias } = useNoticias()
-  const { refreshAll: legacyRefreshAll } = useCache()
-  
-  const { stats: optimizedStats, loading: optimizedLoading } = useOptimizedDashboardStats()
-  const { noticias: optimizedNoticias } = useOptimizedNoticias()
-  
-  // Usar dados otimizados ou legados baseado na preferência
-  const stats = useOptimized ? optimizedStats : legacyStats
-  const loading = useOptimized ? optimizedLoading : legacyLoading
-  const noticias = useOptimized ? optimizedNoticias : legacyNoticias
-  const refreshAll = useOptimized ? () => {
-    // Para o sistema otimizado, não precisamos de refresh manual
-    console.log('🔄 Sistema otimizado - dados atualizados automaticamente')
-  } : legacyRefreshAll
-
   // Estado para controlar expansão dos cards
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
   
   // Estado para controlar animação do botão de atualizar
   const [isRefreshing, setIsRefreshing] = useState(false)
+  
+  // Estado para os dados do dashboard
+  const [stats, setStats] = useState<DashboardStats>({
+    totalVagas: 0,
+    vagasRecentes: 0,
+    totalClientes: 0,
+    totalSites: 0,
+    totalUsuarios: 0
+  })
+  const [noticias, setNoticias] = useState<Noticia[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Limitar notícias exibidas
   const noticiasExibidas = noticias.slice(0, 9)
+
+  // Função para carregar estatísticas do dashboard
+  const loadStats = async () => {
+    try {
+      // Carregar total de vagas
+      const { count: totalVagas } = await supabase
+        .from('vagas')
+        .select('*', { count: 'exact', head: true })
+
+      // Carregar vagas da última semana
+      const oneWeekAgo = new Date()
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+      
+      const { count: vagasRecentes } = await supabase
+        .from('vagas')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', oneWeekAgo.toISOString())
+
+      // Carregar clientes únicos
+      const { data: clientesData } = await supabase
+        .from('vagas')
+        .select('cliente')
+      
+      const clientesUnicos = new Set(clientesData?.map(v => v.cliente) || [])
+      
+      // Carregar sites únicos
+      const { data: sitesData } = await supabase
+        .from('vagas')
+        .select('site')
+      
+      const sitesUnicos = new Set(sitesData?.map(v => v.site) || [])
+      
+      // Carregar total de usuários
+      const { count: totalUsuarios } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+
+      setStats({
+        totalVagas: totalVagas || 0,
+        vagasRecentes: vagasRecentes || 0,
+        totalClientes: clientesUnicos.size,
+        totalSites: sitesUnicos.size,
+        totalUsuarios: totalUsuarios || 0
+      })
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error)
+    }
+  }
+
+  // Função para carregar notícias
+  const loadNoticias = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('noticias')
+        .select('*')
+        .eq('ativa', true)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Erro ao carregar notícias:', error)
+        return
+      }
+
+      setNoticias(data || [])
+    } catch (error) {
+      console.error('Erro ao carregar notícias:', error)
+    }
+  }
+
+  // Função para carregar todos os dados
+  const loadDashboardData = async () => {
+    setLoading(true)
+    try {
+      await Promise.all([
+        loadStats(),
+        loadNoticias()
+      ])
+    } catch (error) {
+      console.error('Erro ao carregar dados do dashboard:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Carregar dados iniciais
+  useEffect(() => {
+    loadDashboardData()
+  }, [])
 
   // Função para alternar expansão do card
   const toggleCardExpansion = (index: number) => {
@@ -88,7 +183,7 @@ export default function Dashboard() {
     
     try {
       // Executar atualização com timeout para evitar travamento
-      const refreshPromise = refreshAll()
+      const refreshPromise = loadDashboardData()
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Refresh timeout')), 10000) // 10 segundos timeout
       })
@@ -247,18 +342,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Sistema de Cache - Apenas para ADMIN */}
-      {user?.role === 'ADMIN' && (
-        <CacheMigrationToggle
-          onToggle={(useOptimized) => {
-            console.log('🔄 Sistema de cache alterado para:', useOptimized ? 'Otimizado' : 'Legado')
-            // Recarregar página para aplicar mudanças
-            setTimeout(() => {
-              window.location.reload()
-            }, 1000)
-          }}
-        />
-      )}
 
       {/* Métricas Principais com Cards 3D */}
       <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-4 gap-4 tablet:gap-6">
@@ -412,7 +495,7 @@ export default function Dashboard() {
             />
           ) : (
             <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 gap-4 tablet:gap-6">
-              {noticiasExibidas.map((noticia, index) => {
+              {noticiasExibidas.map((noticia: Noticia, index: number) => {
                 const isExpanded = expandedCards.has(index)
                 const shouldShowExpandButton = noticia.conteudo.length > 150
                 

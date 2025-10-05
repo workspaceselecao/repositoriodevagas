@@ -156,8 +156,7 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
               window.location.reload()
               break
             case 'clear_cache':
-              // Removido limpeza agressiva que causava deslogamento
-              console.log('Limpeza de cache desabilitada para preservar autenticação')
+              console.log('Limpeza de cache removida do sistema')
               break
             case 'reset_system':
               await bypass.updateSystemControlWithBypass({ is_blocked: false })
@@ -560,7 +559,7 @@ export default function AdminControlPanel({}: AdminControlPanelProps) {
                       }}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Limpar Cache
+                      Limpar Dados
                     </Button>
 
                     <Button

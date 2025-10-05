@@ -1,7 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { CacheProvider } from './contexts/CacheContext'
-import { OptimizedDataProvider } from './contexts/OptimizedDataContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
@@ -178,18 +176,12 @@ function AppRoutes() {
 }
 
 function App() {
-  // Hook para limpeza de cache
-  useCleanup()
   
   return (
     <ThemeProvider>
       <AuthProvider>
-        <CacheProvider>
-          <OptimizedDataProvider>
-            <AppRoutes />
-            <DebugInfo />
-          </OptimizedDataProvider>
-        </CacheProvider>
+        <AppRoutes />
+        <DebugInfo />
       </AuthProvider>
     </ThemeProvider>
   )

@@ -145,17 +145,17 @@ export default function TiraDuvidas() {
     {
       id: 'faq-lento',
       title: 'A aplicação está lenta. O que fazer?',
-      content: '• Verifique sua conexão com a internet\n• Limpe o cache do navegador\n• Feche outras abas desnecessárias\n• Entre em contato com o administrador se o problema persistir\n\nO sistema é otimizado para até 10.000 vagas.',
+      content: '• Verifique sua conexão com a internet\n• Recarregue a página\n• Feche outras abas desnecessárias\n• Entre em contato com o administrador se o problema persistir\n\nO sistema é otimizado para até 10.000 vagas.',
       category: 'problemas',
       type: 'faq',
-      tags: ['lento', 'performance', 'cache', 'internet'],
+      tags: ['lento', 'performance', 'internet'],
       priority: 'high',
       icon: '⚡'
     },
     {
       id: 'faq-acesso',
       title: 'Não consigo acessar o sistema',
-      content: 'Verifique:\n• Se você está online\n• Se a URL está correta\n• Se não há problemas de cache\n• Tente em outro navegador\n• Verifique se o sistema não está em manutenção\n\nEntre em contato com o administrador se necessário.',
+      content: 'Verifique:\n• Se você está online\n• Se a URL está correta\n• Tente em outro navegador\n• Verifique se o sistema não está em manutenção\n\nEntre em contato com o administrador se necessário.',
       category: 'problemas',
       type: 'faq',
       tags: ['acesso', 'login', 'erro', 'navegador'],

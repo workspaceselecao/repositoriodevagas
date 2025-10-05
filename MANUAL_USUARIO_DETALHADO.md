@@ -281,9 +281,9 @@ Cada cliente pode ter filtros independentes:
 - **Perfis de Cor**: Múltiplas combinações de cores
 - **Preview**: Visualizar mudanças antes de aplicar
 
-#### 5. Métricas de Cache
-- **Performance**: Visualizar métricas de cache
-- **Limpeza**: Limpar cache quando necessário
+#### 5. Métricas de Sistema
+- **Performance**: Visualizar métricas do sistema
+- **Limpeza**: Limpar dados quando necessário
 - **Otimização**: Configurações de otimização
 
 #### 6. Configurações de Acesso RH
@@ -434,7 +434,7 @@ O sistema de contato permite comunicação interna via email.
 
 ### Otimização de Performance
 - Use filtros para reduzir o número de vagas exibidas
-- Limpe o cache periodicamente se necessário
+- Recarregue a página periodicamente se necessário
 - Use a paginação para navegar em grandes volumes de dados
 
 ### Backup e Segurança

@@ -19,7 +19,6 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import { APP_VERSION, checkForUpdates, forceReload, fetchServerVersion, getCurrentStoredVersion } from '../version'
-import { useCache } from '../contexts/CacheContext'
 
 interface SobreModalProps {
   isOpen: boolean
@@ -36,8 +35,6 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
   const [currentStoredVersion, setCurrentStoredVersion] = useState<string>(APP_VERSION)
   const [isLoadingInfo, setIsLoadingInfo] = useState(false)
   
-  // Cache context
-  const { cache, loading, cacheStatus, forceInitialLoad, refreshAll } = useCache()
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   
   
@@ -78,27 +75,6 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
     }
   }, [isOpen])
 
-  // Atualizar timestamp do cache
-  useEffect(() => {
-    setLastUpdate(new Date())
-  }, [cache.lastUpdated])
-
-  // Funções auxiliares para o cache debug
-  const getStatusIcon = (status: boolean) => {
-    return status ? (
-      <CheckCircle className="h-4 w-4 text-green-500" />
-    ) : (
-      <XCircle className="h-4 w-4 text-red-500" />
-    )
-  }
-
-  const getStatusBadge = (status: boolean, count: number) => {
-    return (
-      <Badge variant={status ? "default" : "destructive"} className="ml-2">
-        {count} {status ? 'OK' : 'ERRO'}
-      </Badge>
-    )
-  }
 
   // Função para verificar atualizações
   const handleCheckUpdates = async () => {
@@ -276,132 +252,6 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
             </CardContent>
           </Card>
 
-          {/* Debug Cache */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Database className="h-4 w-4 text-primary" />
-                Debug Cache
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="text-xs text-muted-foreground">
-                Usuário: {user?.name} | Última atualização: {lastUpdate?.toLocaleTimeString()}
-              </div>
-              
-              {/* Status das seções */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">Status das Seções:</h4>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      {getStatusIcon(cacheStatus.vagas)}
-                      Vagas
-                    </span>
-                    {getStatusBadge(cacheStatus.vagas, cache.vagas.length)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      {getStatusIcon(cacheStatus.clientes)}
-                      Clientes
-                    </span>
-                    {getStatusBadge(cacheStatus.clientes, cache.clientes.length)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      {getStatusIcon(cacheStatus.sites)}
-                      Sites
-                    </span>
-                    {getStatusBadge(cacheStatus.sites, cache.sites.length)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      {getStatusIcon(cacheStatus.categorias)}
-                      Categorias
-                    </span>
-                    {getStatusBadge(cacheStatus.categorias, cache.categorias.length)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      {getStatusIcon(cacheStatus.cargos)}
-                      Cargos
-                    </span>
-                    {getStatusBadge(cacheStatus.cargos, cache.cargos.length)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      {getStatusIcon(cacheStatus.celulas)}
-                      Células
-                    </span>
-                    {getStatusBadge(cacheStatus.celulas, cache.celulas.length)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      {getStatusIcon(cacheStatus.usuarios)}
-                      Usuários
-                    </span>
-                    {getStatusBadge(cacheStatus.usuarios, cache.usuarios.length)}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center">
-                      {getStatusIcon(cacheStatus.noticias)}
-                      Notícias
-                    </span>
-                    {getStatusBadge(cacheStatus.noticias, cache.noticias.length)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Status geral */}
-              <div className="pt-2 border-t">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="flex items-center">
-                    {loading ? (
-                      <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />
-                    ) : (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    )}
-                    Status Geral
-                  </span>
-                  <Badge variant={loading ? "secondary" : "default"}>
-                    {loading ? 'Carregando...' : 'Pronto'}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Ações do Cache */}
-              <div className="pt-2 border-t space-y-2">
-                <div className="flex gap-2">
-                  <Button
-                    onClick={forceInitialLoad}
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 text-xs"
-                    disabled={loading}
-                  >
-                    <RefreshCw className="h-3 w-3 mr-1" />
-                    Forçar Carregamento
-                  </Button>
-                  <Button
-                    onClick={refreshAll}
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 text-xs"
-                    disabled={loading}
-                  >
-                    <RefreshCw className="h-3 w-3 mr-1" />
-                    Atualizar Cache
-                  </Button>
-                </div>
-              </div>
-
-              {/* Informações adicionais */}
-              <div className="pt-2 border-t text-xs text-muted-foreground">
-                <div>Cache ID: {user?.name?.substring(0, 8)}...</div>
-                <div>Última atualização: {new Date(cache.lastUpdated).toLocaleString()}</div>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Stack Tecnológico - Oculto para usuários RH */}
           {user?.role !== 'RH' && (

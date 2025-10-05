@@ -17,7 +17,6 @@ import { testEmailConfig } from '../lib/emailService'
 import { useAuth } from '../contexts/AuthContext'
 import { useRHNovaVagaAccess, useRHEditAccess, useRHDeleteAccess } from '../hooks/useSystemConfig'
 import { ThemeSelector } from './ThemeSelector'
-import CacheMetricsDisplay from './CacheMetricsDisplay'
 import Header from './Header'
 import { Badge } from './ui/badge'
 import { Download, Database, FileText, Megaphone, Plus, Edit, Trash2, Eye, EyeOff, AlertCircle, Info, Bell, Palette, Mail, Trash, RefreshCw, UserPlus, HelpCircle, Users } from 'lucide-react'
@@ -1202,10 +1201,6 @@ export default function Configuracoes() {
             
             <ThemeSelector />
             
-            {/* Métricas do Cache - apenas para administradores */}
-            {user?.role === 'ADMIN' && (
-              <CacheMetricsDisplay className="mt-6" />
-            )}
           </div>
         </TabsContent>
 

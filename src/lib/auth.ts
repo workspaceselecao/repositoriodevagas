@@ -445,7 +445,7 @@ export async function signOut(): Promise<void> {
       console.warn('Erro ao fazer logout (não crítico):', error)
     })
     
-    // Limpar cache local imediatamente
+    // Limpar dados locais imediatamente
     if (typeof window !== 'undefined') {
       // Limpeza controlada apenas no logout explícito
       // Preservar sessão para evitar deslogamentos indesejados

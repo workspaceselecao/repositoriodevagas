@@ -261,14 +261,14 @@ Sim! Os backups são criptografados e armazenados de forma segura.
 
 ### ❓ A aplicação está lenta. O que fazer?
 - Verifique sua conexão com a internet
-- Limpe o cache do navegador
+- Recarregue a página
 - Feche outras abas desnecessárias
 - Entre em contato com o administrador se o problema persistir
 
 ### ❓ Não consigo acessar o sistema. O que pode ser?
 - Verifique se você está online
 - Confirme se a URL está correta
-- Limpe o cache do navegador
+- Recarregue a página
 - Tente em outro navegador
 - Verifique se o sistema não está em manutenção
 
@@ -375,7 +375,7 @@ Use o sistema de relatórios integrado ou entre em contato com o administrador d
 - **PWA**: Progressive Web App - aplicativo web que pode ser instalado
 - **RLS**: Row Level Security - sistema de segurança no nível de linha
 - **Scraping**: Extração automática de dados de websites
-- **Cache**: Armazenamento temporário de dados para melhor performance
+- **Performance**: Sistema otimizado para melhor performance
 
 ---
 

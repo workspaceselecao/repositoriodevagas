@@ -137,20 +137,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setError(null)
       
-      // Limpar cache IndexedDB
-      if ('indexedDB' in window) {
-        try {
-          const deleteReq = indexedDB.deleteDatabase('repovagas-cache')
-          deleteReq.onsuccess = () => console.log('Cache IndexedDB limpo')
-          deleteReq.onerror = () => console.warn('Erro ao limpar cache IndexedDB')
-        } catch (error) {
-          console.warn('Erro ao limpar IndexedDB:', error)
-        }
-      }
       
       await signOut()
       setUser(null)
-      console.log('Logout realizado com sucesso - cache limpo')
+      console.log('Logout realizado com sucesso')
     } catch (error) {
       console.error('Erro no logout:', error)
       setError(error as Error)

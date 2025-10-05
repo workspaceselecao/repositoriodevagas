@@ -13,10 +13,7 @@ import VagaTemplate from './VagaTemplate'
 import ReportModal from './ReportModal'
 import { useAuth } from '../contexts/AuthContext'
 import { useRHPermissions } from '../hooks/useRHPermissions'
-import { useVagas } from '../hooks/useCacheData'
-import { useCache } from '../contexts/CacheContext'
 import { useSimpleVagas } from '../hooks/useSimpleVagas'
-import { useSimpleCache } from '../lib/simple-cache'
 import { useThemeClasses } from '../hooks/useThemeClasses'
 // import { toast } from 'sonner' // Comentado temporariamente
 
@@ -59,12 +56,10 @@ export default function ListaClientes() {
   const { canEdit, canDelete, loading: permissionsLoading } = useRHPermissions()
   const navigate = useNavigate()
   
-  // Usar cache simples em desenvolvimento para evitar problemas
+  // Usar sistema simples em desenvolvimento
   const isDev = import.meta.env.DEV
   const simpleVagas = useSimpleVagas()
   const complexVagas = useVagas()
-  const { removeVaga, refreshVagas, clearCache } = useCache()
-  const simpleCache = useSimpleCache()
   
   // Escolher qual hook usar baseado no ambiente
   const { vagas, loading, lastUpdated } = isDev ? simpleVagas : complexVagas
@@ -404,8 +399,8 @@ export default function ListaClientes() {
       try {
         const success = await deleteVaga(id)
         if (success) {
-          // Remover do cache
-          removeVaga(id)
+          // Recarregar dados
+          window.location.reload()
         } else {
           alert('Erro ao excluir vaga')
         }
@@ -489,25 +484,13 @@ export default function ListaClientes() {
     setIsRefreshing(false)
   }
 
-  // Função para limpar completamente o cache e forçar carregamento limpo
+  // Função para forçar recarregamento limpo
   const handleForceCleanRefresh = async () => {
     if (isRefreshing) return
     
     setIsRefreshing(true)
     try {
-      console.log('🧹 Limpando cache completamente e forçando carregamento limpo...')
-      
-      // Limpar cache baseado no ambiente
-      if (isDev) {
-        // Limpar cache simples
-        simpleCache.clear()
-      } else {
-        // Limpar cache complexo
-        clearCache()
-      }
-      
-      // Aguardar um pouco para garantir que o cache foi limpo
-      await new Promise(resolve => setTimeout(resolve, 200))
+      console.log('🔄 Forçando recarregamento limpo...')
       
       // Forçar carregamento limpo
       if (isDev) {
@@ -516,10 +499,10 @@ export default function ListaClientes() {
         await refreshVagas()
       }
       
-      console.log('✅ Cache limpo e dados recarregados com sucesso')
+      console.log('✅ Dados recarregados com sucesso')
       
     } catch (error) {
-      console.error('❌ Erro ao limpar cache e recarregar:', error)
+      console.error('❌ Erro ao recarregar dados:', error)
     } finally {
       setIsRefreshing(false)
     }
@@ -598,11 +581,11 @@ export default function ListaClientes() {
             disabled={isRefreshing} 
             size="sm" 
             className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md bg-orange-50 hover:bg-orange-100 border-orange-200"
-            title="Limpar cache e recarregar (resolve problemas de refresh)"
+            title="Forçar recarregamento (resolve problemas de refresh)"
           >
             <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
             <span className={isRefreshing ? 'opacity-70' : ''}>
-              {isRefreshing ? 'Limpando...' : 'Limpar Cache'}
+              {isRefreshing ? 'Recarregando...' : 'Forçar Refresh'}
             </span>
           </Button>
         </div>

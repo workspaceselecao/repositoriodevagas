@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useCache } from '../contexts/CacheContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -43,7 +42,6 @@ export default function NovaVagaFormWithScraping() {
   const [activeTab, setActiveTab] = useState('manual')
   const [buttonColorIndex, setButtonColorIndex] = useState(0)
   const { user } = useAuth()
-  const { addVaga, updateVaga: updateVagaInCache } = useCache()
   const navigate = useNavigate()
 
   const isEditing = !!id
@@ -155,10 +153,6 @@ export default function NovaVagaFormWithScraping() {
           setMessage('✅ Oportunidade atualizada com sucesso!')
           console.log('Vaga atualizada:', vagaAtualizada)
           
-          // Atualizar vaga no cache
-          if (vagaAtualizada && typeof vagaAtualizada === 'object' && 'id' in vagaAtualizada) {
-            updateVagaInCache(vagaAtualizada as any)
-          }
           
           // Navegar após um delay para mostrar a mensagem
           setTimeout(() => {
@@ -183,10 +177,6 @@ export default function NovaVagaFormWithScraping() {
           setMessage('✅ Oportunidade criada com sucesso!')
           console.log('Vaga criada:', novaVaga)
           
-          // Adicionar vaga ao cache
-          if (novaVaga && typeof novaVaga === 'object' && 'id' in novaVaga) {
-            addVaga(novaVaga as any)
-          }
           
           // Limpar formulário após sucesso
           clearForm()

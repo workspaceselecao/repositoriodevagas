@@ -1,9 +1,8 @@
 import { supabase, supabaseAdmin } from './supabase'
 import { Vaga, VagaFormData, VagaFilter } from '../types/database'
-import { sessionCache } from './session-cache'
 import { assertWriteAllowed } from './admin-control'
 
-// Função ROBUSTA para buscar vagas FORÇANDO refresh (ignora cache)
+// Função ROBUSTA para buscar vagas FORÇANDO refresh
 export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]> {
   const maxRetries = 3
   let lastError: Error | null = null
@@ -67,7 +66,7 @@ export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]>
   return []
 }
 
-// Função otimizada para buscar todas as vagas com cache de sessão
+// Função otimizada para buscar todas as vagas
 export async function getVagas(filter?: VagaFilter): Promise<Vaga[]> {
   try {
         let query = supabase
@@ -341,7 +340,7 @@ export async function deleteVaga(id: string): Promise<boolean> {
   }
 }
 
-// Função otimizada para buscar clientes únicos com cache de sessão
+// Função otimizada para buscar clientes únicos
 export async function getClientes(): Promise<string[]> {
   try {
         const { data, error } = await supabase
@@ -379,7 +378,7 @@ export async function getClientes(): Promise<string[]> {
   }
 }
 
-// Função otimizada para buscar sites únicos com cache de sessão
+// Função otimizada para buscar sites únicos
 export async function getSites(): Promise<string[]> {
   try {
         const { data, error } = await supabase
