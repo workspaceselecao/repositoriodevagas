@@ -56,13 +56,8 @@ export default function ListaClientes() {
   const { canEdit, canDelete, loading: permissionsLoading } = useRHPermissions()
   const navigate = useNavigate()
   
-  // Usar sistema simples em desenvolvimento
-  const isDev = import.meta.env.DEV
-  const simpleVagas = useSimpleVagas()
-  const complexVagas = useVagas()
-  
-  // Escolher qual hook usar baseado no ambiente
-  const { vagas, loading, lastUpdated } = isDev ? simpleVagas : complexVagas
+  // Usar sistema simples para carregamento de vagas
+  const { vagas, loading, lastUpdated, refresh } = useSimpleVagas()
   const { textClasses } = useThemeClasses()
 
   // Campos disponíveis para busca
@@ -431,17 +426,13 @@ export default function ListaClientes() {
       try {
         console.log(`🔄 Recarregando dados da página Oportunidades... (Tentativa ${retryCount + 1}/${maxRetries})`)
         
-        // Usar o método de refresh apropriado baseado no ambiente
-        if (isDev) {
-          await simpleVagas.refresh()
-        } else {
-          await refreshVagas()
-        }
+        // Usar o método de refresh
+        await refresh()
         
         // Verificar se os dados foram realmente carregados
         await new Promise(resolve => setTimeout(resolve, 500))
         
-        const currentVagas = isDev ? simpleVagas.vagas : vagas
+        const currentVagas = vagas
         if (currentVagas.length > 0 || retryCount === maxRetries - 1) {
           console.log('✅ Dados recarregados com sucesso')
           
@@ -493,11 +484,7 @@ export default function ListaClientes() {
       console.log('🔄 Forçando recarregamento limpo...')
       
       // Forçar carregamento limpo
-      if (isDev) {
-        await simpleVagas.refresh()
-      } else {
-        await refreshVagas()
-      }
+      await refresh()
       
       console.log('✅ Dados recarregados com sucesso')
       
