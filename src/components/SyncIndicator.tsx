@@ -1,5 +1,5 @@
-import { CheckCircle2, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-import { useDataCache } from '@/contexts/DataCacheContext';
+import { CheckCircle2, Loader2, RefreshCw } from 'lucide-react';
+import { useData } from '../contexts/DataContext';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -10,15 +10,15 @@ import {
 import { useState, useEffect } from 'react';
 
 export function SyncIndicator() {
-  const { syncStatus, refresh } = useDataCache();
+  const { loading, refresh } = useData();
   const [lastSync, setLastSync] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    if (syncStatus === 'synced') {
+    if (!loading) {
       setLastSync(new Date());
     }
-  }, [syncStatus]);
+  }, [loading]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -30,45 +30,27 @@ export function SyncIndicator() {
   };
 
   const getStatusConfig = () => {
-    switch (syncStatus) {
-      case 'synced':
-        return {
-          icon: CheckCircle2,
-          color: 'text-green-500',
-          bgColor: 'bg-green-50 dark:bg-green-950',
-          label: 'Sincronizado',
-          description: `Última sincronização: ${lastSync.toLocaleTimeString('pt-BR')}`,
-        };
-      case 'syncing':
-        return {
-          icon: Loader2,
-          color: 'text-blue-500',
-          bgColor: 'bg-blue-50 dark:bg-blue-950',
-          label: 'Sincronizando...',
-          description: 'Atualizando dados do servidor',
-          animate: true,
-        };
-      case 'error':
-        return {
-          icon: AlertCircle,
-          color: 'text-red-500',
-          bgColor: 'bg-red-50 dark:bg-red-950',
-          label: 'Erro na sincronização',
-          description: 'Problema na conexão com o servidor. Clique para tentar novamente.',
-        };
-      default:
-        // Não mostrar indicador quando está em 'idle'
-        return null;
+    if (loading || isRefreshing) {
+      return {
+        icon: Loader2,
+        color: 'text-blue-500',
+        bgColor: 'bg-blue-50 dark:bg-blue-950',
+        label: 'Carregando...',
+        description: 'Atualizando dados do servidor',
+        animate: true,
+      };
     }
+    
+    return {
+      icon: CheckCircle2,
+      color: 'text-green-500',
+      bgColor: 'bg-green-50 dark:bg-green-950',
+      label: 'Conectado',
+      description: `Última atualização: ${lastSync.toLocaleTimeString('pt-BR')}`,
+    };
   };
 
   const config = getStatusConfig();
-
-  // Não renderizar nada quando está em 'idle'
-  if (!config) {
-    return null;
-  }
-
   const Icon = config.icon;
 
   return (
@@ -94,7 +76,7 @@ export function SyncIndicator() {
           </TooltipContent>
         </Tooltip>
 
-        {syncStatus === 'synced' && (
+        {!loading && !isRefreshing && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -110,28 +92,7 @@ export function SyncIndicator() {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="text-sm">Forçar sincronização</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
-
-        {syncStatus === 'error' && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 text-red-500 ${isRefreshing ? 'animate-spin' : ''}`}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-sm">Tentar novamente</p>
+              <p className="text-sm">Atualizar dados</p>
             </TooltipContent>
           </Tooltip>
         )}

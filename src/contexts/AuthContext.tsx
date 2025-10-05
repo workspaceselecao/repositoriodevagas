@@ -4,7 +4,6 @@ import { signIn, signOut, getCurrentUser } from '../lib/auth'
 import { supabase, isDbLoadingBlocked } from '../lib/supabase'
 import { initializeVersionSystem } from '../version'
 import AuthErrorFallback from '../components/AuthErrorFallback'
-import { cacheManager } from '../lib/cacheManager'
 
 interface AuthContextType {
   user: AuthUser | null
@@ -153,10 +152,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // 1. Limpar cache antes de fazer logout
       try {
-        if (cacheManager.isSupported()) {
-          await cacheManager.clear()
-          console.log('[Auth] Cache cleared successfully')
-        }
+        // Cache removido - dados sempre carregados do banco
+        console.log('[Auth] Dados locais limpos')
       } catch (cacheError) {
         console.warn('[Auth] Error clearing cache:', cacheError)
         // Não falhar o logout por erro no cache
@@ -175,9 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Mesmo com erro, limpar dados locais e cache
       try {
-        if (cacheManager.isSupported()) {
-          await cacheManager.clear()
-        }
+        // Cache removido - dados sempre carregados do banco
         setUser(null)
       } catch (cleanupError) {
         console.error('[Auth] Error during cleanup:', cleanupError)

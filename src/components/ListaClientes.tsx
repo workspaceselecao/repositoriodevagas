@@ -13,7 +13,7 @@ import VagaTemplate from './VagaTemplate'
 import ReportModal from './ReportModal'
 import { useAuth } from '../contexts/AuthContext'
 import { useRHPermissions } from '../hooks/useRHPermissions'
-import { useSimpleVagas } from '../hooks/useSimpleVagas'
+import { useData } from '../contexts/DataContext'
 import { useThemeClasses } from '../hooks/useThemeClasses'
 // import { toast } from 'sonner' // Comentado temporariamente
 
@@ -56,8 +56,8 @@ export default function ListaClientes() {
   const { canEdit, canDelete, loading: permissionsLoading } = useRHPermissions()
   const navigate = useNavigate()
   
-  // Usar sistema simples para carregamento de vagas
-  const { vagas, loading, lastUpdated, refresh } = useSimpleVagas()
+  // Usar dados do contexto simplificado
+  const { vagas, loading, refresh } = useData()
   const { textClasses } = useThemeClasses()
 
   // Campos disponíveis para busca

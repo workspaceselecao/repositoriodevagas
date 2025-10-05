@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
-import { DataCacheProvider } from './contexts/DataCacheContext'
+import { DataProvider } from './contexts/DataContext'
 import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
 import DebugInfo from './components/DebugInfo'
@@ -187,10 +187,10 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <DataCacheProvider>
+        <DataProvider>
           <AppRoutes />
           <DebugInfo />
-        </DataCacheProvider>
+        </DataProvider>
       </AuthProvider>
     </ThemeProvider>
   )
