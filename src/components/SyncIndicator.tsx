@@ -54,7 +54,7 @@ export function SyncIndicator() {
           color: 'text-red-500',
           bgColor: 'bg-red-50 dark:bg-red-950',
           label: 'Erro na sincronização',
-          description: 'Clique para tentar novamente',
+          description: 'Problema na conexão com o servidor. Clique para tentar novamente.',
         };
       default:
         return {
@@ -122,10 +122,10 @@ export function SyncIndicator() {
                 size="sm"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20"
               >
                 <RefreshCw
-                  className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+                  className={`h-4 w-4 text-red-500 ${isRefreshing ? 'animate-spin' : ''}`}
                 />
               </Button>
             </TooltipTrigger>

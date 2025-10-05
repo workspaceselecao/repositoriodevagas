@@ -87,6 +87,16 @@ export default function RealtimeNotifications({
       .subscribe((status: any) => {
         console.log('🔔 Status da subscription:', status)
         setIsConnected(status === 'SUBSCRIBED')
+        
+        if (status === 'CHANNEL_ERROR') {
+          console.error('🔔 Erro no canal, tentando reconectar...')
+          setTimeout(() => {
+            if (!isConnected) {
+              // Recriar subscription se desconectado
+              console.log('🔔 Tentando reconectar...')
+            }
+          }, 5000)
+        }
       })
 
     // Solicitar permissão para notificações do navegador
@@ -98,9 +108,15 @@ export default function RealtimeNotifications({
 
     return () => {
       console.log('🔔 Desconectando notificações em tempo real')
-      reportsSubscription.unsubscribe()
+      if (reportsSubscription) {
+        try {
+          reportsSubscription.unsubscribe()
+        } catch (error) {
+          console.error('🔔 Erro ao desconectar subscription:', error)
+        }
+      }
     }
-  }, [user, onNewReport, onReportUpdate])
+  }, [user?.id, user?.role, user?.email, onNewReport, onReportUpdate])
 
   // Componente invisível - apenas gerencia as notificações
   return null

@@ -76,16 +76,34 @@ export function DataCacheProvider({ children }: { children: ReactNode }) {
     setSyncStatus('syncing');
 
     try {
+      // Verificar se o usuário está autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn('[DataCache] User not authenticated, skipping sync');
+        setLoading(false);
+        setSyncStatus('idle');
+        return;
+      }
+
       const [vagasRes, clientesRes] = await Promise.all([
         supabase.from('vagas').select('*'),
         supabase.from('clientes').select('*').order('nome'),
       ]);
 
-      if (vagasRes.error) throw vagasRes.error;
-      if (clientesRes.error) throw clientesRes.error;
+      if (vagasRes.error) {
+        console.error('[DataCache] Vagas error:', vagasRes.error);
+        throw new Error(`Erro ao buscar vagas: ${vagasRes.error.message}`);
+      }
+      
+      if (clientesRes.error) {
+        console.error('[DataCache] Clientes error:', clientesRes.error);
+        throw new Error(`Erro ao buscar clientes: ${clientesRes.error.message}`);
+      }
 
       const vagasData = vagasRes.data || [];
       const clientesData = clientesRes.data || [];
+
+      console.log(`[DataCache] Fetched ${vagasData.length} vagas and ${clientesData.length} clientes`);
 
       // Atualizar estado
       setVagas(vagasData);
@@ -93,19 +111,42 @@ export function DataCacheProvider({ children }: { children: ReactNode }) {
 
       // Salvar no cache apenas se suportado
       if (cacheManager.isSupported()) {
-        await Promise.all([
-          cacheManager.saveTable('vagas', vagasData),
-          cacheManager.saveTable('clientes', clientesData),
-        ]);
+        try {
+          await Promise.all([
+            cacheManager.saveTable('vagas', vagasData),
+            cacheManager.saveTable('clientes', clientesData),
+          ]);
+          console.log('[DataCache] Data saved to cache successfully');
+        } catch (cacheError) {
+          console.warn('[DataCache] Cache save error:', cacheError);
+          // Não falhar o sync por erro no cache
+        }
       }
 
       setLoading(false);
       setSyncStatus('synced');
-      console.log('[DataCache] Full sync completed');
+      console.log('[DataCache] Full sync completed successfully');
     } catch (error) {
       console.error('[DataCache] Full sync error:', error);
       setSyncStatus('error');
       setLoading(false);
+      
+      // Em caso de erro, tentar carregar dados do cache como fallback
+      if (cacheManager.isSupported()) {
+        try {
+          console.log('[DataCache] Attempting fallback to cache data');
+          const cachedVagas = await cacheManager.getTable('vagas');
+          const cachedClientes = await cacheManager.getTable('clientes');
+          
+          if (cachedVagas && cachedClientes) {
+            setVagas(cachedVagas);
+            setClientes(cachedClientes);
+            console.log('[DataCache] Fallback to cache successful');
+          }
+        } catch (fallbackError) {
+          console.error('[DataCache] Fallback failed:', fallbackError);
+        }
+      }
     }
   }
 
