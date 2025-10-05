@@ -22,7 +22,7 @@ const commonConfig = {
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     flowType: 'pkce' as AuthFlowType,
-    debug: process.env.NODE_ENV === 'development'
+    debug: false // Desabilitar debug para evitar logs desnecessários
   },
   global: {
   },
@@ -39,6 +39,7 @@ const commonConfig = {
 // Cliente padrão (para operações do usuário) - Singleton
 export const supabase = (() => {
   if (!supabaseInstance) {
+    console.log('🔧 Criando instância única do Supabase client')
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, commonConfig) as SupabaseClient
   }
   return supabaseInstance
@@ -47,6 +48,7 @@ export const supabase = (() => {
 // Cliente administrativo (para operações que requerem service role) - Singleton
 export const supabaseAdmin = (() => {
   if (!supabaseAdminInstance) {
+    console.log('🔧 Criando instância única do Supabase admin client')
     supabaseAdminInstance = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,

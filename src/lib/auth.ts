@@ -23,6 +23,8 @@ async function checkIfEmailExists(email: string): Promise<boolean> {
 // Função para fazer login usando Supabase Auth
 export async function signIn({ email, password }: LoginFormData): Promise<AuthUser | null> {
   try {
+    console.log('🔐 Autenticando usuário:', email)
+    
     // Fazer login com Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
@@ -30,7 +32,7 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
     })
 
     if (authError) {
-      console.error('Erro de autenticação:', authError.message)
+      console.error('❌ Erro de autenticação:', authError.message)
       
       // Verificar se é erro de email não confirmado
       if (authError.message.includes('Email not confirmed') || 
@@ -48,6 +50,8 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
       throw new Error('Usuário não encontrado')
     }
 
+    console.log('✅ Autenticação Supabase bem-sucedida')
+
     // Buscar dados do usuário na tabela users usando o ID do auth
     // Usar try-catch para evitar problemas de RLS
     let user = null
@@ -60,6 +64,7 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
 
       if (!userError && userData) {
         user = userData
+        console.log('✅ Dados do usuário carregados')
       }
     } catch (userError) {
       console.log('Erro ao buscar usuário na tabela, usando dados do Auth:', userError)
@@ -67,7 +72,7 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
 
     // Se não encontrou o usuário na tabela, usar dados do Auth
     if (!user) {
-      console.log('Usuário não encontrado na tabela users, usando dados do Auth')
+      console.log('⚠️ Usuário não encontrado na tabela users, usando dados do Auth')
       return {
         id: authData.user.id,
         email: authData.user.email || '',
@@ -76,6 +81,7 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
       }
     }
 
+    console.log('✅ Login concluído com sucesso')
     // Retornar dados do usuário da tabela
     return {
       id: user.id,
@@ -84,7 +90,7 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
       role: user.role
     }
   } catch (error) {
-    console.error('Erro no login:', error)
+    console.error('❌ Erro no login:', error)
     throw error // Re-throw para que o AuthContext possa capturar
   }
 }
