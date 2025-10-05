@@ -203,16 +203,31 @@ export function isDbLoadingBlocked(): boolean {
   }
 }
 
+// Cache para verificação de bloqueio
+let blockCheckCache: { value: boolean; timestamp: number } | null = null
+const BLOCK_CACHE_DURATION = 60000 // 1 minuto
+
 // Função assíncrona para verificar bloqueio no banco (mais confiável)
 export async function isDbLoadingBlockedAsync(): Promise<boolean> {
   try {
+    // Verificar cache primeiro
+    if (blockCheckCache && Date.now() - blockCheckCache.timestamp < BLOCK_CACHE_DURATION) {
+      console.log(`🔍 [isDbLoadingBlockedAsync] Usando cache: ${blockCheckCache.value ? 'BLOQUEADO' : 'LIBERADO'}`)
+      return blockCheckCache.value
+    }
+
     console.log('🔍 [isDbLoadingBlockedAsync] Verificando bloqueio no banco...')
     
-    const { data, error } = await supabaseAdmin
-      .from('system_control')
-      .select('is_blocked')
-      .eq('id', '00000000-0000-0000-0000-000000000001')
-      .single()
+    const { data, error } = await Promise.race([
+      supabaseAdmin
+        .from('system_control')
+        .select('is_blocked')
+        .eq('id', '00000000-0000-0000-0000-000000000001')
+        .single(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout na verificação de bloqueio')), 5000)
+      )
+    ]) as any
 
     if (error) {
       console.warn('⚠️ [isDbLoadingBlockedAsync] Erro ao verificar no banco, usando localStorage:', error.message)
@@ -221,6 +236,12 @@ export async function isDbLoadingBlockedAsync(): Promise<boolean> {
 
     const isBlocked = data?.is_blocked || false
     console.log(`🔍 [isDbLoadingBlockedAsync] Estado do banco: ${isBlocked ? 'BLOQUEADO' : 'LIBERADO'}`)
+    
+    // Atualizar cache
+    blockCheckCache = {
+      value: isBlocked,
+      timestamp: Date.now()
+    }
     
     // Sincronizar com localStorage
     localStorage.setItem(BLOCK_DB_LOADING_KEY, isBlocked.toString())
@@ -364,6 +385,11 @@ import React from 'react'
 // Função para verificar se operações de escrita estão bloqueadas
 export async function checkWriteBlocked(): Promise<boolean> {
   try {
+    // Verificar cache primeiro para operações críticas
+    if (blockCheckCache && Date.now() - blockCheckCache.timestamp < 30000) { // 30 segundos para operações críticas
+      return blockCheckCache.value
+    }
+    
     const isBlocked = await isDbLoadingBlockedAsync()
     if (isBlocked) {
       console.warn('🚫 [checkWriteBlocked] Sistema está BLOQUEADO - operações de escrita não permitidas')

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { cacheManager } from '@/lib/cacheManager';
-import { supabase } from '@/lib/supabase';
+import { cacheManager } from '../lib/cacheManager';
+import { supabase } from '../lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 interface DataCacheContextType {
@@ -180,7 +180,7 @@ export function DataCacheProvider({ children }: { children: ReactNode }) {
     console.log('[DataCache] Setting up realtime listeners...');
 
     try {
-      // Listener para vagas
+      // Listener para vagas com retry logic
       vagasChannel = supabase
         .channel('vagas-changes')
         .on(
@@ -188,9 +188,20 @@ export function DataCacheProvider({ children }: { children: ReactNode }) {
           { event: '*', schema: 'public', table: 'vagas' },
           handleVagasChange
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('[DataCache] Vagas channel status:', status);
+          if (status === 'CLOSED') {
+            console.warn('[DataCache] Vagas channel closed, will retry...');
+            setTimeout(() => {
+              if (vagasChannel) {
+                vagasChannel.unsubscribe();
+                setupRealtimeListeners();
+              }
+            }, 5000);
+          }
+        });
 
-      // Listener para clientes
+      // Listener para clientes com retry logic
       clientesChannel = supabase
         .channel('clientes-changes')
         .on(
@@ -198,7 +209,18 @@ export function DataCacheProvider({ children }: { children: ReactNode }) {
           { event: '*', schema: 'public', table: 'clientes' },
           handleClientesChange
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('[DataCache] Clientes channel status:', status);
+          if (status === 'CLOSED') {
+            console.warn('[DataCache] Clientes channel closed, will retry...');
+            setTimeout(() => {
+              if (clientesChannel) {
+                clientesChannel.unsubscribe();
+                setupRealtimeListeners();
+              }
+            }, 5000);
+          }
+        });
 
       console.log('[DataCache] Realtime listeners setup complete');
     } catch (error) {

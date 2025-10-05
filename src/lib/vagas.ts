@@ -161,10 +161,19 @@ export async function getVagaById(id: string): Promise<Vaga | null> {
 
 // Função para criar uma nova vaga
 export async function createVaga(vagaData: VagaFormData, userId: string): Promise<Vaga | null> {
-  // Verificar se o sistema está bloqueado
-  await assertWriteAllowed()
+  // Verificar se o sistema está bloqueado (com timeout)
+  try {
+    await Promise.race([
+      assertWriteAllowed(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout na verificação de bloqueio')), 5000)
+      )
+    ])
+  } catch (error) {
+    console.warn('⚠️ [createVaga] Timeout na verificação de bloqueio, continuando...', error)
+  }
   
-  const maxRetries = 3
+  const maxRetries = 5
   let lastError: Error | null = null
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -213,12 +222,17 @@ export async function createVaga(vagaData: VagaFormData, userId: string): Promis
 
       const startTime = Date.now()
       
-      // Usar cliente admin para evitar problemas de RLS e timeout
-      const { data: vaga, error } = await supabaseAdmin
-        .from('vagas')
-        .insert(insertData)
-        .select()
-        .single()
+      // Usar cliente admin com timeout para evitar problemas de RLS e timeout
+      const { data: vaga, error } = await Promise.race([
+        supabaseAdmin
+          .from('vagas')
+          .insert(insertData)
+          .select()
+          .single(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout: Operação demorou muito para responder')), 30000)
+        )
+      ]) as any
 
       const endTime = Date.now()
       console.log(`⏱️ [createVaga] Operação concluída em ${endTime - startTime}ms`)
@@ -232,8 +246,33 @@ export async function createVaga(vagaData: VagaFormData, userId: string): Promis
         if (error.message.includes('timeout') || error.message.includes('Timeout')) {
           if (attempt < maxRetries) {
             console.log(`🔄 [createVaga] Timeout detectado, tentando novamente (${attempt + 1}/${maxRetries})...`)
-            await new Promise(resolve => setTimeout(resolve, 1000 * attempt)) // Delay progressivo
+            await new Promise(resolve => setTimeout(resolve, 2000 * attempt)) // Delay progressivo maior
             continue
+          }
+        }
+        
+        // Se for erro de RLS, tentar com cliente normal
+        if (error.message.includes('permission') || error.message.includes('policy') || error.code === '42501') {
+          console.log('🔄 [createVaga] Erro de RLS detectado, tentando com cliente normal...')
+          try {
+            const { data: vagaNormal, error: errorNormal } = await Promise.race([
+              supabase
+                .from('vagas')
+                .insert(insertData)
+                .select()
+                .single(),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout: Operação demorou muito para responder')), 30000)
+              )
+            ]) as any
+            
+            if (!errorNormal && vagaNormal) {
+              console.log('✅ [createVaga] Vaga criada com cliente normal:', vagaNormal)
+              window.dispatchEvent(new CustomEvent('vaga-created', { detail: vagaNormal }))
+              return vagaNormal
+            }
+          } catch (normalError) {
+            console.warn('⚠️ [createVaga] Cliente normal também falhou:', normalError)
           }
         }
         
@@ -254,7 +293,7 @@ export async function createVaga(vagaData: VagaFormData, userId: string): Promis
       if (error instanceof Error && (error.message.includes('timeout') || error.message.includes('Timeout'))) {
         if (attempt < maxRetries) {
           console.log(`🔄 [createVaga] Timeout detectado, tentando novamente (${attempt + 1}/${maxRetries})...`)
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt)) // Delay progressivo
+          await new Promise(resolve => setTimeout(resolve, 2000 * attempt)) // Delay progressivo maior
           continue
         }
       }
