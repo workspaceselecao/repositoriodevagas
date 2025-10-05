@@ -52,11 +52,9 @@ export default function RefreshButton({
       ) : (
         <RefreshCw className="h-4 w-4" />
       )}
-      {size !== 'sm' && (
-        <span className="ml-2">
-          {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-        </span>
-      )}
+      <span className="ml-2">
+        {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
+      </span>
     </Button>
   )
 }

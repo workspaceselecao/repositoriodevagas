@@ -57,17 +57,18 @@ export function SyncIndicator() {
           description: 'Problema na conexão com o servidor. Clique para tentar novamente.',
         };
       default:
-        return {
-          icon: CheckCircle2,
-          color: 'text-gray-500',
-          bgColor: 'bg-gray-50 dark:bg-gray-950',
-          label: 'Aguardando',
-          description: 'Sistema iniciando...',
-        };
+        // Não mostrar indicador quando está em 'idle'
+        return null;
     }
   };
 
   const config = getStatusConfig();
+
+  // Não renderizar nada quando está em 'idle'
+  if (!config) {
+    return null;
+  }
+
   const Icon = config.icon;
 
   return (
