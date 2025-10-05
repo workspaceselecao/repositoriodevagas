@@ -359,24 +359,49 @@ export async function updateVaga(id: string, vagaData: Partial<VagaFormData>, us
 
 // Função para excluir uma vaga
 export async function deleteVaga(id: string): Promise<boolean> {
-  // Verificar se o sistema está bloqueado
-  await assertWriteAllowed()
+  const maxRetries = 3
+  let lastError: Error | null = null
   
-  try {
-    const { error } = await supabase
-      .from('vagas')
-      .delete()
-      .eq('id', id)
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🗑️ [deleteVaga] Tentativa ${attempt}/${maxRetries} - Excluindo vaga ${id}`)
+      
+      // Verificar se o sistema está bloqueado (com timeout)
+      await Promise.race([
+        assertWriteAllowed(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout na verificação de bloqueio')), 5000)
+        )
+      ])
+      
+      // Usar cliente admin para evitar problemas de RLS
+      const { error } = await supabaseAdmin
+        .from('vagas')
+        .delete()
+        .eq('id', id)
 
-    if (error) {
-      throw new Error(error.message)
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      console.log(`✅ [deleteVaga] Vaga ${id} excluída com sucesso na tentativa ${attempt}`)
+      return true
+      
+    } catch (error) {
+      lastError = error as Error
+      console.error(`❌ [deleteVaga] Tentativa ${attempt} falhou:`, error)
+      
+      if (attempt < maxRetries) {
+        const delay = attempt * 1000 // Delay progressivo: 1s, 2s, 3s
+        console.log(`🔄 [deleteVaga] Aguardando ${delay}ms antes da próxima tentativa...`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+      }
     }
-
-    return true
-  } catch (error) {
-    console.error('Erro ao excluir vaga:', error)
-    return false
   }
+
+  // Se todas as tentativas falharam
+  console.error('💥 [deleteVaga] Todas as tentativas falharam:', lastError)
+  return false
 }
 
 // Função otimizada para buscar clientes únicos

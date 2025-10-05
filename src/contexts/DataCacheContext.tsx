@@ -252,6 +252,7 @@ export function DataCacheProvider({ children }: { children: ReactNode }) {
           break;
 
         case 'DELETE':
+          console.log('[DataCache] Removendo vaga do cache:', payload.old.id);
           setVagas(prev => prev.filter(v => v.id !== payload.old.id));
           if (cacheManager.isSupported()) {
             await cacheManager.deleteRecord('vagas', payload.old.id);

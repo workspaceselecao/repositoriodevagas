@@ -53,7 +53,8 @@ export const supabaseAdmin = (() => {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
-        detectSessionInUrl: false
+        detectSessionInUrl: false,
+        storage: undefined // Não usar storage para admin
       },
       global: {
       },
@@ -61,9 +62,7 @@ export const supabaseAdmin = (() => {
         schema: 'public'
       },
       realtime: {
-        params: {
-          eventsPerSecond: 10
-        }
+        enabled: false // Desabilitar realtime para admin para evitar conflitos
       }
     }) as SupabaseClient
   }

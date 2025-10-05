@@ -394,8 +394,8 @@ export default function ListaClientes() {
       try {
         const success = await deleteVaga(id)
         if (success) {
-          // Recarregar dados
-          window.location.reload()
+          // Usar refresh do hook em vez de reload da página
+          await refresh()
         } else {
           alert('Erro ao excluir vaga')
         }
