@@ -62,7 +62,9 @@ export const supabaseAdmin = (() => {
         schema: 'public'
       },
       realtime: {
-        enabled: false // Desabilitar realtime para admin para evitar conflitos
+        params: {
+          eventsPerSecond: 0 // Desabilitar realtime para admin para evitar conflitos
+        }
       }
     }) as SupabaseClient
   }
