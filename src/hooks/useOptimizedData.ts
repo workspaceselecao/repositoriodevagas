@@ -134,7 +134,7 @@ export function useOptimizedData(): OptimizedDataReturn {
   const loadData = useCallback(async <T>(
     key: string,
     fetcher: () => Promise<T[]>,
-    setter: (state: DataState<T>) => void,
+    setter: React.Dispatch<React.SetStateAction<DataState<T>>>,
     dependencies: string[] = []
   ): Promise<void> => {
     // Evitar carregamentos duplicados
@@ -145,7 +145,7 @@ export function useOptimizedData(): OptimizedDataReturn {
 
     try {
       loadingRef.current.add(key)
-      setter(prev => ({ ...prev, loading: true, error: null }))
+      setter((prev: DataState<T>) => ({ ...prev, loading: true, error: null }))
 
       // Tentar cache primeiro
       const cachedData = cache.get<T[]>(key)
@@ -190,7 +190,7 @@ export function useOptimizedData(): OptimizedDataReturn {
 
     } catch (error) {
       console.error(`❌ Erro ao carregar ${key}:`, error)
-      setter(prev => ({
+      setter((prev: DataState<T>) => ({
         ...prev,
         loading: false,
         error: error instanceof Error ? error.message : `Erro ao carregar ${key}`,

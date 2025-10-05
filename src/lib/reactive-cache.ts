@@ -214,18 +214,18 @@ class ReactiveCache {
         case 'UPDATE':
           if (event.data) {
             // Invalidar cache específico para forçar refresh
-            cache.invalidate(event.table as any, event.userId)
+            cache.invalidateByDependency(event.table as string)
           }
           break
 
         case 'DELETE':
           // Invalidar cache específico
-          cache.invalidate(event.table as any, event.userId)
+          cache.invalidateByDependency(event.table as string)
           break
 
         case 'INVALIDATE':
           // Invalidar todo o cache da tabela
-          cache.invalidate(event.table as any, event.userId)
+          cache.invalidateByDependency(event.table as string)
           break
       }
     })

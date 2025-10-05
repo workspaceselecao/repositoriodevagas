@@ -196,6 +196,22 @@ class IntelligentCache {
     }
   }
 
+  // Método de compatibilidade para sistemas legados
+  invalidate(key: string): void {
+    this.delete(key)
+  }
+
+  // Configurar usuário atual (compatibilidade)
+  setCurrentUser(user: any): void {
+    this.set('current-user', user, { ttl: 24 * 60 * 60 * 1000 }) // 24 horas
+  }
+
+  // Invalidar cache do usuário (compatibilidade)
+  invalidateUserCache(userId: string): void {
+    this.invalidateByDependency('user')
+    this.invalidateByDependency(`user-${userId}`)
+  }
+
   // Remover entrada específica
   delete(key: string): void {
     if (this.memoryCache.delete(key)) {
@@ -357,6 +373,9 @@ export function useIntelligentCache() {
     delete: cache.delete.bind(cache),
     clear: cache.clear.bind(cache),
     invalidateByDependency: cache.invalidateByDependency.bind(cache),
+    invalidate: cache.invalidate.bind(cache),
+    setCurrentUser: cache.setCurrentUser.bind(cache),
+    invalidateUserCache: cache.invalidateUserCache.bind(cache),
     getStats: cache.getStats.bind(cache),
     getDebugInfo: cache.getDebugInfo.bind(cache),
     updateConfig: cache.updateConfig.bind(cache)

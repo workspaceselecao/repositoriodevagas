@@ -176,15 +176,25 @@ class UnifiedCache {
     // Tentar cache inteligente primeiro
     if (this.config.enableIntelligentCache) {
       try {
-        const intelligentResult = await this.intelligentCache.get(
-          options.resource as any,
-          fetcher,
-          {
-            forceRefresh: options.forceRefresh,
-            userId: this.currentUser?.id
+        const cacheKey = `${options.resource}:${this.currentUser?.id || 'anonymous'}`
+        
+        if (!options.forceRefresh) {
+          const cachedData = this.intelligentCache.get(cacheKey)
+          if (cachedData) {
+            return cachedData
           }
-        )
-        return intelligentResult
+        }
+        
+        // Buscar dados do servidor
+        const freshData = await fetcher()
+        
+        // Armazenar no cache
+        this.intelligentCache.set(cacheKey, freshData, {
+          ttl: options.ttl || 10 * 60 * 1000,
+          dependencies: [options.resource]
+        })
+        
+        return freshData
       } catch (error) {
         console.warn('⚠️ Cache inteligente falhou, tentando outras opções:', error)
       }
@@ -227,11 +237,11 @@ class UnifiedCache {
 
     // Cache inteligente
     if (this.config.enableIntelligentCache && options.resource) {
-      promises.push(
-        this.intelligentCache.get(options.resource as any, () => Promise.resolve(data), {
-          skipCache: false
-        }).then(() => {})
-      )
+      const cacheKey = `${options.resource}:${this.currentUser?.id || 'anonymous'}`
+      this.intelligentCache.set(cacheKey, data, {
+        ttl: options.ttl || 10 * 60 * 1000,
+        dependencies: [options.resource]
+      })
     }
 
     // Cache persistente
@@ -305,9 +315,7 @@ class UnifiedCache {
 
     // Cache inteligente
     if (this.config.enableIntelligentCache && options.resource) {
-      promises.push(
-        Promise.resolve(this.intelligentCache.invalidate(options.resource as any, options.userId))
-      )
+      this.intelligentCache.invalidateByDependency(options.resource)
     }
 
     // Cache persistente
@@ -494,9 +502,7 @@ class UnifiedCache {
     const promises: Promise<void>[] = []
 
     if (this.config.enableIntelligentCache) {
-      promises.push(
-        Promise.resolve(this.intelligentCache.invalidateUserCache(targetUserId))
-      )
+      this.intelligentCache.invalidateUserCache(targetUserId)
     }
 
     if (this.config.enablePersistentCache) {
