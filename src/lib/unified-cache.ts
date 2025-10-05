@@ -180,8 +180,8 @@ class UnifiedCache {
         
         if (!options.forceRefresh) {
           const cachedData = this.intelligentCache.get(cacheKey)
-          if (cachedData) {
-            return cachedData
+          if (cachedData && cachedData !== null) {
+            return cachedData as T
           }
         }
         
@@ -191,7 +191,7 @@ class UnifiedCache {
         // Armazenar no cache
         this.intelligentCache.set(cacheKey, freshData, {
           ttl: options.ttl || 10 * 60 * 1000,
-          dependencies: [options.resource]
+          dependencies: options.resource ? [options.resource] : []
         })
         
         return freshData
@@ -240,7 +240,7 @@ class UnifiedCache {
       const cacheKey = `${options.resource}:${this.currentUser?.id || 'anonymous'}`
       this.intelligentCache.set(cacheKey, data, {
         ttl: options.ttl || 10 * 60 * 1000,
-        dependencies: [options.resource]
+        dependencies: options.resource ? [options.resource] : []
       })
     }
 

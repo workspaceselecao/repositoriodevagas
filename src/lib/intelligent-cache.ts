@@ -49,12 +49,12 @@ class IntelligentCache {
     }
 
     this.stats = {
-      hits: 0,
-      misses: 0,
-      size: 0,
+    hits: 0,
+    misses: 0,
+    size: 0,
       memoryUsage: 0,
-      lastCleanup: Date.now()
-    }
+    lastCleanup: Date.now()
+  }
 
     this.initializePersistentStorage()
     this.startBackgroundSync()
@@ -142,7 +142,7 @@ class IntelligentCache {
     const entry = this.memoryCache.get(key)
     
     if (!entry) {
-      this.stats.misses++
+    this.stats.misses++
       return null
     }
 
@@ -159,7 +159,7 @@ class IntelligentCache {
     // Atualizar último acesso
     entry.lastAccessed = now
     this.stats.hits++
-    
+
     return entry.data
   }
 
@@ -263,14 +263,14 @@ class IntelligentCache {
     // Limpar entradas expiradas
     const now = Date.now()
     let cleaned = 0
-    
+
     for (const [key, entry] of this.memoryCache.entries()) {
       if (now - entry.timestamp > entry.ttl) {
         this.memoryCache.delete(key)
         cleaned++
       }
     }
-    
+
     if (cleaned > 0) {
       this.stats.size = this.memoryCache.size
       console.log(`🧹 ${cleaned} entradas expiradas removidas`)
@@ -291,7 +291,7 @@ class IntelligentCache {
   private performCleanup(): void {
     const now = Date.now()
     let cleaned = 0
-    
+
     for (const [key, entry] of this.memoryCache.entries()) {
       // Remover entradas expiradas ou muito antigas
       if (now - entry.timestamp > entry.ttl || 
