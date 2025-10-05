@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { CacheProvider } from './contexts/CacheContext'
+import { OptimizedDataProvider } from './contexts/OptimizedDataContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { useCleanup } from './hooks/useCleanup'
 import LoadingScreen from './components/LoadingScreen'
@@ -183,10 +184,10 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <CacheProvider>
+        <OptimizedDataProvider>
           <AppRoutes />
           <DebugInfo />
-        </CacheProvider>
+        </OptimizedDataProvider>
       </AuthProvider>
     </ThemeProvider>
   )

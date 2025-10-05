@@ -20,6 +20,7 @@ import ChangePasswordModal from './ChangePasswordModal'
 import AdminNotifications from './AdminNotifications'
 import NotificationsList from './NotificationsList'
 import RealtimeNotifications, { useRealtimeNotifications } from './RealtimeNotifications'
+import OptimizedRealtimeNotifications from './OptimizedRealtimeNotifications'
 import { 
   Home, 
   Settings, 
@@ -533,12 +534,25 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       />
       
       {/* Change Password Modal */}
-      <ChangePasswordModal 
+      <ChangePasswordModal
         isOpen={isChangePasswordModalOpen}
         onClose={() => setIsChangePasswordModalOpen(false)}
         onSuccess={() => {
           // Opcional: mostrar mensagem de sucesso ou fazer logout
           console.log('Senha alterada com sucesso!')
+        }}
+      />
+
+      {/* Sistema de notificações otimizado */}
+      <OptimizedRealtimeNotifications
+        onNewReport={(report) => {
+          console.log('🔔 Novo report recebido via sistema otimizado:', report)
+        }}
+        onReportUpdate={(report) => {
+          console.log('🔔 Report atualizado via sistema otimizado:', report)
+        }}
+        onDataChange={(type, data) => {
+          console.log('🔔 Dados atualizados via sistema otimizado:', type, data)
         }}
       />
 

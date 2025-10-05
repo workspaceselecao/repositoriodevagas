@@ -1,547 +1,296 @@
-// Sistema de Cache Inteligente Multi-Camada
-// Combina cache em memória, localStorage e IndexedDB para máxima eficiência
-
-import { Vaga, User } from '../types/database'
-// import { sessionCache } from './session-cache' // Removido - sessionCache é apenas para sessões
-
-// Tipos para o sistema de cache
-interface CacheMetadata {
-  timestamp: number
-  ttl: number
-  version: number
-  lastDbUpdate?: number
-  userId?: string
-  permissions?: string[]
-}
+// Sistema de Cache Inteligente e Persistente
+// Solução completa para dados fluidos e disponíveis
 
 interface CacheEntry<T> {
   data: T
-  metadata: CacheMetadata
+  timestamp: number
+  ttl: number
+  version: string
+  dependencies: string[]
+  lastAccessed: number
+}
+
+interface CacheConfig {
+  enablePersistentCache: boolean
+  enableReactiveCache: boolean
+  enableIntelligentRefresh: boolean
+  defaultTTL: number
+  maxCacheSize: number
+  enableBackgroundSync: boolean
+  enableOptimisticUpdates: boolean
 }
 
 interface CacheStats {
   hits: number
   misses: number
-  invalidations: number
   size: number
+  memoryUsage: number
   lastCleanup: number
 }
 
-// Configurações de cache por tipo de dados
-const CACHE_CONFIG = {
-  vagas: {
-    ttl: 15 * 60 * 1000, // 15 minutos
-    maxSize: 1000,
-    priority: 'high',
-    persist: true
-  },
-  clientes: {
-    ttl: 30 * 60 * 1000, // 30 minutos
-    maxSize: 100,
-    priority: 'medium',
-    persist: true
-  },
-  sites: {
-    ttl: 30 * 60 * 1000, // 30 minutos
-    maxSize: 100,
-    priority: 'medium',
-    persist: true
-  },
-  categorias: {
-    ttl: 60 * 60 * 1000, // 1 hora
-    maxSize: 50,
-    priority: 'low',
-    persist: true
-  },
-  cargos: {
-    ttl: 60 * 60 * 1000, // 1 hora
-    maxSize: 200,
-    priority: 'medium',
-    persist: true
-  },
-  usuarios: {
-    ttl: 10 * 60 * 1000, // 10 minutos
-    maxSize: 50,
-    priority: 'high',
-    persist: false // Dados sensíveis não persistem
-  },
-  noticias: {
-    ttl: 5 * 60 * 1000, // 5 minutos
-    maxSize: 50,
-    priority: 'high',
-    persist: false
-  }
-} as const
-
-type CacheKey = keyof typeof CACHE_CONFIG
-
 class IntelligentCache {
   private memoryCache = new Map<string, CacheEntry<any>>()
-  private stats: CacheStats = {
-    hits: 0,
-    misses: 0,
-    invalidations: 0,
-    size: 0,
-    lastCleanup: Date.now()
-  }
-  // private sessionCache = sessionCache // Removido - sessionCache é apenas para sessões
-  private indexedDB: IDBDatabase | null = null
-  private isOnline = navigator.onLine
-  private currentUser: User | null = null
-  private listeners = new Map<string, Set<(data: any) => void>>()
+  private config: CacheConfig
+  private stats: CacheStats
+  private backgroundSyncInterval: NodeJS.Timeout | null = null
+  private cleanupInterval: NodeJS.Timeout | null = null
+  private version = '1.0.0'
 
-  constructor() {
-    this.initializeIndexedDB()
-    this.setupOnlineStatusListener()
-    this.setupPeriodicCleanup()
-    this.setupBackgroundRefresh()
+  constructor(config: Partial<CacheConfig> = {}) {
+    this.config = {
+      enablePersistentCache: true,
+      enableReactiveCache: true,
+      enableIntelligentRefresh: true,
+      defaultTTL: 10 * 60 * 1000, // 10 minutos
+      maxCacheSize: 500,
+      enableBackgroundSync: true,
+      enableOptimisticUpdates: true,
+      ...config
+    }
+
+    this.stats = {
+      hits: 0,
+      misses: 0,
+      size: 0,
+      memoryUsage: 0,
+      lastCleanup: Date.now()
+    }
+
+    this.initializePersistentStorage()
+    this.startBackgroundSync()
+    this.startCleanupProcess()
+    
+    console.log('🚀 Cache Inteligente inicializado:', this.config)
   }
 
-  // Inicializar IndexedDB para cache persistente
-  private async initializeIndexedDB(): Promise<void> {
-    if (typeof window === 'undefined') return
+  // Inicializar armazenamento persistente
+  private async initializePersistentStorage() {
+    if (!this.config.enablePersistentCache) return
 
     try {
-      const request = indexedDB.open('RepositorioVagasCache', 1)
-      
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result
-        
-        // Criar stores para cada tipo de cache
-        Object.keys(CACHE_CONFIG).forEach(key => {
-          if (!db.objectStoreNames.contains(key)) {
-            const store = db.createObjectStore(key, { keyPath: 'id' })
-            store.createIndex('timestamp', 'metadata.timestamp')
-            store.createIndex('userId', 'metadata.userId')
-          }
-        })
-      }
-
-      request.onsuccess = () => {
-        this.indexedDB = request.result
-        console.log('✅ IndexedDB inicializado para cache persistente')
-      }
-
-      request.onerror = () => {
-        console.warn('⚠️ Falha ao inicializar IndexedDB, usando apenas cache em memória')
+      // Carregar dados do localStorage se disponível
+      const savedData = localStorage.getItem('intelligent-cache')
+      if (savedData) {
+        const parsed = JSON.parse(savedData)
+        if (parsed.version === this.version) {
+          this.memoryCache = new Map(parsed.entries)
+          this.stats = parsed.stats || this.stats
+          console.log('📖 Cache persistente restaurado do localStorage')
+        }
       }
     } catch (error) {
-      console.warn('⚠️ IndexedDB não suportado, usando apenas cache em memória')
+      console.warn('⚠️ Erro ao restaurar cache persistente:', error)
     }
   }
 
-  // Configurar listener de status online
-  private setupOnlineStatusListener(): void {
-    window.addEventListener('online', () => {
-      this.isOnline = true
-      console.log('🌐 Conexão restaurada - verificando cache')
-      this.validateCacheOnReconnect()
-    })
+  // Salvar cache no localStorage
+  private saveToPersistentStorage() {
+    if (!this.config.enablePersistentCache) return
 
-    window.addEventListener('offline', () => {
-      this.isOnline = false
-      console.log('📴 Modo offline - usando cache local')
-    })
-  }
-
-  // Configurar limpeza periódica
-  private setupPeriodicCleanup(): void {
-    // Limpeza a cada 5 minutos
-    setInterval(() => {
-      this.cleanup()
-    }, 5 * 60 * 1000)
-  }
-
-  // Configurar refresh em background
-  private setupBackgroundRefresh(): void {
-    // Refresh em background a cada 10 minutos
-    setInterval(() => {
-      this.backgroundRefresh()
-    }, 10 * 60 * 1000)
-  }
-
-  // Definir usuário atual para cache seletivo
-  setCurrentUser(user: User | null): void {
-    this.currentUser = user
-    if (!user) {
-      this.clearUserSpecificCache()
+    try {
+      const data = {
+        version: this.version,
+        entries: Array.from(this.memoryCache.entries()),
+        stats: this.stats,
+        timestamp: Date.now()
+      }
+      localStorage.setItem('intelligent-cache', JSON.stringify(data))
+    } catch (error) {
+      console.warn('⚠️ Erro ao salvar cache persistente:', error)
     }
   }
 
-  // Obter dados com cache inteligente
-  async get<T>(
-    key: CacheKey,
-    fetcher: () => Promise<T>,
+  // Armazenar dados no cache
+  set<T>(
+    key: string, 
+    data: T, 
     options: {
-      forceRefresh?: boolean
-      userId?: string
-      skipCache?: boolean
+      ttl?: number
+      dependencies?: string[]
+      version?: string
     } = {}
-  ): Promise<T> {
-    const cacheKey = this.generateCacheKey(key, options.userId)
-    
-    // Se forçar refresh ou pular cache, buscar diretamente
-    if (options.forceRefresh || options.skipCache) {
-      return this.fetchAndCache(key, fetcher, cacheKey)
+  ): void {
+    const ttl = options.ttl || this.config.defaultTTL
+    const now = Date.now()
+
+    // Verificar se precisa limpar cache
+    if (this.memoryCache.size >= this.config.maxCacheSize) {
+      this.evictOldest()
     }
 
-    // 1. Tentar cache em memória primeiro (mais rápido)
-    const memoryData = this.getFromMemory<T>(cacheKey)
-    if (memoryData) {
-      this.stats.hits++
-      return memoryData
+    const entry: CacheEntry<T> = {
+      data,
+      timestamp: now,
+      ttl,
+      version: options.version || this.version,
+      dependencies: options.dependencies || [],
+      lastAccessed: now
     }
 
-    // 2. Tentar cache de sessão
-    const sessionData = this.getFromSession<T>(cacheKey)
-    if (sessionData) {
-      this.stats.hits++
-      // Promover para cache em memória
-      this.setToMemory(cacheKey, sessionData, CACHE_CONFIG[key].ttl)
-      return sessionData
-    }
+    this.memoryCache.set(key, entry)
+    this.stats.size = this.memoryCache.size
+    this.saveToPersistentStorage()
 
-    // 3. Tentar IndexedDB (se disponível e persistir)
-    if (CACHE_CONFIG[key].persist && this.indexedDB) {
-      const persistedData = await this.getFromIndexedDB<T>(key, cacheKey)
-      if (persistedData) {
-        this.stats.hits++
-        // Promover para cache em memória e sessão
-        this.setToMemory(cacheKey, persistedData, CACHE_CONFIG[key].ttl)
-        this.setToSession(cacheKey, persistedData, CACHE_CONFIG[key].ttl)
-        return persistedData
-      }
-    }
-
-    // 4. Cache miss - buscar dados
-    this.stats.misses++
-    
-    // Se offline, retornar dados em cache mesmo que expirados
-    if (!this.isOnline) {
-      const staleData = await this.getStaleData<T>(key, cacheKey)
-      if (staleData) {
-        console.log(`📴 Usando dados em cache (offline): ${key}`)
-        return staleData
-      }
-    }
-
-    return this.fetchAndCache(key, fetcher, cacheKey)
+    console.log(`💾 Dados armazenados no cache inteligente: ${key}`, {
+      ttl: Math.round(ttl / 1000) + 's',
+      dependencies: entry.dependencies.length
+    })
   }
 
-  // Buscar e armazenar no cache
-  private async fetchAndCache<T>(
-    key: CacheKey,
-    fetcher: () => Promise<T>,
-    cacheKey: string
-  ): Promise<T> {
-    try {
-      console.log(`🔄 Buscando dados do servidor: ${key}`)
-      const data = await fetcher()
-      
-      // Armazenar em todas as camadas
-      this.setToMemory(cacheKey, data, CACHE_CONFIG[key].ttl)
-      this.setToSession(cacheKey, data, CACHE_CONFIG[key].ttl)
-      
-      if (CACHE_CONFIG[key].persist && this.indexedDB) {
-        await this.setToIndexedDB(key, cacheKey, data, CACHE_CONFIG[key].ttl)
-      }
-
-      // Notificar listeners
-      this.notifyListeners(key, data)
-
-      console.log(`✅ Dados armazenados no cache: ${key}`)
-      return data
-    } catch (error) {
-      console.error(`❌ Erro ao buscar dados: ${key}`, error)
-      
-      // Tentar dados em cache mesmo que expirados
-      const staleData = await this.getStaleData<T>(key, cacheKey)
-      if (staleData) {
-        console.log(`🔄 Usando dados em cache (erro na busca): ${key}`)
-        return staleData
-      }
-      
-      throw error
-    }
-  }
-
-  // Cache em memória
-  private getFromMemory<T>(key: string): T | null {
+  // Recuperar dados do cache
+  get<T>(key: string): T | null {
     const entry = this.memoryCache.get(key)
-    if (!entry) return null
-
-    if (this.isExpired(entry.metadata)) {
-      this.memoryCache.delete(key)
+    
+    if (!entry) {
+      this.stats.misses++
       return null
     }
 
+    const now = Date.now()
+    
+    // Verificar se expirou
+    if (now - entry.timestamp > entry.ttl) {
+      this.memoryCache.delete(key)
+      this.stats.misses++
+      this.stats.size = this.memoryCache.size
+      return null
+    }
+
+    // Atualizar último acesso
+    entry.lastAccessed = now
+    this.stats.hits++
+    
     return entry.data
   }
 
-  private setToMemory<T>(key: string, data: T, ttl: number): void {
-    // Limitar tamanho do cache em memória
-    if (this.memoryCache.size >= 100) {
-      this.evictOldestMemoryEntry()
-    }
-
-    this.memoryCache.set(key, {
-      data,
-      metadata: {
-        timestamp: Date.now(),
-        ttl,
-        version: 1,
-        userId: this.currentUser?.id
-      }
-    })
-  }
-
-  // Cache de sessão
-  private getFromSession<T>(key: string): T | null {
-    // Retornar null - sessionCache é apenas para sessões
-    return null
-  }
-
-  private setToSession<T>(key: string, data: T, ttl: number): void {
-    // Não fazer nada - sessionCache é apenas para sessões
-  }
-
-  // Cache persistente (IndexedDB)
-  private async getFromIndexedDB<T>(storeKey: CacheKey, cacheKey: string): Promise<T | null> {
-    if (!this.indexedDB) return null
-
-    return new Promise((resolve) => {
-      const transaction = this.indexedDB!.transaction([storeKey], 'readonly')
-      const store = transaction.objectStore(storeKey)
-      const request = store.get(cacheKey)
-
-      request.onsuccess = () => {
-        const entry = request.result
-        if (!entry || this.isExpired(entry.metadata)) {
-          resolve(null)
-          return
-        }
-        resolve(entry.data)
-      }
-
-      request.onerror = () => resolve(null)
-    })
-  }
-
-  private async setToIndexedDB<T>(
-    storeKey: CacheKey,
-    cacheKey: string,
-    data: T,
-    ttl: number
-  ): Promise<void> {
-    if (!this.indexedDB) return
-
-    return new Promise((resolve, reject) => {
-      const transaction = this.indexedDB!.transaction([storeKey], 'readwrite')
-      const store = transaction.objectStore(storeKey)
-      
-      const entry = {
-        id: cacheKey,
-        data,
-        metadata: {
-          timestamp: Date.now(),
-          ttl,
-          version: 1,
-          userId: this.currentUser?.id
-        }
-      }
-
-      const request = store.put(entry)
-
-      request.onsuccess = () => resolve()
-      request.onerror = () => reject(request.error)
-    })
-  }
-
-  // Obter dados em cache mesmo que expirados
-  private async getStaleData<T>(key: CacheKey, cacheKey: string): Promise<T | null> {
-    // Tentar memória
-    const memoryEntry = this.memoryCache.get(cacheKey)
-    if (memoryEntry) return memoryEntry.data
-
-    // Tentar sessão
-    // const sessionData = this.sessionCache.get(cacheKey) // Removido - sessionCache é apenas para sessões
-    // if (sessionData) return sessionData
-
-    // Tentar IndexedDB
-    if (CACHE_CONFIG[key].persist && this.indexedDB) {
-      return new Promise((resolve) => {
-        const transaction = this.indexedDB!.transaction([key], 'readonly')
-        const store = transaction.objectStore(key)
-        const request = store.get(cacheKey)
-
-        request.onsuccess = () => {
-          resolve(request.result?.data || null)
-        }
-        request.onerror = () => resolve(null)
-      })
-    }
-
-    return null
-  }
-
-  // Gerar chave de cache
-  private generateCacheKey(key: CacheKey, userId?: string): string {
-    const user = userId || this.currentUser?.id || 'anonymous'
-    return `${key}:${user}`
-  }
-
-  // Verificar se entrada expirou
-  private isExpired(metadata: CacheMetadata): boolean {
-    return Date.now() - metadata.timestamp > metadata.ttl
-  }
-
-  // Invalidar cache específico
-  invalidate(key: CacheKey, userId?: string): void {
-    const cacheKey = this.generateCacheKey(key, userId)
+  // Verificar se existe no cache
+  has(key: string): boolean {
+    const entry = this.memoryCache.get(key)
+    if (!entry) return false
     
-    this.memoryCache.delete(cacheKey)
-    // this.sessionCache.delete(cacheKey) // Removido - sessionCache é apenas para sessões
-    
-    if (CACHE_CONFIG[key].persist && this.indexedDB) {
-      const transaction = this.indexedDB.transaction([key], 'readwrite')
-      const store = transaction.objectStore(key)
-      store.delete(cacheKey)
-    }
-
-    this.stats.invalidations++
-    console.log(`🗑️ Cache invalidado: ${key}`)
-  }
-
-  // Invalidar cache do usuário
-  invalidateUserCache(userId: string): void {
-    Object.keys(CACHE_CONFIG).forEach(key => {
-      this.invalidate(key as CacheKey, userId)
-    })
-  }
-
-  // Limpar cache específico do usuário
-  private clearUserSpecificCache(): void {
-    if (!this.currentUser) return
-
-    const userKeys = Array.from(this.memoryCache.keys()).filter(key => 
-      key.includes(this.currentUser!.id)
-    )
-    
-    userKeys.forEach(key => {
+    // Verificar se expirou
+    if (Date.now() - entry.timestamp > entry.ttl) {
       this.memoryCache.delete(key)
-      // this.sessionCache.delete(key) // Removido - sessionCache é apenas para sessões
-    })
+      this.stats.size = this.memoryCache.size
+      return false
+    }
+    
+    return true
   }
 
-  // Limpeza de cache expirado
-  private cleanup(): void {
-    const now = Date.now()
-    let cleaned = 0
-
-    // Limpar memória
+  // Invalidar cache por dependências
+  invalidateByDependency(dependency: string): void {
+    let invalidated = 0
+    
     for (const [key, entry] of this.memoryCache.entries()) {
-      if (this.isExpired(entry.metadata)) {
+      if (entry.dependencies.includes(dependency)) {
         this.memoryCache.delete(key)
-        cleaned++
+        invalidated++
       }
     }
-
-    // Limpar IndexedDB
-    if (this.indexedDB) {
-      Object.keys(CACHE_CONFIG).forEach(async (key) => {
-        const transaction = this.indexedDB!.transaction([key], 'readwrite')
-        const store = transaction.objectStore(key)
-        const index = store.index('timestamp')
-        
-        const request = index.openCursor()
-        request.onsuccess = (event) => {
-          const cursor = (event.target as IDBRequest).result
-          if (cursor) {
-            if (now - cursor.value.metadata.timestamp > cursor.value.metadata.ttl) {
-              cursor.delete()
-              cleaned++
-            }
-            cursor.continue()
-          }
-        }
-      })
-    }
-
-    if (cleaned > 0) {
-      console.log(`🧹 Cache limpo: ${cleaned} itens expirados removidos`)
-    }
-
-    this.stats.lastCleanup = now
-  }
-
-  // Refresh em background
-  private backgroundRefresh(): void {
-    if (!this.isOnline) return
-
-    console.log('🔄 Refresh em background iniciado')
     
-    // Verificar quais caches precisam de refresh
-    for (const [key, entry] of this.memoryCache.entries()) {
-      const config = CACHE_CONFIG[key.split(':')[0] as CacheKey]
-      if (!config) continue
-
-      const age = Date.now() - entry.metadata.timestamp
-      const refreshThreshold = config.ttl * 0.8 // Refresh quando 80% do TTL passou
-
-      if (age > refreshThreshold) {
-        // Marcar para refresh em background
-        console.log(`🔄 Marcando para refresh em background: ${key}`)
-      }
+    if (invalidated > 0) {
+      this.stats.size = this.memoryCache.size
+      this.saveToPersistentStorage()
+      console.log(`🗑️ Invalidados ${invalidated} itens do cache por dependência: ${dependency}`)
     }
   }
 
-  // Validar cache ao reconectar
-  private validateCacheOnReconnect(): void {
-    console.log('🔍 Validando cache após reconexão')
-    
-    // Verificar se dados em cache ainda são válidos
-    // Implementar lógica de validação com servidor se necessário
+  // Remover entrada específica
+  delete(key: string): void {
+    if (this.memoryCache.delete(key)) {
+      this.stats.size = this.memoryCache.size
+      this.saveToPersistentStorage()
+      console.log(`🗑️ Entrada removida do cache: ${key}`)
+    }
   }
 
-  // Remover entrada mais antiga da memória
-  private evictOldestMemoryEntry(): void {
+  // Limpar cache completo
+  clear(): void {
+    this.memoryCache.clear()
+    this.stats.size = 0
+    this.saveToPersistentStorage()
+    console.log('🗑️ Cache inteligente limpo completamente')
+  }
+
+  // Remover entrada mais antiga
+  private evictOldest(): void {
     let oldestKey = ''
     let oldestTime = Date.now()
 
     for (const [key, entry] of this.memoryCache.entries()) {
-      if (entry.metadata.timestamp < oldestTime) {
-        oldestTime = entry.metadata.timestamp
+      if (entry.lastAccessed < oldestTime) {
+        oldestTime = entry.lastAccessed
         oldestKey = key
       }
     }
 
     if (oldestKey) {
       this.memoryCache.delete(oldestKey)
+      console.log(`🗑️ Entrada mais antiga removida: ${oldestKey}`)
     }
   }
 
-  // Adicionar listener para mudanças
-  addListener(key: CacheKey, callback: (data: any) => void): () => void {
-    if (!this.listeners.has(key)) {
-      this.listeners.set(key, new Set())
-    }
-    
-    this.listeners.get(key)!.add(callback)
-    
-    return () => {
-      this.listeners.get(key)?.delete(callback)
-    }
+  // Sincronização em background
+  private startBackgroundSync(): void {
+    if (!this.config.enableBackgroundSync) return
+
+    this.backgroundSyncInterval = setInterval(() => {
+      this.performBackgroundSync()
+    }, 5 * 60 * 1000) // A cada 5 minutos
   }
 
-  // Notificar listeners
-  private notifyListeners(key: CacheKey, data: any): void {
-    this.listeners.get(key)?.forEach(callback => {
-      try {
-        callback(data)
-      } catch (error) {
-        console.error('Erro ao notificar listener:', error)
+  // Sincronização em background
+  private async performBackgroundSync(): Promise<void> {
+    console.log('🔄 Executando sincronização em background...')
+    
+    // Limpar entradas expiradas
+    const now = Date.now()
+    let cleaned = 0
+    
+    for (const [key, entry] of this.memoryCache.entries()) {
+      if (now - entry.timestamp > entry.ttl) {
+        this.memoryCache.delete(key)
+        cleaned++
       }
-    })
+    }
+    
+    if (cleaned > 0) {
+      this.stats.size = this.memoryCache.size
+      console.log(`🧹 ${cleaned} entradas expiradas removidas`)
+    }
+    
+    // Salvar estado atual
+    this.saveToPersistentStorage()
+  }
+
+  // Processo de limpeza
+  private startCleanupProcess(): void {
+    this.cleanupInterval = setInterval(() => {
+      this.performCleanup()
+    }, 30 * 60 * 1000) // A cada 30 minutos
+  }
+
+  // Limpeza completa
+  private performCleanup(): void {
+    const now = Date.now()
+    let cleaned = 0
+    
+    for (const [key, entry] of this.memoryCache.entries()) {
+      // Remover entradas expiradas ou muito antigas
+      if (now - entry.timestamp > entry.ttl || 
+          now - entry.lastAccessed > 60 * 60 * 1000) { // 1 hora sem acesso
+        this.memoryCache.delete(key)
+        cleaned++
+      }
+    }
+    
+    if (cleaned > 0) {
+      this.stats.size = this.memoryCache.size
+      this.saveToPersistentStorage()
+      this.stats.lastCleanup = now
+      console.log(`🧹 Limpeza automática: ${cleaned} entradas removidas`)
+    }
   }
 
   // Obter estatísticas
@@ -549,25 +298,41 @@ class IntelligentCache {
     const total = this.stats.hits + this.stats.misses
     return {
       ...this.stats,
-      hitRate: total > 0 ? (this.stats.hits / total) * 100 : 0,
-      size: this.memoryCache.size
+      hitRate: total > 0 ? (this.stats.hits / total) * 100 : 0
     }
   }
 
-  // Limpar todo o cache
-  clear(): void {
-    this.memoryCache.clear()
-    // this.sessionCache.clear() // Removido - sessionCache é apenas para sessões
-    
-    if (this.indexedDB) {
-      Object.keys(CACHE_CONFIG).forEach(key => {
-        const transaction = this.indexedDB!.transaction([key], 'readwrite')
-        const store = transaction.objectStore(key)
-        store.clear()
-      })
+  // Obter informações de debug
+  getDebugInfo(): any {
+    return {
+      config: this.config,
+      stats: this.getStats(),
+      entries: Array.from(this.memoryCache.entries()).map(([key, entry]) => ({
+        key,
+        age: Math.round((Date.now() - entry.timestamp) / 1000),
+        ttl: Math.round(entry.ttl / 1000),
+        dependencies: entry.dependencies,
+        lastAccessed: Math.round((Date.now() - entry.lastAccessed) / 1000)
+      }))
     }
+  }
 
-    console.log('🗑️ Todo o cache foi limpo')
+  // Atualizar configuração
+  updateConfig(newConfig: Partial<CacheConfig>): void {
+    this.config = { ...this.config, ...newConfig }
+    console.log('⚙️ Configuração do cache atualizada:', newConfig)
+  }
+
+  // Destruir cache
+  destroy(): void {
+    if (this.backgroundSyncInterval) {
+      clearInterval(this.backgroundSyncInterval)
+    }
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval)
+    }
+    this.clear()
+    console.log('💥 Cache inteligente destruído')
   }
 }
 
@@ -581,17 +346,19 @@ export function getIntelligentCache(): IntelligentCache {
   return intelligentCache
 }
 
-// Hook para usar o cache inteligente
+// Hook para usar cache inteligente
 export function useIntelligentCache() {
   const cache = getIntelligentCache()
   
   return {
+    set: cache.set.bind(cache),
     get: cache.get.bind(cache),
-    invalidate: cache.invalidate.bind(cache),
-    invalidateUserCache: cache.invalidateUserCache.bind(cache),
-    setCurrentUser: cache.setCurrentUser.bind(cache),
-    addListener: cache.addListener.bind(cache),
+    has: cache.has.bind(cache),
+    delete: cache.delete.bind(cache),
+    clear: cache.clear.bind(cache),
+    invalidateByDependency: cache.invalidateByDependency.bind(cache),
     getStats: cache.getStats.bind(cache),
-    clear: cache.clear.bind(cache)
+    getDebugInfo: cache.getDebugInfo.bind(cache),
+    updateConfig: cache.updateConfig.bind(cache)
   }
 }

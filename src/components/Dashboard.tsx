@@ -8,6 +8,8 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useDashboardStats, useNoticias } from '../hooks/useCacheData'
 import { useCache } from '../contexts/CacheContext'
+import { useOptimizedDashboardStats, useOptimizedNoticias } from '../contexts/OptimizedDataContext'
+import CacheMigrationToggle from './CacheMigrationToggle'
 import { 
   Users, 
   Building2, 
@@ -34,9 +36,25 @@ import {
 export default function Dashboard() {
   const { user } = useAuth()
   const { config } = useTheme()
-  const { stats, loading } = useDashboardStats()
-  const { noticias } = useNoticias()
-  const { refreshAll } = useCache()
+  
+  // Usar sistema otimizado se disponível
+  const useOptimized = localStorage.getItem('use-optimized-cache') === 'true'
+  
+  const { stats: legacyStats, loading: legacyLoading } = useDashboardStats()
+  const { noticias: legacyNoticias } = useNoticias()
+  const { refreshAll: legacyRefreshAll } = useCache()
+  
+  const { stats: optimizedStats, loading: optimizedLoading } = useOptimizedDashboardStats()
+  const { noticias: optimizedNoticias } = useOptimizedNoticias()
+  
+  // Usar dados otimizados ou legados baseado na preferência
+  const stats = useOptimized ? optimizedStats : legacyStats
+  const loading = useOptimized ? optimizedLoading : legacyLoading
+  const noticias = useOptimized ? optimizedNoticias : legacyNoticias
+  const refreshAll = useOptimized ? () => {
+    // Para o sistema otimizado, não precisamos de refresh manual
+    console.log('🔄 Sistema otimizado - dados atualizados automaticamente')
+  } : legacyRefreshAll
 
   // Estado para controlar expansão dos cards
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
@@ -228,6 +246,19 @@ export default function Dashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Sistema de Cache - Apenas para ADMIN */}
+      {user?.role === 'ADMIN' && (
+        <CacheMigrationToggle
+          onToggle={(useOptimized) => {
+            console.log('🔄 Sistema de cache alterado para:', useOptimized ? 'Otimizado' : 'Legado')
+            // Recarregar página para aplicar mudanças
+            setTimeout(() => {
+              window.location.reload()
+            }, 1000)
+          }}
+        />
+      )}
 
       {/* Métricas Principais com Cards 3D */}
       <div className="grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-4 gap-4 tablet:gap-6">
