@@ -1,5 +1,5 @@
 {
-  "version": "1.0.6",
-  "buildDate": "2024-12-27T10:30:00Z",
-  "description": "Versão com identidade visual RepoVagas completa e linguagem de oportunidades atualizada"
+  "version": "1.0.7",
+  "buildDate": "2025-10-09T00:00:00Z",
+  "description": "Correção de loops infinitos, sistema de auto-refresh e limpeza de cache"
 }
