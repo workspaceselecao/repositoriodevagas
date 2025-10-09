@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
-import { DataProvider } from './contexts/DataContext'
+import { DataProvider, useData } from './contexts/DataContext'
 import { useCleanup } from './hooks/useCleanup'
 import { handlePageRefresh, detectInfiniteLoop } from './lib/refresh-handler'
 import { detectInfiniteLoop as detectLoopAdvanced } from './lib/loop-detector'
@@ -67,8 +67,21 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+// Componente para gerenciar carregamento de dados quando usuário está logado
+function DataLoadingWrapper({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
+  const { loading: dataLoading } = useData()
+
+  // Se usuário está logado mas dados ainda estão carregando
+  if (user && dataLoading) {
+    return <LoadingScreen message="Carregando dados..." />
+  }
+
+  return <>{children}</>
+}
+
 function AppRoutes() {
-  const { user, loading, error, retry } = useAuth()
+  const { user, loading: authLoading, error, retry } = useAuth()
 
   // Se há erro, mostrar ErrorFallback
   if (error) {
@@ -80,7 +93,7 @@ function AppRoutes() {
     return <Navigate to="/dashboard" replace />
   }
 
-  if (loading) {
+  if (authLoading) {
     return (
       <LoadingScreen 
         message={user ? 'Carregando dados...' : 'Inicializando aplicação...'} 
@@ -89,7 +102,8 @@ function AppRoutes() {
   }
 
   return (
-    <Routes>
+    <DataLoadingWrapper>
+      <Routes>
       <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
       <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
       <Route path="/forgot-password" element={!user ? <ForgotPasswordPage /> : <Navigate to="/dashboard" replace />} />
@@ -181,7 +195,8 @@ function AppRoutes() {
       } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+      </Routes>
+    </DataLoadingWrapper>
   )
 }
 

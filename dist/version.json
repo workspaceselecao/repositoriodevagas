@@ -1,5 +1,5 @@
 {
-  "version": "1.0.8",
+  "version": "1.0.9",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "Melhorias na UX: removido aviso persistente 'Conectado' e diferenciados botões de refresh"
+  "description": "Correção crítica: resolvido problema de carregamento infinito na tela inicial"
 }
