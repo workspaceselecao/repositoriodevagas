@@ -22,9 +22,14 @@ const commonConfig = {
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     flowType: 'pkce' as AuthFlowType,
-    debug: false // Desabilitar debug para evitar logs desnecessários
+    debug: false,
+    // Adicionar configuração única para evitar conflitos
+    storageKey: 'repositoriodevagas-auth-token'
   },
   global: {
+    headers: {
+      'X-Client-Info': 'repositoriodevagas-web'
+    }
   },
   db: {
     schema: 'public'
@@ -54,9 +59,14 @@ export const supabaseAdmin = (() => {
         autoRefreshToken: false,
         persistSession: false,
         detectSessionInUrl: false,
-        storage: undefined // Não usar storage para admin
+        storage: undefined, // Não usar storage para admin
+        // Configuração única para admin
+        storageKey: 'repositoriodevagas-admin-token'
       },
       global: {
+        headers: {
+          'X-Client-Info': 'repositoriodevagas-admin'
+        }
       },
       db: {
         schema: 'public'

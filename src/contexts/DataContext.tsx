@@ -24,6 +24,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const retryCountRef = useRef(0);
   const maxRetries = 3;
   const loadingRef = useRef(false);
+  const lastLoadTimeRef = useRef(0);
+  const minLoadInterval = 2000; // Mínimo 2 segundos entre carregamentos
 
   useEffect(() => {
     let mounted = true;
@@ -31,6 +33,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     const initialize = async () => {
       if (!mounted) return;
+      console.log('[DataProvider] 🚀 Inicializando DataProvider...');
       await loadData();
       if (mounted) {
         setupRealtimeListeners();
@@ -48,7 +51,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Função para limpar channels de forma segura
   function cleanupChannels() {
-    console.log('[DataProvider] Limpando channels...');
+    console.log('[DataProvider] 🧹 Limpando channels...');
     
     if (vagasChannelRef.current) {
       try {
@@ -70,79 +73,101 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }
 
   async function loadData() {
-    // Prevenir múltiplas chamadas simultâneas
+    const now = Date.now();
+    
+    // Prevenir múltiplas chamadas simultâneas e carregamentos muito frequentes
     if (loadingRef.current || isUnmountedRef.current) {
-      console.log('[DataProvider] Carregamento já em andamento ou componente desmontado, ignorando...');
+      console.log('[DataProvider] ⏭️ Carregamento já em andamento ou componente desmontado, ignorando...');
+      return;
+    }
+
+    // Verificar se passou tempo suficiente desde o último carregamento
+    if (now - lastLoadTimeRef.current < minLoadInterval) {
+      console.log('[DataProvider] ⏭️ Carregamento muito recente, ignorando...');
       return;
     }
 
     loadingRef.current = true;
-    console.log('[DataProvider] Carregando dados...');
+    lastLoadTimeRef.current = now;
+    console.log('[DataProvider] 🔄 Iniciando carregamento de dados...');
     setLoading(true);
 
     try {
       // Carregar vagas
+      console.log('[DataProvider] 📋 Buscando vagas...');
       const { data: vagasData, error: vagasError } = await supabase
         .from('vagas')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1000);
 
-      if (isUnmountedRef.current) return;
+      if (isUnmountedRef.current) {
+        console.log('[DataProvider] ⚠️ Componente desmontado durante carregamento de vagas');
+        return;
+      }
 
       if (vagasError) {
-        console.error('[DataProvider] Erro ao carregar vagas:', vagasError);
+        console.error('[DataProvider] ❌ Erro ao carregar vagas:', vagasError);
+        throw new Error(`Erro ao carregar vagas: ${vagasError.message}`);
       } else {
         setVagas(vagasData || []);
-        console.log(`[DataProvider] ${vagasData?.length || 0} vagas carregadas`);
+        console.log(`[DataProvider] ✅ ${vagasData?.length || 0} vagas carregadas com sucesso`);
       }
 
       // Carregar clientes (extrair da tabela vagas)
+      console.log('[DataProvider] 👥 Buscando clientes...');
       const { data: clientesData, error: clientesError } = await supabase
         .from('vagas')
         .select('cliente')
         .not('cliente', 'is', null)
         .order('cliente');
 
-      if (isUnmountedRef.current) return;
+      if (isUnmountedRef.current) {
+        console.log('[DataProvider] ⚠️ Componente desmontado durante carregamento de clientes');
+        return;
+      }
 
       if (clientesError) {
-        console.error('[DataProvider] Erro ao carregar clientes:', clientesError);
+        console.error('[DataProvider] ❌ Erro ao carregar clientes:', clientesError);
+        throw new Error(`Erro ao carregar clientes: ${clientesError.message}`);
       } else {
         const uniqueClientes = [...new Set(clientesData?.map(item => item.cliente).filter(Boolean) || [])];
         setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
-        console.log(`[DataProvider] ${uniqueClientes.length} clientes carregados`);
+        console.log(`[DataProvider] ✅ ${uniqueClientes.length} clientes carregados com sucesso`);
       }
 
       // Resetar contador de retries após sucesso
       retryCountRef.current = 0;
+      console.log('[DataProvider] 🎉 Carregamento de dados concluído com sucesso!');
 
     } catch (error) {
-      console.error('[DataProvider] Erro geral:', error);
+      console.error('[DataProvider] ❌ Erro geral no carregamento:', error);
+      // Não fazer throw aqui para evitar quebrar a aplicação
     } finally {
       loadingRef.current = false;
       if (!isUnmountedRef.current) {
         setLoading(false);
+        console.log('[DataProvider] ✅ Estado de loading atualizado para false');
       }
     }
   }
 
   async function refresh() {
     if (isUnmountedRef.current) return;
-    console.log('[DataProvider] Atualizando dados...');
+    console.log('[DataProvider] 🔄 Atualizando dados manualmente...');
     await loadData();
   }
 
   function setupRealtimeListeners() {
     if (isUnmountedRef.current) {
-      console.log('[DataProvider] Componente desmontado, não configurando listeners');
+      console.log('[DataProvider] ⚠️ Componente desmontado, não configurando listeners');
       return;
     }
 
     // Limpar channels existentes antes de criar novos
     cleanupChannels();
 
-    console.log('[DataProvider] Configurando listeners de tempo real...');
+    console.log('[DataProvider] 🔗 Configurando listeners de tempo real...');
 
     // Listener para vagas
     vagasChannelRef.current = supabase
@@ -155,10 +180,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .subscribe((status) => {
         if (isUnmountedRef.current) return;
         
-        console.log('[DataProvider] Vagas channel status:', status);
+        console.log('[DataProvider] 📡 Vagas channel status:', status);
         
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error('[DataProvider] Erro no canal de vagas:', status);
+          console.error('[DataProvider] ❌ Erro no canal de vagas:', status);
           handleChannelError();
         } else if (status === 'SUBSCRIBED') {
           console.log('[DataProvider] ✅ Canal de vagas subscrito com sucesso');
@@ -177,10 +202,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       .subscribe((status) => {
         if (isUnmountedRef.current) return;
         
-        console.log('[DataProvider] Clientes channel status:', status);
+        console.log('[DataProvider] 📡 Clientes channel status:', status);
         
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error('[DataProvider] Erro no canal de clientes:', status);
+          console.error('[DataProvider] ❌ Erro no canal de clientes:', status);
           handleChannelError();
         } else if (status === 'SUBSCRIBED') {
           console.log('[DataProvider] ✅ Canal de clientes subscrito com sucesso');
@@ -196,7 +221,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     
     if (retryCountRef.current <= maxRetries) {
       const delay = Math.min(1000 * Math.pow(2, retryCountRef.current), 10000); // Exponential backoff
-      console.warn(`[DataProvider] Tentando reconectar em ${delay}ms (tentativa ${retryCountRef.current}/${maxRetries})...`);
+      console.warn(`[DataProvider] 🔄 Tentando reconectar em ${delay}ms (tentativa ${retryCountRef.current}/${maxRetries})...`);
       
       setTimeout(() => {
         if (!isUnmountedRef.current) {
@@ -204,7 +229,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         }
       }, delay);
     } else {
-      console.error('[DataProvider] Máximo de tentativas de reconexão atingido. Recarregando dados a cada 30s...');
+      console.error('[DataProvider] ❌ Máximo de tentativas de reconexão atingido. Recarregando dados a cada 30s...');
       // Fallback: recarregar dados periodicamente se realtime falhar
       const intervalId = setInterval(() => {
         if (!isUnmountedRef.current) {
@@ -219,7 +244,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   async function handleVagasChange(payload: any) {
     if (isUnmountedRef.current) return;
     
-    console.log('[DataProvider] Mudança detectada em vagas:', payload.eventType);
+    console.log('[DataProvider] 📝 Mudança detectada em vagas:', payload.eventType);
 
     try {
       switch (payload.eventType) {
@@ -234,19 +259,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
           break;
 
         case 'DELETE':
-          console.log('[DataProvider] Removendo vaga:', payload.old.id);
+          console.log('[DataProvider] 🗑️ Removendo vaga:', payload.old.id);
           setVagas(prev => prev.filter(v => v.id !== payload.old.id));
           break;
       }
     } catch (error) {
-      console.error('[DataProvider] Erro ao processar mudança em vagas:', error);
+      console.error('[DataProvider] ❌ Erro ao processar mudança em vagas:', error);
     }
   }
 
   async function handleClientesChange(payload: any) {
     if (isUnmountedRef.current) return;
     
-    console.log('[DataProvider] Mudança detectada em clientes (via vagas):', payload.eventType);
+    console.log('[DataProvider] 👥 Mudança detectada em clientes (via vagas):', payload.eventType);
 
     try {
       // Recarregar clientes quando vagas mudam
@@ -261,7 +286,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
       }
     } catch (error) {
-      console.error('[DataProvider] Erro ao processar mudança em clientes:', error);
+      console.error('[DataProvider] ❌ Erro ao processar mudança em clientes:', error);
     }
   }
 

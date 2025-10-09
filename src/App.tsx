@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { DataProvider } from './contexts/DataContext'
 import { useCleanup } from './hooks/useCleanup'
 import { handlePageRefresh, detectInfiniteLoop } from './lib/refresh-handler'
+import { detectInfiniteLoop as detectLoopAdvanced } from './lib/loop-detector'
 import LoadingScreen from './components/LoadingScreen'
 import DebugInfo from './components/DebugInfo'
 import ErrorFallback from './components/ErrorFallback'
@@ -190,10 +191,16 @@ function App() {
   
   // Detectar e gerenciar refresh/reload da página
   useEffect(() => {
-    // Detectar loop infinito
-    const hasInfiniteLoop = detectInfiniteLoop()
+    console.log('[App] 🚀 Inicializando aplicação...')
     
-    if (hasInfiniteLoop) {
+    // Detectar loop infinito (sistema básico)
+    const hasBasicLoop = detectInfiniteLoop()
+    
+    // Detectar loop infinito (sistema avançado)
+    const hasAdvancedLoop = detectLoopAdvanced()
+    
+    if (hasBasicLoop || hasAdvancedLoop) {
+      console.error('[App] 🚨 Loop infinito detectado pelos dois sistemas!')
       // Se detectou loop, parar aqui e esperar o usuário reagir ao alert
       return
     }
@@ -202,7 +209,7 @@ function App() {
     handlePageRefresh()
     
     // Log de inicialização
-    console.log('[App] Aplicação inicializada com sucesso')
+    console.log('[App] ✅ Aplicação inicializada com sucesso')
   }, [])
   
   return (
