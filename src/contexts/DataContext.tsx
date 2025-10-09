@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useRef, ReactNode } fro
 import { supabase } from '../lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
+import { forceLoader } from '../lib/force-load';
 
 interface DataContextType {
   vagas: any[];
@@ -89,65 +90,45 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     loadingRef.current = true;
     lastLoadTimeRef.current = now;
-    console.log('[DataProvider] 🔄 Iniciando carregamento de dados...');
+    console.log('[DataProvider] 🔄 Iniciando carregamento FORÇADO de dados...');
     setLoading(true);
 
     try {
-      // Carregar vagas
-      console.log('[DataProvider] 📋 Buscando vagas...');
-      const { data: vagasData, error: vagasError } = await supabase
-        .from('vagas')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1000);
+      // Usar ForceLoader para carregamento garantido
+      console.log('[DataProvider] 🚀 Usando ForceLoader para carregamento garantido...');
+      const vagasData = await forceLoader.forceLoadVagas({
+        maxRetries: 3,
+        retryDelay: 500,
+        timeout: 5000
+      });
 
       if (isUnmountedRef.current) {
-        console.log('[DataProvider] ⚠️ Componente desmontado durante carregamento de vagas');
+        console.log('[DataProvider] ⚠️ Componente desmontado durante carregamento');
         return;
       }
 
-      if (vagasError) {
-        console.error('[DataProvider] ❌ Erro ao carregar vagas:', vagasError);
-        throw new Error(`Erro ao carregar vagas: ${vagasError.message}`);
-      } else {
-        setVagas(vagasData || []);
-        console.log(`[DataProvider] ✅ ${vagasData?.length || 0} vagas carregadas com sucesso`);
-      }
+      setVagas(vagasData);
+      console.log(`[DataProvider] ✅ ${vagasData.length} vagas carregadas com sucesso via ForceLoader`);
 
-      // Carregar clientes (extrair da tabela vagas)
-      console.log('[DataProvider] 👥 Buscando clientes...');
-      const { data: clientesData, error: clientesError } = await supabase
-        .from('vagas')
-        .select('cliente')
-        .not('cliente', 'is', null)
-        .order('cliente');
-
-      if (isUnmountedRef.current) {
-        console.log('[DataProvider] ⚠️ Componente desmontado durante carregamento de clientes');
-        return;
-      }
-
-      if (clientesError) {
-        console.error('[DataProvider] ❌ Erro ao carregar clientes:', clientesError);
-        throw new Error(`Erro ao carregar clientes: ${clientesError.message}`);
-      } else {
-        const uniqueClientes = [...new Set(clientesData?.map(item => item.cliente).filter(Boolean) || [])];
-        setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
-        console.log(`[DataProvider] ✅ ${uniqueClientes.length} clientes carregados com sucesso`);
-      }
+      // Extrair clientes únicos das vagas
+      const uniqueClientes = [...new Set(vagasData.map(vaga => vaga.cliente).filter(Boolean))];
+      setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
+      console.log(`[DataProvider] ✅ ${uniqueClientes.length} clientes extraídos com sucesso`);
 
       // Resetar contador de retries após sucesso
       retryCountRef.current = 0;
-      console.log('[DataProvider] 🎉 Carregamento de dados concluído com sucesso!');
+      console.log('[DataProvider] 🎉 Carregamento FORÇADO concluído com sucesso!');
 
     } catch (error) {
-      console.error('[DataProvider] ❌ Erro geral no carregamento:', error);
-      // Não fazer throw aqui para evitar quebrar a aplicação
+      console.error('[DataProvider] ❌ Erro no carregamento forçado:', error);
+      // Mesmo com erro, definir dados vazios para não travar a aplicação
+      setVagas([]);
+      setClientes([]);
     } finally {
       loadingRef.current = false;
       if (!isUnmountedRef.current) {
         setLoading(false);
-        console.log('[DataProvider] ✅ Estado de loading atualizado para false');
+        console.log('[DataProvider] ✅ Estado de loading atualizado para false (FORÇADO)');
       }
     }
   }

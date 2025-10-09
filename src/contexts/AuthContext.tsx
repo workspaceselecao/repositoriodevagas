@@ -27,13 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Inicializar sistema de versão em background
     initializeVersionSystem()
 
-    // Timeout de segurança para garantir que loading seja false
+    // Timeout de segurança mais agressivo para garantir que loading seja false
     const safetyTimeout = setTimeout(() => {
       if (isMounted) {
-        console.log('⚠️ Timeout de segurança: definindo loading=false')
+        console.log('⚠️ Timeout de segurança: FORÇANDO loading=false')
         setLoading(false)
+        setUser(null) // Reset user também para evitar loops
       }
-    }, 10000) // 10 segundos
+    }, 3000) // 3 segundos apenas
 
     // Verificação imediata de sessão - SEM timeout
     const checkUser = async () => {
@@ -48,8 +49,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
         
-        // Verificação imediata de sessão
-        const { data: { session }, error } = await supabase.auth.getSession()
+        // Verificação imediata de sessão com timeout agressivo
+        const sessionPromise = supabase.auth.getSession()
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session timeout')), 2000)
+        )
+        
+        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
         
         if (error) {
           console.warn('⚠️ Erro ao verificar sessão:', error)
@@ -108,30 +114,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Listener para mudanças de autenticação - apenas para mudanças futuras
+  // Listener simplificado para evitar loops
   useEffect(() => {
     let isMounted = true
+    let lastEventTime = 0
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const now = Date.now()
+      
+      // Prevenir eventos duplicados em menos de 1 segundo
+      if (now - lastEventTime < 1000) {
+        console.log('🚫 Evento de auth duplicado ignorado:', event)
+        return
+      }
+      lastEventTime = now
+      
       console.log('Auth state change:', event, session?.user?.email)
       
       if (!isMounted) return
       
       if (event === 'SIGNED_IN' && session?.user) {
-        try {
-          console.log('✅ Usuário logado via listener, carregando dados...')
-          const userData = await getCurrentUser()
-          if (isMounted) {
-            setUser(userData)
-            setError(null)
-            setLoading(false)
-          }
-        } catch (error) {
-          console.error('❌ Erro ao carregar dados do usuário via listener:', error)
-          if (isMounted) {
-            setError(error as Error)
-            setLoading(false)
-          }
+        console.log('✅ Usuário logado via listener - FORÇANDO loading=false')
+        if (isMounted) {
+          setUser({ id: session.user.id, email: session.user.email!, role: 'USER' } as any)
+          setError(null)
+          setLoading(false)
         }
       } else if (event === 'SIGNED_OUT') {
         console.log('🚪 Usuário deslogado via listener')

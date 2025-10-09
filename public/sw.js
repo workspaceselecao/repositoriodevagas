@@ -1,6 +1,6 @@
-const CACHE_NAME = 'repo-vagas-v1'
-const STATIC_CACHE_NAME = 'repo-vagas-static-v1'
-const DYNAMIC_CACHE_NAME = 'repo-vagas-dynamic-v1'
+const CACHE_NAME = 'repo-vagas-v1.2.0'
+const STATIC_CACHE_NAME = 'repo-vagas-static-v1.2.0'
+const DYNAMIC_CACHE_NAME = 'repo-vagas-dynamic-v1.2.0'
 
 // Arquivos estáticos para cache
 const STATIC_FILES = [
@@ -32,24 +32,23 @@ self.addEventListener('install', (event) => {
   )
 })
 
-// Ativar service worker
+// Ativar service worker com limpeza agressiva
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Ativando service worker...')
+  console.log('[SW] Ativando service worker com limpeza agressiva...')
   
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
+        // Limpar TODOS os caches antigos agressivamente
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE_NAME && cacheName !== DYNAMIC_CACHE_NAME) {
-              console.log('[SW] Removendo cache antigo:', cacheName)
-              return caches.delete(cacheName)
-            }
+            console.log('[SW] Removendo cache antigo:', cacheName)
+            return caches.delete(cacheName)
           })
         )
       })
       .then(() => {
-        console.log('[SW] Service worker ativado')
+        console.log('[SW] Service worker ativado com cache limpo')
         return self.clients.claim()
       })
   )

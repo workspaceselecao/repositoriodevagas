@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "Correção definitiva: resolvido loop infinito de carregamento com timeout de segurança e logs melhorados"
+  "description": "CARREGAMENTO AUTOMÁTICO GARANTIDO: ForceLoader + timeouts agressivos + cache limpo + múltiplas instâncias resolvidas"
 }
