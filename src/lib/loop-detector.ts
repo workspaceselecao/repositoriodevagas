@@ -106,43 +106,43 @@ export function resetLoopDetection(): void {
 }
 
 /**
- * Hook para monitorar e prevenir loops infinitos
+ * Classe para monitorar e prevenir loops infinitos
  */
-export function useLoopPrevention() {
-  const lastActionRef = useRef<number>(0);
-  const actionCountRef = useRef<number>(0);
-  const maxActionsPerSecond = 5;
+class LoopPreventionManager {
+  private lastActionTime: number = 0;
+  private actionCount: number = 0;
+  private readonly maxActionsPerSecond = 5;
   
   /**
    * Verifica se uma ação pode ser executada sem causar loop
    */
-  const canExecuteAction = (): boolean => {
+  canExecuteAction(): boolean {
     const now = Date.now();
-    const timeSinceLastAction = now - lastActionRef.current;
+    const timeSinceLastAction = now - this.lastActionTime;
     
     // Reset contador se passou mais de 1 segundo
     if (timeSinceLastAction > 1000) {
-      actionCountRef.current = 0;
+      this.actionCount = 0;
     }
     
     // Incrementar contador
-    actionCountRef.current++;
-    lastActionRef.current = now;
+    this.actionCount++;
+    this.lastActionTime = now;
     
     // Verificar se excedeu limite
-    if (actionCountRef.current > maxActionsPerSecond) {
+    if (this.actionCount > this.maxActionsPerSecond) {
       console.warn('⚠️ Muitas ações por segundo detectadas, bloqueando para prevenir loop');
       return false;
     }
     
     return true;
-  };
+  }
   
   /**
    * Executa uma ação com proteção contra loop
    */
-  const executeWithProtection = (action: () => void, actionName: string): void => {
-    if (!canExecuteAction()) {
+  executeWithProtection(action: () => void, actionName: string): void {
+    if (!this.canExecuteAction()) {
       console.warn(`⚠️ Ação "${actionName}" bloqueada para prevenir loop`);
       return;
     }
@@ -152,12 +152,32 @@ export function useLoopPrevention() {
     } catch (error) {
       console.error(`❌ Erro na ação "${actionName}":`, error);
     }
-  };
+  }
   
+  /**
+   * Reset do contador de ações
+   */
+  reset(): void {
+    this.actionCount = 0;
+    this.lastActionTime = 0;
+  }
+}
+
+// Instância singleton para uso global
+const loopPreventionManager = new LoopPreventionManager();
+
+/**
+ * Função para monitorar e prevenir loops infinitos (versão funcional)
+ */
+export function useLoopPrevention() {
   return {
-    canExecuteAction,
-    executeWithProtection,
-    resetLoopDetection
+    canExecuteAction: () => loopPreventionManager.canExecuteAction(),
+    executeWithProtection: (action: () => void, actionName: string) => 
+      loopPreventionManager.executeWithProtection(action, actionName),
+    resetLoopDetection: () => {
+      resetLoopDetection();
+      loopPreventionManager.reset();
+    }
   };
 }
 
