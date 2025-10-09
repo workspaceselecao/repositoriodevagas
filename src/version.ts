@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.2.8"
+export const APP_VERSION = "1.2.9"
 export const BUILD_DATE = new Date().toISOString()
 
 // Chave para armazenar a versão atual no localStorage
@@ -136,30 +136,53 @@ export const checkForUpdates = async (): Promise<boolean> => {
 export const forceReload = () => {
   console.log('🔄 Forçando reload da aplicação...')
   
-  // Buscar a versão atual do servidor e atualizar o localStorage antes do reload
+  // CORREÇÃO: Sempre atualizar para a versão mais recente disponível
   fetchServerVersion().then(serverVersion => {
     if (serverVersion) {
-      // CORREÇÃO: Atualizar para a versão do servidor, não manter a atual
+      // Atualizar para a versão do servidor (mais recente)
       setCurrentStoredVersion(serverVersion.version)
       console.log('✅ Versão atualizada no localStorage para:', serverVersion.version)
-      
-      // Limpar cache do navegador para garantir que a nova versão seja carregada
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => {
-            caches.delete(name)
-          })
-          console.log('🗑️ Cache limpo para nova versão')
+    } else {
+      // Se não conseguir buscar do servidor, usar APP_VERSION
+      setCurrentStoredVersion(APP_VERSION)
+      console.log('✅ Usando APP_VERSION como fallback:', APP_VERSION)
+    }
+    
+    // Limpar cache do navegador AGESSIVAMENTE
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => {
+          caches.delete(name)
         })
-      }
+        console.log('🗑️ Cache limpo para nova versão')
+        
+        // Forçar reload com cache bypass
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
+      })
+    } else {
+      // Se não suporta cache, reload direto
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
     }
   }).catch(error => {
-    console.warn('⚠️ Não foi possível atualizar versão antes do reload:', error)
-  }).finally(() => {
-    // Forçar reload com cache bypass para garantir nova versão
+    console.warn('⚠️ Erro ao buscar versão, usando APP_VERSION:', error)
+    setCurrentStoredVersion(APP_VERSION)
+    
+    // Limpar cache mesmo com erro
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => {
+          caches.delete(name)
+        })
+      })
+    }
+    
     setTimeout(() => {
-      window.location.reload() // Força reload sem cache
-    }, 100)
+      window.location.reload()
+    }, 500)
   })
 }
 

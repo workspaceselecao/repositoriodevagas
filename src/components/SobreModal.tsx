@@ -106,14 +106,19 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
       // Primeiro, carregar informações atualizadas
       await loadServerInfo()
       
-      // Depois verificar se há atualizações
-      const hasUpdate = await checkForUpdates()
-      if (hasUpdate) {
-        if (confirm('Nova versão disponível! Deseja atualizar agora?')) {
+      // Buscar versão do servidor diretamente
+      const serverInfo = await fetchServerVersion()
+      
+      if (serverInfo && serverInfo.version !== APP_VERSION) {
+        console.log(`📦 Nova versão disponível: ${serverInfo.version} (atual: ${APP_VERSION})`)
+        if (confirm(`Nova versão ${serverInfo.version} disponível!\n\nVersão atual: ${APP_VERSION}\nVersão nova: ${serverInfo.version}\n\nDeseja atualizar agora?`)) {
+          console.log('🚀 Usuário confirmou atualização, iniciando reload...')
           forceReload()
         }
+      } else if (serverInfo) {
+        alert(`Você está usando a versão mais recente!\n\nVersão atual: ${APP_VERSION}`)
       } else {
-        alert('Você está usando a versão mais recente!')
+        alert('Não foi possível verificar atualizações. Tente novamente.')
       }
     } catch (error) {
       console.error('Erro ao verificar atualizações:', error)
@@ -159,7 +164,7 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
                     {isLoadingInfo ? (
                       <RefreshCw className="h-3 w-3 animate-spin mr-1" />
                     ) : null}
-                    v{serverVersionInfo?.version || APP_VERSION}
+                    v{APP_VERSION}
                   </Badge>
                 </div>
                 <div>
