@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 interface DataContextType {
   vagas: any[];
@@ -16,21 +17,66 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [clientes, setClientes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  let vagasChannel: RealtimeChannel | null = null;
-  let clientesChannel: RealtimeChannel | null = null;
+  // Usar refs para gerenciar channels corretamente e evitar loops
+  const vagasChannelRef = useRef<RealtimeChannel | null>(null);
+  const clientesChannelRef = useRef<RealtimeChannel | null>(null);
+  const isUnmountedRef = useRef(false);
+  const retryCountRef = useRef(0);
+  const maxRetries = 3;
+  const loadingRef = useRef(false);
 
   useEffect(() => {
-    loadData();
-    setupRealtimeListeners();
+    let mounted = true;
+    isUnmountedRef.current = false;
+
+    const initialize = async () => {
+      if (!mounted) return;
+      await loadData();
+      if (mounted) {
+        setupRealtimeListeners();
+      }
+    };
+
+    initialize();
 
     return () => {
-      // Cleanup: remover listeners
-      if (vagasChannel) supabase.removeChannel(vagasChannel);
-      if (clientesChannel) supabase.removeChannel(clientesChannel);
+      mounted = false;
+      isUnmountedRef.current = true;
+      cleanupChannels();
     };
   }, []);
 
+  // Função para limpar channels de forma segura
+  function cleanupChannels() {
+    console.log('[DataProvider] Limpando channels...');
+    
+    if (vagasChannelRef.current) {
+      try {
+        supabase.removeChannel(vagasChannelRef.current);
+        vagasChannelRef.current = null;
+      } catch (error) {
+        console.error('[DataProvider] Erro ao remover vagasChannel:', error);
+      }
+    }
+
+    if (clientesChannelRef.current) {
+      try {
+        supabase.removeChannel(clientesChannelRef.current);
+        clientesChannelRef.current = null;
+      } catch (error) {
+        console.error('[DataProvider] Erro ao remover clientesChannel:', error);
+      }
+    }
+  }
+
   async function loadData() {
+    // Prevenir múltiplas chamadas simultâneas
+    if (loadingRef.current || isUnmountedRef.current) {
+      console.log('[DataProvider] Carregamento já em andamento ou componente desmontado, ignorando...');
+      return;
+    }
+
+    loadingRef.current = true;
     console.log('[DataProvider] Carregando dados...');
     setLoading(true);
 
@@ -41,6 +87,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(1000);
+
+      if (isUnmountedRef.current) return;
 
       if (vagasError) {
         console.error('[DataProvider] Erro ao carregar vagas:', vagasError);
@@ -56,6 +104,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .not('cliente', 'is', null)
         .order('cliente');
 
+      if (isUnmountedRef.current) return;
+
       if (clientesError) {
         console.error('[DataProvider] Erro ao carregar clientes:', clientesError);
       } else {
@@ -64,67 +114,111 @@ export function DataProvider({ children }: { children: ReactNode }) {
         console.log(`[DataProvider] ${uniqueClientes.length} clientes carregados`);
       }
 
+      // Resetar contador de retries após sucesso
+      retryCountRef.current = 0;
+
     } catch (error) {
       console.error('[DataProvider] Erro geral:', error);
     } finally {
-      setLoading(false);
+      loadingRef.current = false;
+      if (!isUnmountedRef.current) {
+        setLoading(false);
+      }
     }
   }
 
   async function refresh() {
+    if (isUnmountedRef.current) return;
     console.log('[DataProvider] Atualizando dados...');
     await loadData();
   }
 
   function setupRealtimeListeners() {
+    if (isUnmountedRef.current) {
+      console.log('[DataProvider] Componente desmontado, não configurando listeners');
+      return;
+    }
+
+    // Limpar channels existentes antes de criar novos
+    cleanupChannels();
+
     console.log('[DataProvider] Configurando listeners de tempo real...');
 
     // Listener para vagas
-    vagasChannel = supabase
-      .channel('vagas-changes')
+    vagasChannelRef.current = supabase
+      .channel(`vagas-changes-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'vagas' },
         handleVagasChange
       )
       .subscribe((status) => {
+        if (isUnmountedRef.current) return;
+        
         console.log('[DataProvider] Vagas channel status:', status);
-        if (status === 'CLOSED') {
-          console.warn('[DataProvider] Vagas channel closed, will retry...');
-          setTimeout(() => {
-            if (vagasChannel) {
-              vagasChannel.unsubscribe();
-              setupRealtimeListeners();
-            }
-          }, 5000);
+        
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[DataProvider] Erro no canal de vagas:', status);
+          handleChannelError();
+        } else if (status === 'SUBSCRIBED') {
+          console.log('[DataProvider] ✅ Canal de vagas subscrito com sucesso');
+          retryCountRef.current = 0; // Reset retry count on success
         }
       });
 
     // Listener para clientes (baseado em vagas)
-    clientesChannel = supabase
-      .channel('clientes-changes')
+    clientesChannelRef.current = supabase
+      .channel(`clientes-changes-${Date.now()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'vagas' },
         handleClientesChange
       )
       .subscribe((status) => {
+        if (isUnmountedRef.current) return;
+        
         console.log('[DataProvider] Clientes channel status:', status);
-        if (status === 'CLOSED') {
-          console.warn('[DataProvider] Clientes channel closed, will retry...');
-          setTimeout(() => {
-            if (clientesChannel) {
-              clientesChannel.unsubscribe();
-              setupRealtimeListeners();
-            }
-          }, 5000);
+        
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[DataProvider] Erro no canal de clientes:', status);
+          handleChannelError();
+        } else if (status === 'SUBSCRIBED') {
+          console.log('[DataProvider] ✅ Canal de clientes subscrito com sucesso');
+          retryCountRef.current = 0; // Reset retry count on success
         }
       });
+  }
 
-    return { vagasChannel, clientesChannel };
+  function handleChannelError() {
+    if (isUnmountedRef.current) return;
+
+    retryCountRef.current++;
+    
+    if (retryCountRef.current <= maxRetries) {
+      const delay = Math.min(1000 * Math.pow(2, retryCountRef.current), 10000); // Exponential backoff
+      console.warn(`[DataProvider] Tentando reconectar em ${delay}ms (tentativa ${retryCountRef.current}/${maxRetries})...`);
+      
+      setTimeout(() => {
+        if (!isUnmountedRef.current) {
+          setupRealtimeListeners();
+        }
+      }, delay);
+    } else {
+      console.error('[DataProvider] Máximo de tentativas de reconexão atingido. Recarregando dados a cada 30s...');
+      // Fallback: recarregar dados periodicamente se realtime falhar
+      const intervalId = setInterval(() => {
+        if (!isUnmountedRef.current) {
+          loadData();
+        } else {
+          clearInterval(intervalId);
+        }
+      }, 30000);
+    }
   }
 
   async function handleVagasChange(payload: any) {
+    if (isUnmountedRef.current) return;
+    
     console.log('[DataProvider] Mudança detectada em vagas:', payload.eventType);
 
     try {
@@ -150,6 +244,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }
 
   async function handleClientesChange(payload: any) {
+    if (isUnmountedRef.current) return;
+    
     console.log('[DataProvider] Mudança detectada em clientes (via vagas):', payload.eventType);
 
     try {
@@ -160,7 +256,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .not('cliente', 'is', null)
         .order('cliente');
 
-      if (!clientesError && clientesData) {
+      if (!clientesError && clientesData && !isUnmountedRef.current) {
         const uniqueClientes = [...new Set(clientesData.map(item => item.cliente).filter(Boolean))];
         setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
       }
@@ -168,6 +264,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       console.error('[DataProvider] Erro ao processar mudança em clientes:', error);
     }
   }
+
+  // Configurar auto-refresh a cada 5 minutos
+  useAutoRefresh({
+    onRefresh: refresh,
+    interval: 300000, // 5 minutos
+    enabled: true,
+    onVisibilityChange: true
+  });
 
   const value = {
     vagas,

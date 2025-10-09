@@ -2,6 +2,51 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 
+## [1.0.7] - 2025-10-09
+
+### 🐛 Correções Críticas
+- Corrigido loop infinito ao pressionar F5 (refresh)
+- Corrigido loop infinito quando aplicação fica aberta por muito tempo
+- Corrigido memory leaks em listeners de realtime
+- Corrigido problema de múltiplas instâncias de channels
+
+### ✨ Adicionado
+- Sistema de detecção de loops infinitos (`src/lib/refresh-handler.ts`)
+- Sistema de limpeza automática de cache ao fechar aplicação
+- Hook `useAutoRefresh` para recarregamento automático inteligente
+- Lock de refresh para prevenir múltiplos reloads simultâneos
+- Debounce em operações de refresh
+- Exponential backoff em reconexões de realtime
+- Limite de tentativas de reconexão (máx 3)
+- Limpeza automática de cache após 1 minuto de inatividade
+- Logs detalhados para debugging de problemas de carregamento
+
+### 🔄 Alterado
+- `DataContext`: Refatorado para usar refs ao invés de variáveis locais
+- `DataContext`: Adicionado controle de estado de montagem/desmontagem
+- `DataContext`: Implementado fallback para polling quando realtime falha
+- `useCleanup`: Implementado sistema completo de limpeza de recursos
+- `App.tsx`: Integrado sistema de detecção de loops
+
+### 🚀 Melhorias de Performance
+- Prevenção de múltiplas chamadas simultâneas de carregamento
+- Cleanup adequado de timers e listeners
+- Refresh automático apenas quando página está visível
+- Cache preserva apenas dados críticos (tokens de auth)
+- Channels de realtime com nomes únicos baseados em timestamp
+
+### 📊 Monitoramento
+- Sistema detecta 5+ carregamentos em 30s como loop infinito
+- Alert automático para usuário quando loop é detectado
+- Logs estruturados para rastreamento de problemas
+- Verificação de performance em carregamentos
+
+### 📚 Documentação
+- Criado `MELHORIAS_SISTEMA_LOOP_INFINITO.md` com detalhes técnicos
+- Criado `GUIA_TESTE_RAPIDO.md` para validação das correções
+- Documentação de todos os hooks e sistemas novos
+- Guia de troubleshooting para problemas comuns
+
 ## [1.0.6] - 2024-12-27
 
 ### ✨ Adicionado

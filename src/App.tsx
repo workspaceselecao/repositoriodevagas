@@ -1,8 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { DataProvider } from './contexts/DataContext'
 import { useCleanup } from './hooks/useCleanup'
+import { handlePageRefresh, detectInfiniteLoop } from './lib/refresh-handler'
 import LoadingScreen from './components/LoadingScreen'
 import DebugInfo from './components/DebugInfo'
 import ErrorFallback from './components/ErrorFallback'
@@ -183,6 +185,25 @@ function AppRoutes() {
 }
 
 function App() {
+  // Ativar sistema de limpeza de cache
+  useCleanup()
+  
+  // Detectar e gerenciar refresh/reload da página
+  useEffect(() => {
+    // Detectar loop infinito
+    const hasInfiniteLoop = detectInfiniteLoop()
+    
+    if (hasInfiniteLoop) {
+      // Se detectou loop, parar aqui e esperar o usuário reagir ao alert
+      return
+    }
+    
+    // Gerenciar refresh da página
+    handlePageRefresh()
+    
+    // Log de inicialização
+    console.log('[App] Aplicação inicializada com sucesso')
+  }, [])
   
   return (
     <ThemeProvider>
