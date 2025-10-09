@@ -48,11 +48,26 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
     try {
       console.log('📡 Carregando informações atualizadas do servidor...')
       
-      // Buscar informações da versão do servidor
+      // Limpar cache antes de buscar
+      if ('caches' in window) {
+        const cacheNames = await caches.keys()
+        await Promise.all(cacheNames.map(name => caches.delete(name)))
+        console.log('🗑️ Cache limpo antes de buscar versão')
+      }
+      
+      // Buscar informações da versão do servidor com cache bypass
       const serverInfo = await fetchServerVersion()
       if (serverInfo) {
         setServerVersionInfo(serverInfo)
         console.log('✅ Informações do servidor carregadas:', serverInfo.version)
+      } else {
+        // Fallback: usar APP_VERSION se não conseguir buscar do servidor
+        console.log('⚠️ Usando versão local como fallback:', APP_VERSION)
+        setServerVersionInfo({
+          version: APP_VERSION,
+          buildDate: new Date().toISOString(),
+          description: 'Versão local'
+        })
       }
       
       // Obter versão armazenada localmente
@@ -63,6 +78,12 @@ export default function SobreModal({ isOpen, onClose, user }: SobreModalProps) {
       
     } catch (error) {
       console.error('❌ Erro ao carregar informações do servidor:', error)
+      // Em caso de erro, usar APP_VERSION
+      setServerVersionInfo({
+        version: APP_VERSION,
+        buildDate: new Date().toISOString(),
+        description: 'Versão local (erro no servidor)'
+      })
     } finally {
       setIsLoadingInfo(false)
     }

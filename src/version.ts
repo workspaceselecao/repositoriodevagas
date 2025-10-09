@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.2.3"
+export const APP_VERSION = "1.2.5"
 export const BUILD_DATE = new Date().toISOString()
 
 // Chave para armazenar a versão atual no localStorage
@@ -33,15 +33,28 @@ export const setCurrentStoredVersion = (version: string): void => {
 // Função para buscar informações da versão do servidor
 export const fetchServerVersion = async (): Promise<VersionInfo | null> => {
   try {
-    // Adicionar timestamp para evitar cache
-    const timestamp = Date.now()
-    const response = await fetch(`/version.json?t=${timestamp}`, {
+    // Adicionar timestamp aleatório para evitar cache
+    const timestamp = Date.now() + Math.random()
+    
+    // Limpar cache antes da requisição
+    if ('caches' in window) {
+      try {
+        const cacheNames = await caches.keys()
+        await Promise.all(cacheNames.map(name => caches.delete(name)))
+        console.log('🗑️ Cache limpo antes de buscar version.json')
+      } catch (cacheError) {
+        console.warn('⚠️ Erro ao limpar cache:', cacheError)
+      }
+    }
+    
+    const response = await fetch(`/version.json?t=${timestamp}&r=${Math.random()}`, {
       method: 'GET',
       cache: 'no-store',
       headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
         'Pragma': 'no-cache',
-        'Expires': '0'
+        'Expires': '0',
+        'Last-Modified': new Date().toUTCString()
       }
     })
     

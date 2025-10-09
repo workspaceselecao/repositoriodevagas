@@ -1,5 +1,5 @@
 {
-  "version": "1.2.4",
+  "version": "1.2.5",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "Correção dupla: versionamento atualizado para v1.2.4 + alinhamento perfeito do botão sidebar sem wrapper duplicado"
+  "description": "Correção definitiva do versionamento: limpeza agressiva de cache + fallback para APP_VERSION + fetchServerVersion otimizado"
 }
