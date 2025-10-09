@@ -1,5 +1,5 @@
 {
-  "version": "1.2.2",
+  "version": "1.2.3",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "Correção da sidebar: botão 'Atualizar Dados' agora mostra apenas ícone quando sidebar contraída"
+  "description": "Alinhamento perfeito: botão 'Atualizar Dados' agora está perfeitamente alinhado com outros itens da sidebar"
 }

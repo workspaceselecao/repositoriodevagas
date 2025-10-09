@@ -8,6 +8,7 @@ interface RefreshButtonProps {
   size?: 'sm' | 'default' | 'lg'
   className?: string
   showText?: boolean
+  iconSize?: 'sm' | 'md' | 'lg'
 }
 
 export default function RefreshButton({ 
@@ -15,7 +16,8 @@ export default function RefreshButton({
   variant = 'outline', 
   size = 'default',
   className = '',
-  showText = true
+  showText = true,
+  iconSize = 'md'
 }: RefreshButtonProps) {
   const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -50,12 +52,12 @@ export default function RefreshButton({
       title={isRefreshing ? 'Atualizando...' : 'Atualizar dados'}
     >
       {isRefreshing ? (
-        <RefreshCw className="h-4 w-4 animate-spin" />
+        <RefreshCw className={`animate-spin ${iconSize === 'sm' ? 'h-4 w-4' : iconSize === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />
       ) : (
-        <RefreshCw className="h-4 w-4" />
+        <RefreshCw className={`${iconSize === 'sm' ? 'h-4 w-4' : iconSize === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />
       )}
       {showText && (
-        <span className="ml-2">
+        <span className="ml-3 text-sm font-medium">
           {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
         </span>
       )}

@@ -305,6 +305,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       variant="ghost"
                       size="sm"
                       showText={!isCollapsed}
+                      iconSize={isCollapsed ? 'lg' : 'sm'}
                       className={`w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 rounded-lg hover-button ${
                         isCollapsed 
                           ? "justify-center p-3 h-11 w-11" 
