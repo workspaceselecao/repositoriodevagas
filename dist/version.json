@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.2.1",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "CARREGAMENTO AUTOMÁTICO GARANTIDO: ForceLoader + timeouts agressivos + cache limpo + múltiplas instâncias resolvidas"
+  "description": "Interface simplificada: removido botão 'Forçar Refresh' redundante, mantido apenas 'Atualizar Dados' otimizado"
 }

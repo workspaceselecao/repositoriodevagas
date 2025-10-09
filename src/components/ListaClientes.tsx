@@ -8,7 +8,7 @@ import { Badge } from './ui/badge'
 import { Vaga } from '../types/database'
 import { deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw, Filter, Clock, Hash, MapPin, DollarSign, Calendar, User, Briefcase, Globe, Tag, Star, ArrowUpDown, AlertTriangle, RotateCcw } from 'lucide-react'
+import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw, Filter, Clock, Hash, MapPin, DollarSign, Calendar, User, Briefcase, Globe, Tag, Star, ArrowUpDown, AlertTriangle } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
 import ReportModal from './ReportModal'
 import { useAuth } from '../contexts/AuthContext'
@@ -475,25 +475,6 @@ export default function ListaClientes() {
     setIsRefreshing(false)
   }
 
-  // Função para forçar recarregamento limpo
-  const handleForceCleanRefresh = async () => {
-    if (isRefreshing) return
-    
-    setIsRefreshing(true)
-    try {
-      console.log('🔄 Forçando recarregamento limpo...')
-      
-      // Forçar carregamento limpo
-      await refresh()
-      
-      console.log('✅ Dados recarregados com sucesso')
-      
-    } catch (error) {
-      console.error('❌ Erro ao recarregar dados:', error)
-    } finally {
-      setIsRefreshing(false)
-    }
-  }
 
   const formatText = (text: string | undefined, maxLength: number = 100) => {
     if (!text) return 'Não informado'
@@ -545,30 +526,17 @@ export default function ListaClientes() {
             <span className="tablet:hidden">Exportar</span>
           </Button>
           <Button 
-            variant="outline" 
+            variant="default" 
             onClick={handleRefresh} 
             disabled={isRefreshing} 
             size="sm" 
             data-refresh-button
-            className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
+            className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md bg-blue-600 hover:bg-blue-700 text-white"
             title="Atualizar dados do servidor"
           >
             <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
             <span className={isRefreshing ? 'opacity-70' : ''}>
-              {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-            </span>
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={handleForceCleanRefresh} 
-            disabled={isRefreshing} 
-            size="sm" 
-            className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md bg-orange-50 hover:bg-orange-100 border-orange-200"
-            title="Forçar recarregamento completo (resolve problemas persistentes)"
-          >
-            <RotateCcw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
-            <span className={isRefreshing ? 'opacity-70' : ''}>
-              {isRefreshing ? 'Recarregando...' : 'Forçar Refresh'}
+              {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
             </span>
           </Button>
         </div>
