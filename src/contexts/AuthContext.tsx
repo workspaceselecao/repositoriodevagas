@@ -27,6 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Inicializar sistema de versão em background
     initializeVersionSystem()
 
+    // Timeout de segurança para garantir que loading seja false
+    const safetyTimeout = setTimeout(() => {
+      if (isMounted) {
+        console.log('⚠️ Timeout de segurança: definindo loading=false')
+        setLoading(false)
+      }
+    }, 10000) // 10 segundos
+
     // Verificação imediata de sessão - SEM timeout
     const checkUser = async () => {
       if (!isMounted) return
@@ -46,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) {
           console.warn('⚠️ Erro ao verificar sessão:', error)
           if (isMounted) {
+            clearTimeout(safetyTimeout)
             setUser(null)
             setLoading(false)
           }
@@ -57,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             const userData = await getCurrentUser()
             if (isMounted) {
+              console.log('✅ Dados do usuário carregados, definindo loading=false')
+              clearTimeout(safetyTimeout)
               setUser(userData)
               setLoading(false)
               console.log('✅ Usuário autenticado automaticamente')
@@ -64,12 +75,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } catch (userError) {
             console.error('❌ Erro ao carregar dados do usuário:', userError)
             if (isMounted) {
+              console.log('❌ Erro no carregamento, definindo loading=false')
+              clearTimeout(safetyTimeout)
               setUser(null)
               setLoading(false)
             }
           }
         } else if (isMounted) {
-          console.log('❌ Nenhuma sessão encontrada')
+          console.log('❌ Nenhuma sessão encontrada, definindo loading=false')
+          clearTimeout(safetyTimeout)
           setUser(null)
           setLoading(false)
         }
@@ -77,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error('❌ Erro na verificação de usuário:', error)
         if (isMounted) {
+          clearTimeout(safetyTimeout)
           setUser(null)
           setLoading(false)
         }
@@ -89,35 +104,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Cleanup
     return () => {
       isMounted = false
+      clearTimeout(safetyTimeout)
     }
   }, [])
 
-  // Listener para mudanças de autenticação simplificado
+  // Listener para mudanças de autenticação - apenas para mudanças futuras
   useEffect(() => {
+    let isMounted = true
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.email)
       
+      if (!isMounted) return
+      
       if (event === 'SIGNED_IN' && session?.user) {
         try {
-          console.log('✅ Usuário logado, carregando dados...')
+          console.log('✅ Usuário logado via listener, carregando dados...')
           const userData = await getCurrentUser()
-          setUser(userData)
-          setError(null)
-          setLoading(false)
+          if (isMounted) {
+            setUser(userData)
+            setError(null)
+            setLoading(false)
+          }
         } catch (error) {
-          console.error('❌ Erro ao carregar dados do usuário:', error)
-          setError(error as Error)
-          setLoading(false)
+          console.error('❌ Erro ao carregar dados do usuário via listener:', error)
+          if (isMounted) {
+            setError(error as Error)
+            setLoading(false)
+          }
         }
       } else if (event === 'SIGNED_OUT') {
-        console.log('🚪 Usuário deslogado')
-        setUser(null)
-        setError(null)
-        setLoading(false)
+        console.log('🚪 Usuário deslogado via listener')
+        if (isMounted) {
+          setUser(null)
+          setError(null)
+          setLoading(false)
+        }
       }
     })
 
     return () => {
+      isMounted = false
       subscription.unsubscribe()
     }
   }, [])

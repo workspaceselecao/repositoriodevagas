@@ -1,5 +1,5 @@
 {
-  "version": "1.0.9",
+  "version": "1.1.0",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "Correção crítica: resolvido problema de carregamento infinito na tela inicial"
+  "description": "Correção definitiva: resolvido loop infinito de carregamento com timeout de segurança e logs melhorados"
 }
