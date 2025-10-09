@@ -304,6 +304,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <RefreshButton
                       variant="ghost"
                       size="sm"
+                      showText={!isCollapsed}
                       className={`w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 rounded-lg hover-button ${
                         isCollapsed 
                           ? "justify-center p-3 h-11 w-11" 
@@ -426,6 +427,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
                   <RefreshButton
                     variant="ghost"
+                    showText={true}
                     className="w-full justify-start px-3 py-2.5 h-11 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 rounded-lg mb-2"
                   />
                   

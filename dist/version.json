@@ -1,5 +1,5 @@
 {
-  "version": "1.2.1",
+  "version": "1.2.2",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "Interface simplificada: removido botão 'Forçar Refresh' redundante, mantido apenas 'Atualizar Dados' otimizado"
+  "description": "Correção da sidebar: botão 'Atualizar Dados' agora mostra apenas ícone quando sidebar contraída"
 }

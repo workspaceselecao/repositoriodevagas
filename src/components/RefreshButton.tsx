@@ -7,13 +7,15 @@ interface RefreshButtonProps {
   variant?: 'default' | 'ghost' | 'outline'
   size?: 'sm' | 'default' | 'lg'
   className?: string
+  showText?: boolean
 }
 
 export default function RefreshButton({ 
   onRefresh, 
   variant = 'outline', 
   size = 'default',
-  className = '' 
+  className = '',
+  showText = true
 }: RefreshButtonProps) {
   const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -52,9 +54,11 @@ export default function RefreshButton({
       ) : (
         <RefreshCw className="h-4 w-4" />
       )}
-      <span className="ml-2">
-        {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
-      </span>
+      {showText && (
+        <span className="ml-2">
+          {isRefreshing ? 'Atualizando...' : 'Atualizar Dados'}
+        </span>
+      )}
     </Button>
   )
 }
