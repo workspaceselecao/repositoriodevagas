@@ -53,6 +53,11 @@ export function SyncIndicator() {
   const config = getStatusConfig();
   const Icon = config.icon;
 
+  // Mostrar apenas quando está carregando ou quando há botão de refresh
+  if (!loading && !isRefreshing) {
+    return null;
+  }
+
   return (
     <TooltipProvider>
       <div className="flex items-center gap-2">
@@ -75,27 +80,6 @@ export function SyncIndicator() {
             <p className="text-sm">{config.description}</p>
           </TooltipContent>
         </Tooltip>
-
-        {!loading && !isRefreshing && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="h-8 w-8 p-0"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-sm">Atualizar dados</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
       </div>
     </TooltipProvider>
   );

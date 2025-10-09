@@ -8,7 +8,7 @@ import { Badge } from './ui/badge'
 import { Vaga } from '../types/database'
 import { deleteVaga } from '../lib/vagas'
 import { exportToExcel } from '../lib/backup'
-import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw, Filter, Clock, Hash, MapPin, DollarSign, Calendar, User, Briefcase, Globe, Tag, Star, ArrowUpDown, AlertTriangle } from 'lucide-react'
+import { Search, Download, Plus, Users, Building2, TrendingUp, Eye, X, ChevronLeft, ChevronRight, RefreshCw, Filter, Clock, Hash, MapPin, DollarSign, Calendar, User, Briefcase, Globe, Tag, Star, ArrowUpDown, AlertTriangle, RotateCcw } from 'lucide-react'
 import VagaTemplate from './VagaTemplate'
 import ReportModal from './ReportModal'
 import { useAuth } from '../contexts/AuthContext'
@@ -551,6 +551,7 @@ export default function ListaClientes() {
             size="sm" 
             data-refresh-button
             className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
+            title="Atualizar dados do servidor"
           >
             <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
             <span className={isRefreshing ? 'opacity-70' : ''}>
@@ -563,9 +564,9 @@ export default function ListaClientes() {
             disabled={isRefreshing} 
             size="sm" 
             className="h-8 tablet:h-9 transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md bg-orange-50 hover:bg-orange-100 border-orange-200"
-            title="Forçar recarregamento (resolve problemas de refresh)"
+            title="Forçar recarregamento completo (resolve problemas persistentes)"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
+            <RotateCcw className={`h-4 w-4 mr-2 transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'hover:rotate-180'}`} />
             <span className={isRefreshing ? 'opacity-70' : ''}>
               {isRefreshing ? 'Recarregando...' : 'Forçar Refresh'}
             </span>

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.7",
-  "buildDate": "2025-10-09T00:00:00Z",
-  "description": "Correção de loops infinitos, sistema de auto-refresh e limpeza de cache"
+  "version": "1.0.8",
+  "buildDate": "2025-01-09T00:00:00Z",
+  "description": "Melhorias na UX: removido aviso persistente 'Conectado' e diferenciados botões de refresh"
 }
