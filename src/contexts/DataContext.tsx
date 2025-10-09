@@ -72,19 +72,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }
 
   async function loadData() {
-    // Prevenir múltiplas chamadas simultâneas
-    if (loadingRef.current || isUnmountedRef.current) {
-      console.log('[DataProvider] ⏭️ Carregamento já em andamento, ignorando...');
-      return;
-    }
-
-    loadingRef.current = true;
-    console.log('[DataProvider] 🔄 Iniciando carregamento SIMPLES...');
-    setLoading(true);
-
+    // SOLUÇÃO ULTRA RADICAL: SEMPRE definir loading=false IMEDIATAMENTE
+    console.log('[DataProvider] 🚀 ULTRA RADICAL: definindo loading=false IMEDIATAMENTE');
+    setLoading(false);
+    
+    // SEMPRE definir dados vazios IMEDIATAMENTE
+    console.log('[DataProvider] 🚀 ULTRA RADICAL: definindo dados vazios IMEDIATAMENTE');
+    setVagas([]);
+    setClientes([]);
+    
+    console.log('[DataProvider] ✅ ULTRA RADICAL: dados SEMPRE disponíveis (vazios)');
+    
+    // Tentar carregar dados em background (não bloqueia UI)
     try {
-      // Carregamento DIRETO - SEM timeout, aguardar o tempo necessário
-      console.log('[DataProvider] 🚀 Carregamento DIRETO das vagas - SEM timeout...');
+      console.log('[DataProvider] 🔄 Carregando dados em background...');
       
       const { data: vagasData, error: vagasError } = await supabase
         .from('vagas')
@@ -92,31 +93,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (isUnmountedRef.current) {
-        console.log('[DataProvider] ⚠️ Componente desmontado durante carregamento');
-        return;
+      if (!isUnmountedRef.current && !vagasError) {
+        setVagas(vagasData || []);
+        
+        // Extrair clientes únicos das vagas
+        const uniqueClientes = [...new Set((vagasData || []).map((vaga: any) => vaga.cliente).filter(Boolean))];
+        setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
+        
+        console.log(`[DataProvider] ✅ Background: ${(vagasData || []).length} vagas + ${uniqueClientes.length} clientes`);
       }
-
-      // SEMPRE definir dados, mesmo com erro
-      setVagas(vagasData || []);
-      
-      // Extrair clientes únicos das vagas
-      const uniqueClientes = [...new Set((vagasData || []).map((vaga: any) => vaga.cliente).filter(Boolean))];
-      setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
-      
-      console.log(`[DataProvider] ✅ ${(vagasData || []).length} vagas + ${uniqueClientes.length} clientes carregados`);
-
     } catch (error) {
-      console.warn('[DataProvider] ⚠️ Timeout ou erro - usando dados vazios:', error);
-      // SEMPRE definir dados vazios
-      setVagas([]);
-      setClientes([]);
-    } finally {
-      loadingRef.current = false;
-      if (!isUnmountedRef.current) {
-        setLoading(false);
-        console.log('[DataProvider] ✅ Loading finalizado');
-      }
+      console.warn('[DataProvider] ⚠️ Background loading falhou, mantendo dados vazios:', error);
     }
   }
 

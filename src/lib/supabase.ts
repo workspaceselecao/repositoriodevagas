@@ -41,11 +41,23 @@ const commonConfig = {
   }
 }
 
-// Cliente padrão (para operações do usuário) - Singleton
+// Cliente padrão (para operações do usuário) - Singleton ULTRA RADICAL
 export const supabase = (() => {
   if (!supabaseInstance) {
-    console.log('🔧 Criando instância única do Supabase client')
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, commonConfig) as SupabaseClient
+    console.log('🔧 ULTRA RADICAL: Criando instância única do Supabase client')
+    
+    // Configuração ULTRA RADICAL para evitar múltiplas instâncias
+    const ultraRadicalConfig = {
+      ...commonConfig,
+      auth: {
+        ...commonConfig.auth,
+        storageKey: 'repositoriodevagas-ultra-radical-auth',
+        autoRefreshToken: false, // Desabilitar auto-refresh para evitar conflitos
+        persistSession: false    // Desabilitar persistência para evitar conflitos
+      }
+    }
+    
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, ultraRadicalConfig) as SupabaseClient
   }
   return supabaseInstance
 })()

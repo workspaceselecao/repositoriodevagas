@@ -27,70 +27,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Inicializar sistema de versão em background
     initializeVersionSystem()
 
-        // SEM timeout de segurança - deixar carregar naturalmente
-        console.log('[AuthContext] 🚀 Iniciando verificação SEM timeout de segurança')
-
-    // Verificação imediata de sessão - SEM timeout
+        // SOLUÇÃO ULTRA RADICAL: SEMPRE definir loading=false IMEDIATAMENTE
+    console.log('[AuthContext] 🚀 ULTRA RADICAL: definindo loading=false IMEDIATAMENTE')
+    setLoading(false)
+    setUser(null)
+    
+    // Verificação em background (não bloqueia UI)
     const checkUser = async () => {
       if (!isMounted) return
       
       try {
-        // Verificar se o carregamento está bloqueado
-        if (isDbLoadingBlocked()) {
-          console.log('🚫 Carregamento bloqueado - permitindo acesso sem login')
-          setUser(null)
-          setLoading(false)
-          return
-        }
-        
-        // Verificação de sessão SEM timeout - aguardar o tempo necessário
-        console.log('[AuthContext] 🔍 Verificando sessão SEM timeout...')
+        console.log('[AuthContext] 🔄 Verificando sessão em background...')
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
-          console.warn('⚠️ Erro ao verificar sessão:', error)
-          if (isMounted) {
-            setUser(null)
-            setLoading(false)
-          }
+          console.warn('⚠️ Erro ao verificar sessão em background:', error)
           return
         }
 
-            if (session?.user && isMounted) {
-              console.log('✅ Sessão encontrada, carregando dados do usuário...')
-              try {
-                const userData = await getCurrentUser()
-                if (isMounted) {
-                  console.log('✅ Dados do usuário carregados, definindo loading=false')
-                  setUser(userData)
-                  setLoading(false)
-                  console.log('✅ Usuário autenticado automaticamente')
-                }
-              } catch (userError) {
-                console.error('❌ Erro ao carregar dados do usuário:', userError)
-                if (isMounted) {
-                  console.log('❌ Erro no carregamento, definindo loading=false')
-                  setUser(null)
-                  setLoading(false)
-                }
-              }
-            } else if (isMounted) {
-              console.log('❌ Nenhuma sessão encontrada, definindo loading=false')
-              setUser(null)
-              setLoading(false)
-            }
-
-          } catch (error) {
-            console.error('❌ Erro na verificação de usuário:', error)
+        if (session?.user && isMounted) {
+          console.log('✅ Sessão encontrada em background, carregando dados...')
+          try {
+            const userData = await getCurrentUser()
             if (isMounted) {
-              setUser(null)
-              setLoading(false)
+              setUser(userData)
+              console.log('✅ Usuário carregado em background')
             }
+          } catch (userError) {
+            console.warn('⚠️ Erro ao carregar dados em background:', userError)
           }
         }
+      } catch (error) {
+        console.warn('⚠️ Erro na verificação em background:', error)
+      }
+    }
 
-        // Iniciar verificação imediatamente
-        checkUser()
+    // Verificar em background (não bloqueia UI)
+    checkUser()
 
         // Cleanup
         return () => {
