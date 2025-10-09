@@ -27,14 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Inicializar sistema de versão em background
     initializeVersionSystem()
 
-    // Timeout de segurança para garantir que loading seja false (sem resetar usuário)
-    const safetyTimeout = setTimeout(() => {
-      if (isMounted) {
-        console.log('⚠️ Timeout de segurança: FORÇANDO loading=false (mantendo usuário)')
-        setLoading(false)
-        // NÃO resetar o usuário para evitar logout automático
-      }
-    }, 10000) // 10 segundos para dar mais tempo
+        // SEM timeout de segurança - deixar carregar naturalmente
+        console.log('[AuthContext] 🚀 Iniciando verificação SEM timeout de segurança')
 
     // Verificação imediata de sessão - SEM timeout
     const checkUser = async () => {
@@ -49,69 +43,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
         
-        // Verificação imediata de sessão com timeout agressivo
-        const sessionPromise = supabase.auth.getSession()
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 2000)
-        )
-        
-        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
+        // Verificação de sessão SEM timeout - aguardar o tempo necessário
+        console.log('[AuthContext] 🔍 Verificando sessão SEM timeout...')
+        const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
           console.warn('⚠️ Erro ao verificar sessão:', error)
           if (isMounted) {
-            clearTimeout(safetyTimeout)
             setUser(null)
             setLoading(false)
           }
           return
         }
 
-        if (session?.user && isMounted) {
-          console.log('✅ Sessão encontrada, carregando dados do usuário...')
-          try {
-            const userData = await getCurrentUser()
-            if (isMounted) {
-              console.log('✅ Dados do usuário carregados, definindo loading=false')
-              clearTimeout(safetyTimeout)
-              setUser(userData)
+            if (session?.user && isMounted) {
+              console.log('✅ Sessão encontrada, carregando dados do usuário...')
+              try {
+                const userData = await getCurrentUser()
+                if (isMounted) {
+                  console.log('✅ Dados do usuário carregados, definindo loading=false')
+                  setUser(userData)
+                  setLoading(false)
+                  console.log('✅ Usuário autenticado automaticamente')
+                }
+              } catch (userError) {
+                console.error('❌ Erro ao carregar dados do usuário:', userError)
+                if (isMounted) {
+                  console.log('❌ Erro no carregamento, definindo loading=false')
+                  setUser(null)
+                  setLoading(false)
+                }
+              }
+            } else if (isMounted) {
+              console.log('❌ Nenhuma sessão encontrada, definindo loading=false')
+              setUser(null)
               setLoading(false)
-              console.log('✅ Usuário autenticado automaticamente')
             }
-          } catch (userError) {
-            console.error('❌ Erro ao carregar dados do usuário:', userError)
+
+          } catch (error) {
+            console.error('❌ Erro na verificação de usuário:', error)
             if (isMounted) {
-              console.log('❌ Erro no carregamento, definindo loading=false')
-              clearTimeout(safetyTimeout)
               setUser(null)
               setLoading(false)
             }
           }
-        } else if (isMounted) {
-          console.log('❌ Nenhuma sessão encontrada, definindo loading=false')
-          clearTimeout(safetyTimeout)
-          setUser(null)
-          setLoading(false)
         }
 
-      } catch (error) {
-        console.error('❌ Erro na verificação de usuário:', error)
-        if (isMounted) {
-          clearTimeout(safetyTimeout)
-          setUser(null)
-          setLoading(false)
+        // Iniciar verificação imediatamente
+        checkUser()
+
+        // Cleanup
+        return () => {
+          isMounted = false
         }
-      }
-    }
-
-    // Iniciar verificação imediatamente
-    checkUser()
-
-    // Cleanup
-    return () => {
-      isMounted = false
-      clearTimeout(safetyTimeout)
-    }
   }, [])
 
   // Listener simplificado para evitar loops

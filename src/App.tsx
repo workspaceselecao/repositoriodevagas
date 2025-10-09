@@ -71,22 +71,17 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function DataLoadingWrapper({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
   const { loading: dataLoading } = useData()
-  const [forceShow, setForceShow] = useState(false)
 
-  // Timeout de segurança para forçar exibição da aplicação
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      console.log('🚨 [App] Timeout de segurança: FORÇANDO exibição da aplicação')
-      setForceShow(true)
-    }, 5000) // 5 segundos
+  // SEM timeout de segurança - deixar carregar naturalmente
+  console.log('[App] DataLoadingWrapper - user:', !!user, 'dataLoading:', dataLoading)
 
-    return () => clearTimeout(timeout)
-  }, [])
-
-  // Se usuário está logado mas dados ainda estão carregando (e não forçou ainda)
-  if (user && dataLoading && !forceShow) {
+  // Se usuário está logado mas dados ainda estão carregando
+  if (user && dataLoading) {
+    console.log('[App] Usuário logado, dados carregando...')
     return <LoadingScreen message="Carregando dados..." />
   }
+  
+  console.log('[App] Mostrando aplicação - user:', !!user, 'dataLoading:', dataLoading)
 
   return <>{children}</>
 }

@@ -83,23 +83,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(true);
 
     try {
-      // Carregamento MUITO SIMPLES - apenas 1 segundo de timeout
-      console.log('[DataProvider] 🚀 Carregamento ULTRA SIMPLES das vagas...');
+      // Carregamento DIRETO - SEM timeout, aguardar o tempo necessário
+      console.log('[DataProvider] 🚀 Carregamento DIRETO das vagas - SEM timeout...');
       
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout 1s')), 1000)
-      );
-
-      const loadPromise = supabase
+      const { data: vagasData, error: vagasError } = await supabase
         .from('vagas')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
-
-      const { data: vagasData, error: vagasError } = await Promise.race([
-        loadPromise,
-        timeoutPromise
-      ]) as any;
 
       if (isUnmountedRef.current) {
         console.log('[DataProvider] ⚠️ Componente desmontado durante carregamento');

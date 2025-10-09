@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.2.9"
+export const APP_VERSION = "1.3.0"
 export const BUILD_DATE = new Date().toISOString()
 
 // Chave para armazenar a versão atual no localStorage
