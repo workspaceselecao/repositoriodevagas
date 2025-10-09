@@ -1,5 +1,5 @@
 {
-  "version": "1.2.3",
+  "version": "1.2.4",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "Alinhamento perfeito: botão 'Atualizar Dados' agora está perfeitamente alinhado com outros itens da sidebar"
+  "description": "Correção dupla: versionamento atualizado para v1.2.4 + alinhamento perfeito do botão sidebar sem wrapper duplicado"
 }
