@@ -1,5 +1,5 @@
 {
-  "version": "1.2.7",
+  "version": "1.2.8",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "SOLUÇÃO DEFINITIVA: ForceLoader corrigido + carregamento direto + timeout agressivo + SEM LOOPS INFINITOS"
+  "description": "CORREÇÃO REAL: DataContext simplificado + auto-refresh desabilitado + timeout 1s + SEM LOOPS"
 }

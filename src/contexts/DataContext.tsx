@@ -35,9 +35,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
       console.log('[DataProvider] 🚀 Inicializando DataProvider...');
       await loadData();
-      if (mounted) {
-        setupRealtimeListeners();
-      }
+      // NÃO configurar listeners automaticamente - evitar loops
+      // setupRealtimeListeners();
     };
 
     initialize();
@@ -73,39 +72,29 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }
 
   async function loadData() {
-    const now = Date.now();
-    
-    // Prevenir múltiplas chamadas simultâneas e carregamentos muito frequentes
+    // Prevenir múltiplas chamadas simultâneas
     if (loadingRef.current || isUnmountedRef.current) {
-      console.log('[DataProvider] ⏭️ Carregamento já em andamento ou componente desmontado, ignorando...');
-      return;
-    }
-
-    // Verificar se passou tempo suficiente desde o último carregamento
-    if (now - lastLoadTimeRef.current < minLoadInterval) {
-      console.log('[DataProvider] ⏭️ Carregamento muito recente, ignorando...');
+      console.log('[DataProvider] ⏭️ Carregamento já em andamento, ignorando...');
       return;
     }
 
     loadingRef.current = true;
-    lastLoadTimeRef.current = now;
-    console.log('[DataProvider] 🔄 Iniciando carregamento FORÇADO de dados...');
+    console.log('[DataProvider] 🔄 Iniciando carregamento SIMPLES...');
     setLoading(true);
 
     try {
-      // Carregamento DIRETO e SIMPLES - sem ForceLoader problemático
-      console.log('[DataProvider] 🚀 Carregamento DIRETO das vagas...');
+      // Carregamento MUITO SIMPLES - apenas 1 segundo de timeout
+      console.log('[DataProvider] 🚀 Carregamento ULTRA SIMPLES das vagas...');
       
-      // Timeout agressivo para garantir que sempre retorne
       const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout direto')), 2000)
+        setTimeout(() => reject(new Error('Timeout 1s')), 1000)
       );
 
       const loadPromise = supabase
         .from('vagas')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(1000);
+        .limit(100);
 
       const { data: vagasData, error: vagasError } = await Promise.race([
         loadPromise,
@@ -117,35 +106,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (vagasError) {
-        console.warn('[DataProvider] ⚠️ Erro ao carregar vagas, usando dados vazios:', vagasError);
-        setVagas([]);
-        setClientes([]);
-      } else {
-        setVagas(vagasData || []);
-        console.log(`[DataProvider] ✅ ${(vagasData || []).length} vagas carregadas com sucesso (DIRETO)`);
-
-        // Extrair clientes únicos das vagas
-        const uniqueClientes = [...new Set((vagasData || []).map((vaga: any) => vaga.cliente).filter(Boolean))];
-        setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
-        console.log(`[DataProvider] ✅ ${uniqueClientes.length} clientes extraídos com sucesso`);
-      }
-
-      // Resetar contador de retries após sucesso
-      retryCountRef.current = 0;
-      console.log('[DataProvider] 🎉 Carregamento DIRETO concluído com sucesso!');
+      // SEMPRE definir dados, mesmo com erro
+      setVagas(vagasData || []);
+      
+      // Extrair clientes únicos das vagas
+      const uniqueClientes = [...new Set((vagasData || []).map((vaga: any) => vaga.cliente).filter(Boolean))];
+      setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
+      
+      console.log(`[DataProvider] ✅ ${(vagasData || []).length} vagas + ${uniqueClientes.length} clientes carregados`);
 
     } catch (error) {
-      console.error('[DataProvider] ❌ Erro no carregamento direto:', error);
-      // SEMPRE definir dados vazios para não travar a aplicação
+      console.warn('[DataProvider] ⚠️ Timeout ou erro - usando dados vazios:', error);
+      // SEMPRE definir dados vazios
       setVagas([]);
       setClientes([]);
-      console.log('[DataProvider] ✅ Dados vazios definidos para evitar travamento');
     } finally {
       loadingRef.current = false;
       if (!isUnmountedRef.current) {
         setLoading(false);
-        console.log('[DataProvider] ✅ Estado de loading atualizado para false (FORÇADO)');
+        console.log('[DataProvider] ✅ Loading finalizado');
       }
     }
   }
@@ -214,29 +193,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   function handleChannelError() {
     if (isUnmountedRef.current) return;
-
-    retryCountRef.current++;
     
-    if (retryCountRef.current <= maxRetries) {
-      const delay = Math.min(1000 * Math.pow(2, retryCountRef.current), 10000); // Exponential backoff
-      console.warn(`[DataProvider] 🔄 Tentando reconectar em ${delay}ms (tentativa ${retryCountRef.current}/${maxRetries})...`);
-      
-      setTimeout(() => {
-        if (!isUnmountedRef.current) {
-          setupRealtimeListeners();
-        }
-      }, delay);
-    } else {
-      console.error('[DataProvider] ❌ Máximo de tentativas de reconexão atingido. Recarregando dados a cada 30s...');
-      // Fallback: recarregar dados periodicamente se realtime falhar
-      const intervalId = setInterval(() => {
-        if (!isUnmountedRef.current) {
-          loadData();
-        } else {
-          clearInterval(intervalId);
-        }
-      }, 30000);
-    }
+    console.warn('[DataProvider] ⚠️ Erro no canal - NÃO reconectando para evitar loops');
+    // NÃO reconectar automaticamente - isso causa loops infinitos
+    // Apenas logar o erro e continuar
   }
 
   async function handleVagasChange(payload: any) {
@@ -288,13 +248,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Configurar auto-refresh a cada 5 minutos
-  useAutoRefresh({
-    onRefresh: refresh,
-    interval: 300000, // 5 minutos
-    enabled: true,
-    onVisibilityChange: true
-  });
+  // DESABILITADO: auto-refresh que pode causar loops
+  // useAutoRefresh({
+  //   onRefresh: refresh,
+  //   interval: 300000, // 5 minutos
+  //   enabled: false, // DESABILITADO
+  //   onVisibilityChange: false
+  // });
 
   const value = {
     vagas,
