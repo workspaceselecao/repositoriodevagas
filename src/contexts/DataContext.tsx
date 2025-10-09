@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState, useRef, ReactNode } fro
 import { supabase } from '../lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
-import { forceLoader } from '../lib/force-load';
 
 interface DataContextType {
   vagas: any[];
@@ -94,36 +93,54 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(true);
 
     try {
-      // Usar ForceLoader para carregamento garantido
-      console.log('[DataProvider] 🚀 Usando ForceLoader para carregamento garantido...');
-      const vagasData = await forceLoader.forceLoadVagas({
-        maxRetries: 3,
-        retryDelay: 500,
-        timeout: 5000
-      });
+      // Carregamento DIRETO e SIMPLES - sem ForceLoader problemático
+      console.log('[DataProvider] 🚀 Carregamento DIRETO das vagas...');
+      
+      // Timeout agressivo para garantir que sempre retorne
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout direto')), 2000)
+      );
+
+      const loadPromise = supabase
+        .from('vagas')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1000);
+
+      const { data: vagasData, error: vagasError } = await Promise.race([
+        loadPromise,
+        timeoutPromise
+      ]) as any;
 
       if (isUnmountedRef.current) {
         console.log('[DataProvider] ⚠️ Componente desmontado durante carregamento');
         return;
       }
 
-      setVagas(vagasData);
-      console.log(`[DataProvider] ✅ ${vagasData.length} vagas carregadas com sucesso via ForceLoader`);
+      if (vagasError) {
+        console.warn('[DataProvider] ⚠️ Erro ao carregar vagas, usando dados vazios:', vagasError);
+        setVagas([]);
+        setClientes([]);
+      } else {
+        setVagas(vagasData || []);
+        console.log(`[DataProvider] ✅ ${(vagasData || []).length} vagas carregadas com sucesso (DIRETO)`);
 
-      // Extrair clientes únicos das vagas
-      const uniqueClientes = [...new Set(vagasData.map(vaga => vaga.cliente).filter(Boolean))];
-      setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
-      console.log(`[DataProvider] ✅ ${uniqueClientes.length} clientes extraídos com sucesso`);
+        // Extrair clientes únicos das vagas
+        const uniqueClientes = [...new Set((vagasData || []).map((vaga: any) => vaga.cliente).filter(Boolean))];
+        setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
+        console.log(`[DataProvider] ✅ ${uniqueClientes.length} clientes extraídos com sucesso`);
+      }
 
       // Resetar contador de retries após sucesso
       retryCountRef.current = 0;
-      console.log('[DataProvider] 🎉 Carregamento FORÇADO concluído com sucesso!');
+      console.log('[DataProvider] 🎉 Carregamento DIRETO concluído com sucesso!');
 
     } catch (error) {
-      console.error('[DataProvider] ❌ Erro no carregamento forçado:', error);
-      // Mesmo com erro, definir dados vazios para não travar a aplicação
+      console.error('[DataProvider] ❌ Erro no carregamento direto:', error);
+      // SEMPRE definir dados vazios para não travar a aplicação
       setVagas([]);
       setClientes([]);
+      console.log('[DataProvider] ✅ Dados vazios definidos para evitar travamento');
     } finally {
       loadingRef.current = false;
       if (!isUnmountedRef.current) {

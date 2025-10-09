@@ -1,5 +1,5 @@
 {
-  "version": "1.2.6",
+  "version": "1.2.7",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "Correção CRÍTICA: removido logout automático + conta fantasma eliminada + verificações automáticas desabilitadas"
+  "description": "SOLUÇÃO DEFINITIVA: ForceLoader corrigido + carregamento direto + timeout agressivo + SEM LOOPS INFINITOS"
 }

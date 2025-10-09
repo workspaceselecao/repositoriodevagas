@@ -1,5 +1,5 @@
 // Sistema de carregamento forçado para garantir que os dados sejam sempre carregados
-import { supabase } from './supabase'
+import { supabase, supabaseAdmin } from './supabase'
 
 interface ForceLoadOptions {
   maxRetries?: number
@@ -21,7 +21,7 @@ export class ForceLoader {
 
   async forceLoadVagas(options: ForceLoadOptions = {}): Promise<any[]> {
     const cacheKey = 'vagas'
-    const { maxRetries = 5, retryDelay = 1000, timeout = 10000 } = options
+    const { maxRetries = 3, retryDelay = 500, timeout = 3000 } = options
 
     // Verificar cache primeiro
     if (this.cache.has(cacheKey)) {
@@ -92,7 +92,8 @@ export class ForceLoader {
   }
 
   private async loadFromSupabase(): Promise<any[]> {
-    const { data, error } = await supabase
+    // Usar supabaseAdmin para evitar problemas de RLS
+    const { data, error } = await supabaseAdmin
       .from('vagas')
       .select('*')
       .order('created_at', { ascending: false })
