@@ -75,10 +75,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     handleCloseModal: handleCloseUpdateModal,
     checkForUpdates
   } = useUpdateCheck({
-    checkOnMount: true, // Verificar na montagem
-    checkInterval: 30 * 60 * 1000, // Verificar a cada 30 minutos
+    checkOnMount: false, // Desabilitar verificação automática
+    checkInterval: 0, // Sem verificação automática
     showModalDelay: 2000, // 2 segundos de delay
-    autoCheckOnFocus: false // Desabilitar verificação no foco para evitar loops
+    autoCheckOnFocus: false // Desabilitar verificação no foco
   })
 
 

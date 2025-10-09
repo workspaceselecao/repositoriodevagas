@@ -27,14 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Inicializar sistema de versão em background
     initializeVersionSystem()
 
-    // Timeout de segurança mais agressivo para garantir que loading seja false
+    // Timeout de segurança para garantir que loading seja false (sem resetar usuário)
     const safetyTimeout = setTimeout(() => {
       if (isMounted) {
-        console.log('⚠️ Timeout de segurança: FORÇANDO loading=false')
+        console.log('⚠️ Timeout de segurança: FORÇANDO loading=false (mantendo usuário)')
         setLoading(false)
-        setUser(null) // Reset user também para evitar loops
+        // NÃO resetar o usuário para evitar logout automático
       }
-    }, 3000) // 3 segundos apenas
+    }, 10000) // 10 segundos para dar mais tempo
 
     // Verificação imediata de sessão - SEM timeout
     const checkUser = async () => {
@@ -134,11 +134,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return
       
       if (event === 'SIGNED_IN' && session?.user) {
-        console.log('✅ Usuário logado via listener - FORÇANDO loading=false')
+        console.log('✅ Usuário logado via listener - carregando dados reais')
         if (isMounted) {
-          setUser({ id: session.user.id, email: session.user.email!, role: 'USER' } as any)
-          setError(null)
-          setLoading(false)
+          try {
+            // Buscar dados reais do usuário em vez de usar role padrão
+            const userData = await getCurrentUser()
+            if (isMounted) {
+              setUser(userData)
+              setError(null)
+              setLoading(false)
+              console.log('✅ Dados reais do usuário carregados via listener')
+            }
+          } catch (error) {
+            console.error('❌ Erro ao carregar dados do usuário via listener:', error)
+            if (isMounted) {
+              setUser(null)
+              setError(null)
+              setLoading(false)
+            }
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         console.log('🚪 Usuário deslogado via listener')

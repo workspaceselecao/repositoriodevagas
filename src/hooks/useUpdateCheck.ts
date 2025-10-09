@@ -97,35 +97,12 @@ export function useUpdateCheck(options: UseUpdateCheckOptions = {}) {
     }
   }, [checkInterval, checkForUpdatesNow])
 
-  // Verificar atualizações quando a janela ganha foco (se configurado)
+  // DESABILITADO: Verificar atualizações quando a janela ganha foco
+  // Isso estava causando logout automático quando a aplicação perdia o foco
   useEffect(() => {
-    if (!autoCheckOnFocus) return
-
-    const handleFocus = () => {
-      console.log('👁️ Janela ganhou foco, verificando atualizações...')
-      // Pequeno delay para evitar verificações muito frequentes
-      setTimeout(() => {
-        checkForUpdatesNow()
-      }, 500)
-    }
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log('👁️ Página ficou visível, verificando atualizações...')
-        setTimeout(() => {
-          checkForUpdatesNow()
-        }, 500)
-      }
-    }
-
-    window.addEventListener('focus', handleFocus)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => {
-      window.removeEventListener('focus', handleFocus)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [autoCheckOnFocus, checkForUpdatesNow])
+    // Completamente desabilitado para evitar problemas de logout automático
+    console.log('🚫 Verificações automáticas de atualização DESABILITADAS para evitar logout automático')
+  }, [])
 
   return {
     hasUpdate,

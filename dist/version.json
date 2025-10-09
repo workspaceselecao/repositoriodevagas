@@ -1,5 +1,5 @@
 {
-  "version": "1.2.5",
+  "version": "1.2.6",
   "buildDate": "2025-01-09T00:00:00Z",
-  "description": "Correção definitiva do versionamento: limpeza agressiva de cache + fallback para APP_VERSION + fetchServerVersion otimizado"
+  "description": "Correção CRÍTICA: removido logout automático + conta fantasma eliminada + verificações automáticas desabilitadas"
 }
