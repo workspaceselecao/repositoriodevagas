@@ -7,6 +7,7 @@ import { EmptyState } from './ui/empty-state'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
+import { SUPER_ADMIN_EMAIL } from '../lib/user-filter'
 import { 
   Users, 
   Building2, 
@@ -103,17 +104,21 @@ export default function Dashboard() {
       
       const sitesUnicos = new Set(sitesData?.map(v => v.site) || [])
       
-      // Carregar total de usuários
-      const { count: totalUsuarios } = await supabase
+      // Carregar total de usuários (excluindo Superusuário)
+      const { data: usuariosData } = await supabase
         .from('users')
-        .select('*', { count: 'exact', head: true })
+        .select('email')
+      
+      // Filtrar Superusuário da contagem
+      const usuariosSemSuper = usuariosData?.filter(user => user.email !== SUPER_ADMIN_EMAIL) || []
+      const totalUsuarios = usuariosSemSuper.length
 
       setStats({
         totalVagas: totalVagas || 0,
         vagasRecentes: vagasRecentes || 0,
         totalClientes: clientesUnicos.size,
         totalSites: sitesUnicos.size,
-        totalUsuarios: totalUsuarios || 0
+        totalUsuarios: totalUsuarios
       })
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error)
