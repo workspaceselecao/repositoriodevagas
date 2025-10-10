@@ -91,22 +91,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return
       
       if (event === 'SIGNED_IN' && session?.user) {
-        console.log('✅ Usuário logado via listener - carregando dados reais')
+        console.log('[AuthContext] ✅ Usuário logado via listener - carregando dados reais')
         if (isMounted) {
           try {
             // Buscar dados reais do usuário em vez de usar role padrão
             const userData = await getCurrentUser()
-            if (isMounted) {
+            if (isMounted && userData) {
               setUser(userData)
               setError(null)
               setLoading(false)
-              console.log('✅ Dados reais do usuário carregados via listener')
+              console.log('[AuthContext] ✅ Dados reais do usuário carregados via listener:', userData.email)
+            } else if (isMounted) {
+              console.log('[AuthContext] ⚠️ getCurrentUser retornou null, mantendo estado atual')
             }
           } catch (error) {
-            console.error('❌ Erro ao carregar dados do usuário via listener:', error)
+            console.error('[AuthContext] ❌ Erro ao carregar dados do usuário via listener:', error)
             if (isMounted) {
-              setUser(null)
-              setError(null)
+              // Não limpar o usuário se já está logado via login direto
+              // Apenas garantir que loading está false
               setLoading(false)
             }
           }
@@ -132,18 +134,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null)
       setLoading(true)
       
+      console.log('[AuthContext] 🔐 Iniciando processo de login...')
       const userData = await signIn(credentials)
       
       if (userData) {
+        console.log('[AuthContext] ✅ Login bem-sucedido, definindo usuário:', userData.email)
         setUser(userData)
         setLoading(false)
         return true
       }
       
+      console.log('[AuthContext] ❌ Login falhou - usuário não encontrado')
       setLoading(false)
       return false
     } catch (error) {
-      console.error('❌ Erro no login:', error)
+      console.error('[AuthContext] ❌ Erro no login:', error)
       setError(error as Error)
       setLoading(false)
       return false

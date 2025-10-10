@@ -32,22 +32,22 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      console.log('🚀 Iniciando processo de login...')
+      console.log('[LoginPage] 🚀 Iniciando processo de login...')
       const success = await login(formData)
       
       if (success) {
-        console.log('✅ Login bem-sucedido, redirecionando...')
+        console.log('[LoginPage] ✅ Login bem-sucedido, redirecionando...')
         // Redirecionamento imediato após login bem-sucedido
         navigate('/dashboard', { replace: true })
       } else {
-        console.log('❌ Login falhou')
+        console.log('[LoginPage] ❌ Login falhou')
         setError('Email ou senha incorretos')
         setShakeError(true)
         setTimeout(() => setShakeError(false), 500)
         setLoading(false)
       }
     } catch (error: any) {
-      console.error('❌ Erro no login:', error)
+      console.error('[LoginPage] ❌ Erro no login:', error)
       // Verificar se é erro de email não confirmado
       if (error.message === 'CONFIRM_EMAIL') {
         setError('Seu cadastro ainda não foi confirmado. Verifique sua caixa de entrada e clique no link de confirmação enviado por email.')

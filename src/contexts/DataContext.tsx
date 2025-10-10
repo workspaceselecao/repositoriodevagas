@@ -37,6 +37,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       await loadData();
       // NÃO configurar listeners automaticamente - evitar loops
       // setupRealtimeListeners();
+      console.log('[DataProvider] ✅ Inicialização concluída');
     };
 
     initialize();
@@ -56,6 +57,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       try {
         supabase.removeChannel(vagasChannelRef.current);
         vagasChannelRef.current = null;
+        console.log('[DataProvider] ✅ VagasChannel removido');
       } catch (error) {
         console.error('[DataProvider] Erro ao remover vagasChannel:', error);
       }
@@ -65,6 +67,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       try {
         supabase.removeChannel(clientesChannelRef.current);
         clientesChannelRef.current = null;
+        console.log('[DataProvider] ✅ ClientesChannel removido');
       } catch (error) {
         console.error('[DataProvider] Erro ao remover clientesChannel:', error);
       }
@@ -101,6 +104,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setClientes(uniqueClientes.map(cliente => ({ nome: cliente })));
         
         console.log(`[DataProvider] ✅ Background: ${(vagasData || []).length} vagas + ${uniqueClientes.length} clientes`);
+      } else if (vagasError) {
+        console.warn('[DataProvider] ⚠️ Erro ao carregar vagas:', vagasError);
       }
     } catch (error) {
       console.warn('[DataProvider] ⚠️ Background loading falhou, mantendo dados vazios:', error);

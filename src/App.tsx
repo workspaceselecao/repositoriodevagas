@@ -31,18 +31,24 @@ import { SUPER_ADMIN_EMAIL } from './lib/user-filter'
 function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) {
   const { user, loading } = useAuth()
 
+  console.log('[App] ProtectedRoute - user:', !!user, 'loading:', loading, 'requireAdmin:', requireAdmin)
+
   if (loading) {
+    console.log('[App] ProtectedRoute - Mostrando loading...')
     return <LoadingScreen message="Verificando autenticação..." />
   }
 
   if (!user) {
+    console.log('[App] ProtectedRoute - Usuário não encontrado, redirecionando para login')
     return <Navigate to="/login" replace />
   }
 
   if (requireAdmin && user.role !== 'ADMIN') {
+    console.log('[App] ProtectedRoute - Usuário não é admin, redirecionando para dashboard')
     return <Navigate to="/dashboard" replace />
   }
 
+  console.log('[App] ProtectedRoute - Acesso autorizado, mostrando conteúdo')
   return <>{children}</>
 }
 
@@ -72,14 +78,11 @@ function DataLoadingWrapper({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
   const { loading: dataLoading } = useData()
 
-  // SEM timeout de segurança - deixar carregar naturalmente
   console.log('[App] DataLoadingWrapper - user:', !!user, 'dataLoading:', dataLoading)
 
-  // Se usuário está logado mas dados ainda estão carregando
-  if (user && dataLoading) {
-    console.log('[App] Usuário logado, dados carregando...')
-    return <LoadingScreen message="Carregando dados..." />
-  }
+  // CORREÇÃO: Não bloquear a UI se dados estão carregando
+  // O DataProvider já define loading=false imediatamente e carrega dados em background
+  // Se o usuário está autenticado, mostrar a aplicação imediatamente
   
   console.log('[App] Mostrando aplicação - user:', !!user, 'dataLoading:', dataLoading)
 
@@ -89,17 +92,22 @@ function DataLoadingWrapper({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   const { user, loading: authLoading, error, retry } = useAuth()
 
+  console.log('[App] AppRoutes - user:', !!user, 'authLoading:', authLoading, 'error:', !!error)
+
   // Se há erro, mostrar ErrorFallback
   if (error) {
+    console.log('[App] AppRoutes - Mostrando ErrorFallback')
     return <ErrorFallback error={error} onRetry={retry} />
   }
 
   // Redirecionamento automático se usuário já está logado
   if (user && (window.location.pathname === '/login' || window.location.pathname === '/')) {
+    console.log('[App] AppRoutes - Usuário logado, redirecionando para dashboard')
     return <Navigate to="/dashboard" replace />
   }
 
   if (authLoading) {
+    console.log('[App] AppRoutes - Auth carregando, mostrando loading')
     return (
       <LoadingScreen 
         message={user ? 'Carregando dados...' : 'Inicializando aplicação...'} 
@@ -107,6 +115,7 @@ function AppRoutes() {
     )
   }
 
+  console.log('[App] AppRoutes - Mostrando rotas principais')
   return (
     <DataLoadingWrapper>
       <Routes>

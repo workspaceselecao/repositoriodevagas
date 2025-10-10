@@ -73,22 +73,26 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
     // Se não encontrou o usuário na tabela, usar dados do Auth
     if (!user) {
       console.log('⚠️ Usuário não encontrado na tabela users, usando dados do Auth')
-      return {
+      const fallbackUser = {
         id: authData.user.id,
         email: authData.user.email || '',
         name: authData.user.user_metadata?.full_name || authData.user.email?.split('@')[0] || 'Usuário',
         role: authData.user.user_metadata?.role || 'RH' // Role padrão
       }
+      console.log('✅ Dados do usuário (fallback):', fallbackUser.email, fallbackUser.role)
+      return fallbackUser
     }
 
     console.log('✅ Login concluído com sucesso')
     // Retornar dados do usuário da tabela
-    return {
+    const authUser = {
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.role
     }
+    console.log('✅ Dados do usuário retornados:', authUser.email, authUser.role)
+    return authUser
   } catch (error) {
     console.error('❌ Erro no login:', error)
     throw error // Re-throw para que o AuthContext possa capturar
@@ -482,12 +486,14 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     // Primeiro, tentar usar dados do Auth se disponíveis
     if (authUser.user_metadata?.role) {
       console.log('Usando dados do Auth (role disponível)')
-      return {
+      const authMetadataUser = {
         id: authUser.id,
         email: authUser.email || '',
         name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
         role: authUser.user_metadata.role
       }
+      console.log('✅ getCurrentUser metadata:', authMetadataUser.email, authMetadataUser.role)
+      return authMetadataUser
     }
 
     // Se não tem role no metadata, buscar na tabela users com timeout reduzido
@@ -507,12 +513,14 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
       if (!error && user) {
         console.log('Usuário encontrado na tabela')
-        return {
+        const tableUser = {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role
         }
+        console.log('✅ getCurrentUser tabela:', tableUser.email, tableUser.role)
+        return tableUser
       }
     } catch (tableError) {
       console.log('Erro ao buscar na tabela users:', tableError)
@@ -520,12 +528,14 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
     // Fallback: usar dados do Auth
     console.log('Usando dados do Auth (fallback)')
-    return {
+    const fallbackUser = {
       id: authUser.id,
       email: authUser.email || '',
       name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Usuário',
       role: authUser.user_metadata?.role || 'RH'
     }
+    console.log('✅ getCurrentUser fallback:', fallbackUser.email, fallbackUser.role)
+    return fallbackUser
   } catch (error) {
     console.error('Erro ao buscar usuário atual:', error)
     return null
