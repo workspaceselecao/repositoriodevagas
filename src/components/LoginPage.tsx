@@ -8,6 +8,7 @@ import { Label } from './ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { ThemeToggle } from './ThemeToggle'
 import Logo from './Logo'
+import RotatingBackground from './RotatingBackground'
 import { LoginFormData } from '../types/database'
 import { Lock, Mail, Eye, EyeOff, CheckCircle, AlertCircle, KeyRound } from 'lucide-react'
 
@@ -80,27 +81,22 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background dinâmico baseado no tema */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20"></div>
+      {/* Background rotativo com imagens */}
+      <RotatingBackground />
       
-      {/* Padrão de fundo animado */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.05%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40 animate-pulse"></div>
-      
-      {/* Círculos flutuantes decorativos */}
-      <div className="absolute top-20 left-20 w-32 h-32 bg-primary/10 rounded-full blur-xl animate-pulse"></div>
-      <div className="absolute bottom-20 right-20 w-24 h-24 bg-secondary/10 rounded-full blur-xl animate-pulse delay-1000"></div>
-      <div className="absolute top-1/2 left-10 w-16 h-16 bg-accent/10 rounded-full blur-xl animate-pulse delay-500"></div>
+      {/* Overlay escuro para melhorar legibilidade */}
+      <div className="absolute inset-0 bg-black/20"></div>
       
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4 z-20">
         <ThemeToggle />
       </div>
 
-      {/* Card principal com glassmorphism */}
+      {/* Card principal com glassmorphism transparente */}
       <Card className={`w-full max-w-md relative z-10 transition-all duration-300 hover:shadow-2xl ${
         config.effects.glassmorphism 
-          ? 'bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl' 
-          : 'bg-card shadow-xl'
+          ? 'bg-white/5 backdrop-blur-xl border-white/10 shadow-2xl' 
+          : 'bg-card/80 backdrop-blur-sm shadow-xl'
       } ${shakeError ? 'animate-shake' : ''}`}>
         <CardHeader className="text-center space-y-6 pb-8">
           {/* Logo RepoVagas */}
