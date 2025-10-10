@@ -230,6 +230,13 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
 
 export async function getPendingReportsForAdmin(adminId: string): Promise<Report[]> {
   try {
+    // Verificar se adminId é válido antes de fazer a chamada
+    if (!adminId || adminId.trim() === '') {
+      console.log('🔍 [getPendingReportsForAdmin] AdminId inválido, retornando array vazio')
+      return []
+    }
+    
+    console.log('🔍 [getPendingReportsForAdmin] Buscando reports pendentes para admin:', adminId)
     const { data, error } = await getSupabaseAdmin()
       .from('reports')
       .select(`

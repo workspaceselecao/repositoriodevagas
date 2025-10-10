@@ -155,8 +155,11 @@ export function useRealtimeNotifications() {
   }
 
   useEffect(() => {
-    loadPendingReports()
-  }, [user?.id])
+    // Só carregar reports pendentes se o usuário for admin e estiver autenticado
+    if (user && user.role === 'ADMIN') {
+      loadPendingReports()
+    }
+  }, [user?.id, user?.role])
 
   return {
     pendingReports,
