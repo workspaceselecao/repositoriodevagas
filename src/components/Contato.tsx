@@ -5,11 +5,12 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Textarea } from './ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Mail, Send, User, MessageSquare, Phone, MessageCircle } from 'lucide-react'
+import { Mail, Send, User, MessageSquare, Phone, MessageCircle, Users, Zap } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getRecipientEmails } from '../lib/contactEmail'
 import { sendContactEmail, testEmailConfig } from '../lib/emailService'
 import { getAllContactEmailConfigs } from '../lib/contactEmail'
+import { ContactEmailConfig } from '../types/database'
 
 interface ContactFormData {
   nome: string
@@ -31,7 +32,8 @@ export default function Contato() {
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('')
   const [recipientEmails, setRecipientEmails] = useState<string[]>(['roberio.gomes@atento.com']) // Emails padrão
-  const [teamsContact, setTeamsContact] = useState<string>('') // Contato Teams
+  const [teamsContacts, setTeamsContacts] = useState<ContactEmailConfig[]>([]) // Lista de admins com Teams
+  const [selectedAdmin, setSelectedAdmin] = useState<string>('') // Admin selecionado no dropdown
   const { user } = useAuth()
 
   // Preencher email automaticamente se o usuário estiver logado
@@ -57,27 +59,27 @@ export default function Contato() {
         console.log('📧 [Contato] Emails destinatários carregados:', emails)
         setRecipientEmails(emails)
         
-        // Encontrar email com sufixo @atento.com para Teams automático
-        const atentoEmail = contactConfigs.find(config => 
-          config.ativo && config.email.endsWith('@atento.com')
-        )
+        // Filtrar admins ativos que têm email válido (para criar link Teams)
+        const adminsWithTeams = contactConfigs
+          .filter(config => config.ativo && config.email)
+          .map(config => {
+            // Se não houver teams_contact configurado, criar automaticamente baseado no email
+            if (!config.teams_contact && config.email.endsWith('@atento.com')) {
+              return {
+                ...config,
+                teams_contact: `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(config.email)}`
+              }
+            }
+            return config
+          })
+          .filter(config => config.teams_contact) // Apenas admins com link Teams disponível
         
-        if (atentoEmail) {
-          // Criar link do Teams automaticamente baseado no email @atento.com
-          const teamsLink = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(atentoEmail.email)}`
-          console.log('💬 [Contato] Link Teams automático criado para:', atentoEmail.email)
-          console.log('💬 [Contato] Link Teams:', teamsLink)
-          setTeamsContact(teamsLink)
-        } else {
-          // Fallback: usar teams_contact configurado manualmente se não houver @atento.com
-          const activeTeamsContact = contactConfigs.find(config => 
-            config.ativo && config.teams_contact
-          )
-          
-          if (activeTeamsContact?.teams_contact) {
-            console.log('💬 [Contato] Usando contato Teams manual:', activeTeamsContact.teams_contact)
-            setTeamsContact(activeTeamsContact.teams_contact)
-          }
+        console.log('💬 [Contato] Admins com Teams carregados:', adminsWithTeams)
+        setTeamsContacts(adminsWithTeams)
+        
+        // Selecionar o primeiro admin por padrão, se houver
+        if (adminsWithTeams.length > 0) {
+          setSelectedAdmin(adminsWithTeams[0].id)
         }
         
         console.log('✅ [Contato] Dados de contato carregados com sucesso')
@@ -103,6 +105,22 @@ export default function Contato() {
       ...prev,
       assunto: value
     }))
+  }
+
+  const handleAdminSelect = (adminId: string) => {
+    setSelectedAdmin(adminId)
+  }
+
+  const handleOpenTeamsChat = () => {
+    const admin = teamsContacts.find(contact => contact.id === selectedAdmin)
+    if (admin?.teams_contact) {
+      console.log('💬 [Contato] Abrindo chat do Teams com:', admin.nome || admin.email)
+      window.open(admin.teams_contact, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  const getSelectedAdmin = () => {
+    return teamsContacts.find(contact => contact.id === selectedAdmin)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -177,39 +195,99 @@ export default function Contato() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-2xl">
+    <div className="container mx-auto p-6 max-w-2xl space-y-6">
+      {/* Card destacado para chat direto no Teams */}
+      {teamsContacts.length > 0 && (
+        <Card className="border-2 border-blue-500 dark:border-blue-600 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <Zap className="h-6 w-6 text-white" />
+              </div>
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                Resposta Instantânea via Teams
+              </span>
+            </CardTitle>
+            <CardDescription className="text-base">
+              Precisa de uma resposta rápida? Fale diretamente com um de nossos administradores através do Microsoft Teams.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              <Label htmlFor="admin-select" className="flex items-center gap-2 text-base font-semibold">
+                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                Escolha o Administrador
+              </Label>
+              <Select value={selectedAdmin} onValueChange={handleAdminSelect}>
+                <SelectTrigger 
+                  id="admin-select" 
+                  className="w-full border-2 border-blue-300 dark:border-blue-700 bg-white dark:bg-gray-900 h-12 text-base"
+                >
+                  <SelectValue placeholder="Selecione um administrador" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teamsContacts.map(contact => (
+                    <SelectItem key={contact.id} value={contact.id} className="text-base py-3">
+                      <div className="flex items-center gap-3">
+                        <MessageCircle className="h-4 w-4 text-blue-600" />
+                        <div>
+                          <div className="font-medium">
+                            {contact.nome || contact.email}
+                          </div>
+                          {contact.nome && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {contact.email}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {getSelectedAdmin() && (
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button 
+                  onClick={handleOpenTeamsChat}
+                  className="flex-1 h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
+                  size="lg"
+                >
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  Iniciar Chat no Teams
+                </Button>
+              </div>
+            )}
+
+            <div className="flex items-start gap-2 p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg border border-blue-300 dark:border-blue-700">
+              <MessageCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-blue-900 dark:text-blue-100">
+                <strong>Dica:</strong> O chat será aberto automaticamente no Microsoft Teams. 
+                {getSelectedAdmin() && (
+                  <span className="block mt-1">
+                    Você será conectado com <strong>{getSelectedAdmin()?.nome || getSelectedAdmin()?.email}</strong>.
+                  </span>
+                )}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Card do formulário de contato */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5" />
-            Entre em Contato
+            Enviar Email de Contato
           </CardTitle>
           <CardDescription>
-            Envie sua mensagem diretamente através do sistema. O email será enviado automaticamente via Resend para nossa equipe.
+            Ou envie sua mensagem por email. A mensagem será enviada automaticamente via Resend para nossa equipe.
             {recipientEmails.length > 1 && (
               <span className="block mt-2 text-sm text-blue-600 dark:text-blue-400">
-                📧 Sua mensagem será enviada para {recipientEmails.length} destinatários configurados pelos administradores.
+                📧 Sua mensagem será enviada para {recipientEmails.length} destinatários configurados.
               </span>
-            )}
-            {teamsContact && (
-              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                  <MessageCircle className="h-4 w-4" />
-                  <span className="text-sm font-medium">Precisa de uma resposta rápida?</span>
-                </div>
-                <a 
-                  href={teamsContact} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 mt-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  <span className="text-sm font-medium underline">Chat direto no Teams: Clique aqui</span>
-                </a>
-                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                  Será aberto automaticamente no Teams para o administrador @atento.com
-                </p>
-              </div>
             )}
           </CardDescription>
         </CardHeader>
