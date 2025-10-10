@@ -1,5 +1,5 @@
 // Sistema de controle administrativo para bloquear/liberar carregamento de dados
-import { supabaseAdmin } from './supabase'
+import { getSupabaseAdmin } from './supabase'
 
 export interface AdminControlState {
   isBlocked: boolean
@@ -19,7 +19,7 @@ export async function getAdminControlState(): Promise<AdminControlState> {
   try {
     console.log('🔍 [getAdminControlState] Buscando estado do controle no banco...')
     
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('system_control')
       .select('*')
       .eq('id', '00000000-0000-0000-0000-000000000001')
@@ -81,7 +81,7 @@ function getAdminControlStateFromLocalStorage(): AdminControlState {
 // Função para obter UUID do usuário atual
 async function getCurrentUserId(): Promise<string | null> {
   try {
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser()
+    const { data: { user }, error } = await getSupabaseAdmin().auth.getUser()
     if (error || !user) {
       console.warn('⚠️ [getCurrentUserId] Usuário não autenticado')
       return null
@@ -134,7 +134,7 @@ export async function setAdminControlState(isBlocked: boolean, updatedBy: string
     }
     
     // Atualizar no banco
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('system_control')
       .update(updateData)
       .eq('id', controlId)
@@ -219,7 +219,7 @@ export async function isDbLoadingBlockedAsync(): Promise<boolean> {
     console.log('🔍 [isDbLoadingBlockedAsync] Verificando bloqueio no banco...')
     
     const { data, error } = await Promise.race([
-      supabaseAdmin
+      getSupabaseAdmin()
         .from('system_control')
         .select('is_blocked')
         .eq('id', '00000000-0000-0000-0000-000000000001')

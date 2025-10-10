@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from './supabase'
+import { supabase, getSupabaseAdmin } from './supabase'
 import { Vaga, VagaFormData, VagaFilter } from '../types/database'
 import { assertWriteAllowed } from './admin-control'
 
@@ -12,7 +12,7 @@ export async function getVagasForceRefresh(filter?: VagaFilter): Promise<Vaga[]>
       console.log(`🔄 [getVagasForceRefresh] Tentativa ${attempt}/${maxRetries} - Buscando vagas diretamente do DB...`)
       
       // SEMPRE usar cliente admin para evitar problemas de RLS
-      let query = supabaseAdmin
+      let query = getSupabaseAdmin()
         .from('vagas')
         .select('*')
         .order('created_at', { ascending: false })
@@ -98,7 +98,7 @@ export async function getVagas(filter?: VagaFilter): Promise<Vaga[]> {
           console.warn('⚠️ Erro com cliente normal, tentando com cliente admin:', error.message)
           
           // Se falhar com cliente normal, tentar com cliente admin
-          let adminQuery = supabaseAdmin
+          let adminQuery = getSupabaseAdmin()
             .from('vagas')
             .select('*')
             .order('created_at', { ascending: false })
@@ -224,7 +224,7 @@ export async function createVaga(vagaData: VagaFormData, userId: string): Promis
       
       // Usar cliente admin com timeout para evitar problemas de RLS e timeout
       const { data: vaga, error } = await Promise.race([
-        supabaseAdmin
+        getSupabaseAdmin()
           .from('vagas')
           .insert(insertData)
           .select()
@@ -375,7 +375,7 @@ export async function deleteVaga(id: string): Promise<boolean> {
       ])
       
       // Usar cliente admin para evitar problemas de RLS
-      const { error } = await supabaseAdmin
+      const { error } = await getSupabaseAdmin()
         .from('vagas')
         .delete()
         .eq('id', id)
@@ -417,7 +417,7 @@ export async function getClientes(): Promise<string[]> {
           console.warn('⚠️ Erro com cliente normal para clientes, tentando com cliente admin:', error.message)
           
           // Se falhar com cliente normal, tentar com cliente admin
-          const { data: adminData, error: adminError } = await supabaseAdmin
+          const { data: adminData, error: adminError } = await getSupabaseAdmin()
             .from('vagas')
             .select('cliente')
             .not('cliente', 'is', null)
@@ -455,7 +455,7 @@ export async function getSites(): Promise<string[]> {
           console.warn('⚠️ Erro com cliente normal para sites, tentando com cliente admin:', error.message)
           
           // Se falhar com cliente normal, tentar com cliente admin
-          const { data: adminData, error: adminError } = await supabaseAdmin
+          const { data: adminData, error: adminError } = await getSupabaseAdmin()
             .from('vagas')
             .select('site')
             .not('site', 'is', null)

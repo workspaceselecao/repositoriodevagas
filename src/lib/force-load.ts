@@ -1,5 +1,5 @@
 // Sistema de carregamento forçado para garantir que os dados sejam sempre carregados
-import { supabase, supabaseAdmin } from './supabase'
+import { supabase, getSupabaseAdmin } from './supabase'
 
 interface ForceLoadOptions {
   maxRetries?: number
@@ -93,7 +93,7 @@ export class ForceLoader {
 
   private async loadFromSupabase(): Promise<any[]> {
     // Usar supabaseAdmin para evitar problemas de RLS
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('vagas')
       .select('*')
       .order('created_at', { ascending: false })

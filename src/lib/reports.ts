@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from './supabase'
+import { supabase, getSupabaseAdmin } from './supabase'
 import { Report, ReportFormData, User, Vaga } from '../types/database'
 import { filterVisibleUsers } from './user-filter'
 
@@ -30,7 +30,7 @@ function filterReportsWithHiddenAdmin(reports: any[]): any[] {
  * 3. Sistema de comunicação em tempo real
  * 
  * PRINCÍPIOS:
- * - Usar sempre supabaseAdmin para operações críticas
+ * - Usar sempre getSupabaseAdmin() para operações críticas
  * - Validação mínima de autenticação
  * - Foco na funcionalidade, não na complexidade
  */
@@ -52,7 +52,7 @@ export async function createReport(reportData: ReportFormData): Promise<Report |
     }
 
     // 2. Buscar o ID correto na tabela users baseado no email do Auth
-    const { data: userData, error: userError } = await supabaseAdmin
+    const { data: userData, error: userError } = await getSupabaseAdmin()
       .from('users')
       .select('id, email, role')
       .eq('email', authUser.email)
@@ -69,7 +69,7 @@ export async function createReport(reportData: ReportFormData): Promise<Report |
     const correctUserId = userData.id
 
     // 2. Buscar dados da vaga usando cliente administrativo
-    const { data: vagaData, error: vagaError } = await supabaseAdmin
+    const { data: vagaData, error: vagaError } = await getSupabaseAdmin()
       .from('vagas')
       .select('*')
       .eq('id', reportData.vaga_id)
@@ -84,7 +84,7 @@ export async function createReport(reportData: ReportFormData): Promise<Report |
     console.log('📋 Valor atual:', currentValue)
 
     // 3. Criar o report usando cliente administrativo (bypass RLS)
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('reports')
       .insert({
         vaga_id: reportData.vaga_id,
@@ -106,7 +106,7 @@ export async function createReport(reportData: ReportFormData): Promise<Report |
     console.log('✅ Report criado com sucesso:', data)
     
     // Verificar se o report foi realmente salvo
-    const { data: verification, error: verifyError } = await supabaseAdmin
+    const { data: verification, error: verifyError } = await getSupabaseAdmin()
       .from('reports')
       .select('*')
       .eq('id', data.id)
@@ -132,7 +132,7 @@ export async function createReport(reportData: ReportFormData): Promise<Report |
 
 export async function getReportById(reportId: string): Promise<Report | null> {
   try {
-    const { data: report, error } = await supabaseAdmin
+    const { data: report, error } = await getSupabaseAdmin()
       .from('reports')
       .select(`
         *,
@@ -162,7 +162,7 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
     console.log('🔍 [getReportsByUser] Buscando reports para:', { userId, userRole })
     
     // Primeiro, verificar se há reports na tabela geral
-    const { data: allReports, error: allError } = await supabaseAdmin
+    const { data: allReports, error: allError } = await getSupabaseAdmin()
       .from('reports')
       .select('*')
       .order('created_at', { ascending: false })
@@ -178,7 +178,7 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
       })))
     }
     
-    let query = supabaseAdmin.from('reports').select(`
+    let query = getSupabaseAdmin().from('reports').select(`
       *,
       vaga:vagas(*),
       reporter:users!reports_reported_by_fkey(*),
@@ -190,7 +190,7 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
       console.log('🔍 [getReportsByUser] Aplicando filtro RH para reported_by:', userId)
       
       // Verificar se há reports para este usuário específico
-      const { data: userReports, error: userError } = await supabaseAdmin
+      const { data: userReports, error: userError } = await getSupabaseAdmin()
         .from('reports')
         .select('*')
         .eq('reported_by', userId)
@@ -230,7 +230,7 @@ export async function getReportsByUser(userId: string, userRole: string): Promis
 
 export async function getPendingReportsForAdmin(adminId: string): Promise<Report[]> {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('reports')
       .select(`
         *,
@@ -271,7 +271,7 @@ export async function updateReportStatus(reportId: string, status: Report['statu
       updateData.completed_at = new Date().toISOString()
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('reports')
       .update(updateData)
       .eq('id', reportId)
@@ -294,7 +294,7 @@ export async function deleteReport(reportId: string): Promise<boolean> {
   try {
     console.log('🗑️ [deleteReport] Deletando report:', reportId)
     
-    const { error } = await supabaseAdmin
+    const { error } = await getSupabaseAdmin()
       .from('reports')
       .delete()
       .eq('id', reportId)
@@ -318,7 +318,7 @@ export async function deleteReport(reportId: string): Promise<boolean> {
 
 export async function getAllAdmins(): Promise<User[]> {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('users')
       .select('id, name, email')
       .eq('role', 'ADMIN')
@@ -344,7 +344,7 @@ export async function getAllAdmins(): Promise<User[]> {
 
 export async function getReportsForRealtime(adminId: string): Promise<Report[]> {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('reports')
       .select(`
         id,

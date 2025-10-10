@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from './supabase'
+import { supabase, getSupabaseAdmin } from './supabase'
 import { User, AuthUser, LoginFormData, UserFormData } from '../types/database'
 import { validatePasswordStrength, isValidPassword } from './password-utils'
 import { filterVisibleUsers, SUPER_ADMIN_EMAIL } from './user-filter'
@@ -119,7 +119,7 @@ export async function createUser(userData: UserFormData): Promise<User | null> {
 async function createUserWithAdmin(userData: UserFormData): Promise<User | null> {
   try {
     // Criar usuário no Supabase Auth usando cliente administrativo
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    const { data: authData, error: authError } = await getSupabaseAdmin().auth.admin.createUser({
       email: userData.email,
       password: userData.password,
       email_confirm: true
@@ -135,7 +135,7 @@ async function createUserWithAdmin(userData: UserFormData): Promise<User | null>
     }
 
     // Criar registro na tabela users usando cliente administrativo
-    const { data: user, error: userError } = await supabaseAdmin
+    const { data: user, error: userError } = await getSupabaseAdmin()
       .from('users')
       .insert({
         id: authData.user.id,
@@ -150,7 +150,7 @@ async function createUserWithAdmin(userData: UserFormData): Promise<User | null>
     if (userError) {
       console.error('Erro ao criar usuário na tabela:', userError)
       // Se falhou, remover o usuário do Auth
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+      await getSupabaseAdmin().auth.admin.deleteUser(authData.user.id)
       throw new Error(userError.message)
     }
 
@@ -275,7 +275,7 @@ export async function deleteUser(userId: string): Promise<boolean> {
 
     if (hasServiceKey) {
       // Excluir do Supabase Auth usando cliente administrativo
-      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+      const { error: authError } = await getSupabaseAdmin().auth.admin.deleteUser(userId)
       if (authError) {
         console.error('Erro ao excluir usuário do Auth:', authError)
         throw new Error(authError.message)
@@ -324,7 +324,7 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
     if (hasServiceKey) {
       try {
         // Buscar todos os usuários no Auth para encontrar o correto
-        const { data: allUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+        const { data: allUsers, error: listError } = await getSupabaseAdmin().auth.admin.listUsers()
         
         if (listError) {
           console.error('Erro ao listar usuários do Auth:', listError)
@@ -337,7 +337,7 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
         if (authUser) {
           // Usuário existe no Auth, redefinir senha
           console.log('Usuário encontrado no Auth, redefinindo senha...')
-          const { error } = await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
+          const { error } = await getSupabaseAdmin().auth.admin.updateUserById(authUser.id, {
             password: newPassword
           })
 
@@ -351,7 +351,7 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
         } else {
           // Usuário não existe no Auth, criar
           console.log('Usuário não existe no Supabase Auth, criando...')
-          const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          const { data: newAuthUser, error: createError } = await getSupabaseAdmin().auth.admin.createUser({
             email: user.email,
             password: newPassword,
             email_confirm: true,
@@ -368,7 +368,7 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
               console.log('Email já existe no Auth, tentando redefinir senha...')
               const existingUser = allUsers.users?.find((u: any) => u.email === user.email)
               if (existingUser) {
-                const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+                const { error: updateError } = await getSupabaseAdmin().auth.admin.updateUserById(existingUser.id, {
                   password: newPassword
                 })
                 

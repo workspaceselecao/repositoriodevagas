@@ -12,7 +12,6 @@ export function isDbLoadingBlocked(): boolean {
 
 // Singleton para evitar múltiplas instâncias
 let supabaseInstance: SupabaseClient | null = null
-let supabaseAdminInstance: SupabaseClient | null = null
 
 // Configuração comum para evitar múltiplas instâncias
 const commonConfig = {
@@ -41,54 +40,35 @@ const commonConfig = {
   }
 }
 
-// Cliente padrão (para operações do usuário) - Singleton ULTRA RADICAL
+// Cliente padrão (para operações do usuário) - Singleton com configuração otimizada
 export const supabase = (() => {
   if (!supabaseInstance) {
-    console.log('🔧 ULTRA RADICAL: Criando instância única do Supabase client')
+    console.log('🔧 Criando instância única do Supabase client')
     
-    // Configuração ULTRA RADICAL para evitar múltiplas instâncias
-    const ultraRadicalConfig = {
-      ...commonConfig,
-      auth: {
-        ...commonConfig.auth,
-        storageKey: 'repositoriodevagas-ultra-radical-auth',
-        autoRefreshToken: false, // Desabilitar auto-refresh para evitar conflitos
-        persistSession: false    // Desabilitar persistência para evitar conflitos
-      }
-    }
-    
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, ultraRadicalConfig) as SupabaseClient
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, commonConfig) as SupabaseClient
   }
   return supabaseInstance
 })()
 
-// Cliente administrativo (para operações que requerem service role) - Singleton
-export const supabaseAdmin = (() => {
-  if (!supabaseAdminInstance) {
-    console.log('🔧 Criando instância única do Supabase admin client')
-    supabaseAdminInstance = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-        detectSessionInUrl: false,
-        storage: undefined, // Não usar storage para admin
-        // Configuração única para admin
-        storageKey: 'repositoriodevagas-admin-token'
-      },
-      global: {
-        headers: {
-          'X-Client-Info': 'repositoriodevagas-admin'
-        }
-      },
-      db: {
-        schema: 'public'
-      },
-      realtime: {
-        params: {
-          eventsPerSecond: 0 // Desabilitar realtime para admin para evitar conflitos
-        }
+// Função para criar cliente admin sob demanda
+// IMPORTANTE: Esta função só cria o cliente quando chamada explicitamente
+export function getSupabaseAdmin(): SupabaseClient {
+  console.log('🔧 Criando cliente Supabase admin sob demanda')
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
+      storage: undefined
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'repositoriodevagas-admin',
+        'Authorization': `Bearer ${supabaseServiceKey}`
       }
-    }) as SupabaseClient
-  }
-  return supabaseAdminInstance
-})()
+    },
+    db: {
+      schema: 'public'
+    }
+  }) as SupabaseClient
+}

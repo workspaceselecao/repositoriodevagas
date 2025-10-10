@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from './supabase'
+import { supabase, getSupabaseAdmin } from './supabase'
 import { useAdminSovereignty } from '../hooks/useAdminSovereignty'
 
 // Tipos para operações administrativas
@@ -171,7 +171,7 @@ export class AdminBypass {
   async createUserWithBypass(userData: any): Promise<BypassResult> {
     return this.bypassUserOperation(
       async () => {
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await getSupabaseAdmin()
           .from('users')
           .insert(userData)
           .select()
@@ -188,7 +188,7 @@ export class AdminBypass {
   async updateUserWithBypass(userId: string, updates: any): Promise<BypassResult> {
     return this.bypassUserOperation(
       async () => {
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await getSupabaseAdmin()
           .from('users')
           .update(updates)
           .eq('id', userId)
@@ -206,7 +206,7 @@ export class AdminBypass {
   async deleteUserWithBypass(userId: string): Promise<BypassResult> {
     return this.bypassUserOperation(
       async () => {
-        const { error } = await supabaseAdmin
+        const { error } = await getSupabaseAdmin()
           .from('users')
           .delete()
           .eq('id', userId)
@@ -223,7 +223,7 @@ export class AdminBypass {
   async createVagaWithBypass(vagaData: any): Promise<BypassResult> {
     return this.bypassVagaOperation(
       async () => {
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await getSupabaseAdmin()
           .from('vagas')
           .insert(vagaData)
           .select()
@@ -240,7 +240,7 @@ export class AdminBypass {
   async updateVagaWithBypass(vagaId: string, updates: any): Promise<BypassResult> {
     return this.bypassVagaOperation(
       async () => {
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await getSupabaseAdmin()
           .from('vagas')
           .update(updates)
           .eq('id', vagaId)
@@ -258,7 +258,7 @@ export class AdminBypass {
   async deleteVagaWithBypass(vagaId: string): Promise<BypassResult> {
     return this.bypassVagaOperation(
       async () => {
-        const { error } = await supabaseAdmin
+        const { error } = await getSupabaseAdmin()
           .from('vagas')
           .delete()
           .eq('id', vagaId)
@@ -275,7 +275,7 @@ export class AdminBypass {
   async updateSystemControlWithBypass(controlData: any): Promise<BypassResult> {
     return this.bypassSystemOperation(
       async () => {
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await getSupabaseAdmin()
           .from('system_control')
           .update(controlData)
           .eq('id', '00000000-0000-0000-0000-000000000001')
@@ -301,7 +301,7 @@ export class AdminBypass {
     }
 
     try {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await getSupabaseAdmin()
         .from('admin_audit_log')
         .select('*')
         .order('timestamp', { ascending: false })
@@ -321,7 +321,7 @@ export class AdminBypass {
   async emergencyDataCleanup(table: string, condition: any): Promise<BypassResult> {
     return this.emergencyBypass(
       async () => {
-        const { error } = await supabaseAdmin
+        const { error } = await getSupabaseAdmin()
           .from(table)
           .delete()
           .match(condition)
