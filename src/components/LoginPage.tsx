@@ -84,8 +84,8 @@ export default function LoginPage() {
       {/* Background rotativo com imagens */}
       <RotatingBackground />
       
-      {/* Overlay escuro para melhorar legibilidade */}
-      <div className="absolute inset-0 bg-black/20"></div>
+      {/* Overlay escuro sutil para melhorar legibilidade */}
+      <div className="absolute inset-0 bg-black/10"></div>
       
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4 z-20">
@@ -95,8 +95,8 @@ export default function LoginPage() {
       {/* Card principal com glassmorphism transparente */}
       <Card className={`w-full max-w-md relative z-10 transition-all duration-300 hover:shadow-2xl ${
         config.effects.glassmorphism 
-          ? 'bg-white/5 backdrop-blur-xl border-white/10 shadow-2xl' 
-          : 'bg-card/80 backdrop-blur-sm shadow-xl'
+          ? 'bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl' 
+          : 'bg-card/90 backdrop-blur-sm shadow-xl'
       } ${shakeError ? 'animate-shake' : ''}`}>
         <CardHeader className="text-center space-y-6 pb-8">
           {/* Logo RepoVagas */}

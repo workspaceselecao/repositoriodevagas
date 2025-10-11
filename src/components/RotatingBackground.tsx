@@ -62,7 +62,7 @@ export default function RotatingBackground({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        opacity: isTransitioning ? 0.2 : 0.3 // Opacidade reduzida durante transição
+        opacity: isTransitioning ? 0.4 : 0.6 // Opacidade aumentada para melhor visibilidade
       }}
     />
   )
