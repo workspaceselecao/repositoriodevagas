@@ -27,70 +27,76 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Inicializar sistema de versão em background
     initializeVersionSystem()
 
-        // SOLUÇÃO ULTRA RADICAL: SEMPRE definir loading=false IMEDIATAMENTE
-    console.log('[AuthContext] 🚀 ULTRA RADICAL: definindo loading=false IMEDIATAMENTE')
+    // SOLUÇÃO SIMPLIFICADA: Definir loading=false imediatamente
+    console.log('[AuthContext] 🚀 Inicializando: definindo loading=false IMEDIATAMENTE')
     setLoading(false)
     setUser(null)
     
-    // Verificação em background (não bloqueia UI)
+    // Verificação simples em background (não bloqueia UI)
     const checkUser = async () => {
       if (!isMounted) return
       
       try {
-        console.log('[AuthContext] 🔄 Verificando sessão em background...')
+        console.log('[AuthContext] 🔄 Verificando sessão existente...')
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
-          console.warn('⚠️ Erro ao verificar sessão em background:', error)
+          console.warn('[AuthContext] ⚠️ Erro ao verificar sessão:', error)
           return
         }
 
         if (session?.user && isMounted) {
-          console.log('✅ Sessão encontrada em background, carregando dados...')
+          console.log('[AuthContext] ✅ Sessão encontrada, carregando dados do usuário...')
           try {
             const userData = await getCurrentUser()
-            if (isMounted) {
+            if (isMounted && userData) {
               setUser(userData)
-              console.log('✅ Usuário carregado em background')
+              console.log('[AuthContext] ✅ Usuário carregado automaticamente')
             }
           } catch (userError) {
-            console.warn('⚠️ Erro ao carregar dados em background:', userError)
+            console.warn('[AuthContext] ⚠️ Erro ao carregar dados do usuário:', userError)
           }
         }
       } catch (error) {
-        console.warn('⚠️ Erro na verificação em background:', error)
+        console.warn('[AuthContext] ⚠️ Erro na verificação de sessão:', error)
       }
     }
 
-    // Verificar em background (não bloqueia UI)
+    // Verificar sessão existente em background
     checkUser()
 
-        // Cleanup
-        return () => {
-          isMounted = false
-        }
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   // Listener simplificado para evitar loops
   useEffect(() => {
     let isMounted = true
     let lastEventTime = 0
+    let isLoginInProgress = false
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const now = Date.now()
       
       // Prevenir eventos duplicados em menos de 1 segundo
       if (now - lastEventTime < 1000) {
-        console.log('🚫 Evento de auth duplicado ignorado:', event)
+        console.log('[AuthContext] 🚫 Evento de auth duplicado ignorado:', event)
         return
       }
       lastEventTime = now
       
-      console.log('Auth state change:', event, session?.user?.email)
+      console.log('[AuthContext] Auth state change:', event, session?.user?.email)
       
       if (!isMounted) return
       
       if (event === 'SIGNED_IN' && session?.user) {
+        // Se já temos um usuário e não estamos fazendo login manual, ignorar
+        if (user && !isLoginInProgress) {
+          console.log('[AuthContext] ⚠️ Usuário já existe, ignorando evento SIGNED_IN')
+          return
+        }
+        
         console.log('[AuthContext] ✅ Usuário logado via listener - carregando dados reais')
         if (isMounted) {
           try {
@@ -100,9 +106,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setUser(userData)
               setError(null)
               setLoading(false)
+              isLoginInProgress = false
               console.log('[AuthContext] ✅ Dados reais do usuário carregados via listener:', userData.email)
             } else if (isMounted) {
               console.log('[AuthContext] ⚠️ getCurrentUser retornou null, mantendo estado atual')
+              isLoginInProgress = false
             }
           } catch (error) {
             console.error('[AuthContext] ❌ Erro ao carregar dados do usuário via listener:', error)
@@ -110,29 +118,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               // Não limpar o usuário se já está logado via login direto
               // Apenas garantir que loading está false
               setLoading(false)
+              isLoginInProgress = false
             }
           }
         }
       } else if (event === 'SIGNED_OUT') {
-        console.log('🚪 Usuário deslogado via listener')
+        console.log('[AuthContext] 🚪 Usuário deslogado via listener')
         if (isMounted) {
           setUser(null)
           setError(null)
           setLoading(false)
+          isLoginInProgress = false
         }
       }
     })
 
+    // Função para marcar que login está em progresso
+    const markLoginInProgress = () => {
+      isLoginInProgress = true
+    }
+
+    // Expor função globalmente para uso no login
+    ;(window as any).__markLoginInProgress = markLoginInProgress
+
     return () => {
       isMounted = false
       subscription.unsubscribe()
+      delete (window as any).__markLoginInProgress
     }
-  }, [])
+  }, [user])
 
   const login = async (credentials: LoginFormData): Promise<boolean> => {
     try {
       setError(null)
       setLoading(true)
+      
+      // Marcar que login está em progresso para evitar conflitos com listener
+      if ((window as any).__markLoginInProgress) {
+        (window as any).__markLoginInProgress()
+      }
       
       console.log('[AuthContext] 🔐 Iniciando processo de login...')
       const userData = await signIn(credentials)

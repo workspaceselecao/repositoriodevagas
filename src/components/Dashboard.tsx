@@ -187,30 +187,29 @@ export default function Dashboard() {
     setIsRefreshing(true)
     
     try {
-      // Executar atualização com timeout para evitar travamento
-      const refreshPromise = loadDashboardData()
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Refresh timeout')), 10000) // 10 segundos timeout
-      })
+      console.log('[Dashboard] 🔄 Iniciando refresh simples...')
       
-      await Promise.race([refreshPromise, timeoutPromise])
+      // Refresh simples sem timeout complexo
+      await loadDashboardData()
+      
+      console.log('[Dashboard] ✅ Refresh concluído com sucesso')
       
       // Feedback tátil de sucesso
       if ('vibrate' in navigator) {
         navigator.vibrate([100]) // Vibração de confirmação
       }
     } catch (error) {
-      console.error('Erro ao atualizar:', error)
+      console.error('[Dashboard] ❌ Erro ao atualizar:', error)
       
       // Feedback tátil de erro
       if ('vibrate' in navigator) {
         navigator.vibrate([200, 100, 200]) // Vibração de erro
       }
     } finally {
-      // Parar animação após um delay mínimo para melhor UX
+      // Parar animação após delay mínimo
       setTimeout(() => {
         setIsRefreshing(false)
-      }, 1000)
+      }, 800)
     }
   }
 
