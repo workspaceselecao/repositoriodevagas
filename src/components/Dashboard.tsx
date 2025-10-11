@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { SUPER_ADMIN_EMAIL } from '../lib/user-filter'
+import IntelligentRefresh from './IntelligentRefresh'
 import { 
   Users, 
   Building2, 
@@ -56,8 +57,7 @@ export default function Dashboard() {
   // Estado para controlar expansão dos cards
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
   
-  // Estado para controlar animação do botão de atualizar
-  const [isRefreshing, setIsRefreshing] = useState(false)
+  // Estado para controlar animação do botão de atualizar (removido - usando IntelligentRefresh)
   
   // Estado para os dados do dashboard
   const [stats, setStats] = useState<DashboardStats>({
@@ -176,42 +176,7 @@ export default function Dashboard() {
     setExpandedCards(newExpanded)
   }
 
-  // Função para atualizar com animação e feedback tátil otimizada
-  const handleRefresh = async () => {
-    // Feedback tátil (vibração) se suportado
-    if ('vibrate' in navigator) {
-      navigator.vibrate([50, 30, 50]) // Vibração suave
-    }
-    
-    // Iniciar animação
-    setIsRefreshing(true)
-    
-    try {
-      console.log('[Dashboard] 🔄 Iniciando refresh simples...')
-      
-      // Refresh simples sem timeout complexo
-      await loadDashboardData()
-      
-      console.log('[Dashboard] ✅ Refresh concluído com sucesso')
-      
-      // Feedback tátil de sucesso
-      if ('vibrate' in navigator) {
-        navigator.vibrate([100]) // Vibração de confirmação
-      }
-    } catch (error) {
-      console.error('[Dashboard] ❌ Erro ao atualizar:', error)
-      
-      // Feedback tátil de erro
-      if ('vibrate' in navigator) {
-        navigator.vibrate([200, 100, 200]) // Vibração de erro
-      }
-    } finally {
-      // Parar animação após delay mínimo
-      setTimeout(() => {
-        setIsRefreshing(false)
-      }, 800)
-    }
-  }
+  // Função removida - agora usando IntelligentRefresh component
 
 
 
@@ -331,18 +296,10 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex flex-col tablet:flex-row gap-2">
-          <Button 
-            onClick={handleRefresh} 
-            variant="outline" 
-            size="sm"
-            disabled={isRefreshing}
-            className="transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 transition-transform duration-500 ${
-              isRefreshing ? 'animate-spin' : 'hover:rotate-180'
-            }`} />
-            {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-          </Button>
+          <IntelligentRefresh 
+            onRefresh={loadDashboardData}
+            className="w-full tablet:w-auto"
+          />
         </div>
       </div>
 

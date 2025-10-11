@@ -70,81 +70,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Listener simplificado para evitar loops
+  // SOLUÇÃO RADICAL: Remover listener automático para evitar loops
+  // O listener estava causando loops infinitos, especialmente após períodos de inatividade
+  // Agora usamos apenas verificação manual quando necessário
   useEffect(() => {
-    let isMounted = true
-    let lastEventTime = 0
-    let isLoginInProgress = false
+    console.log('[AuthContext] 🔧 Listener automático desabilitado para evitar loops')
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const now = Date.now()
-      
-      // Prevenir eventos duplicados em menos de 1 segundo
-      if (now - lastEventTime < 1000) {
-        console.log('[AuthContext] 🚫 Evento de auth duplicado ignorado:', event)
-        return
-      }
-      lastEventTime = now
-      
-      console.log('[AuthContext] Auth state change:', event, session?.user?.email)
-      
-      if (!isMounted) return
-      
-      if (event === 'SIGNED_IN' && session?.user) {
-        // Se já temos um usuário e não estamos fazendo login manual, ignorar
-        if (user && !isLoginInProgress) {
-          console.log('[AuthContext] ⚠️ Usuário já existe, ignorando evento SIGNED_IN')
+    // Função para verificação manual de sessão (chamada apenas quando necessário)
+    const manualSessionCheck = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.warn('[AuthContext] ⚠️ Erro na verificação manual de sessão:', error)
           return
         }
-        
-        console.log('[AuthContext] ✅ Usuário logado via listener - carregando dados reais')
-        if (isMounted) {
-          try {
-            // Buscar dados reais do usuário em vez de usar role padrão
-            const userData = await getCurrentUser()
-            if (isMounted && userData) {
-              setUser(userData)
-              setError(null)
-              setLoading(false)
-              isLoginInProgress = false
-              console.log('[AuthContext] ✅ Dados reais do usuário carregados via listener:', userData.email)
-            } else if (isMounted) {
-              console.log('[AuthContext] ⚠️ getCurrentUser retornou null, mantendo estado atual')
-              isLoginInProgress = false
-            }
-          } catch (error) {
-            console.error('[AuthContext] ❌ Erro ao carregar dados do usuário via listener:', error)
-            if (isMounted) {
-              // Não limpar o usuário se já está logado via login direto
-              // Apenas garantir que loading está false
-              setLoading(false)
-              isLoginInProgress = false
-            }
+
+        if (session?.user && !user) {
+          console.log('[AuthContext] ✅ Sessão encontrada na verificação manual, carregando dados...')
+          const userData = await getCurrentUser()
+          if (userData) {
+            setUser(userData)
+            setLoading(false)
+            console.log('[AuthContext] ✅ Usuário carregado via verificação manual:', userData.email)
           }
         }
-      } else if (event === 'SIGNED_OUT') {
-        console.log('[AuthContext] 🚪 Usuário deslogado via listener')
-        if (isMounted) {
-          setUser(null)
-          setError(null)
-          setLoading(false)
-          isLoginInProgress = false
-        }
+      } catch (error) {
+        console.error('[AuthContext] ❌ Erro na verificação manual:', error)
       }
-    })
-
-    // Função para marcar que login está em progresso
-    const markLoginInProgress = () => {
-      isLoginInProgress = true
     }
 
-    // Expor função globalmente para uso no login
-    ;(window as any).__markLoginInProgress = markLoginInProgress
+    // Expor função para uso externo
+    ;(window as any).__manualSessionCheck = manualSessionCheck
 
     return () => {
-      isMounted = false
-      subscription.unsubscribe()
-      delete (window as any).__markLoginInProgress
+      delete (window as any).__manualSessionCheck
     }
   }, [user])
 
@@ -153,12 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null)
       setLoading(true)
       
-      // Marcar que login está em progresso para evitar conflitos com listener
-      if ((window as any).__markLoginInProgress) {
-        (window as any).__markLoginInProgress()
-      }
-      
-      console.log('[AuthContext] 🔐 Iniciando processo de login...')
+      console.log('[AuthContext] 🔐 Iniciando processo de login SIMPLES...')
       const userData = await signIn(credentials)
       
       if (userData) {
