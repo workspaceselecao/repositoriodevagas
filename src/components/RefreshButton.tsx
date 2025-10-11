@@ -23,37 +23,23 @@ export default function RefreshButton({
 
   const handleRefresh = async () => {
     if (isRefreshing) return
-    
+
     setIsRefreshing(true)
-    
+
     try {
-      // CORREÇÃO CRÍTICA: Verificar se já estamos em processo de reload
-      const reloadKey = 'refresh-button-reload'
-      if (sessionStorage.getItem(reloadKey)) {
-        console.warn('⚠️ Refresh já em andamento, evitando múltiplos reloads')
-        return
-      }
-      
-      sessionStorage.setItem(reloadKey, Date.now().toString())
-      
       // Executar callback personalizado se fornecido
       if (onRefresh) {
         await onRefresh()
       } else {
-        // CORREÇÃO CRÍTICA: Usar location.replace em vez de reload para evitar desaparecimento
-        console.log('🔄 Executando location.replace seguro...')
+        // SOLUÇÃO DEFINITIVA: Reload simples e direto
+        console.log('🔄 Executando reload simples...')
         window.location.replace(window.location.href)
       }
     } catch (error) {
       console.error('Erro durante refresh:', error)
     } finally {
-      // CORREÇÃO: Reset do estado mais rápido para melhor UX
+      // Reset do estado mais rápido para melhor UX
       setTimeout(() => setIsRefreshing(false), 500)
-      
-      // CORREÇÃO: Limpar flag de reload após 5 segundos
-      setTimeout(() => {
-        sessionStorage.removeItem('refresh-button-reload')
-      }, 5000)
     }
   }
 

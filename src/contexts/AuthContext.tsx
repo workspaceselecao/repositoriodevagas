@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { AuthUser, LoginFormData } from '../types/database'
 import { signIn, signOut, getCurrentUser } from '../lib/auth'
 import { supabase, isDbLoadingBlocked } from '../lib/supabase'
-import { initializeVersionSystem } from '../version'
 import AuthErrorFallback from '../components/AuthErrorFallback'
 
 interface AuthContextType {
@@ -24,8 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true
 
-    // Inicializar sistema de versão em background
-    initializeVersionSystem()
+    // SOLUÇÃO DEFINITIVA: Sistema de versão removido para evitar loops infinitos
 
     // SOLUÇÃO SIMPLIFICADA: Definir loading=false imediatamente
     console.log('[AuthContext] 🚀 Inicializando: definindo loading=false IMEDIATAMENTE')

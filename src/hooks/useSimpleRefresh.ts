@@ -33,12 +33,12 @@ export function useSimpleRefresh({
         await onRefresh()
       }
 
-      // CORREÇÃO CRÍTICA: Refresh simples da página se não há callback - usar location.replace
-      if (!onRefresh) {
-        console.log('🔄 Executando location.replace simples...')
-        window.location.replace(window.location.href)
-        return
-      }
+             // SOLUÇÃO DEFINITIVA: Refresh simples da página se não há callback
+             if (!onRefresh) {
+               console.log('🔄 Executando reload simples...')
+               window.location.replace(window.location.href)
+               return
+             }
 
       setLastRefresh(new Date())
       console.log('[SimpleRefresh] ✅ Refresh concluído com sucesso')

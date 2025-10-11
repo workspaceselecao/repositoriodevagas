@@ -10,10 +10,10 @@ interface UseUpdateCheckOptions {
 
 export function useUpdateCheck(options: UseUpdateCheckOptions = {}) {
   const {
-    checkOnMount = true,
+    checkOnMount = false, // SOLUÇÃO DEFINITIVA: Desabilitado por padrão
     checkInterval = 0, // 0 = não verificar automaticamente
     showModalDelay = 2000, // 2 segundos de delay
-    autoCheckOnFocus = true // verificar quando a janela ganha foco
+    autoCheckOnFocus = false // SOLUÇÃO DEFINITIVA: Desabilitado por padrão
   } = options
 
   const [hasUpdate, setHasUpdate] = useState(false)
