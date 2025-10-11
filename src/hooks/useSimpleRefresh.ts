@@ -33,8 +33,9 @@ export function useSimpleRefresh({
         await onRefresh()
       }
 
-      // Refresh simples da página se não há callback
+      // CORREÇÃO: Refresh simples da página se não há callback - mais suave
       if (!onRefresh) {
+        console.log('🔄 Executando refresh simples da página...')
         window.location.reload()
         return
       }

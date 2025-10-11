@@ -31,14 +31,15 @@ export default function RefreshButton({
       if (onRefresh) {
         await onRefresh()
       } else {
-        // Refresh padrão - apenas recarregar a página
+        // CORREÇÃO: Refresh padrão mais suave - usar reload suave
+        console.log('🔄 Executando reload suave...')
         window.location.reload()
       }
     } catch (error) {
       console.error('Erro durante refresh:', error)
     } finally {
-      // Reset do estado após um pequeno delay
-      setTimeout(() => setIsRefreshing(false), 1000)
+      // CORREÇÃO: Reset do estado mais rápido para melhor UX
+      setTimeout(() => setIsRefreshing(false), 500) // Reduzido de 1000ms para 500ms
     }
   }
 

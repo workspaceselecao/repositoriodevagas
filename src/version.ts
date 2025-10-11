@@ -30,22 +30,14 @@ export const setCurrentStoredVersion = (version: string): void => {
   }
 }
 
-// Função para buscar informações da versão do servidor
+// Função para buscar informações da versão do servidor (versão menos agressiva)
 export const fetchServerVersion = async (): Promise<VersionInfo | null> => {
   try {
     // Adicionar timestamp aleatório para evitar cache
     const timestamp = Date.now() + Math.random()
     
-    // Limpar cache antes da requisição
-    if ('caches' in window) {
-      try {
-        const cacheNames = await caches.keys()
-        await Promise.all(cacheNames.map(name => caches.delete(name)))
-        console.log('🗑️ Cache limpo antes de buscar version.json')
-      } catch (cacheError) {
-        console.warn('⚠️ Erro ao limpar cache:', cacheError)
-      }
-    }
+    // CORREÇÃO: Não limpar cache antes da requisição para evitar invisibilidade
+    console.log('🔍 Buscando versão do servidor...')
     
     const response = await fetch(`/version.json?t=${timestamp}&r=${Math.random()}`, {
       method: 'GET',
@@ -132,7 +124,7 @@ export const checkForUpdates = async (): Promise<boolean> => {
   }
 }
 
-// Função para forçar reload da aplicação
+// Função para forçar reload da aplicação (versão menos agressiva)
 export const forceReload = () => {
   console.log('🔄 Forçando reload da aplicação...')
   
@@ -148,41 +140,47 @@ export const forceReload = () => {
       console.log('✅ Usando APP_VERSION como fallback:', APP_VERSION)
     }
     
-    // Limpar cache do navegador AGESSIVAMENTE
+    // CORREÇÃO: Limpeza de cache mais conservadora para evitar invisibilidade
+    console.log('🧹 Limpando cache de forma conservadora...')
+    
+    // Limpar apenas caches específicos, não todos
     if ('caches' in window) {
       caches.keys().then(names => {
-        names.forEach(name => {
-          caches.delete(name)
-        })
-        console.log('🗑️ Cache limpo para nova versão')
+        // CORREÇÃO: Limpar apenas caches de versão, não todos
+        const versionCaches = names.filter(name => 
+          name.includes('version') || name.includes('app-cache')
+        )
         
-        // Forçar reload com cache bypass
+        Promise.all(versionCaches.map(name => caches.delete(name))).then(() => {
+          console.log('🗑️ Caches de versão limpos')
+          
+          // CORREÇÃO: Reload mais suave sem delay excessivo
+          setTimeout(() => {
+            console.log('🔄 Executando reload suave...')
+            window.location.reload()
+          }, 100) // Reduzido de 500ms para 100ms
+        })
+      }).catch(error => {
+        console.warn('⚠️ Erro ao limpar caches, fazendo reload direto:', error)
         setTimeout(() => {
           window.location.reload()
-        }, 500)
+        }, 100)
       })
     } else {
       // Se não suporta cache, reload direto
       setTimeout(() => {
         window.location.reload()
-      }, 500)
+      }, 100)
     }
   }).catch(error => {
     console.warn('⚠️ Erro ao buscar versão, usando APP_VERSION:', error)
     setCurrentStoredVersion(APP_VERSION)
     
-    // Limpar cache mesmo com erro
-    if ('caches' in window) {
-      caches.keys().then(names => {
-        names.forEach(name => {
-          caches.delete(name)
-        })
-      })
-    }
-    
+    // CORREÇÃO: Reload direto sem limpeza agressiva de cache
     setTimeout(() => {
+      console.log('🔄 Reload direto devido a erro...')
       window.location.reload()
-    }, 500)
+    }, 100)
   })
 }
 
