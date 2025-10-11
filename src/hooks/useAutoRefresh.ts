@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { usePageVisibility } from './usePageVisibility'
 
 interface UseAutoRefreshOptions {
   onRefresh: () => Promise<void> | void
@@ -63,9 +62,9 @@ export function useAutoRefresh({
       }
     }, interval)
 
-    // CORREÇÃO: Usar hook centralizado para visibilidade
-    const handleVisibilityChange = (isVisible: boolean) => {
-      if (onVisibilityChange && isVisible) {
+    // CORREÇÃO: Sistema de visibilidade simplificado
+    const handleVisibilityChange = () => {
+      if (onVisibilityChange && document.visibilityState === 'visible') {
         const timeSinceLastRefresh = Date.now() - lastRefreshRef.current
         
         // Se a página ficou invisível por mais de 2 minutos, fazer refresh
@@ -87,14 +86,10 @@ export function useAutoRefresh({
       }
     }
 
-    // CORREÇÃO: Usar hook centralizado para visibilidade
+    // Adicionar listeners
     if (onVisibilityChange) {
-      usePageVisibility({
-        onVisibilityChange: handleVisibilityChange
-      })
+      document.addEventListener('visibilitychange', handleVisibilityChange)
     }
-    
-    // Adicionar listeners para outros eventos
     window.addEventListener('keydown', handleKeyDown)
 
     // Cleanup
@@ -103,6 +98,7 @@ export function useAutoRefresh({
       if (intervalIdRef.current) {
         clearInterval(intervalIdRef.current)
       }
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [enabled, interval, onRefresh, onVisibilityChange])

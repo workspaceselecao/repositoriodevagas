@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { usePageVisibility } from './usePageVisibility'
 
 /**
  * Hook para gerenciar limpeza de cache e recursos quando a aplicação é fechada
@@ -51,11 +50,11 @@ export function useCleanup() {
       // delete event.returnValue;
     }
 
-    // CORREÇÃO: Usar hook centralizado para gerenciar visibilidade
+    // CORREÇÃO: Sistema de visibilidade simplificado e funcional
     let cleanupTimeout: NodeJS.Timeout | null = null
     
-    const handleVisibilityChange = (isVisible: boolean) => {
-      if (!isVisible) {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
         console.log('[useCleanup] Página ficou invisível, preparando limpeza...')
         // Limpar timeout anterior se existir
         if (cleanupTimeout) {
@@ -84,19 +83,16 @@ export function useCleanup() {
       cleanupResources()
     }
 
-    // Usar hook centralizado para visibilidade
-    const { visibilityState } = usePageVisibility({
-      onVisibilityChange: handleVisibilityChange
-    })
-
-    // Adicionar listeners para outros eventos
+    // Adicionar listeners
     window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('pagehide', handlePageHide)
 
     // Limpeza ao desmontar o componente
     return () => {
       console.log('[useCleanup] Desmontando hook de limpeza')
       window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('pagehide', handlePageHide)
       
       // Limpar timeout se existir
