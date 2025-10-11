@@ -33,16 +33,19 @@ function ProtectedRoute({ children, requireAdmin = false }: { children: React.Re
 
   console.log('[App] ProtectedRoute - user:', !!user, 'loading:', loading, 'requireAdmin:', requireAdmin)
 
+  // SOLUÇÃO DEFINITIVA: Se ainda está carregando, mostrar loading
   if (loading) {
     console.log('[App] ProtectedRoute - Mostrando loading...')
     return <LoadingScreen message="Verificando autenticação..." />
   }
 
+  // SOLUÇÃO DEFINITIVA: Se não há usuário após carregamento, redirecionar para login
   if (!user) {
     console.log('[App] ProtectedRoute - Usuário não encontrado, redirecionando para login')
     return <Navigate to="/login" replace />
   }
 
+  // Verificar se é admin se necessário
   if (requireAdmin && user.role !== 'ADMIN') {
     console.log('[App] ProtectedRoute - Usuário não é admin, redirecionando para dashboard')
     return <Navigate to="/dashboard" replace />
@@ -100,17 +103,12 @@ function AppRoutes() {
     return <ErrorFallback error={error} onRetry={retry} />
   }
 
-  // Redirecionamento automático se usuário já está logado
-  if (user && (window.location.pathname === '/login' || window.location.pathname === '/')) {
-    console.log('[App] AppRoutes - Usuário logado, redirecionando para dashboard')
-    return <Navigate to="/dashboard" replace />
-  }
-
+  // SOLUÇÃO DEFINITIVA: Mostrar loading enquanto verifica autenticação
   if (authLoading) {
     console.log('[App] AppRoutes - Auth carregando, mostrando loading')
     return (
       <LoadingScreen 
-        message={user ? 'Carregando dados...' : 'Inicializando aplicação...'} 
+        message="Verificando autenticação..." 
       />
     )
   }

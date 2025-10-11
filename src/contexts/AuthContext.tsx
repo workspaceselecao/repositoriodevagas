@@ -23,14 +23,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true
 
-    // SOLUÇÃO DEFINITIVA: Sistema de versão removido para evitar loops infinitos
-
-    // SOLUÇÃO SIMPLIFICADA: Definir loading=false imediatamente
-    console.log('[AuthContext] 🚀 Inicializando: definindo loading=false IMEDIATAMENTE')
-    setLoading(false)
-    setUser(null)
+    // SOLUÇÃO DEFINITIVA: Aguardar verificação de sessão antes de definir loading=false
+    console.log('[AuthContext] 🚀 Inicializando: verificando sessão primeiro...')
     
-    // Verificação simples em background (não bloqueia UI)
     const checkUser = async () => {
       if (!isMounted) return
       
@@ -40,6 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (error) {
           console.warn('[AuthContext] ⚠️ Erro ao verificar sessão:', error)
+          if (isMounted) {
+            setLoading(false)
+            setUser(null)
+          }
           return
         }
 
@@ -49,18 +48,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const userData = await getCurrentUser()
             if (isMounted && userData) {
               setUser(userData)
+              setLoading(false)
               console.log('[AuthContext] ✅ Usuário carregado automaticamente')
             }
           } catch (userError) {
             console.warn('[AuthContext] ⚠️ Erro ao carregar dados do usuário:', userError)
+            if (isMounted) {
+              setLoading(false)
+              setUser(null)
+            }
+          }
+        } else {
+          // Sem sessão, definir loading=false
+          if (isMounted) {
+            setLoading(false)
+            setUser(null)
+            console.log('[AuthContext] ❌ Nenhuma sessão encontrada')
           }
         }
       } catch (error) {
         console.warn('[AuthContext] ⚠️ Erro na verificação de sessão:', error)
+        if (isMounted) {
+          setLoading(false)
+          setUser(null)
+        }
       }
     }
 
-    // Verificar sessão existente em background
+    // Verificar sessão existente ANTES de mostrar a UI
     checkUser()
 
     return () => {
