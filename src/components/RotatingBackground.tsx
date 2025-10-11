@@ -2,17 +2,10 @@ import { useState, useEffect } from 'react'
 
 interface RotatingBackgroundProps {
   className?: string
-  autoRotate?: boolean
-  rotationInterval?: number
 }
 
-export default function RotatingBackground({ 
-  className = '',
-  autoRotate = true,
-  rotationInterval = 10000 // 10 segundos por padrão
-}: RotatingBackgroundProps) {
+export default function RotatingBackground({ className = '' }: RotatingBackgroundProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
   
   // Lista de imagens de background
   const backgroundImages = [
@@ -29,40 +22,20 @@ export default function RotatingBackground({
     setCurrentImageIndex(randomIndex)
   }
 
-  // Função para alternar para próxima imagem
-  const nextImage = () => {
-    setIsTransitioning(true)
-    setTimeout(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length)
-      setIsTransitioning(false)
-    }, 500) // Duração da transição
-  }
-
-  // Selecionar imagem aleatória na inicialização
+  // Selecionar imagem aleatória apenas na inicialização
   useEffect(() => {
     selectRandomImage()
   }, [])
 
-  // Rotação automática se habilitada
-  useEffect(() => {
-    if (!autoRotate) return
-
-    const interval = setInterval(() => {
-      nextImage()
-    }, rotationInterval)
-
-    return () => clearInterval(interval)
-  }, [autoRotate, rotationInterval])
-
   return (
     <div 
-      className={`fixed inset-0 w-full h-full -z-10 transition-opacity duration-500 ${className}`}
+      className={`fixed inset-0 w-full h-full -z-10 ${className}`}
       style={{
         backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        opacity: isTransitioning ? 0.4 : 0.6 // Opacidade aumentada para melhor visibilidade
+        opacity: 0.6 // Opacidade para boa visibilidade
       }}
     />
   )
