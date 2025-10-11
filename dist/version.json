@@ -1,5 +1,5 @@
 {
-  "version": "1.0.7",
-  "buildDate": "2025-10-09T00:00:00Z",
-  "description": "Correção de loops infinitos, sistema de auto-refresh e limpeza de cache"
+  "version": "1.5.0",
+  "buildDate": "2025-10-11T06:30:00Z",
+  "description": "Correção CRÍTICA: Problema de invisibilidade após refresh resolvido. Sistema de limpeza automática otimizado para não interferir com navegação. Melhorias na estabilidade da aplicação."
 }
