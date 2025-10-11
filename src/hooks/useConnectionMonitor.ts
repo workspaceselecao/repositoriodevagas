@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react'
+import { usePageVisibility } from './usePageVisibility'
 
 interface UseConnectionMonitorOptions {
   onConnectionLost?: () => void
@@ -61,9 +62,9 @@ export function useConnectionMonitor({
     // Verificação periódica
     checkIntervalRef.current = setInterval(checkConnection, checkInterval)
     
-    // Verificação quando a página volta ao foco
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
+    // CORREÇÃO: Usar hook centralizado para visibilidade
+    const handleVisibilityChange = (isVisible: boolean) => {
+      if (isVisible) {
         console.log('[ConnectionMonitor] 👁️ Página voltou ao foco, verificando conexão...')
         checkConnection()
       }
@@ -80,7 +81,11 @@ export function useConnectionMonitor({
       isConnected.current = false
     }
     
-    document.addEventListener('visibilitychange', handleVisibilityChange)
+    // CORREÇÃO: Usar hook centralizado para visibilidade
+    usePageVisibility({
+      onVisibilityChange: handleVisibilityChange
+    })
+    
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
     
@@ -88,7 +93,6 @@ export function useConnectionMonitor({
       if (checkIntervalRef.current) {
         clearInterval(checkIntervalRef.current)
       }
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
       console.log('[ConnectionMonitor] 🛑 Monitoramento de conexão interrompido')

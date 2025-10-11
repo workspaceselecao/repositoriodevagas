@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { usePageVisibility } from './usePageVisibility'
 
 /**
  * Hook para gerenciar limpeza de cache e recursos quando a aplicação é fechada
@@ -7,39 +8,35 @@ export function useCleanup() {
   useEffect(() => {
     console.log('[useCleanup] Sistema de limpeza ativo')
 
-    // Função para limpar cache e sessões
+    // Função para limpar cache e sessões (versão mais conservadora)
     const cleanupResources = () => {
       console.log('[useCleanup] Limpando recursos...')
       
       try {
-        // Limpar sessionStorage (mas manter alguns dados críticos)
-        const itemsToKeep = [
-          'supabase.auth.token',
-          'sb-mywaoaofatgwbbtyqfpd-auth-token'
+        // CORREÇÃO: Não limpar sessionStorage automaticamente
+        // Manter todos os tokens de autenticação e dados de sessão
+        console.log('[useCleanup] Mantendo dados de sessão intactos')
+
+        // CORREÇÃO: Limpar apenas caches temporários, não dados persistentes
+        const temporaryCacheKeys = [
+          'temp-cache',
+          'background-fetch',
+          'loading-state'
         ]
         
-        const sessionKeys = Object.keys(sessionStorage)
-        sessionKeys.forEach(key => {
-          if (!itemsToKeep.some(item => key.includes(item))) {
+        // Limpar apenas caches temporários
+        temporaryCacheKeys.forEach(key => {
+          if (localStorage.getItem(key)) {
+            localStorage.removeItem(key)
+          }
+          if (sessionStorage.getItem(key)) {
             sessionStorage.removeItem(key)
           }
         })
 
-        // Limpar cache específico da aplicação no localStorage
-        const cacheKeys = [
-          'vagas-cache',
-          'clientes-cache',
-          'reports-cache',
-          'dashboard-cache',
-          'last-fetch',
-          'cache-timestamp'
-        ]
-        
-        cacheKeys.forEach(key => {
-          localStorage.removeItem(key)
-        })
-
-        console.log('[useCleanup] ✅ Cache limpo com sucesso')
+        // CORREÇÃO: NÃO limpar caches principais que podem ser necessários
+        // para restaurar o estado da aplicação após reabrir
+        console.log('[useCleanup] ✅ Limpeza conservadora concluída (mantendo dados importantes)')
       } catch (error) {
         console.error('[useCleanup] Erro ao limpar cache:', error)
       }
@@ -54,18 +51,30 @@ export function useCleanup() {
       // delete event.returnValue;
     }
 
-    // Detectar visibilidade da página
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
+    // CORREÇÃO: Usar hook centralizado para gerenciar visibilidade
+    let cleanupTimeout: NodeJS.Timeout | null = null
+    
+    const handleVisibilityChange = (isVisible: boolean) => {
+      if (!isVisible) {
         console.log('[useCleanup] Página ficou invisível, preparando limpeza...')
-        // Limpar após 1 minuto de inatividade
-        setTimeout(() => {
+        // Limpar timeout anterior se existir
+        if (cleanupTimeout) {
+          clearTimeout(cleanupTimeout)
+        }
+        // CORREÇÃO: Limpar apenas após 15 minutos de inatividade
+        cleanupTimeout = setTimeout(() => {
           if (document.visibilityState === 'hidden') {
+            console.log('[useCleanup] Página invisível há mais de 15 minutos, limpando recursos...')
             cleanupResources()
           }
-        }, 60000)
+        }, 900000) // 15 minutos
       } else {
-        console.log('[useCleanup] Página voltou a ficar visível')
+        console.log('[useCleanup] Página voltou a ficar visível - cancelando limpeza')
+        // Cancelar limpeza se a página voltou a ficar visível
+        if (cleanupTimeout) {
+          clearTimeout(cleanupTimeout)
+          cleanupTimeout = null
+        }
       }
     }
 
@@ -75,38 +84,49 @@ export function useCleanup() {
       cleanupResources()
     }
 
-    // Adicionar listeners
+    // Usar hook centralizado para visibilidade
+    const { visibilityState } = usePageVisibility({
+      onVisibilityChange: handleVisibilityChange
+    })
+
+    // Adicionar listeners para outros eventos
     window.addEventListener('beforeunload', handleBeforeUnload)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('pagehide', handlePageHide)
 
     // Limpeza ao desmontar o componente
     return () => {
       console.log('[useCleanup] Desmontando hook de limpeza')
       window.removeEventListener('beforeunload', handleBeforeUnload)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('pagehide', handlePageHide)
+      
+      // Limpar timeout se existir
+      if (cleanupTimeout) {
+        clearTimeout(cleanupTimeout)
+        cleanupTimeout = null
+      }
     }
   }, [])
 
   // Retornar função de limpeza manual se necessário
   return {
     cleanupCache: () => {
-      const cacheKeys = [
-        'vagas-cache',
-        'clientes-cache',
-        'reports-cache',
-        'dashboard-cache',
-        'last-fetch',
-        'cache-timestamp'
+      // CORREÇÃO: Função de limpeza manual mais conservadora
+      const temporaryCacheKeys = [
+        'temp-cache',
+        'background-fetch',
+        'loading-state'
       ]
       
-      cacheKeys.forEach(key => {
-        localStorage.removeItem(key)
-        sessionStorage.removeItem(key)
+      temporaryCacheKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          localStorage.removeItem(key)
+        }
+        if (sessionStorage.getItem(key)) {
+          sessionStorage.removeItem(key)
+        }
       })
       
-      console.log('[useCleanup] Cache limpo manualmente')
+      console.log('[useCleanup] Cache temporário limpo manualmente (mantendo dados importantes)')
     }
   }
 }
