@@ -55,21 +55,13 @@ export function useCleanup() {
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        console.log('[useCleanup] Página ficou invisível, preparando limpeza...')
-        // Limpar timeout anterior se existir
-        if (cleanupTimeout) {
-          clearTimeout(cleanupTimeout)
-        }
-        // CORREÇÃO: Limpar apenas após 15 minutos de inatividade
-        cleanupTimeout = setTimeout(() => {
-          if (document.visibilityState === 'hidden') {
-            console.log('[useCleanup] Página invisível há mais de 15 minutos, limpando recursos...')
-            cleanupResources()
-          }
-        }, 900000) // 15 minutos
+        console.log('[useCleanup] Página ficou invisível - aguardando...')
+        // CORREÇÃO CRÍTICA: Não fazer limpeza automática por invisibilidade
+        // Isso estava causando o problema de invisibilidade
+        console.log('[useCleanup] Limpeza automática por invisibilidade DESABILITADA para evitar problemas')
       } else {
-        console.log('[useCleanup] Página voltou a ficar visível - cancelando limpeza')
-        // Cancelar limpeza se a página voltou a ficar visível
+        console.log('[useCleanup] Página voltou a ficar visível')
+        // Cancelar qualquer limpeza pendente
         if (cleanupTimeout) {
           clearTimeout(cleanupTimeout)
           cleanupTimeout = null
@@ -77,10 +69,10 @@ export function useCleanup() {
       }
     }
 
-    // Detectar quando o usuário sai da página
+    // CORREÇÃO CRÍTICA: Desabilitar limpeza automática no pagehide
     const handlePageHide = () => {
-      console.log('[useCleanup] Página sendo ocultada, limpando recursos...')
-      cleanupResources()
+      console.log('[useCleanup] Página sendo ocultada - limpeza automática DESABILITADA')
+      // CORREÇÃO: Não fazer limpeza automática no pagehide para evitar invisibilidade
     }
 
     // Adicionar listeners
