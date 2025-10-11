@@ -124,9 +124,21 @@ export const checkForUpdates = async (): Promise<boolean> => {
   }
 }
 
-// Função para forçar reload da aplicação (versão menos agressiva)
+// Função para forçar reload da aplicação (versão mais robusta)
 export const forceReload = () => {
   console.log('🔄 Forçando reload da aplicação...')
+  
+  // CORREÇÃO CRÍTICA: Verificar se já estamos em processo de reload para evitar loops
+  const reloadKey = 'app-reload-in-progress'
+  const reloadStartTime = Date.now()
+  
+  if (sessionStorage.getItem(reloadKey)) {
+    console.warn('⚠️ Reload já em andamento, evitando loop infinito')
+    return
+  }
+  
+  // Marcar que reload está em andamento
+  sessionStorage.setItem(reloadKey, reloadStartTime.toString())
   
   // CORREÇÃO: Sempre atualizar para a versão mais recente disponível
   fetchServerVersion().then(serverVersion => {
@@ -140,53 +152,41 @@ export const forceReload = () => {
       console.log('✅ Usando APP_VERSION como fallback:', APP_VERSION)
     }
     
-    // CORREÇÃO: Limpeza de cache mais conservadora para evitar invisibilidade
-    console.log('🧹 Limpando cache de forma conservadora...')
+    // CORREÇÃO CRÍTICA: Reload imediato sem limpeza de cache para evitar desaparecimento
+    console.log('🔄 Executando reload imediato sem limpeza de cache...')
     
-    // Limpar apenas caches específicos, não todos
-    if ('caches' in window) {
-      caches.keys().then(names => {
-        // CORREÇÃO: Limpar apenas caches de versão, não todos
-        const versionCaches = names.filter(name => 
-          name.includes('version') || name.includes('app-cache')
-        )
-        
-        Promise.all(versionCaches.map(name => caches.delete(name))).then(() => {
-          console.log('🗑️ Caches de versão limpos')
-          
-          // CORREÇÃO: Reload mais suave sem delay excessivo
-          setTimeout(() => {
-            console.log('🔄 Executando reload suave...')
-            window.location.reload()
-          }, 100) // Reduzido de 500ms para 100ms
-        })
-      }).catch(error => {
-        console.warn('⚠️ Erro ao limpar caches, fazendo reload direto:', error)
-        setTimeout(() => {
-          window.location.reload()
-        }, 100)
-      })
-    } else {
-      // Se não suporta cache, reload direto
-      setTimeout(() => {
-        window.location.reload()
-      }, 100)
-    }
+    // CORREÇÃO: Usar location.replace em vez de reload para evitar problemas
+    setTimeout(() => {
+      console.log('🔄 Executando location.replace...')
+      window.location.replace(window.location.href)
+    }, 50)
+    
   }).catch(error => {
     console.warn('⚠️ Erro ao buscar versão, usando APP_VERSION:', error)
     setCurrentStoredVersion(APP_VERSION)
     
-    // CORREÇÃO: Reload direto sem limpeza agressiva de cache
+    // CORREÇÃO: Reload imediato mesmo com erro
     setTimeout(() => {
-      console.log('🔄 Reload direto devido a erro...')
-      window.location.reload()
-    }, 100)
+      console.log('🔄 Reload imediato devido a erro...')
+      window.location.replace(window.location.href)
+    }, 50)
   })
+  
+  // CORREÇÃO: Limpar flag de reload após 10 segundos para evitar bloqueio permanente
+  setTimeout(() => {
+    sessionStorage.removeItem(reloadKey)
+    console.log('🧹 Flag de reload removida')
+  }, 10000)
 }
 
 // Função para inicializar o sistema de versão (chamada na inicialização da app)
 export const initializeVersionSystem = () => {
   try {
+    // CORREÇÃO CRÍTICA: Limpar flags de reload que podem estar causando problemas
+    sessionStorage.removeItem('app-reload-in-progress')
+    sessionStorage.removeItem('refresh-button-reload')
+    console.log('🧹 Flags de reload limpos na inicialização')
+    
     const storedVersion = getCurrentStoredVersion()
     
     if (!storedVersion) {
@@ -195,6 +195,12 @@ export const initializeVersionSystem = () => {
       console.log('🚀 Sistema de versão inicializado com versão:', APP_VERSION)
     } else {
       console.log('📋 Versão armazenada:', storedVersion, '| Versão atual:', APP_VERSION)
+      
+      // CORREÇÃO: Se há discrepância significativa de versão, atualizar automaticamente
+      if (storedVersion !== APP_VERSION) {
+        console.log('🔄 Discrepância de versão detectada, atualizando...')
+        setCurrentStoredVersion(APP_VERSION)
+      }
     }
   } catch (error) {
     console.warn('⚠️ Erro ao inicializar sistema de versão:', error)
