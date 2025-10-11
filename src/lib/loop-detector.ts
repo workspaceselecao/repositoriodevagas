@@ -3,8 +3,8 @@
  */
 
 const LOOP_DETECTION_KEY = 'app-loop-detection';
-const LOOP_THRESHOLD = 3; // Máximo de carregamentos em 10 segundos
-const LOOP_WINDOW = 10000; // Janela de 10 segundos
+const LOOP_THRESHOLD = 6; // Aumentado de 3 para 6 carregamentos
+const LOOP_WINDOW = 30000; // Aumentado para 30 segundos
 
 interface LoopDetectionData {
   timestamps: number[];
@@ -33,18 +33,19 @@ export function detectInfiniteLoop(): boolean {
     // Salvar dados atualizados
     localStorage.setItem(LOOP_DETECTION_KEY, JSON.stringify(data));
     
-    // Verificar se excedeu o threshold
+    // CORREÇÃO: Verificar se excedeu o threshold de forma menos agressiva
     if (data.timestamps.length >= LOOP_THRESHOLD) {
-      console.error('🚨 LOOP INFINITO DETECTADO!', {
+      console.warn('⚠️ Possível loop infinito detectado!', {
         count: data.timestamps.length,
         window: LOOP_WINDOW,
         threshold: LOOP_THRESHOLD
       });
       
-      // Limpar dados problemáticos
-      clearProblematicData();
+      // CORREÇÃO: Limpar dados problemáticos de forma mais conservadora
+      clearProblematicDataConservative();
       
-      return true;
+      // CORREÇÃO: Não retornar true para não bloquear a aplicação
+      return false;
     }
     
     return false;
@@ -90,6 +91,33 @@ function clearProblematicData(): void {
     console.log('✅ Dados problemáticos limpos');
   } catch (error) {
     console.error('[LoopDetector] Erro ao limpar dados:', error);
+  }
+}
+
+/**
+ * CORREÇÃO: Limpeza conservadora de dados (não remove dados importantes)
+ */
+function clearProblematicDataConservative(): void {
+  try {
+    console.log('🧹 Limpeza conservadora de dados problemáticos...');
+    
+    // CORREÇÃO: Limpar apenas dados de loop detection, não caches importantes
+    const loopKeys = [
+      'app-loop-detection',
+      'loop-check-timestamps',
+      'app-refresh-lock',
+      'refresh-count'
+    ];
+    
+    loopKeys.forEach(key => {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    });
+    
+    // CORREÇÃO: NÃO limpar caches importantes que podem ser necessários para a aplicação
+    console.log('✅ Dados de loop limpos conservadoramente (caches preservados)');
+  } catch (error) {
+    console.error('[LoopDetector] Erro na limpeza conservadora:', error);
   }
 }
 

@@ -69,43 +69,84 @@ export function handlePageRefresh(): void {
   if (perfData && perfData.type === 'reload') {
     console.log('[RefreshHandler] Refresh da página detectado');
     
-    // Verificar se já há um lock ativo
+    // CORREÇÃO: Verificar se já há um lock ativo de forma menos agressiva
     if (isRefreshLocked()) {
-      console.warn('[RefreshHandler] Múltiplos refreshes detectados - possível loop infinito!');
+      console.warn('[RefreshHandler] Múltiplos refreshes detectados - verificando se é realmente um loop...');
       
-      // Limpar dados problemáticos que podem estar causando o loop
-      try {
-        const problematicKeys = [
-          'last-error',
-          'error-count',
-          'retry-count'
-        ];
+      // CORREÇÃO: Só limpar dados se realmente houver muitos refreshes consecutivos
+      const refreshCount = getRefreshCount();
+      if (refreshCount > 3) { // Só agir se houver mais de 3 refreshes
+        console.warn('[RefreshHandler] Loop infinito confirmado, limpando dados problemáticos...');
         
-        problematicKeys.forEach(key => {
-          sessionStorage.removeItem(key);
-          localStorage.removeItem(key);
-        });
-        
-        console.log('[RefreshHandler] Dados problemáticos limpos');
-      } catch (error) {
-        console.error('[RefreshHandler] Erro ao limpar dados:', error);
+        // Limpar dados problemáticos que podem estar causando o loop
+        try {
+          const problematicKeys = [
+            'last-error',
+            'error-count',
+            'retry-count'
+          ];
+          
+          problematicKeys.forEach(key => {
+            sessionStorage.removeItem(key);
+            localStorage.removeItem(key);
+          });
+          
+          console.log('[RefreshHandler] Dados problemáticos limpos');
+        } catch (error) {
+          console.error('[RefreshHandler] Erro ao limpar dados:', error);
+        }
+      } else {
+        console.log('[RefreshHandler] Refresh normal detectado, não é um loop infinito');
       }
     }
     
-    // Criar novo lock
-    setRefreshLock();
+    // CORREÇÃO: Criar lock apenas se necessário
+    if (!isRefreshLocked()) {
+      setRefreshLock();
+    }
   } else {
     console.log('[RefreshHandler] Carregamento normal da página');
   }
 }
 
 /**
- * Detectar se a aplicação está em loop infinito
+ * Contar quantos refreshes ocorreram recentemente
+ */
+function getRefreshCount(): number {
+  const REFRESH_COUNT_KEY = 'refresh-count';
+  const REFRESH_WINDOW = 30000; // 30 segundos
+  
+  try {
+    const now = Date.now();
+    const stored = sessionStorage.getItem(REFRESH_COUNT_KEY);
+    
+    let data = stored ? JSON.parse(stored) : { count: 0, lastReset: now };
+    
+    // Reset se passou muito tempo
+    if (now - data.lastReset > REFRESH_WINDOW) {
+      data = { count: 0, lastReset: now };
+    }
+    
+    // Incrementar contador
+    data.count++;
+    
+    // Salvar
+    sessionStorage.setItem(REFRESH_COUNT_KEY, JSON.stringify(data));
+    
+    return data.count;
+  } catch (error) {
+    console.error('[RefreshHandler] Erro ao contar refreshes:', error);
+    return 0;
+  }
+}
+
+/**
+ * Detectar se a aplicação está em loop infinito (versão menos agressiva)
  */
 export function detectInfiniteLoop(): boolean {
   const LOOP_CHECK_KEY = 'loop-check-timestamps';
-  const MAX_LOADS_IN_PERIOD = 5; // Máximo de carregamentos
-  const CHECK_PERIOD = 30000; // em 30 segundos
+  const MAX_LOADS_IN_PERIOD = 8; // Aumentado de 5 para 8
+  const CHECK_PERIOD = 60000; // Aumentado para 60 segundos
   
   try {
     const storedData = sessionStorage.getItem(LOOP_CHECK_KEY);
@@ -122,19 +163,32 @@ export function detectInfiniteLoop(): boolean {
     // Salvar de volta
     sessionStorage.setItem(LOOP_CHECK_KEY, JSON.stringify(timestamps));
     
-    // Verificar se há muitos carregamentos
+    // CORREÇÃO: Verificar se há muitos carregamentos de forma menos agressiva
     if (timestamps.length >= MAX_LOADS_IN_PERIOD) {
-      console.error('[RefreshHandler] ⚠️ LOOP INFINITO DETECTADO!');
+      console.error('[RefreshHandler] ⚠️ Possível loop infinito detectado!');
       
-      // Limpar tudo para tentar recuperar
-      sessionStorage.clear();
-      localStorage.removeItem('vagas-cache');
-      localStorage.removeItem('clientes-cache');
+      // CORREÇÃO: Não limpar tudo imediatamente, apenas dados específicos
+      try {
+        const problematicKeys = [
+          'loop-check-timestamps',
+          'app-refresh-lock',
+          'refresh-count'
+        ];
+        
+        problematicKeys.forEach(key => {
+          sessionStorage.removeItem(key);
+        });
+        
+        // CORREÇÃO: Não limpar caches importantes que podem ser necessários
+        console.log('[RefreshHandler] Dados de loop limpos, mas caches preservados');
+      } catch (error) {
+        console.error('[RefreshHandler] Erro ao limpar dados de loop:', error);
+      }
       
-      // Notificar usuário
-      alert('Detectamos um problema com o carregamento da aplicação. A página será recarregada uma última vez.');
+      // CORREÇÃO: Não mostrar alert imediatamente, apenas log
+      console.warn('[RefreshHandler] Loop detectado, mas não bloqueando aplicação');
       
-      return true;
+      return false; // CORREÇÃO: Não retornar true para não bloquear a aplicação
     }
     
     return false;
