@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 import { BackupLog, BackupOptions } from '../types/database'
 import { filterVisibleUsers, filterBackupData, filterExcelSheet, filterCSVContent } from './user-filter'
-import * as XLSX from 'xlsx'
+import * as ExcelJS from 'exceljs'
 
 // Função para fazer backup manual
 export async function createManualBackup(userId: string, options: BackupOptions): Promise<BackupLog | null> {
@@ -104,31 +104,52 @@ export async function createManualBackup(userId: string, options: BackupOptions)
 
 // Função para gerar backup em Excel
 async function generateExcelBackup(data: any): Promise<Buffer> {
-  const workbook = XLSX.utils.book_new()
+  const workbook = new ExcelJS.Workbook()
 
   // Adicionar planilha de vagas
   if (data.vagas && data.vagas.length > 0) {
-    const vagasSheet = XLSX.utils.json_to_sheet(data.vagas)
-    XLSX.utils.book_append_sheet(workbook, vagasSheet, 'Vagas')
+    const worksheet = workbook.addWorksheet('Vagas')
+    worksheet.addRows(data.vagas)
   }
 
   // Adicionar planilha de usuários (já filtrada)
   if (data.users && data.users.length > 0) {
     const filteredUsers = filterExcelSheet(data.users, 'Usuários')
     if (filteredUsers.length > 0) {
-      const usersSheet = XLSX.utils.json_to_sheet(filteredUsers)
-      XLSX.utils.book_append_sheet(workbook, usersSheet, 'Usuários')
+      const worksheet = workbook.addWorksheet('Usuários')
+      worksheet.addRows(filteredUsers)
     }
   }
 
   // Adicionar planilha de logs de backup
   if (data.backup_logs && data.backup_logs.length > 0) {
-    const logsSheet = XLSX.utils.json_to_sheet(data.backup_logs)
-    XLSX.utils.book_append_sheet(workbook, logsSheet, 'Logs de Backup')
+    const worksheet = workbook.addWorksheet('Logs de Backup')
+    worksheet.addRows(data.backup_logs)
   }
 
-  const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
-  return excelBuffer
+  const buffer = await workbook.xlsx.writeBuffer()
+  return Buffer.from(buffer)
+}
+
+// Função auxiliar para converter JSON para CSV
+function jsonToCSV(data: any[]): string {
+  if (!data || data.length === 0) return ''
+  
+  const headers = Object.keys(data[0])
+  const csvHeaders = headers.join(',')
+  
+  const csvRows = data.map(row => 
+    headers.map(header => {
+      const value = row[header]
+      // Escapar valores que contêm vírgulas ou aspas
+      if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+        return `"${value.replace(/"/g, '""')}"`
+      }
+      return value || ''
+    }).join(',')
+  )
+  
+  return [csvHeaders, ...csvRows].join('\n')
 }
 
 // Função para gerar backup em CSV
@@ -138,7 +159,7 @@ async function generateCSVBackup(data: any): Promise<string> {
   // Adicionar vagas
   if (data.vagas && data.vagas.length > 0) {
     csvContent += '=== VAGAS ===\n'
-    csvContent += XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(data.vagas))
+    csvContent += jsonToCSV(data.vagas)
     csvContent += '\n\n'
   }
 
@@ -147,7 +168,7 @@ async function generateCSVBackup(data: any): Promise<string> {
     const filteredUsers = filterExcelSheet(data.users, 'Usuários')
     if (filteredUsers.length > 0) {
       csvContent += '=== USUÁRIOS ===\n'
-      csvContent += XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(filteredUsers))
+      csvContent += jsonToCSV(filteredUsers)
       csvContent += '\n\n'
     }
   }
@@ -155,7 +176,7 @@ async function generateCSVBackup(data: any): Promise<string> {
   // Adicionar logs de backup
   if (data.backup_logs && data.backup_logs.length > 0) {
     csvContent += '=== LOGS DE BACKUP ===\n'
-    csvContent += XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(data.backup_logs))
+    csvContent += jsonToCSV(data.backup_logs)
   }
 
   return csvContent
@@ -219,14 +240,14 @@ export async function createAutomaticBackup(): Promise<BackupLog | null> {
 // Função para exportar dados para Excel
 export async function exportToExcel(data: any[], fileName: string): Promise<void> {
   try {
-    const workbook = XLSX.utils.book_new()
-    const worksheet = XLSX.utils.json_to_sheet(data)
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados')
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Dados')
+    worksheet.addRows(data)
     
-    const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
+    const buffer = await workbook.xlsx.writeBuffer()
     
     // Criar blob e fazer download
-    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url

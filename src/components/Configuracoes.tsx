@@ -10,7 +10,7 @@ import { Switch } from './ui/switch'
 import { Textarea } from './ui/textarea'
 import { BackupOptions, BackupLog, Noticia, NoticiaFormData, ContactEmailConfig, ContactEmailFormData } from '../types/database'
 import { createManualBackup, getBackupLogs } from '../lib/backup'
-import * as XLSX from 'xlsx'
+import * as ExcelJS from 'exceljs'
 import { getNoticias, createNoticia, updateNoticia, deleteNoticia, toggleNoticiaStatus } from '../lib/noticias'
 import { getAllContactEmailConfigs, createContactEmailConfig, updateContactEmailConfig, deleteContactEmailConfig, toggleContactEmailConfigStatus } from '../lib/contactEmail'
 import { testEmailConfig } from '../lib/emailService'
@@ -336,17 +336,18 @@ export default function Configuracoes() {
 
 
   const generateExcelFromBackup = async (backupData: any): Promise<Buffer> => {
-    const workbook = XLSX.utils.book_new()
+    const workbook = new ExcelJS.Workbook()
     
     // Adicionar cada tabela como uma planilha
     Object.keys(backupData).forEach(tableName => {
       if (backupData[tableName] && Array.isArray(backupData[tableName])) {
-        const worksheet = XLSX.utils.json_to_sheet(backupData[tableName])
-        XLSX.utils.book_append_sheet(workbook, worksheet, tableName)
+        const worksheet = workbook.addWorksheet(tableName)
+        worksheet.addRows(backupData[tableName])
       }
     })
     
-    return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
+    const buffer = await workbook.xlsx.writeBuffer()
+    return Buffer.from(buffer)
   }
 
   const generateCSVFromBackup = async (backupData: any): Promise<string> => {
