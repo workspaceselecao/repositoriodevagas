@@ -560,7 +560,7 @@ export default function ReportsList() {
                         </Button>
                       </div>
                     )}
-                    {user?.role === 'ADMIN' && report.status === 'completed' && (
+                    {user?.role === 'ADMIN' && (report.status === 'completed' || report.status === 'rejected') && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -875,7 +875,9 @@ export default function ReportsList() {
                   Campo: {getFieldLabel(reportToDelete.field_name)}
                 </p>
                 <p className="text-xs text-red-600 mt-1">
-                  Status: {reportToDelete.status === 'completed' ? 'Concluído' : reportToDelete.status}
+                  Status: {reportToDelete.status === 'completed' ? 'Concluído' : 
+                          reportToDelete.status === 'rejected' ? 'Rejeitado' : 
+                          reportToDelete.status}
                 </p>
               </div>
             )}
@@ -886,6 +888,16 @@ export default function ReportsList() {
               </p>
               <p className="text-xs text-yellow-700 mt-1">
                 O registro do report será permanentemente removido do banco de dados.
+                {reportToDelete?.status === 'rejected' && (
+                  <span className="block mt-1 font-medium">
+                    Este report foi rejeitado e pode ser removido com segurança.
+                  </span>
+                )}
+                {reportToDelete?.status === 'completed' && (
+                  <span className="block mt-1 font-medium">
+                    Este report foi concluído e pode ser removido do histórico.
+                  </span>
+                )}
               </p>
             </div>
             
