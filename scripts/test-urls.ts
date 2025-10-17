@@ -4,10 +4,10 @@ async function testUrls() {
   console.log('=' .repeat(40))
   
   const urls = [
-    'https://rkcrazuegletgxoqfinc.supabase.co',
-    'https://rkcrazuegletgxogflnc.supabase.co', // versão anterior
-    'https://rkcrazuegletgxoqfinc.supabase.co/rest/v1/',
-    'https://rkcrazuegletgxoqfinc.supabase.co/auth/v1/',
+    'https://mywaoaofatgwbbtyqfpd.supabase.co',
+    'https://mywaoaofatgwbbtyqfpd.supabase.co/rest/v1/',
+    'https://mywaoaofatgwbbtyqfpd.supabase.co/auth/v1/',
+    'https://mywaoaofatgwbbtyqfpd.supabase.co/storage/v1/',
   ]
   
   for (const url of urls) {

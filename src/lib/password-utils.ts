@@ -28,7 +28,7 @@ const PATTERNS = {
   lowercase: /[a-z]/,
   uppercase: /[A-Z]/,
   numbers: /[0-9]/,
-  symbols: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+  symbols: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
   sequential: /(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i,
   repeated: /(.)\1{2,}/
 }

@@ -17,7 +17,7 @@ import { SUPER_ADMIN_EMAIL } from '../lib/user-filter'
 
 interface AdminControlPanelProps {}
 
-export default function AdminControlPanel({}: AdminControlPanelProps) {
+export default function AdminControlPanel(_props: AdminControlPanelProps) {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [message, setMessage] = useState<string>('')

@@ -265,14 +265,15 @@ export class JobScrapingService {
     const allText = doc.body.textContent || ''
     
     switch (field) {
-      case 'horario_trabalho':
+      case 'horario_trabalho': {
         const horarioMatch = allText.match(/Horário de Trabalho[^<]*?(Das \d{1,2}:\d{2} às \d{1,2}:\d{2})/i)
         if (horarioMatch) {
           return { text: horarioMatch[1].trim(), confidence: 70 }
         }
         break
+      }
         
-      case 'local_trabalho':
+      case 'local_trabalho': {
         const localMatch = allText.match(/Local de trabalho[:\s]*([^<]+?)(?=\s*$|$)/i)
         if (localMatch) {
           return { text: localMatch[1].trim(), confidence: 70 }
@@ -283,13 +284,15 @@ export class JobScrapingService {
           return { text: enderecoMatch[0].trim(), confidence: 60 }
         }
         break
+      }
         
-      case 'salario':
+      case 'salario': {
         const salarioMatch = allText.match(/Salário[:\s]*([^<]*)/i)
         if (salarioMatch && salarioMatch[1].includes('R$')) {
           return { text: salarioMatch[1].trim(), confidence: 70 }
         }
         break
+      }
     }
     
     return { text: '', confidence: 0 }
@@ -420,9 +423,8 @@ export class JobScrapingService {
         .filter(responsabilidade => responsabilidade.trim() !== '') // Remove responsabilidades vazias
         .join('\n')
     } else if (field === 'descricao_vaga') {
-      cleaned = cleaned
-        // Preservar quebras de linha naturais - não dividir por ponto e vírgula
-        // Apenas normalizar espaços e manter a estrutura original
+      // Para descrição de vaga, manter o texto original sem modificações
+      // cleaned já contém o texto limpo
     } else {
       // Para outros campos, usar limpeza normal
       cleaned = cleaned
