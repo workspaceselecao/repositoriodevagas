@@ -284,15 +284,19 @@ export default function Configuracoes() {
     setMessage('')
 
     try {
+      console.log('🗑️ [Configuracoes] Iniciando exclusão do email com ID:', id)
+      
       const result = await deleteContactEmailConfig(id)
       if (result) {
         setMessage('Email de contato removido com sucesso!')
+        console.log('✅ [Configuracoes] Email excluído com sucesso')
         loadContactEmails()
       } else {
         setMessage('Erro ao remover email de contato')
+        console.error('❌ [Configuracoes] Resultado da exclusão foi false')
       }
     } catch (error: any) {
-      console.error('Erro ao remover email de contato:', error)
+      console.error('❌ [Configuracoes] Erro ao remover email de contato:', error)
       setMessage(`Erro ao remover email de contato: ${error.message}`)
     } finally {
       setContactEmailLoading(false)

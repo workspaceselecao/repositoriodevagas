@@ -101,20 +101,43 @@ export async function updateContactEmailConfig(id: string, config: ContactEmailF
 // Função para remover uma configuração de email de contato
 export async function deleteContactEmailConfig(id: string): Promise<boolean> {
   try {
+    console.log('🗑️ [ContactEmail] Iniciando exclusão do email com ID:', id)
+    
+    // Primeiro, verificar se o registro existe
+    const { data: existingData, error: fetchError } = await supabase
+      .from('contact_email_config')
+      .select('id, email, nome')
+      .eq('id', id)
+      .single()
+
+    if (fetchError) {
+      console.error('❌ [ContactEmail] Erro ao buscar registro para exclusão:', fetchError)
+      throw new Error(`Registro não encontrado: ${fetchError.message}`)
+    }
+
+    if (!existingData) {
+      console.error('❌ [ContactEmail] Registro não encontrado para exclusão')
+      throw new Error('Registro não encontrado')
+    }
+
+    console.log('📋 [ContactEmail] Registro encontrado:', existingData)
+
+    // Executar a exclusão
     const { error } = await supabase
       .from('contact_email_config')
       .delete()
       .eq('id', id)
 
     if (error) {
-      console.error('Erro ao remover configuração de email:', error)
-      return false
+      console.error('❌ [ContactEmail] Erro ao executar exclusão:', error)
+      throw new Error(`Erro ao excluir: ${error.message}`)
     }
 
+    console.log('✅ [ContactEmail] Email excluído com sucesso:', existingData.email)
     return true
   } catch (error) {
-    console.error('Erro ao remover configuração de email:', error)
-    return false
+    console.error('❌ [ContactEmail] Erro geral na exclusão:', error)
+    throw error
   }
 }
 

@@ -59,7 +59,26 @@ export default function Contato() {
     const admin = teamsContacts.find(contact => contact.id === selectedAdmin)
     if (admin?.teams_contact) {
       console.log('💬 [Contato] Abrindo chat do Teams com:', admin.nome || admin.email)
-      window.open(admin.teams_contact, '_blank', 'noopener,noreferrer')
+      
+      // Tentar abrir o Teams de diferentes formas para garantir compatibilidade
+      try {
+        // Primeiro, tentar abrir diretamente
+        const teamsUrl = admin.teams_contact
+        window.open(teamsUrl, '_blank', 'noopener,noreferrer')
+        
+        // Fallback: tentar com protocolo teams://
+        setTimeout(() => {
+          const teamsProtocolUrl = `teams://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(admin.email)}`
+          window.location.href = teamsProtocolUrl
+        }, 1000)
+        
+      } catch (error) {
+        console.error('Erro ao abrir Teams:', error)
+        // Fallback final: copiar email para área de transferência
+        navigator.clipboard.writeText(admin.email).then(() => {
+          alert(`Email copiado para área de transferência: ${admin.email}\nCole no Teams para iniciar o chat.`)
+        })
+      }
     }
   }
 
