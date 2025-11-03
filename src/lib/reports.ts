@@ -1,6 +1,6 @@
 import { supabase, getSupabaseAdmin } from './supabase'
 import { Report, ReportFormData, User, Vaga } from '../types/database'
-import { filterVisibleUsers } from './user-filter'
+import { filterVisibleUsers, SUPER_ADMIN_EMAIL } from './user-filter'
 
 // =============================================
 // SISTEMA SIMPLIFICADO DE REPORTS
@@ -10,12 +10,12 @@ import { filterVisibleUsers } from './user-filter'
 function filterReportsWithHiddenAdmin(reports: any[]): any[] {
   return reports.filter(report => {
     // Verificar se o reporter é o administrador oculto
-    if (report.reporter?.email === 'robgomez.sir@live.com') {
+    if (report.reporter?.email === SUPER_ADMIN_EMAIL) {
       return false
     }
     
     // Verificar se o assignee é o administrador oculto
-    if (report.assignee?.email === 'robgomez.sir@live.com') {
+    if (report.assignee?.email === SUPER_ADMIN_EMAIL) {
       return false
     }
     

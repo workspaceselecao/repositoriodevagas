@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Email do administrador oculto
-const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
+const SUPER_ADMIN_EMAIL = 'roberio.gomes@atento.com'
 
 // Script para criar o administrador oculto específico
 async function createSuperAdmin() {
