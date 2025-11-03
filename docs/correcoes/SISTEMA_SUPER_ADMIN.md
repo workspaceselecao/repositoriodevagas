@@ -7,8 +7,8 @@ O sistema possui um **Super Administrador Oculto** que possui privilégios espec
 ## 🎯 Características do Super Admin
 
 ### Identificação
-- **Email:** `roberio.gomes@atento.com`
-- **Nome:** Roberio Gomes
+- **Email:** `robgomez.sir@live.com`
+- **Nome:** Super Administrador
 - **Role:** `ADMIN`
 - **Status:** Oculto (não aparece em listas de usuários)
 
@@ -33,7 +33,7 @@ O Super Admin **NÃO aparece** em:
 
 ##### Arquivo: `src/lib/user-filter.ts`
 ```typescript
-export const SUPER_ADMIN_EMAIL = 'roberio.gomes@atento.com'
+export const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
 
 // Filtra usuários visíveis
 export function filterVisibleUsers<T extends { email: string }>(users: T[]): T[] {
@@ -89,9 +89,9 @@ Este script:
 5. ✅ Configura email_confirmed como true
 
 **Credenciais:**
-- **Email:** `roberio.gomes@atento.com`
+- **Email:** `robgomez.sir@live.com`
 - **Senha:** `admintotal`
-- **Nome:** `Administrador`
+- **Nome:** `Super Administrador`
 
 ### Método 2: Manual via Supabase Dashboard
 
@@ -108,8 +108,8 @@ Este script:
 INSERT INTO public.users (id, email, name, role, password_hash)
 VALUES (
   gen_random_uuid(),
-  'roberio.gomes@atento.com',
-  'Roberio Gomes',
+  'robgomez.sir@live.com',
+  'Super Administrador',
   'ADMIN',
   ''
 );
@@ -218,7 +218,7 @@ async function createBackup() {
 ```sql
 SELECT id, email, name, role, created_at
 FROM public.users
-WHERE email = 'roberio.gomes@atento.com';
+WHERE email = 'robgomez.sir@live.com';
 ```
 
 ### Verificar se está no Supabase Auth
@@ -226,7 +226,7 @@ WHERE email = 'roberio.gomes@atento.com';
 ```sql
 SELECT id, email, email_confirmed_at, raw_user_meta_data
 FROM auth.users
-WHERE email = 'roberio.gomes@atento.com';
+WHERE email = 'robgomez.sir@live.com';
 ```
 
 ### Testar Filtro de Visibilidade
@@ -270,7 +270,7 @@ npm run test-password-reset
 -- CERTIFIQUE-SE de ter outro admin antes de executar!
 
 DELETE FROM public.users
-WHERE email = 'roberio.gomes@atento.com';
+WHERE email = 'robgomez.sir@live.com';
 
 -- Também remover do Supabase Auth
 -- Via Dashboard > Authentication > Users
@@ -323,7 +323,7 @@ function UserStats() {
 
 ## ✅ Checklist de Implementação
 
-- [x] Email definido: `roberio.gomes@atento.com`
+- [x] Email definido: `robgomez.sir@live.com`
 - [x] Filtro de visibilidade implementado
 - [x] Sanitização de exportação implementada
 - [x] Filtro de backup implementado
