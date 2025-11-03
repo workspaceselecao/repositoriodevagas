@@ -2,7 +2,7 @@
 // Garante que o administrador oculto nunca apareça em listas, downloads ou backups
 
 // Email do administrador oculto
-export const SUPER_ADMIN_EMAIL = 'robgomez.sir@live.com'
+export const SUPER_ADMIN_EMAIL = 'roberio.gomes@atento.com'
 
 /**
  * Filtra usuários para remover o administrador oculto

@@ -42,7 +42,8 @@ async function populateVagas() {
       categoria: vaga.CATEGORIA || null,
       cargo: vaga.CARGO || null,
       cliente: vaga.CLIENTE || null,
-      produto: vaga.PRODUTO || null,
+      titulo: null, // Campo opcional
+      celula: vaga.PRODUTO || null, // Mapeia PRODUTO para celula
       descricao_vaga: vaga['Descrição da vaga'] || null,
       responsabilidades_atribuicoes: vaga['Responsabilidades e atribuições'] || null,
       requisitos_qualificacoes: vaga['Requisitos e qualificações'] || null,

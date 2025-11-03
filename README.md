@@ -105,7 +105,7 @@ Sistema de gerenciamento e comparação de vagas de emprego desenvolvido com **R
 
 ### Tabela `vagas`
 - `id`: UUID (chave primária)
-- `site`, `categoria`, `cargo`, `cliente`, `produto`: VARCHAR
+- `site`, `categoria`, `cargo`, `cliente`, `celula`, `titulo`: VARCHAR
 - `descricao_vaga`, `responsabilidades_atribuicoes`, `requisitos_qualificacoes`: TEXT
 - `salario`, `horario_trabalho`, `jornada_trabalho`: VARCHAR
 - `beneficios`, `local_trabalho`, `etapas_processo`: TEXT

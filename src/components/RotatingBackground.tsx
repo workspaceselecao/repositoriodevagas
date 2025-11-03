@@ -9,14 +9,11 @@ export default function RotatingBackground({ className = '' }: RotatingBackgroun
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showArrow, setShowArrow] = useState(false)
   
-  // Lista de imagens de background (atualizada com Slide6)
+  // Lista de imagens de background disponíveis
   const backgroundImages = [
-    '/backhome/Slide1.PNG',
-    '/backhome/Slide2.PNG',
-    '/backhome/Slide3.PNG',
-    '/backhome/Slide4.PNG',
-    '/backhome/Slide5.PNG',
-    '/backhome/Slide6.PNG'
+    '/backhome/BLUE.PNG',
+    '/backhome/GREEN.PNG',
+    '/backhome/ORANGE.PNG'
   ]
 
   // Função para selecionar uma imagem aleatória
@@ -27,7 +24,7 @@ export default function RotatingBackground({ className = '' }: RotatingBackgroun
 
   // Função para navegar para próxima imagem
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length)
+    setCurrentImageIndex((prev: number) => (prev + 1) % backgroundImages.length)
   }
 
   // Selecionar imagem aleatória apenas na inicialização

@@ -1,11 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 import vagasData from '../REPOSITORIO.json'
 
-// Credenciais do Supabase (temporárias para o script)
-const supabaseUrl = 'https://rkcrazuegletgxoqflnc.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrY3JhenVlZ2xldGd4b3FmbG5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1OTM5NjMsImV4cCI6MjA3NDE2OTk2M30.EV-UhjfAqY2ggLbA1fYaVHVr2hv3dK3NR8c3RQiV2xI'
+// Credenciais do Supabase - usando Service Key para ignorar RLS
+const supabaseUrl = 'https://mywaoaofatgwbbtyqfpd.supabase.co'
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15d2FvYW9mYXRnd2JidHlxZnBkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODYwMDMyNCwiZXhwIjoyMDc0MTc2MzI0fQ.oUhs-CNusuqxKFIwjc1zv0Nh4TJ6opnmzt8_V1Lfq7U'
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { autoRefreshToken: false, persistSession: false }
+})
 
 interface VagaFromJSON {
   SITE: string
@@ -50,7 +52,8 @@ async function populateDatabase() {
       categoria: vaga.CATEGORIA,
       cargo: vaga.CARGO,
       cliente: vaga.CLIENTE,
-      produto: vaga.PRODUTO,
+      titulo: null, // Campo opcional
+      celula: vaga.PRODUTO, // Mapeia PRODUTO para celula
       descricao_vaga: vaga['Descrição da vaga'] || null,
       responsabilidades_atribuicoes: vaga['Responsabilidades e atribuições'] || null,
       requisitos_qualificacoes: vaga['Requisitos e qualificações'] || null,
