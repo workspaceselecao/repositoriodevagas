@@ -26,20 +26,32 @@ export default function ResetPasswordPage() {
   const { config } = useTheme()
   const navigate = useNavigate()
 
-  // Verificar se há uma sessão de recuperação válida
+    // Verificar se há uma sessão de recuperação válida
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // Verificar se há um token na URL (indica que o usuário clicou no link)
+        const url = new URL(window.location.href)
+        const hashParams = new URLSearchParams(url.hash.substring(1))
+        const queryParams = new URLSearchParams(url.search)
+        const hasToken = hashParams.has('access_token') || hashParams.has('token_hash') || 
+                        queryParams.has('access_token') || queryParams.has('token_hash')
+
         const hasSession = await hasPasswordRecoverySession()
         setIsValidSession(hasSession)
-        
+
         if (!hasSession) {
-          setMessage('Link de recuperação inválido ou expirado. Solicite um novo link.')
+          // Mensagem mais específica baseada na presença do token
+          if (hasToken) {
+            setMessage('Este link de recuperação já foi usado ou expirou. Links de recuperação só podem ser usados uma vez. Por favor, solicite um novo link.')
+          } else {
+            setMessage('Link de recuperação inválido ou expirado. Solicite um novo link.')
+          }
         }
       } catch (error) {
         console.error('Erro ao verificar sessão:', error)
         setIsValidSession(false)
-        setMessage('Erro ao verificar link de recuperação.')
+        setMessage('Erro ao verificar link de recuperação. Tente solicitar um novo link.')
       }
     }
 

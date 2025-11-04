@@ -6,13 +6,16 @@ import { filterVisibleUsers, SUPER_ADMIN_EMAIL } from './user-filter'
 // Função auxiliar para verificar se email existe no sistema
 async function checkIfEmailExists(email: string): Promise<boolean> {
   try {
+    // Normalizar email antes de verificar
+    const normalizedEmail = email.trim().toLowerCase()
+    
     // Verificar na tabela users
     const { data: user, error } = await supabase
       .from('users')
       .select('email')
-      .eq('email', email)
+      .eq('email', normalizedEmail)
       .single()
-    
+
     return !error && !!user
   } catch (error) {
     // Se não encontrou na tabela users, retornar false
@@ -23,27 +26,52 @@ async function checkIfEmailExists(email: string): Promise<boolean> {
 // Função para fazer login usando Supabase Auth
 export async function signIn({ email, password }: LoginFormData): Promise<AuthUser | null> {
   try {
-    console.log('🔐 Autenticando usuário:', email)
+    // Normalizar e validar email
+    const normalizedEmail = email.trim().toLowerCase()
+    console.log('🔐 Autenticando usuário:', normalizedEmail)
+
+    // Validar formato do email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(normalizedEmail)) {
+      console.error('❌ Email inválido:', normalizedEmail)
+      throw new Error('Email inválido. Por favor, verifique o email digitado.')
+    }
+
+    // Verificar se o email existe na tabela users antes de tentar autenticar
+    const emailExists = await checkIfEmailExists(normalizedEmail)
+    console.log('📧 Email existe na tabela users:', emailExists)
     
-    // Fazer login com Supabase Auth
+    // Fazer login com Supabase Auth usando email normalizado
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
+      email: normalizedEmail,
       password
     })
 
     if (authError) {
       console.error('❌ Erro de autenticação:', authError.message)
+      console.error('❌ Código do erro:', authError.status)
       
       // Verificar se é erro de email não confirmado
       if (authError.message.includes('Email not confirmed') || 
-          authError.message.includes('email_not_confirmed') ||
-          (authError.message.includes('Invalid login credentials') && 
-           await checkIfEmailExists(email))) {
+          authError.message.includes('email_not_confirmed')) {
         throw new Error('CONFIRM_EMAIL')
       }
       
+      // Se o email existe na tabela mas falhou a autenticação, pode ser problema de senha
+      if (authError.message.includes('Invalid login credentials')) {
+        if (emailExists) {
+          // Email existe, mas senha pode estar incorreta
+          console.error('❌ Email existe mas credenciais inválidas - possivelmente senha incorreta')
+          throw new Error('Email ou senha incorretos. Verifique suas credenciais.')
+        } else {
+          // Email não existe em lugar nenhum
+          console.error('❌ Email não encontrado no sistema')
+          throw new Error('Email não encontrado no sistema. Verifique o email digitado.')
+        }
+      }
+      
       // Outros erros de autenticação
-      throw new Error(authError.message)
+      throw new Error(authError.message || 'Erro ao fazer login. Tente novamente.')
     }
 
     if (!authData.user) {
@@ -65,9 +93,43 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
       if (!userError && userData) {
         user = userData
         console.log('✅ Dados do usuário carregados')
+      } else if (userError) {
+        console.warn('⚠️ Erro ao buscar usuário pelo ID:', userError.message)
+        
+        // Tentar buscar pelo email como fallback
+        try {
+          const { data: userByEmail, error: emailError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', normalizedEmail)
+            .single()
+          
+          if (!emailError && userByEmail) {
+            user = userByEmail
+            console.log('✅ Usuário encontrado pelo email como fallback')
+          }
+        } catch (emailFallbackError) {
+          console.warn('⚠️ Erro ao buscar usuário pelo email:', emailFallbackError)
+        }
       }
     } catch (userError) {
-      console.log('Erro ao buscar usuário na tabela, usando dados do Auth:', userError)
+      console.warn('⚠️ Erro ao buscar usuário na tabela:', userError)
+      
+      // Tentar buscar pelo email como fallback
+      try {
+        const { data: userByEmail, error: emailError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', normalizedEmail)
+          .single()
+        
+        if (!emailError && userByEmail) {
+          user = userByEmail
+          console.log('✅ Usuário encontrado pelo email como fallback (catch)')
+        }
+      } catch (emailFallbackError) {
+        console.warn('⚠️ Erro ao buscar usuário pelo email (catch):', emailFallbackError)
+      }
     }
 
     // Se não encontrou o usuário na tabela, usar dados do Auth
@@ -75,8 +137,8 @@ export async function signIn({ email, password }: LoginFormData): Promise<AuthUs
       console.log('⚠️ Usuário não encontrado na tabela users, usando dados do Auth')
       const fallbackUser = {
         id: authData.user.id,
-        email: authData.user.email || '',
-        name: authData.user.user_metadata?.full_name || authData.user.email?.split('@')[0] || 'Usuário',
+        email: normalizedEmail, // Usar email normalizado
+        name: authData.user.user_metadata?.full_name || normalizedEmail.split('@')[0] || 'Usuário',
         role: authData.user.user_metadata?.role || 'RH' // Role padrão
       }
       console.log('✅ Dados do usuário (fallback):', fallbackUser.email, fallbackUser.role)
@@ -558,12 +620,24 @@ export async function resetPasswordForEmail(email: string): Promise<{ success: b
       }
     }
 
-    // Enviar email de recuperação usando Supabase Auth
-    const redirectUrl = import.meta.env.VITE_SUPABASE_REDIRECT_URL || 
-                       (window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://repositoriodevagas.vercel.app')
-    
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${redirectUrl}/reset-password`
+        // Enviar email de recuperação usando Supabase Auth
+    // Usar a URL atual da aplicação para o redirectTo
+    const getRedirectUrl = () => {
+      // Prioridade 1: Variável de ambiente
+      if (import.meta.env.VITE_SUPABASE_REDIRECT_URL) {
+        return import.meta.env.VITE_SUPABASE_REDIRECT_URL
+      }
+      
+      // Prioridade 2: URL atual da aplicação
+      const currentUrl = window.location.origin
+      return `${currentUrl}/reset-password`
+    }
+
+    const redirectUrl = getRedirectUrl()
+    console.log('🔗 URL de redirecionamento para recuperação de senha:', redirectUrl)
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {        
+      redirectTo: redirectUrl
     })
 
     if (error) {
@@ -706,23 +780,62 @@ export async function resetPasswordWithToken(newPassword: string): Promise<{ suc
  */
 export async function hasPasswordRecoverySession(): Promise<boolean> {
   try {
-    const { data: { session } } = await supabase.auth.getSession()
+    // Primeiro, verificar se há um token na URL (hash ou query string)
+    // Isso indica que o usuário clicou no link de recuperação
+    const url = new URL(window.location.href)
+    const hashParams = new URLSearchParams(url.hash.substring(1)) // Remover o # inicial
+    const queryParams = new URLSearchParams(url.search)
     
-    // Verificar se é uma sessão de recuperação válida
-    // Uma sessão de recuperação tem user e access_token, mas pode não ter refresh_token completo
+    const hasTokenInHash = hashParams.has('access_token') || hashParams.has('token_hash') || hashParams.has('type')
+    const hasTokenInQuery = queryParams.has('access_token') || queryParams.has('token_hash') || queryParams.has('type')
+    const hasTokenInUrl = hasTokenInHash || hasTokenInQuery
+
+    // Se há um token na URL, aguardar um pouco para o Supabase processar
+    if (hasTokenInUrl) {
+      console.log('🔐 Token de recuperação detectado na URL, aguardando processamento...')
+      // Aguardar o Supabase processar o token (o cliente tem detectSessionInUrl: true)
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+
+    // Verificar se há uma sessão válida
+    const { data: { session }, error } = await supabase.auth.getSession()
+
+    // Se há erro ao obter sessão e não há token na URL, o link é inválido
+    if (error) {
+      console.error('❌ Erro ao obter sessão:', error)
+      // Se não havia token na URL, significa que o link foi usado ou expirou
+      if (!hasTokenInUrl) {
+        return false
+      }
+      // Se havia token mas deu erro, pode ser token inválido/expirado
+      // Tentar verificar usando getUser para mais detalhes
+      const { data: { user: userData }, error: userError } = await supabase.auth.getUser()
+      if (userError || !userData) {
+        console.error('❌ Token inválido ou expirado:', userError?.message)
+        return false
+      }
+    }
+
+    // Verificar se há uma sessão válida com usuário
     if (session?.user && session.access_token) {
       // Verificar se estamos na página de reset
       const isOnResetPage = window.location.pathname === '/reset-password'
-      
+
       if (isOnResetPage) {
-        console.log('Sessão de recuperação válida detectada')
+        console.log('✅ Sessão de recuperação válida detectada')
         return true
       }
     }
-    
+
+    // Se havia token na URL mas não há sessão, o token pode ter sido usado ou expirado
+    if (hasTokenInUrl && !session?.user) {
+      console.log('⚠️ Token detectado na URL mas não foi possível criar sessão - pode ter sido usado ou expirado')
+      return false
+    }
+
     return false
   } catch (error) {
-    console.error('Erro ao verificar sessão de recuperação:', error)
+    console.error('❌ Erro ao verificar sessão de recuperação:', error)
     return false
   }
 }
