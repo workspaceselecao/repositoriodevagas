@@ -18,12 +18,15 @@ export default function Contato() {
       try {
         const contactConfigs = await getAllContactEmailConfigs()
         
-        // Filtrar admins ativos que têm email válido (para criar link Teams)
+        // Filtrar admins ativos que têm email válido OU teams_contact configurado
         const adminsWithTeams = contactConfigs
-          .filter(config => config.ativo && config.email)
+          .filter(config => {
+            // Incluir apenas contatos ativos que tenham email OU teams_contact configurado
+            return config.ativo && (config.email || config.teams_contact)
+          })
           .map(config => {
-            // Se não houver teams_contact configurado, criar automaticamente baseado no email
-            // Usar deep link do Teams Desktop que abre diretamente o chat específico
+            // Apenas criar teams_contact automaticamente se NÃO houver um já configurado
+            // SEMPRE priorizar o teams_contact cadastrado pelo usuário
             if (!config.teams_contact && config.email) {
               const encodedEmail = encodeURIComponent(config.email.trim())
               return {
@@ -31,6 +34,7 @@ export default function Contato() {
                 teams_contact: `msteams://teams.microsoft.com/l/chat/0/0?users=${encodedEmail}&message=`
               }
             }
+            // Se já existe teams_contact, usar exatamente como está cadastrado
             return config
           })
           .filter(config => config.teams_contact) // Apenas admins com link Teams disponível
@@ -65,34 +69,54 @@ export default function Contato() {
     }
 
     console.log('💬 [Contato] Abrindo chat do Teams com:', admin.nome || admin.email)
+    console.log('🔗 [Contato] teams_contact configurado:', admin.teams_contact ? 'SIM' : 'NÃO')
 
-    // Verificar se há um teams_contact configurado
-    if (admin.teams_contact) {
-      // Se já existe uma URL configurada, tentar usar ela primeiro
+    // PRIORIDADE 1: Sempre usar o teams_contact cadastrado se existir
+    // Não criar link automático se já houver um configurado
+    if (admin.teams_contact && admin.teams_contact.trim()) {
       const existingUrl = admin.teams_contact.trim()
+      console.log('✅ [Contato] Usando teams_contact cadastrado:', existingUrl)
       
-      // Verificar se é uma URL completa ou precisa ser construída
-      if (existingUrl.startsWith('http://') || existingUrl.startsWith('https://')) {
-        // URL completa - usar diretamente
-        console.log('🌐 [Contato] Usando URL configurada:', existingUrl)
-        window.open(existingUrl, '_blank', 'noopener,noreferrer')
-        return
-      } else if (existingUrl.startsWith('msteams://')) {
-        // Deep link do Teams - usar diretamente
-        console.log('📱 [Contato] Usando deep link configurado:', existingUrl)
-        window.location.href = existingUrl
-        return
+      try {
+        // Verificar tipo de link e abrir adequadamente
+        if (existingUrl.startsWith('msteams://')) {
+          // Deep link do Teams Desktop - usar window.location.href
+          console.log('📱 [Contato] Abrindo deep link do Teams Desktop')
+          window.location.href = existingUrl
+          return
+        } else if (existingUrl.startsWith('https://teams.microsoft.com/') || existingUrl.startsWith('http://teams.microsoft.com/')) {
+          // URL Web do Teams - usar window.open
+          console.log('🌐 [Contato] Abrindo URL Web do Teams')
+          window.open(existingUrl, '_blank', 'noopener,noreferrer')
+          return
+        } else if (existingUrl.startsWith('http://') || existingUrl.startsWith('https://')) {
+          // URL genérica - tentar abrir como link web
+          console.log('🌐 [Contato] Abrindo URL genérica')
+          window.open(existingUrl, '_blank', 'noopener,noreferrer')
+          return
+        } else {
+          // Link pode estar incompleto ou em formato incorreto
+          console.warn('⚠️ [Contato] Formato de teams_contact não reconhecido:', existingUrl)
+          // Tentar usar mesmo assim - pode funcionar
+          window.location.href = existingUrl
+          return
+        }
+      } catch (error) {
+        console.error('❌ [Contato] Erro ao abrir teams_contact:', error)
+        // Continuar para fallback
       }
     }
 
-    // Se não houver teams_contact configurado ou estiver em formato incorreto,
-    // construir a URL correta baseada no email
+    // FALLBACK: Apenas criar link automático se NÃO houver teams_contact configurado
+    // Isso não deveria acontecer se o usuário cadastrou um link específico
     if (!admin.email) {
-      console.error('❌ [Contato] Email não disponível para criar link do Teams')
-      alert('Email não disponível para contato via Teams')
+      console.error('❌ [Contato] Email não disponível e teams_contact não configurado')
+      alert('Email não disponível para contato via Teams. Configure um teams_contact na página de configurações.')
       return
     }
 
+    console.log('⚠️ [Contato] teams_contact não configurado, criando link automático baseado no email')
+    
     try {
       const email = admin.email.trim()
       const encodedEmail = encodeURIComponent(email)
@@ -104,24 +128,19 @@ export default function Contato() {
       // Formato alternativo: URL Web do Teams (fallback)
       const teamsWebUrl = `https://teams.microsoft.com/l/chat/0/0?users=${encodedEmail}&message=`
       
-      console.log('🔗 [Contato] Tentando abrir Teams Desktop:', teamsDesktopUrl)
+      console.log('🔗 [Contato] Criando link automático - Desktop:', teamsDesktopUrl)
       
       // Tentar abrir primeiro o Teams Desktop
-      const desktopLink = document.createElement('a')
-      desktopLink.href = teamsDesktopUrl
-      desktopLink.style.display = 'none'
-      document.body.appendChild(desktopLink)
-      desktopLink.click()
-      document.body.removeChild(desktopLink)
+      window.location.href = teamsDesktopUrl
       
-      // Fallback: Se o Teams Desktop não abrir em 1 segundo, tentar Web
+      // Fallback: Se o Teams Desktop não abrir, tentar Web após 1 segundo
       setTimeout(() => {
         console.log('🌐 [Contato] Tentando abrir Teams Web como fallback:', teamsWebUrl)
         window.open(teamsWebUrl, '_blank', 'noopener,noreferrer')
       }, 1000)
       
     } catch (error) {
-      console.error('❌ [Contato] Erro ao abrir Teams:', error)
+      console.error('❌ [Contato] Erro ao criar link automático:', error)
       
       // Fallback final: copiar email para área de transferência
       navigator.clipboard.writeText(admin.email).then(() => {
