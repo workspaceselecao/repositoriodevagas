@@ -10,7 +10,7 @@ interface AuthContextType {
   logout: () => Promise<void>
   loading: boolean
   error: Error | null
-  retry: () => void
+  retry: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -31,13 +31,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       try {
         console.log('[AuthContext] 🔄 Verificando sessão existente...')
-        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        // Adicionar timeout para evitar espera infinita
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout ao verificar sessão. Verifique sua conexão com a internet.')), 10000)
+        })
+        
+        const sessionPromise = supabase.auth.getSession()
+        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
         
         if (error) {
-          console.warn('[AuthContext] ⚠️ Erro ao verificar sessão:', error)
+          console.error('[AuthContext] ❌ Erro ao verificar sessão:', error)
+          
+          // Verificar se é erro crítico (rede, conexão, etc)
+          const isCriticalError = error.message?.includes('network') || 
+                                  error.message?.includes('fetch') ||
+                                  error.message?.includes('timeout') ||
+                                  error.message?.includes('Failed to fetch') ||
+                                  error.status === 0 // Erro de rede
+          
           if (isMounted) {
-            setLoading(false)
-            setUser(null)
+            if (isCriticalError) {
+              // Erro crítico - definir como erro fatal
+              setError(new Error(`Erro de conexão: ${error.message || 'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.'}`))
+              setLoading(false)
+              setUser(null)
+              return
+            } else {
+              // Erro não crítico - continuar normalmente
+              setLoading(false)
+              setUser(null)
+            }
           }
           return
         }
@@ -45,17 +69,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user && isMounted) {
           console.log('[AuthContext] ✅ Sessão encontrada, carregando dados do usuário...')
           try {
-            const userData = await getCurrentUser()
+            // Adicionar timeout para getCurrentUser também
+            const userDataPromise = getCurrentUser()
+            const userDataTimeoutPromise = new Promise<null>((resolve) => {
+              setTimeout(() => resolve(null), 5000) // 5 segundos de timeout
+            })
+            
+            const userData = await Promise.race([userDataPromise, userDataTimeoutPromise])
+            
             if (isMounted && userData) {
               setUser(userData)
               setLoading(false)
+              setError(null) // Limpar qualquer erro anterior
               console.log('[AuthContext] ✅ Usuário carregado automaticamente')
-            }
-          } catch (userError) {
-            console.warn('[AuthContext] ⚠️ Erro ao carregar dados do usuário:', userError)
-            if (isMounted) {
+            } else if (isMounted) {
+              // getCurrentUser retornou null ou timeout - tentar usar dados básicos do Auth
+              console.warn('[AuthContext] ⚠️ getCurrentUser retornou null, usando dados básicos do Auth')
+              
+              // Usar dados básicos da sessão como fallback
+              const basicUser = {
+                id: session.user.id,
+                email: session.user.email || '',
+                name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Usuário',
+                role: session.user.user_metadata?.role || 'RH'
+              }
+              
+              setUser(basicUser)
               setLoading(false)
-              setUser(null)
+              setError(null)
+              console.log('[AuthContext] ✅ Usuário básico carregado como fallback')
+            }
+          } catch (userError: any) {
+            console.error('[AuthContext] ❌ Erro ao carregar dados do usuário:', userError)
+            
+            // Verificar se é erro crítico
+            const isCriticalError = userError.message?.includes('network') || 
+                                    userError.message?.includes('fetch') ||
+                                    userError.message?.includes('timeout') ||
+                                    userError.message?.includes('Failed to fetch') ||
+                                    userError.message?.includes('Timeout')
+            
+            if (isMounted) {
+              if (isCriticalError) {
+                setError(new Error(`Erro ao carregar dados do usuário: ${userError.message || 'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.'}`))
+              } else {
+                // Erro não crítico - tentar usar dados básicos da sessão
+                console.warn('[AuthContext] ⚠️ Erro não crítico, tentando usar dados básicos da sessão')
+                try {
+                  const basicUser = {
+                    id: session.user.id,
+                    email: session.user.email || '',
+                    name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Usuário',
+                    role: session.user.user_metadata?.role || 'RH'
+                  }
+                  setUser(basicUser)
+                  setError(null)
+                  console.log('[AuthContext] ✅ Usuário básico carregado após erro não crítico')
+                } catch (fallbackError) {
+                  console.error('[AuthContext] ❌ Erro no fallback:', fallbackError)
+                  setError(new Error('Erro ao carregar dados do usuário. Tente fazer login novamente.'))
+                }
+              }
+              setLoading(false)
             }
           }
         } else {
@@ -63,12 +138,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (isMounted) {
             setLoading(false)
             setUser(null)
+            setError(null) // Limpar qualquer erro anterior
             console.log('[AuthContext] ❌ Nenhuma sessão encontrada')
           }
         }
-      } catch (error) {
-        console.warn('[AuthContext] ⚠️ Erro na verificação de sessão:', error)
+      } catch (error: any) {
+        console.error('[AuthContext] ❌ Erro na verificação de sessão:', error)
+        
+        // Verificar se é timeout ou erro crítico
+        const isCriticalError = error.message?.includes('Timeout') ||
+                                error.message?.includes('network') ||
+                                error.message?.includes('fetch') ||
+                                error.message?.includes('Failed to fetch')
+        
         if (isMounted) {
+          if (isCriticalError) {
+            setError(new Error(error.message || 'Erro ao inicializar aplicação. Verifique sua conexão com a internet.'))
+          } else {
+            setError(new Error('Erro ao inicializar aplicação. Tente novamente.'))
+          }
           setLoading(false)
           setUser(null)
         }
@@ -126,23 +214,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null)
       setLoading(true)
       
-      console.log('[AuthContext] 🔐 Iniciando processo de login SIMPLES...')
+      console.log('[AuthContext] 🔐 Iniciando processo de login...')
       const userData = await signIn(credentials)
       
       if (userData) {
         console.log('[AuthContext] ✅ Login bem-sucedido, definindo usuário:', userData.email)
         setUser(userData)
         setLoading(false)
+        setError(null) // Garantir que não há erro
         return true
       }
       
       console.log('[AuthContext] ❌ Login falhou - usuário não encontrado')
       setLoading(false)
+      // Não definir erro aqui - o signIn já deve ter lançado uma exceção ou retornado null
       return false
-    } catch (error) {
+    } catch (error: any) {
       console.error('[AuthContext] ❌ Erro no login:', error)
-      setError(error as Error)
+      
+      // Verificar se é erro crítico
+      const errorMessage = error?.message || 'Erro ao fazer login. Tente novamente.'
+      const isCriticalError = errorMessage.includes('network') || 
+                              errorMessage.includes('fetch') ||
+                              errorMessage.includes('timeout') ||
+                              errorMessage.includes('Failed to fetch') ||
+                              error?.status === 0
+      
+      if (isCriticalError) {
+        setError(new Error(`Erro de conexão: ${errorMessage}`))
+      } else {
+        setError(new Error(errorMessage))
+      }
+      
       setLoading(false)
+      setUser(null)
       return false
     }
   }
@@ -182,12 +287,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const retry = () => {
+  const retry = async () => {
     setError(null)
     setLoading(true)
     
-    // Recarregar a página para tentar novamente
-    window.location.reload()
+    try {
+      console.log('[AuthContext] 🔄 Tentando novamente a inicialização...')
+      
+      // Tentar verificar sessão novamente
+      const { data: { session }, error } = await supabase.auth.getSession()
+      
+      if (error) {
+        // Verificar se é erro crítico
+        const isCriticalError = error.message?.includes('network') || 
+                                error.message?.includes('fetch') ||
+                                error.message?.includes('timeout') ||
+                                error.message?.includes('Failed to fetch') ||
+                                error.status === 0
+        
+        if (isCriticalError) {
+          setError(new Error(`Erro de conexão: ${error.message || 'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.'}`))
+          setLoading(false)
+          return
+        }
+      }
+
+      if (session?.user) {
+        try {
+          const userData = await getCurrentUser()
+          if (userData) {
+            setUser(userData)
+            setLoading(false)
+            setError(null)
+            console.log('[AuthContext] ✅ Retry bem-sucedido - usuário carregado')
+            return
+          }
+        } catch (userError: any) {
+          console.error('[AuthContext] ❌ Erro ao carregar dados do usuário no retry:', userError)
+          setError(new Error(`Erro ao carregar dados: ${userError.message || 'Tente novamente.'}`))
+          setLoading(false)
+          return
+        }
+      }
+
+      // Sem sessão - continuar normalmente
+      setLoading(false)
+      setUser(null)
+      setError(null)
+      console.log('[AuthContext] ✅ Retry concluído - sem sessão ativa')
+    } catch (error: any) {
+      console.error('[AuthContext] ❌ Erro no retry:', error)
+      setError(new Error(error.message || 'Erro ao tentar novamente. Tente recarregar a página.'))
+      setLoading(false)
+    }
   }
 
   const value = {

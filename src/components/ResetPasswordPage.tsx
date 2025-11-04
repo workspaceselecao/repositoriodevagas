@@ -29,29 +29,45 @@ export default function ResetPasswordPage() {
     // Verificar se há uma sessão de recuperação válida
   useEffect(() => {
     const checkSession = async () => {
+      setIsValidSession(null) // Indicar que está verificando
+      setMessage('Verificando link de recuperação...')
+      
       try {
         // Verificar se há um token na URL (indica que o usuário clicou no link)
         const url = new URL(window.location.href)
         const hashParams = new URLSearchParams(url.hash.substring(1))
         const queryParams = new URLSearchParams(url.search)
         const hasToken = hashParams.has('access_token') || hashParams.has('token_hash') || 
-                        queryParams.has('access_token') || queryParams.has('token_hash')
+                        hashParams.has('type') ||
+                        queryParams.has('access_token') || queryParams.has('token_hash') ||
+                        queryParams.has('type')
 
+        console.log('🔐 [ResetPasswordPage] Verificando sessão de recuperação...', {
+          hasToken,
+          hash: url.hash.substring(0, 100),
+          search: url.search.substring(0, 100)
+        })
+
+        // hasPasswordRecoverySession() já tenta múltiplas vezes internamente
         const hasSession = await hasPasswordRecoverySession()
+        
+        console.log('🔐 [ResetPasswordPage] Resultado da verificação:', hasSession)
         setIsValidSession(hasSession)
 
         if (!hasSession) {
           // Mensagem mais específica baseada na presença do token
           if (hasToken) {
-            setMessage('Este link de recuperação já foi usado ou expirou. Links de recuperação só podem ser usados uma vez. Por favor, solicite um novo link.')
+            setMessage('Este link de recuperação já foi usado ou expirou. Links de recuperação só podem ser usados uma vez e têm validade limitada. Por favor, solicite um novo link.')
           } else {
-            setMessage('Link de recuperação inválido ou expirado. Solicite um novo link.')
+            setMessage('Link de recuperação inválido ou expirado. Verifique se você copiou o link completo do email. Solicite um novo link se necessário.')
           }
+        } else {
+          setMessage('') // Limpar mensagem se a sessão for válida
         }
-      } catch (error) {
-        console.error('Erro ao verificar sessão:', error)
+      } catch (error: any) {
+        console.error('❌ [ResetPasswordPage] Erro ao verificar sessão:', error)
         setIsValidSession(false)
-        setMessage('Erro ao verificar link de recuperação. Tente solicitar um novo link.')
+        setMessage('Erro ao verificar link de recuperação. Tente solicitar um novo link. Se o problema persistir, verifique sua conexão com a internet.')
       }
     }
 

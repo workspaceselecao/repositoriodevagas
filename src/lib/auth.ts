@@ -625,20 +625,29 @@ export async function resetPasswordForEmail(email: string): Promise<{ success: b
     const getRedirectUrl = () => {
       // Prioridade 1: Variável de ambiente
       if (import.meta.env.VITE_SUPABASE_REDIRECT_URL) {
-        return import.meta.env.VITE_SUPABASE_REDIRECT_URL
+        const envUrl = import.meta.env.VITE_SUPABASE_REDIRECT_URL
+        console.log('🔗 Usando URL de redirecionamento da variável de ambiente:', envUrl)
+        return envUrl
       }
       
       // Prioridade 2: URL atual da aplicação
       const currentUrl = window.location.origin
-      return `${currentUrl}/reset-password`
+      const redirectUrl = `${currentUrl}/reset-password`
+      console.log('🔗 Usando URL de redirecionamento baseada na URL atual:', redirectUrl)
+      return redirectUrl
     }
 
     const redirectUrl = getRedirectUrl()
-    console.log('🔗 URL de redirecionamento para recuperação de senha:', redirectUrl)
+    console.log('🔗 [resetPasswordForEmail] URL de redirecionamento final:', redirectUrl)
+    console.log('🔗 [resetPasswordForEmail] Email para recuperação:', email)
 
+    // IMPORTANTE: O redirectTo URL deve estar na lista de URLs permitidas no Supabase Dashboard
+    // Authentication > URL Configuration > Redirect URLs
     const { error } = await supabase.auth.resetPasswordForEmail(email, {        
       redirectTo: redirectUrl
     })
+    
+    console.log('🔗 [resetPasswordForEmail] Resultado do envio:', error ? `Erro: ${error.message}` : 'Sucesso')
 
     if (error) {
       console.error('Erro ao enviar email de recuperação:', error)
@@ -790,30 +799,83 @@ export async function hasPasswordRecoverySession(): Promise<boolean> {
     const hasTokenInQuery = queryParams.has('access_token') || queryParams.has('token_hash') || queryParams.has('type')
     const hasTokenInUrl = hasTokenInHash || hasTokenInQuery
 
-    // Se há um token na URL, aguardar um pouco para o Supabase processar
+    console.log('🔐 Verificando sessão de recuperação de senha...', {
+      hasTokenInHash,
+      hasTokenInQuery,
+      hasTokenInUrl,
+      hash: url.hash.substring(0, 50),
+      search: url.search.substring(0, 50)
+    })
+
+    // Se há um token na URL, aguardar e tentar múltiplas vezes para o Supabase processar
     if (hasTokenInUrl) {
       console.log('🔐 Token de recuperação detectado na URL, aguardando processamento...')
-      // Aguardar o Supabase processar o token (o cliente tem detectSessionInUrl: true)
-      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Tentar verificar a sessão múltiplas vezes (até 3 segundos)
+      // O Supabase pode demorar um pouco para processar o token
+      for (let attempt = 0; attempt < 6; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 500)) // Aguardar 500ms entre tentativas
+        
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (session?.user && session.access_token) {
+          console.log('✅ Sessão de recuperação válida detectada (tentativa', attempt + 1, ')')
+          return true
+        }
+        
+        if (error) {
+          console.warn('⚠️ Erro ao verificar sessão (tentativa', attempt + 1, '):', error.message)
+          
+          // Se o erro indica que o token é inválido/expirado, não continuar tentando
+          if (error.message.includes('expired') || 
+              error.message.includes('invalid') || 
+              error.message.includes('not found') ||
+              error.message.includes('Email link is invalid')) {
+            console.error('❌ Token inválido ou expirado:', error.message)
+            return false
+          }
+        }
+      }
+      
+      // Se após todas as tentativas não conseguiu criar sessão, verificar novamente
+      const { data: { session: finalSession }, error: finalError } = await supabase.auth.getSession()
+      
+      if (finalSession?.user && finalSession.access_token) {
+        console.log('✅ Sessão de recuperação válida detectada (verificação final)')
+        return true
+      }
+      
+      if (finalError) {
+        console.error('❌ Erro final ao verificar sessão:', finalError.message)
+        
+        // Verificar usando getUser para mais detalhes
+        const { data: { user: userData }, error: userError } = await supabase.auth.getUser()
+        if (userError || !userData) {
+          console.error('❌ Token inválido ou expirado (getUser):', userError?.message)
+          
+          // Verificar mensagem de erro específica
+          if (userError?.message?.includes('expired') || 
+              userError?.message?.includes('invalid') ||
+              userError?.message?.includes('Email link is invalid')) {
+            return false
+          }
+        } else {
+          // Se getUser retornou usuário, pode ser que a sessão esteja válida
+          console.log('✅ Usuário encontrado via getUser, sessão pode estar válida')
+          return true
+        }
+      }
+      
+      console.log('⚠️ Token detectado na URL mas não foi possível criar sessão após múltiplas tentativas')
+      return false
     }
 
-    // Verificar se há uma sessão válida
+    // Se não há token na URL, verificar se há uma sessão válida (caso o token já tenha sido processado)
     const { data: { session }, error } = await supabase.auth.getSession()
 
-    // Se há erro ao obter sessão e não há token na URL, o link é inválido
     if (error) {
-      console.error('❌ Erro ao obter sessão:', error)
-      // Se não havia token na URL, significa que o link foi usado ou expirou
-      if (!hasTokenInUrl) {
-        return false
-      }
-      // Se havia token mas deu erro, pode ser token inválido/expirado
-      // Tentar verificar usando getUser para mais detalhes
-      const { data: { user: userData }, error: userError } = await supabase.auth.getUser()
-      if (userError || !userData) {
-        console.error('❌ Token inválido ou expirado:', userError?.message)
-        return false
-      }
+      console.error('❌ Erro ao obter sessão:', error.message)
+      return false
     }
 
     // Verificar se há uma sessão válida com usuário
@@ -822,19 +884,13 @@ export async function hasPasswordRecoverySession(): Promise<boolean> {
       const isOnResetPage = window.location.pathname === '/reset-password'
 
       if (isOnResetPage) {
-        console.log('✅ Sessão de recuperação válida detectada')
+        console.log('✅ Sessão de recuperação válida detectada (sem token na URL)')
         return true
       }
     }
 
-    // Se havia token na URL mas não há sessão, o token pode ter sido usado ou expirado
-    if (hasTokenInUrl && !session?.user) {
-      console.log('⚠️ Token detectado na URL mas não foi possível criar sessão - pode ter sido usado ou expirado')
-      return false
-    }
-
     return false
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Erro ao verificar sessão de recuperação:', error)
     return false
   }

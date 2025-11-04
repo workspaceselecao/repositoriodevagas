@@ -4,7 +4,7 @@ import { RefreshCw, AlertTriangle, Home } from 'lucide-react'
 
 interface ErrorFallbackProps {
   error?: Error
-  onRetry?: () => void
+  onRetry?: () => void | Promise<void>
   onGoHome?: () => void
 }
 
@@ -13,9 +13,9 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   onRetry, 
   onGoHome 
 }) => {
-  const handleRetry = () => {
+  const handleRetry = async () => {
     if (onRetry) {
-      onRetry()
+      await onRetry()
     } else {
       // Fallback: recarregar a página
       window.location.reload()
